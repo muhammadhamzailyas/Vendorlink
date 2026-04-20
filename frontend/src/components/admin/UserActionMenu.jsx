@@ -1,0 +1,72 @@
+import React from "react";
+import {
+  DotsThreeVertical as MoreVert,
+  Eye as Visibility,
+  Prohibit as Block,
+  Archive,
+  CircleNotch,
+} from "@phosphor-icons/react";
+import { 
+  Button, 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "../ui";
+
+const UserActionMenu = ({
+  user,
+  actionLoading,
+  onView,
+  onSuspend,
+  onArchive,
+}) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        disabled={actionLoading}
+        className="h-8 w-8 rounded-full"
+      >
+        {actionLoading ? (
+          <CircleNotch className="h-5 w-5 animate-spin text-[var(--muted-foreground)]" />
+        ) : (
+          <MoreVert className="w-5 h-5" />
+        )}
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-48 p-1.5">
+      <DropdownMenuItem 
+        onClick={onView}
+        className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] focus:text-[var(--foreground)] focus:bg-[var(--muted)] cursor-pointer"
+      >
+        <Visibility className="mr-2 w-4 h-4" /> View Details
+      </DropdownMenuItem>
+      
+      {user?.role !== "admin" && (
+        <>
+          <DropdownMenuItem 
+            onClick={onSuspend}
+            disabled={actionLoading}
+            className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] focus:text-[var(--foreground)] focus:bg-[var(--muted)] cursor-pointer"
+          >
+            <Block className="mr-2 w-4 h-4" /> Suspend
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
+          <DropdownMenuItem 
+            onClick={onArchive}
+            disabled={actionLoading}
+            className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-danger focus:text-danger focus:bg-danger-surface cursor-pointer"
+          >
+            <Archive className="mr-2 w-4 h-4" /> Archive User
+          </DropdownMenuItem>
+        </>
+      )}
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
+
+export default UserActionMenu;

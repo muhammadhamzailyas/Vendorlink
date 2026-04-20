@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  /* =========================
+     CORE SEMANTIC TOKENS
+     ========================= */
+
+  --background: theme(colors.neutral.50);
+  --foreground: theme(colors.neutral.800);
+
+  --card: theme(colors.neutral.100);
+  --card-foreground: theme(colors.neutral.800);
+
+  --popover: theme(colors.neutral.100);
+  --popover-foreground: theme(colors.neutral.800);
+
+  --border: theme(colors.neutral.300);
+  --input: theme(colors.neutral.200);
+
+  --muted: theme(colors.neutral.100);
+  --muted-foreground: theme(colors.neutral.500);
+
+  --accent: theme(colors.neutral.200);
+  --accent-foreground: theme(colors.neutral.800);
+
+  --ring: theme(colors.neutral.400);
+
+  /* =========================
+     INTERACTIVE STATES
+     ========================= */
+
+  --hover: theme(colors.neutral.200);
+  --active: theme(colors.neutral.300);
+
+  /* =========================
+     INPUT SYSTEM
+     ========================= */
+
+  --input-bg: #ffffff;
+  --input-border: theme(colors.neutral.200);
+  --input-focus: theme(colors.neutral.400);
+
+  /* =========================
+     STATUS COLORS (semantic, NOT layout)
+     ========================= */
+
+  --success: #16a34a;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #2563eb;
+
+  /* =========================
+     BADGES (structured like shadcn variants)
+     ========================= */
+
+  --badge-blue-bg: theme(colors.blue.50);
+  --badge-blue-text: theme(colors.blue.700);
+  --badge-blue-border: theme(colors.blue.200);
+
+  --badge-green-bg: theme(colors.green.50);
+  --badge-green-text: theme(colors.green.700);
+  --badge-green-border: theme(colors.green.200);
+
+  --badge-amber-bg: theme(colors.amber.50);
+  --badge-amber-text: theme(colors.amber.700);
+  --badge-amber-border: theme(colors.amber.200);
+
+  --badge-red-bg: theme(colors.red.50);
+  --badge-red-text: theme(colors.red.700);
+  --badge-red-border: theme(colors.red.200);
+
+  --badge-purple-bg: theme(colors.purple.50);
+  --badge-purple-text: theme(colors.purple.700);
+  --badge-purple-border: theme(colors.purple.200);
+
+  --badge-teal-bg: theme(colors.teal.50);
+  --badge-teal-text: theme(colors.teal.700);
+  --badge-teal-border: theme(colors.teal.200);
+}
+
+/* =========================
+   DARK MODE
+   ========================= */
+
+@variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --background: theme(colors.neutral.950);
+  --foreground: theme(colors.neutral.200);
+
+  --card: theme(colors.neutral.900);
+  --card-foreground: theme(colors.neutral.200);
+
+  --popover: theme(colors.neutral.900);
+  --popover-foreground: theme(colors.neutral.200);
+
+  --border: theme(colors.neutral.700);
+  --input: theme(colors.neutral.700);
+
+  --muted: theme(colors.neutral.800);
+  --muted-foreground: theme(colors.neutral.400);
+
+  --accent: theme(colors.neutral.800);
+  --accent-foreground: theme(colors.neutral.200);
+
+  --ring: theme(colors.neutral.500);
+
+  --hover: theme(colors.neutral.800);
+  --active: theme(colors.neutral.700);
+
+  --input-bg: #1a1a1a;
+  --input-border: theme(colors.neutral.700);
+  --input-focus: theme(colors.neutral.500);
+
+  --success: #4ade80;
+  --error: #f87171;
+  --warning: #fbbf24;
+  --info: #60a5fa;
+
+  --badge-blue-bg: theme(colors.blue.900);
+  --badge-blue-text: theme(colors.blue.300);
+  --badge-blue-border: theme(colors.blue.700);
+
+  --badge-green-bg: theme(colors.green.900);
+  --badge-green-text: theme(colors.green.300);
+  --badge-green-border: theme(colors.green.700);
+
+  --badge-amber-bg: theme(colors.amber.900);
+  --badge-amber-text: theme(colors.amber.300);
+  --badge-amber-border: theme(colors.amber.700);
+
+  --badge-red-bg: theme(colors.red.900);
+  --badge-red-text: theme(colors.red.300);
+  --badge-red-border: theme(colors.red.700);
+
+  --badge-purple-bg: theme(colors.purple.900);
+  --badge-purple-text: theme(colors.purple.300);
+  --badge-purple-border: theme(colors.purple.700);
+
+  --badge-teal-bg: theme(colors.teal.900);
+  --badge-teal-text: theme(colors.teal.300);
+  --badge-teal-border: theme(colors.teal.700);
+}

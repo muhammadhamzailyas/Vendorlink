@@ -1,0 +1,136 @@
+import React from "react";
+import { Input, Textarea } from "../../ui";
+import MagnifyingGlassableSelect from "./SearchableSelect";
+
+const BUSINESS_TYPE_OPTIONS = [
+  { value: "Private Limited", label: "Private Limited Company" },
+  { value: "Public Limited", label: "Public Limited Company" },
+  { value: "Sole Proprietor", label: "Sole Proprietorship" },
+  { value: "Partnership", label: "Partnership" },
+  { value: "LLP", label: "Limited Liability Partnership (LLP)" },
+  { value: "NGO", label: "Non-Governmental Organization (NGO)" },
+  { value: "Trust", label: "Trust / Foundation" },
+  { value: "Cooperative", label: "Cooperative Society" },
+  { value: "Freelancer", label: "Freelancer / Independent" },
+  { value: "Government", label: "Government Body" },
+];
+
+const RAW_INDUSTRIES = [
+  { value: "IT", label: "IT & Software Development" },
+  { value: "AI", label: "AI & Data Science" },
+  { value: "Design", label: "Graphics & Design" },
+  { value: "Marketing", label: "Digital Marketing" },
+  { value: "Writing", label: "Writing & Translation" },
+  { value: "Video", label: "Video & Animation" },
+  { value: "Music", label: "Music & Audio" },
+  { value: "Consulting", label: "Business & Consulting" },
+  { value: "Sales", label: "Sales & Customer Support" },
+  { value: "Legal", label: "Legal & Compliance" },
+  { value: "Finance", label: "Accounting & Finance" },
+  { value: "Architecture", label: "Architecture & Interior Design" },
+  { value: "Manufacturing", label: "Engineering & Manufacturing" },
+  { value: "Healthcare", label: "Healthcare & Life Sciences" },
+  { value: "Education", label: "Education & E-learning" },
+  { value: "Ecommerce", label: "E-commerce & Retail" },
+  { value: "Logistics", label: "Logistics & Supply Chain" },
+  { value: "RealEstate", label: "Real Estate" },
+  { value: "Media", label: "Media & Entertainment" },
+  { value: "NGO", label: "Non-profit & NGO" },
+];
+
+const INDUSTRY_OPTIONS = [
+  ...RAW_INDUSTRIES.sort((a, b) => a.label.localeCompare(b.label)),
+  { value: "Other", label: "Other" }
+];
+
+const COMPANY_SIZE_OPTIONS = [
+  { value: "1-10", label: "1–10 employees" },
+  { value: "11-50", label: "11–50 employees" },
+  { value: "51-200", label: "51–200 employees" },
+  { value: "201-500", label: "201–500 employees" },
+  { value: "501-1000", label: "501–1000 employees" },
+  { value: "1000+", label: "1000+ employees" },
+];
+
+const YEAR_OPTIONS = Array.from(
+  { length: new Date().getFullYear() - 1900 + 1 },
+  (_, i) => ({
+    value: (new Date().getFullYear() - i).toString(),
+    label: (new Date().getFullYear() - i).toString(),
+  })
+);
+
+const CompanyBusinessFields = ({ data, onChange }) => (
+  <>
+    <Input
+      className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+      placeholder="Company/Business Name"
+      value={data.companyName}
+      onChange={(e) => onChange({ companyName: e.target.value })}
+    />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <MagnifyingGlassableSelect
+          value={data.businessType}
+          placeholder="Business Type"
+          searchPlaceholder="MagnifyingGlass type..."
+          options={BUSINESS_TYPE_OPTIONS}
+          onChange={(val) => onChange({ businessType: val })}
+        />
+        <MagnifyingGlassableSelect
+          value={data.industry}
+          placeholder="Industry/Sector"
+          searchPlaceholder="MagnifyingGlass industry..."
+          options={INDUSTRY_OPTIONS}
+          onChange={(val) => onChange({ industry: val })}
+        />
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+          placeholder="Registration Number / License No."
+          type="number"
+          numericOnly
+          value={data.registrationNumber}
+          onChange={(e) => onChange({ registrationNumber: e.target.value })}
+        />
+        <Input
+          className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+          placeholder="Tax ID / VAT / NTN Number"
+          type="number"
+          numericOnly
+          value={data.ntn}
+          onChange={(e) => onChange({ ntn: e.target.value })}
+        />
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <MagnifyingGlassableSelect
+          value={data.yearEstablished}
+          placeholder="Year Established"
+          searchPlaceholder="MagnifyingGlass year..."
+          options={YEAR_OPTIONS}
+          onChange={(val) => onChange({ yearEstablished: val })}
+        />
+        <MagnifyingGlassableSelect
+          value={data.companySize}
+          placeholder="Company Size"
+          searchPlaceholder="MagnifyingGlass size..."
+          options={COMPANY_SIZE_OPTIONS}
+          onChange={(val) => onChange({ companySize: val })}
+        />
+    </div>
+    <Input
+      className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+      placeholder="Company Website (optional)"
+      value={data.website}
+      onChange={(e) => onChange({ website: e.target.value })}
+    />
+    <Textarea
+      className="min-h-24 rounded-xl border-0 bg-[var(--muted)] px-4 py-3 font-medium"
+      placeholder="Briefly describe your company and services..."
+      value={data.description}
+      onChange={(e) => onChange({ description: e.target.value })}
+    />
+  </>
+);
+
+export default CompanyBusinessFields;

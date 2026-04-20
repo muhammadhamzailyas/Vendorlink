@@ -1,0 +1,112 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useNotifications } from "../../context/NotificationContext";
+import { Bell } from "@phosphor-icons/react";
+import { formatDate } from "../../lib/dateUtils";
+import { Button, Card, Popover, PopoverContent, PopoverTrigger, ScrollArea, Separator, Badge } from "../ui";
+import { cn } from "@/lib/cn";
+
+const priorityDot = {
+  urgent: "bg-[var(--error)]",
+  high: "bg-[var(--warning)]",
+  normal: "bg-[var(--foreground)]",
+  low: "bg-[var(--border)]",
+};
+
+const NotificationBadge = ({ className }) => {
+  const navigate = useNavigate();
+  const { notifications, unreadCount, markAsRead } = useNotifications();
+
+  const getRole = () => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}").role || "";
+    } catch {
+      return "";
+    }
+  };
+
+  const recent = notifications.slice(0, 5);
+
+  const handleClick = async (n) => {
+    if (!n.read) await markAsRead(n._id);
+    // Navigate based on notification data
+    const role = getRole();
+    if (n.data?.contractId) {
+      navigate(`/${role}/contract/${n.data.contractId}`);
+    } else if (n.data?.taskId) {
+      navigate(`/${role}/task/${n.data.taskId}`);
+    } else {
+      navigate(`/${role}/notifications`);
+    }
+  };
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className={cn("relative h-9 w-9 p-0 rounded-xl hover:bg-[var(--muted)]", className)}
+          aria-label="Notifications"
+        >
+          <Bell className="w-5 h-5 text-[var(--muted-foreground)]" />
+          {unreadCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] flex items-center justify-center rounded-full text-white text-[10px] font-bold px-1 ring-2 ring-background border-none p-0"
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </Badge>
+          )}
+        </Button>
+      </PopoverTrigger>
+      
+      <PopoverContent align="end" className="w-80 p-0 overflow-hidden shadow-soft border-[var(--border)]/50">
+        <div className="flex items-center justify-between px-5 py-4 bg-[var(--muted)]/30">
+          <span className="text-xs font-extrabold text-[var(--foreground)] uppercase tracking-tight">Notifications</span>
+          {unreadCount > 0 && (
+            <span className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider">{unreadCount} unread</span>
+          )}
+        </div>
+        <Separator />
+
+        {recent.length === 0 ? (
+          <div className="px-5 py-8 text-center text-sm font-medium text-[var(--muted-foreground)]">No notifications</div>
+        ) : (
+          <ScrollArea className="max-h-80">
+            {recent.map((n) => (
+              <Button
+                key={n._id}
+                variant="ghost"
+                onClick={() => handleClick(n)}
+                className={cn(
+                  "group w-full h-auto flex items-start justify-start gap-3 px-5 py-4 border-b border-[var(--border)]/50 text-left transition-colors hover:bg-[var(--muted)]/50 rounded-none",
+                  !n.read ? "bg-[var(--muted)]/30" : "bg-[var(--card)]"
+                )}
+              >
+                <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 shadow-sm ${priorityDot[n.priority] || priorityDot.normal}`} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-bold text-[var(--foreground)] truncate group-hover:text-[var(--foreground)] transition-colors">{n.title}</p>
+                  <p className="text-[11px] font-medium text-[var(--muted-foreground)] line-clamp-2 mt-0.5">{n.message}</p>
+                  <p className="text-[10px] font-bold text-[var(--muted-foreground)]/40 uppercase tracking-tighter mt-1.5">{formatDate(n.createdAt)}</p>
+                </div>
+              </Button>
+            ))}
+          </ScrollArea>
+        )}
+
+        <Separator />
+        <Button
+          variant="ghost"
+          onClick={() => navigate(`/${getRole()}/notifications`)}
+          className="w-full h-auto py-3.5 text-center text-[11px] font-extrabold text-[var(--muted-foreground)] uppercase tracking-tight bg-[var(--muted)]/30 hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-all rounded-none"
+        >
+          View All Notifications
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+export default NotificationBadge;

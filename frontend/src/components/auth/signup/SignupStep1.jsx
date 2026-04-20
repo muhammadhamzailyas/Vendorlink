@@ -1,0 +1,194 @@
+import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { Button, Checkbox, Input, Label, Tabs } from "../../ui";
+import PhoneInputField from "./PhoneInputField";
+import PasswordInputField from "./PasswordInputField";
+import { isValidPhoneNumber } from "react-phone-number-input";
+
+const SignupStep1 = ({ 
+  data, 
+  onChange, 
+  showPassword, 
+  onTogglePassword, 
+  showConfirmPassword, 
+  onToggleConfirmPassword, 
+  onSubmit, 
+  loading 
+}) => {
+  const isOAuth = !!data.authProvider && data.authProvider !== "local";
+  
+  const errors = useMemo(() => {
+    const errs = {};
+    
+    // Name validation
+    if (data.fullName && data.fullName.trim().length < 3) {
+      errs.fullName = "Name is too short (min 3 characters)";
+    }
+
+    // Email validation
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errs.email = "Invalid email format";
+    }
+
+    // Phone validation - Universal for all countries using libphonenumber metadata
+    if (data.phone) {
+        // isValidPhoneNumber handles trunk prefixes (like leading 0) 
+        // and checks against global mobile number plans for the specific isoCode.
+        if (!isValidPhoneNumber(data.phone, data.isoCode)) {
+            errs.phone = "Invalid format";
+        }
+    }
+
+    // Password validation
+    if (!isOAuth) {
+        if (data.password && data.password.length < 8) {
+            errs.password = "Password must be at least 8 characters";
+        }
+        if (data.confirmPassword && data.password && data.password !== data.confirmPassword) {
+            errs.confirmPassword = "Passwords do not match";
+        }
+    }
+
+    return errs;
+  }, [data, isOAuth]);
+
+  const isSubmitDisabled =
+    loading ||
+    Object.keys(errors).length > 0 ||
+    !data.role ||
+    !data.fullName?.trim() ||
+    !data.email?.trim() ||
+    !data.phone?.trim() ||
+    (!isOAuth && (!data.password?.trim() || !data.confirmPassword?.trim())) ||
+    !data.agreeToTerms;
+
+  const roleOptions = [
+    { label: "Company", value: "company" },
+    { label: "Vendor", value: "vendor" },
+  ];
+
+  const ErrorMsg = ({ children }) => (
+    <p className="text-[11px] text-[var(--error)] mt-1.5 font-bold uppercase tracking-tight animate-in fade-in slide-in-from-top-1">
+        {children}
+    </p>
+  );
+
+  return (
+  <form
+    className="space-y-5"
+    autoComplete="off"
+    onSubmit={(e) => {
+      e.preventDefault();
+      if (!isSubmitDisabled) onSubmit();
+    }}
+  >
+    <div>
+      <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)]">
+        Account Type
+      </Label>
+      <Tabs
+        value={data.role}
+        onChange={(val) => onChange({ role: val })}
+        tabs={roleOptions}
+        className="h-12"
+      />
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-1">
+            <Input
+              className="h-12 rounded-xl font-medium"
+              placeholder="Full Name"
+              type="text"
+              value={data.fullName}
+              autoComplete="new-password"
+              onChange={(e) => onChange({ fullName: e.target.value })}
+            />
+            {errors.fullName && <ErrorMsg>{errors.fullName}</ErrorMsg>}
+        </div>
+        
+        <div className="space-y-1">
+            <PhoneInputField 
+              countryCode={data.countryCode}
+              isoCode={data.isoCode}
+              phone={data.phone}
+              onChange={onChange}
+            />
+            {errors.phone && <ErrorMsg>{errors.phone}</ErrorMsg>}
+        </div>
+    </div>
+
+    <div className="space-y-1">
+        <Input
+          className="h-12 rounded-xl font-medium"
+          placeholder="Email Address"
+          type="email"
+          value={data.email}
+          autoComplete="new-password"
+          onChange={(e) => onChange({ email: e.target.value })}
+          disabled={isOAuth}
+        />
+        {errors.email && <ErrorMsg>{errors.email}</ErrorMsg>}
+    </div>
+
+    {!isOAuth && (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-1">
+              <PasswordInputField 
+                placeholder="Password"
+                value={data.password}
+                autoComplete="new-password"
+                onChange={(val) => onChange({ password: val })}
+                showPassword={showPassword}
+                onToggle={onTogglePassword}
+              />
+              {errors.password && <ErrorMsg>{errors.password}</ErrorMsg>}
+          </div>
+          <div className="space-y-1">
+              <PasswordInputField 
+                placeholder="Confirm Password"
+                value={data.confirmPassword}
+                autoComplete="new-password"
+                onChange={(val) => onChange({ confirmPassword: val })}
+                showPassword={showConfirmPassword}
+                onToggle={onToggleConfirmPassword}
+              />
+              {errors.confirmPassword && <ErrorMsg>{errors.confirmPassword}</ErrorMsg>}
+          </div>
+      </div>
+    )}
+
+    <div className="flex items-start gap-3 text-sm text-[var(--foreground)] pt-1">
+      <Checkbox
+        id="terms"
+        checked={data.agreeToTerms}
+        onCheckedChange={(checked) => onChange({ agreeToTerms: !!checked })}
+        className="mt-1"
+      />
+      <Label htmlFor="terms" className="leading-relaxed text-sm text-[var(--foreground)] cursor-pointer select-none">
+        I agree to the{" "}
+        <Link to="/terms" className="text-[var(--foreground)] hover:opacity-80 underline underline-offset-4">
+          Terms of Service
+        </Link>
+        {" "}and{" "}
+        <Link to="/privacy" className="text-[var(--foreground)] hover:opacity-80 underline underline-offset-4">
+          Privacy Policy
+        </Link>
+      </Label>
+    </div>
+
+    <Button
+      type="submit"
+      variant="primary"
+      disabled={isSubmitDisabled}
+      loading={loading}
+      size="lg"
+      className="w-full shadow-soft font-normal"
+    >
+      Save & Continue
+    </Button>
+  </form>
+  );
+};
+
+export default SignupStep1;

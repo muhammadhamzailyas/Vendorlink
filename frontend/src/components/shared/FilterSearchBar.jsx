@@ -1,0 +1,83 @@
+import React, { useState } from "react";
+import { MagnifyingGlass, Funnel as Funnel } from "@phosphor-icons/react";
+import { Button, Card, Input, Tabs, TabsList, TabsTrigger } from "../ui";
+import { cn } from "@/lib/cn";
+
+/**
+ * Reusable FilterSearchBar component with collapsible filter tabs
+ */
+const FilterSearchBar = ({
+  searchValue,
+  onSearchChange,
+  searchPlaceholder = "MagnifyingGlass...",
+  activeTab,
+  onTabChange,
+  tabs = [],
+  actions,
+  className,
+}) => {
+  const [showFilters, setShowFilters] = useState(false);
+  const hasTabs = tabs.length > 0;
+
+  return (
+    <Card className={cn("mb-8 overflow-hidden shadow-soft border-[var(--border)] bg-[var(--card)]", className)}>
+      <div className="flex flex-col gap-5 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          {hasTabs ? (
+            <Button
+              type="button"
+              variant={showFilters ? "secondary" : "ghost"}
+              onClick={() => setShowFilters(!showFilters)}
+              className="shrink-0 rounded-xl font-bold uppercase tracking-tight"
+              size="sm"
+            >
+              <Funnel size={18} />
+              <span className="whitespace-nowrap">Filters</span>
+            </Button>
+          ) : null}
+
+          <div className="relative min-w-0 flex-1">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] z-10">
+              <MagnifyingGlass size={18} />
+            </div>
+            <Input
+              type="text"
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-11 h-11"
+            />
+          </div>
+
+          {actions ? <div className="flex flex-wrap items-center gap-3 lg:justify-end">{actions}</div> : null}
+        </div>
+
+        {hasTabs && showFilters ? (
+        <div className="border-t border-[var(--border)] pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
+          <Tabs 
+            value={tabs[activeTab]} 
+            onValueChange={(value) => onTabChange(tabs.indexOf(value))}
+            className="w-full"
+          >
+            <TabsList className="bg-[var(--muted)] p-1 h-auto flex flex-wrap justify-start gap-1 border border-[var(--border)]">
+              {tabs.map((label, index) => (
+                <TabsTrigger 
+                  key={index} 
+                  value={label}
+                  className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--background)] transition-all"
+                >
+                  {label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+        ) : null}
+      </div>
+    </Card>
+  );
+};
+
+export default FilterSearchBar;
+
+

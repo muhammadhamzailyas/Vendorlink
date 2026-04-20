@@ -1,0 +1,808 @@
+const Payment = require("../model/Payment");
+const Contract = require("../model/Contract");
+const Task = require("../model/task");
+const User = require("../model/user");
+const Wallet = require("../model/Wallet");
+const Transaction = require("../model/Transaction");
+
+class PaymentController {
+  constructor() {
+    this.PLATFORM_FEE_PERCENTAGE = 5;
+  }
+
+  getNotificationService(req) {
+    try {
+      return req?.app?.get("notificationService") || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // ==================== WALLET MANAGEMENT ====================
+
+  async getOrCreateWallet(userId) {
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet) {
+      wallet = new Wallet({
+        userId,
+        balance: 0,
+        lockedBalance: 0,
+        totalDeposited: 0,
+        totalWithdrawn: 0,
+        totalReceived: 0,
+      });
+      await wallet.save();
+    }
+    return wallet;
+  }
+
+  async getWallet(req, res) {
+    try {
+      const userId = req.user.id;
+      const wallet = await this.getOrCreateWallet(userId);
+
+      const transactions = await Transaction.find({
+        $or: [{ fromUserId: userId }, { toUserId: userId }],
+      })
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .populate("fromUserId", "username companyName")
+        .populate("toUserId", "username companyName");
+
+      res.json({
+        success: true,
+        data: {
+          wallet,
+          transactions,
+          availableBalance: wallet.balance,
+          lockedBalance: wallet.lockedBalance,
+          totalBalance: wallet.balance + wallet.lockedBalance,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== COMPANY DEPOSIT ====================
+
+  async depositMoney(req, res) {
+    try {
+      const { amount, paymentMethod } = req.body;
+      const companyId = req.user.id;
+
+      if (amount < 100) {
+        return res.status(400).json({ error: "Minimum deposit is PKR 100" });
+      }
+
+      const wallet = await this.getOrCreateWallet(companyId);
+
+      const transaction = new Transaction({
+        fromUserId: companyId,
+        toUserId: companyId,
+        amount,
+        type: "deposit",
+        status: "pending",
+        paymentMethod,
+        description: `Wallet deposit of PKR ${amount}`,
+      });
+      await transaction.save();
+
+      // Mock deposit for development
+      if (process.env.NODE_ENV !== "production") {
+        wallet.balance += amount;
+        wallet.totalDeposited += amount;
+        wallet.lastTransactionAt = new Date();
+        await wallet.save();
+
+        transaction.status = "completed";
+        transaction.completedAt = new Date();
+        transaction.gateway = {
+          name: "mock",
+          transactionId: `MOCK_${Date.now()}`,
+        };
+        await transaction.save();
+
+        return res.json({
+          success: true,
+          message: "Deposit successful (TEST MODE)",
+          data: { wallet, transaction, newBalance: wallet.balance },
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Deposit initiated",
+        data: { transaction },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== MAKE PAYMENT ====================
+
+  async makePayment(req, res) {
+    try {
+      const { contractId, amount, paymentType, milestoneId, notes } = req.body;
+      const companyId = req.user.id;
+
+      const contract = await Contract.findById(contractId)
+        .populate("taskId")
+        .populate("vendorId");
+
+      if (!contract) return res.status(404).json({ error: "Contract not found" });
+      if (contract.companyId.toString() !== companyId) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const remainingAmount = contract.totalBudget - (contract.totalPaid || 0);
+      if (amount <= 0 || amount > remainingAmount) {
+        return res.status(400).json({
+          error: `Invalid amount. Maximum allowed: ${remainingAmount}`,
+        });
+      }
+
+      const companyWallet = await this.getOrCreateWallet(companyId);
+      if (companyWallet.balance < amount) {
+        return res.status(400).json({
+          error: "Insufficient wallet balance",
+          required: amount,
+          available: companyWallet.balance,
+        });
+      }
+
+      const platformFee = (amount * this.PLATFORM_FEE_PERCENTAGE) / 100;
+      const vendorAmount = amount - platformFee;
+
+      const payment = new Payment({
+        taskId: contract.taskId._id,
+        contractId: contract._id,
+        companyId: contract.companyId,
+        vendorId: contract.vendorId._id,
+        amount,
+        originalAmount: contract.totalBudget,
+        platformFee,
+        vendorAmount,
+        paymentType: paymentType || "full",
+        milestoneId,
+        status: "completed",
+        notes,
+        createdBy: companyId,
+        paymentDate: new Date(),
+      });
+      await payment.save();
+
+      // Update wallets
+      companyWallet.balance -= amount;
+      companyWallet.lockedBalance += amount;
+      companyWallet.lastTransactionAt = new Date();
+      await companyWallet.save();
+
+      const vendorWallet = await this.getOrCreateWallet(contract.vendorId._id);
+      vendorWallet.lockedBalance += vendorAmount;
+      vendorWallet.lastTransactionAt = new Date();
+      await vendorWallet.save();
+
+      // Create transaction
+      const transaction = new Transaction({
+        fromUserId: companyId,
+        toUserId: contract.vendorId._id,
+        amount,
+        platformFee,
+        netAmount: vendorAmount,
+        type: "payment",
+        status: "completed",
+        paymentMethod: "wallet_balance",
+        taskId: contract.taskId._id,
+        contractId: contract._id,
+        paymentId: payment._id,
+        description: `Payment for ${contract.title}`,
+        completedAt: new Date(),
+        fromBalanceAfter: companyWallet.balance,
+        toBalanceAfter: vendorWallet.balance + vendorWallet.lockedBalance,
+      });
+      await transaction.save();
+
+      // Update contract
+      contract.totalPaid = (contract.totalPaid || 0) + amount;
+      contract.remainingAmount = contract.totalBudget - contract.totalPaid;
+      contract.payments = contract.payments || [];
+      contract.payments.push(payment._id);
+      if (contract.totalPaid >= contract.totalBudget) {
+        contract.paymentStatus = "paid";
+      }
+      await contract.save();
+
+      payment.transactionId = transaction._id;
+      await payment.save();
+
+      // Send notification
+      const notificationService = this.getNotificationService(req);
+      if (notificationService) {
+        try {
+          await notificationService.createNotification({
+            recipientId: contract.vendorId._id,
+            type: "payment_received",
+            title: "Payment Received",
+            message: `You received PKR ${vendorAmount} for ${contract.title}`,
+            data: { paymentId: payment._id, amount: vendorAmount },
+            relatedId: payment._id,
+            relatedModel: "Payment",
+          });
+        } catch (e) { /* Ignore notification errors */ }
+      }
+
+      res.json({
+        success: true,
+        message: "Payment completed successfully",
+        data: { payment, transaction, companyBalance: companyWallet.balance },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== CONFIRM PAYMENT ====================
+
+  async confirmPayment(req, res) {
+    try {
+      const { paymentId } = req.params;
+      const vendorId = req.user.id;
+
+      const payment = await Payment.findById(paymentId);
+      if (!payment) return res.status(404).json({ error: "Payment not found" });
+      if (payment.vendorId.toString() !== vendorId) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const vendorWallet = await this.getOrCreateWallet(vendorId);
+      vendorWallet.lockedBalance -= payment.vendorAmount;
+      vendorWallet.balance += payment.vendorAmount;
+      vendorWallet.totalReceived += payment.vendorAmount;
+      await vendorWallet.save();
+
+      const companyWallet = await this.getOrCreateWallet(payment.companyId);
+      companyWallet.lockedBalance -= payment.amount;
+      await companyWallet.save();
+
+      payment.vendorConfirmed = true;
+      payment.vendorConfirmedAt = new Date();
+      await payment.save();
+
+      res.json({
+        success: true,
+        message: "Payment confirmed",
+        data: { newBalance: vendorWallet.balance },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== REQUEST WITHDRAWAL ====================
+
+  async requestWithdrawal(req, res) {
+    try {
+      const { amount, paymentMethod, accountDetails } = req.body;
+      const vendorId = req.user.id;
+
+      if (amount < 500) {
+        return res.status(400).json({ error: "Minimum withdrawal is PKR 500" });
+      }
+
+      const wallet = await this.getOrCreateWallet(vendorId);
+      if (wallet.balance < amount) {
+        return res.status(400).json({
+          error: "Insufficient balance",
+          available: wallet.balance,
+        });
+      }
+
+      const transaction = new Transaction({
+        fromUserId: vendorId,
+        toUserId: vendorId,
+        amount,
+        type: "withdrawal",
+        status: "pending",
+        paymentMethod,
+        description: `Withdrawal of PKR ${amount}`,
+        withdrawalDetails: accountDetails,
+      });
+      await transaction.save();
+
+      wallet.balance -= amount;
+      wallet.lockedBalance += amount;
+      await wallet.save();
+
+      // Auto-complete in development
+      if (process.env.NODE_ENV !== "production") {
+        setTimeout(async () => {
+          try {
+            wallet.lockedBalance -= amount;
+            wallet.totalWithdrawn += amount;
+            await wallet.save();
+
+            transaction.status = "completed";
+            transaction.completedAt = new Date();
+            await transaction.save();
+          } catch (e) {
+            console.error("Auto-complete withdrawal error:", e);
+          }
+        }, 3000);
+      }
+
+      res.json({
+        success: true,
+        message: "Withdrawal request submitted",
+        data: { transaction, remainingBalance: wallet.balance },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== GET COMPANY ACTIVE TASKS ====================
+
+  async getCompanyActiveTasks(req, res) {
+    try {
+      const companyId = req.user.id;
+
+      const contracts = await Contract.find({
+        companyId: companyId,
+        status: { $in: ["active", "in-progress", "pending-vendor", "pending-company"] },
+      })
+        .populate("taskId", "title description category budget")
+        .populate("vendorId", "username companyName email")
+        .lean();
+
+      if (!contracts.length) {
+        return res.json({ success: true, data: [] });
+      }
+
+      const wallet = await this.getOrCreateWallet(companyId);
+
+      const tasksWithPayments = await Promise.all(
+        contracts.map(async (contract) => {
+          const payments = await Payment.find({ contractId: contract._id })
+            .sort({ createdAt: -1 })
+            .lean();
+
+          const totalPaid = payments
+            .filter(p => p.status === "completed")
+            .reduce((sum, p) => sum + p.amount, 0);
+
+          const totalBudget = contract.totalBudget || 0;
+          const pendingAmount = totalBudget - totalPaid;
+
+          return {
+            contractId: contract._id,
+            taskId: contract.taskId,
+            vendor: contract.vendorId,
+            title: contract.title || contract.taskId?.title || "Untitled Task",
+            totalBudget,
+            totalPaid,
+            pendingAmount: pendingAmount > 0 ? pendingAmount : 0,
+            paymentStatus: totalPaid >= totalBudget ? "paid" : totalPaid > 0 ? "partial" : "unpaid",
+            payments,
+            milestones: contract.milestones || [],
+            walletBalance: wallet.balance,
+            contractStatus: contract.status,
+          };
+        })
+      );
+
+      const activeTasks = tasksWithPayments.filter(task => task.pendingAmount > 0 || task.paymentStatus !== "paid");
+
+      res.json({ success: true, data: activeTasks });
+    } catch (error) {
+      console.error("Error in getCompanyActiveTasks:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== GET VENDOR ACTIVE TASKS ====================
+
+  async getVendorActiveTasks(req, res) {
+    try {
+      const vendorId = req.user.id;
+
+      const contracts = await Contract.find({
+        vendorId: vendorId,
+        status: { $in: ["active", "in-progress", "pending-vendor", "pending-company"] },
+      })
+        .populate("taskId", "title description category budget")
+        .populate("companyId", "username companyName email")
+        .lean();
+
+      if (!contracts.length) {
+        return res.json({ success: true, data: [] });
+      }
+
+      const wallet = await this.getOrCreateWallet(vendorId);
+
+      const tasksWithPayments = await Promise.all(
+        contracts.map(async (contract) => {
+          const payments = await Payment.find({ contractId: contract._id })
+            .sort({ createdAt: -1 })
+            .lean();
+
+          const totalPaid = payments
+            .filter(p => p.status === "completed")
+            .reduce((sum, p) => sum + p.amount, 0);
+
+          const totalBudget = contract.totalBudget || 0;
+          const pendingAmount = totalBudget - totalPaid;
+
+          const vendorReceived = payments
+            .filter(p => p.status === "completed")
+            .reduce((sum, p) => sum + (p.vendorAmount || p.amount), 0);
+
+          return {
+            contractId: contract._id,
+            taskId: contract.taskId,
+            company: contract.companyId,
+            title: contract.title || contract.taskId?.title || "Untitled Task",
+            totalBudget,
+            totalPaid,
+            vendorReceived,
+            pendingAmount: pendingAmount > 0 ? pendingAmount : 0,
+            canRequestPayment: pendingAmount > 0 && ["active", "in-progress"].includes(contract.status),
+            payments: payments.map(p => ({
+              _id: p._id,
+              amount: p.amount,
+              vendorAmount: p.vendorAmount || p.amount,
+              platformFee: p.platformFee || 0,
+              status: p.status,
+              paymentType: p.paymentType,
+              paymentDate: p.paymentDate,
+              createdAt: p.createdAt,
+              invoiceNumber: p.invoiceNumber,
+              vendorConfirmed: p.vendorConfirmed || false,
+            })),
+            walletBalance: wallet.balance,
+            lockedBalance: wallet.lockedBalance,
+            contractStatus: contract.status,
+          };
+        })
+      );
+
+      const activeTasks = tasksWithPayments.filter(task => task.pendingAmount > 0);
+
+      res.json({ success: true, data: activeTasks });
+    } catch (error) {
+      console.error("Error in getVendorActiveTasks:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== VENDOR PAYMENT SUMMARY ====================
+
+  async getVendorPaymentSummary(req, res) {
+    try {
+      const vendorId = req.user.id;
+      const wallet = await this.getOrCreateWallet(vendorId);
+
+      const payments = await Payment.find({
+        vendorId: vendorId,
+        status: "completed",
+      });
+
+      const summary = {
+        availableBalance: wallet.balance,
+        lockedBalance: wallet.lockedBalance,
+        totalEarned: wallet.totalReceived,
+        totalWithdrawn: wallet.totalWithdrawn,
+        pendingAmount: payments
+          .filter(p => !p.vendorConfirmed)
+          .reduce((sum, p) => sum + (p.vendorAmount || p.amount), 0),
+        completedCount: payments.length,
+        platformFees: payments.reduce((sum, p) => sum + (p.platformFee || 0), 0),
+      };
+
+      res.json({ success: true, data: summary });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== REQUEST PAYMENT ====================
+
+  async requestPayment(req, res) {
+    try {
+      const { contractId, amount, milestoneId, notes } = req.body;
+      const vendorId = req.user.id;
+
+      const contract = await Contract.findById(contractId).populate("companyId");
+      if (!contract) return res.status(404).json({ error: "Contract not found" });
+      if (contract.vendorId.toString() !== vendorId) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      const remainingAmount = contract.totalBudget - (contract.totalPaid || 0);
+      if (amount <= 0 || amount > remainingAmount) {
+        return res.status(400).json({ error: `Invalid amount. Max: ${remainingAmount}` });
+      }
+
+      const paymentRequest = new Payment({
+        taskId: contract.taskId,
+        contractId: contract._id,
+        companyId: contract.companyId._id,
+        vendorId: contract.vendorId,
+        amount,
+        originalAmount: contract.totalBudget,
+        paymentType: milestoneId ? "milestone" : "partial",
+        milestoneId,
+        status: "pending",
+        notes: notes || "Payment request from vendor",
+        createdBy: vendorId,
+      });
+      await paymentRequest.save();
+
+      const notificationService = this.getNotificationService(req);
+      if (notificationService) {
+        try {
+          await notificationService.createNotification({
+            recipientId: contract.companyId._id,
+            senderId: vendorId,
+            type: "payment_request",
+            title: "Payment Request",
+            message: `Vendor requested payment of PKR ${amount} for ${contract.title}`,
+            data: { contractId, amount, paymentId: paymentRequest._id },
+            relatedId: contract._id,
+            relatedModel: "Contract",
+          });
+        } catch (e) { /* Ignore */ }
+      }
+
+      res.json({
+        success: true,
+        message: "Payment request sent",
+        data: { paymentRequest },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== GET CONTRACT PAYMENTS ====================
+
+  async getContractPayments(req, res) {
+    try {
+      const { contractId } = req.params;
+
+      const payments = await Payment.find({ contractId })
+        .populate("taskId", "title")
+        .populate("companyId", "username companyName")
+        .populate("vendorId", "username companyName")
+        .sort({ createdAt: -1 });
+
+      res.json({ success: true, data: payments });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== GET PAYMENT BY ID ====================
+
+  async getPaymentById(req, res) {
+    try {
+      const { id } = req.params;
+
+      const payment = await Payment.findById(id)
+        .populate("taskId", "title description")
+        .populate("companyId", "username companyName email")
+        .populate("vendorId", "username companyName email")
+        .populate("contractId");
+
+      if (!payment) return res.status(404).json({ error: "Payment not found" });
+
+      const transaction = await Transaction.findOne({ paymentId: id });
+
+      res.json({
+        success: true,
+        data: { ...payment.toObject(), transaction },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== ADMIN METHODS ====================
+
+  async getAllPayments(req, res) {
+    try {
+      const { status, startDate, endDate, page = 1, limit = 20 } = req.query;
+      const query = {};
+
+      if (status && status !== "all") query.status = status;
+      if (startDate || endDate) {
+        query.createdAt = {};
+        if (startDate) query.createdAt.$gte = new Date(startDate);
+        if (endDate) query.createdAt.$lte = new Date(endDate);
+      }
+
+      const payments = await Payment.find(query)
+        .populate("taskId", "title")
+        .populate("companyId", "username companyName")
+        .populate("vendorId", "username companyName")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit));
+
+      const total = await Payment.countDocuments(query);
+
+      res.json({
+        success: true,
+        data: {
+          payments,
+          pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getAllTransactions(req, res) {
+    try {
+      const { type, status, startDate, endDate, page = 1, limit = 20 } = req.query;
+      const query = {};
+
+      if (type && type !== "all") query.type = type;
+      if (status && status !== "all") query.status = status;
+      if (startDate || endDate) {
+        query.createdAt = {};
+        if (startDate) query.createdAt.$gte = new Date(startDate);
+        if (endDate) query.createdAt.$lte = new Date(endDate);
+      }
+
+      const transactions = await Transaction.find(query)
+        .populate("fromUserId", "username companyName")
+        .populate("toUserId", "username companyName")
+        .populate("taskId", "title")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit));
+
+      const total = await Transaction.countDocuments(query);
+
+      res.json({
+        success: true,
+        data: {
+          transactions,
+          pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async processWithdrawal(req, res) {
+    try {
+      const { transactionId, status, adminNotes } = req.body;
+      const adminId = req.user.id;
+
+      const transaction = await Transaction.findById(transactionId);
+      if (!transaction || transaction.type !== "withdrawal") {
+        return res.status(404).json({ error: "Withdrawal not found" });
+      }
+
+      const wallet = await this.getOrCreateWallet(transaction.fromUserId);
+
+      if (status === "completed") {
+        wallet.lockedBalance -= transaction.amount;
+        wallet.totalWithdrawn += transaction.amount;
+        transaction.status = "completed";
+        transaction.completedAt = new Date();
+      } else if (status === "failed") {
+        wallet.lockedBalance -= transaction.amount;
+        wallet.balance += transaction.amount;
+        transaction.status = "failed";
+      }
+
+      transaction.adminNotes = adminNotes;
+      transaction.withdrawalDetails = transaction.withdrawalDetails || {};
+      transaction.withdrawalDetails.processedBy = adminId;
+      transaction.withdrawalDetails.processedAt = new Date();
+
+      await wallet.save();
+      await transaction.save();
+
+      res.json({ success: true, message: `Withdrawal ${status}`, data: transaction });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ==================== GENERATE INVOICE ====================
+
+  async generateInvoice(req, res) {
+    try {
+      const { id } = req.params;
+
+      const payment = await Payment.findById(id)
+        .populate("taskId", "title description")
+        .populate("companyId", "username companyName email")
+        .populate("vendorId", "username companyName email");
+
+      if (!payment) return res.status(404).json({ error: "Payment not found" });
+
+      const transaction = await Transaction.findOne({ paymentId: id });
+      const html = this.generateInvoiceHTML(payment, transaction);
+
+      res.setHeader("Content-Type", "text/html");
+      res.setHeader("Content-Disposition", `attachment; filename=invoice-${payment.invoiceNumber || id}.html`);
+      res.send(html);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  generateInvoiceHTML(payment) {
+    const formatDate = (date) => {
+      if (!date) return "N/A";
+      return new Date(date).toLocaleDateString("en-PK", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+
+    const formatCurrency = (amount) => `PKR ${(amount || 0).toLocaleString("en-PK")}`;
+
+    return `<!DOCTYPE html>
+    <html>
+    <head>
+      <title>Invoice - ${payment.invoiceNumber || payment._id}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .invoice-box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.15); }
+        h1 { color: #333; border-bottom: 2px solid #8F63FF; padding-bottom: 10px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f5f5f5; }
+        .total { font-size: 18px; font-weight: bold; text-align: right; margin-top: 20px; }
+        .status { display: inline-block; padding: 5px 10px; border-radius: 4px; }
+        .status.completed { background-color: #d4edda; color: #155724; }
+        .footer { margin-top: 50px; text-align: center; color: #666; }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-box">
+        <h1>INVOICE</h1>
+        <div class="header">
+          <div>
+            <h3>From: ${payment.companyId?.companyName || payment.companyId?.username || "Company"}</h3>
+            <p>${payment.companyId?.email || ""}</p>
+          </div>
+          <div>
+            <h3>To: ${payment.vendorId?.companyName || payment.vendorId?.username || "Vendor"}</h3>
+            <p>${payment.vendorId?.email || ""}</p>
+          </div>
+        </div>
+        <p><strong>Invoice Number:</strong> ${payment.invoiceNumber || payment._id}</p>
+        <p><strong>Date:</strong> ${formatDate(payment.paymentDate || payment.createdAt)}</p>
+        <p><strong>Status:</strong> <span class="status ${payment.status}">${payment.status.toUpperCase()}</span></p>
+        <table>
+          <thead><tr><th>Description</th><th>Type</th><th>Amount</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>${payment.taskId?.title || "Payment"}</td>
+              <td>${payment.paymentType}</td>
+              <td>${formatCurrency(payment.amount)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="total">Total: ${formatCurrency(payment.amount)}</div>
+        ${payment.notes ? `<p><strong>Notes:</strong> ${payment.notes}</p>` : ""}
+        <div class="footer">This is a computer generated invoice - VendorLink</div>
+      </div>
+    </body>
+    </html>`;
+  }
+}
+
+module.exports = new PaymentController();

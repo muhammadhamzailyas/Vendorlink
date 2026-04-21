@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "../../ui";
-import { Lock, WarningCircle } from "@phosphor-icons/react";
+import { Lock } from "@phosphor-icons/react";
 import toastUtil from "../../../lib/toast";
 
 const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) => {
@@ -16,7 +16,6 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
 
     setIsConnected(true);
 
-    // Confirm the payment
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       redirect: "if_required",
@@ -35,34 +34,61 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
     <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="bg-[var(--muted)] border border-[var(--ring)]/10 p-5 rounded-2xl">
           <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)]">Order Summary</h3>
-              <span className="px-2.5 py-1 bg-[var(--foreground)] text-[var(--foreground)] text-[10px] font-black rounded-lg uppercase">{planName}</span>
+              <h3 className="text-xs font-normal uppercase tracking-widest text-[var(--muted-foreground)]">Order Summary</h3>
+              <span className="px-2.5 py-1 bg-[var(--foreground)] text-[var(--background)] text-[10px] font-normal rounded-lg uppercase tracking-tight">
+                {planName}
+              </span>
           </div>
           <div className="flex justify-between items-baseline">
-              <span className="text-[var(--muted-foreground)] text-sm">Monthly Subscription</span>
-              <span className="text-2xl font-black">${planPrice}<span className="text-xs font-medium text-[var(--muted-foreground)]">/mo</span></span>
+              <span className="text-[var(--muted-foreground)] text-sm font-normal">Monthly Subscription</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-normal text-[var(--foreground)]">${planPrice}</span>
+                <span className="text-xs font-normal text-[var(--muted-foreground)]">/mo</span>
+              </div>
           </div>
       </div>
 
       <div className="space-y-4">
         <div className="p-1">
-            {/* Real Stripe Element */}
-            <PaymentElement options={{ layout: 'tabs' }} />
+            <PaymentElement options={{ 
+              layout: 'tabs',
+              appearance: {
+                theme: 'none',
+                variables: {
+                  fontFamily: 'inherit',
+                  colorBackground: 'var(--input-bg)',
+                  colorText: 'var(--foreground)',
+                  colorDanger: 'var(--error)',
+                  borderRadius: '12px',
+                  spacingGridRow: '16px',
+                },
+                rules: {
+                  '.Input': {
+                    border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-xs)',
+                  },
+                  '.Input:focus': {
+                    border: '1px solid var(--foreground)',
+                  }
+                }
+              }
+            }} />
         </div>
 
         <div className="flex items-center gap-2 text-[10px] text-[var(--muted-foreground)] bg-[var(--muted)]/30 p-3 rounded-xl border border-[var(--border)]/50">
             <Lock size={12} className="shrink-0" />
-            <span>Secure encryption active. No amount will be charged until your account is verified.</span>
+            <span className="font-normal uppercase tracking-tight">Secure encryption active. No amount will be charged until your account is verified.</span>
         </div>
       </div>
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-4 pt-2 border-t border-[var(--border)]/50">
         <Button 
           type="button" 
           variant="secondary" 
           onClick={onBack} 
           disabled={isProcessing} 
-          className="h-12 w-1/3 rounded-xl"
+          size="lg"
+          className="flex-1 font-normal"
         >
           Back
         </Button>
@@ -71,9 +97,10 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
           variant="primary" 
           loading={isProcessing} 
           disabled={!stripe || isProcessing}
-          className="h-12 w-2/3 rounded-xl text-base font-bold uppercase tracking-widest"
+          size="lg"
+          className="flex-1 font-normal shadow-soft"
         >
-          {isProcessing ? "Processing..." : "Secure & Continue"}
+          {isProcessing ? "Processing..." : "Complete Payment"}
         </Button>
       </div>
     </form>

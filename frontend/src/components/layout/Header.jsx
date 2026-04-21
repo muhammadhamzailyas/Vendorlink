@@ -115,7 +115,7 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
               <CaretRight className="h-4 w-4 text-[var(--muted-foreground)] hidden sm:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+          <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl border border-[var(--border)]">
             <div className="flex items-center gap-3 p-2 mb-2 bg-[var(--muted)] rounded-lg">
                 <UserAvatar user={user} size="md" />
                 <div className="flex flex-col">

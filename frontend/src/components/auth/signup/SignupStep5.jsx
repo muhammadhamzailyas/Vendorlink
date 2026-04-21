@@ -90,12 +90,13 @@ const SignupStep5 = ({ data, onSubmit, onBack, loading }) => {
             </p>
         </div>
 
-        <div className="flex w-full gap-3">
+        <div className="flex w-full gap-4 pt-4 border-t border-[var(--border)]/50">
           <Button 
             variant="secondary" 
             onClick={onBack} 
             disabled={loading}
-            className="h-12 w-1/3 rounded-xl font-normal"
+            size="lg"
+            className="flex-1 font-normal"
           >
             Back
           </Button>
@@ -104,7 +105,8 @@ const SignupStep5 = ({ data, onSubmit, onBack, loading }) => {
             onClick={onSubmit} 
             loading={loading} 
             disabled={loading}
-            className="h-12 w-2/3 rounded-xl text-base font-normal"
+            size="lg"
+            className="flex-1 font-normal shadow-soft"
           >
             Submit Application
           </Button>

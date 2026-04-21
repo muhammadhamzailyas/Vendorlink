@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowsClockwise, Phone, Envelope, CheckCircle } from "@phosphor-icons/react";
 import { Button, InputOTP, Label } from "../../components/ui";
 import toastUtil from "../../lib/toast";
 import { auth, setupRecaptcha, signInWithPhoneNumber } from "../../lib/firebase";
 import { sendEmailVerification } from "firebase/auth";
+import AuthLayout from "../../components/auth/AuthLayout";
 
 // CHANGE THIS TO YOUR ACTUAL TEST NUMBER IF NEEDED
-const TEST_PHONE_NUMBER = ""; // Leave empty to use the user's actual phone number
+const TEST_PHONE_NUMBER = "+923193669430"; // Test number for Firebase SMS flow
 
 const VerifyPending = () => {
   const location = useLocation();
@@ -85,16 +86,24 @@ const VerifyPending = () => {
   };
 
   const handlePhoneSend = useCallback(async () => {
-    if (loading || !targetPhone) return;
+    if (loading) return;
     
+    // Use test number for the actual Firebase call to bypass real SMS delivery if set
+    const phoneToUse = TEST_PHONE_NUMBER || targetPhone;
+
+    if (!phoneToUse) {
+        toastUtil.error("Phone number missing. Please restart signup.");
+        return;
+    }
+
     setLoading(true);
     try {
-      console.log(`[Verify] Sending automatic SMS to: ${targetPhone}`);
+      console.log(`[Verify] Sending SMS (via Firebase) to: ${phoneToUse}`);
       
       const appVerifier = recaptchaRef.current;
       if (!appVerifier) throw new Error("reCAPTCHA not initialized");
 
-      const result = await signInWithPhoneNumber(auth, targetPhone, appVerifier);
+      const result = await signInWithPhoneNumber(auth, phoneToUse, appVerifier);
       setConfirmationResult(result);
       toastUtil.success("Verification code sent!");
       setTimer(60);
@@ -104,7 +113,7 @@ const VerifyPending = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, targetPhone, recaptchaRef]);
+  }, [loading, targetPhone]);
 
   const handlePhoneVerify = async () => {
     if (!confirmationResult || code.length !== 6) return;
@@ -153,52 +162,54 @@ const VerifyPending = () => {
     };
   }, [mode, handlePhoneSend]);
 
+  const getSubtitle = () => {
+    if (mode === "email") {
+        return `We've sent a verification link to ${email}`;
+    }
+    return `Enter the 6-digit code sent to ${targetPhone}`;
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] p-4 md:p-6">
+    <AuthLayout
+      title={mode === "email" ? "Check your email" : "Verify your phone"}
+      subtitle={getSubtitle()}
+      hideGoogle
+      footerText="Problems?"
+      footerLinkText="Go back to signup"
+      footerLinkTo="/signup"
+    >
       <div id="recaptcha-container"></div>
 
-      <div className="max-w-md w-full space-y-8 bg-[var(--card)] p-8 md:p-12 rounded-3xl border border-[var(--border)] shadow-soft">
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="h-20 w-20 bg-[var(--foreground)]/10 text-[var(--foreground)] rounded-full flex items-center justify-center">
-              {mode === "email" ? <Envelope size={40} /> : <Phone size={40} />}
+      <div className="space-y-8">
+        <div className="flex justify-center">
+            <div className="h-20 w-20 bg-[var(--muted)] text-[var(--foreground)] rounded-full flex items-center justify-center">
+                {mode === "email" ? <Envelope size={40} className="opacity-80" /> : <Phone size={40} className="opacity-80" />}
             </div>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {mode === "email" ? "Check your email" : "Verify your phone"}
-          </h1>
-          <p className="text-[var(--muted-foreground)] text-sm leading-relaxed px-4">
-            {mode === "email" ? (
-                <>We've sent a verification link to <br/><span className="font-bold text-[var(--foreground)] break-all">{email}</span></>
-            ) : (
-                <>Enter the 6-digit code sent to <br/><span className="font-bold text-[var(--foreground)]">{targetPhone}</span></>
-            )}
-          </p>
         </div>
 
         {mode === "email" ? (
             <div className="space-y-6">
-                <div className="bg-[var(--muted)]/50 p-5 rounded-2xl border border-[var(--border)]/50 flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-[var(--foreground)] shrink-0 mt-0.5" />
+                <div className="bg-[var(--muted)] border border-[var(--border)]/50 p-5 rounded-2xl flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
                     <p className="text-sm text-[var(--foreground)] font-medium leading-relaxed">
                         We are waiting for you to click the link in your email. This page will update automatically.
                     </p>
                 </div>
-                <div className="flex justify-center py-4">
-                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--ring)] border-t-transparent"></div>
-                </div>
+                
+                <p className="text-center text-[10px] text-[var(--muted-foreground)] uppercase tracking-[0.2em] font-bold animate-pulse">
+                    Monitoring for verification...
+                </p>
             </div>
         ) : (
             <div className="space-y-8">
                 {!confirmationResult && loading ? (
-                    <div className="flex flex-col items-center gap-4 py-8">
-                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--ring)] border-t-transparent"></div>
-                        <p className="text-xs text-[var(--muted-foreground)] font-bold uppercase tracking-widest animate-pulse">Requesting SMS...</p>
+                    <div className="flex flex-col items-center gap-4 py-4">
+                        <p className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase tracking-widest animate-pulse">Requesting SMS...</p>
                     </div>
                 ) : (
                     <form onSubmit={(e) => { e.preventDefault(); handlePhoneVerify(); }} className="space-y-8">
                         <div className="space-y-4 flex flex-col items-center">
-                            <Label htmlFor="code" className="text-xs uppercase tracking-widest text-[var(--muted-foreground)]/80 font-bold">
+                            <Label htmlFor="code" className="text-[10px] uppercase tracking-widest text-[var(--muted-foreground)] font-black">
                                 SMS Verification Code
                             </Label>
                             <InputOTP
@@ -214,9 +225,9 @@ const VerifyPending = () => {
                             variant="primary"
                             loading={loading}
                             disabled={code.length !== 6 || loading || !confirmationResult}
-                            className="w-full h-14 rounded-2xl text-base font-bold shadow-soft active:scale-[0.98] transition-transform"
+                            className="w-full h-14 rounded-2xl text-base font-normal shadow-soft active:scale-[0.98] transition-transform"
                         >
-                            Complete Verification
+                            Finalize Verification
                         </Button>
                     </form>
                 )}
@@ -230,7 +241,7 @@ const VerifyPending = () => {
                 <button
                 onClick={handleResendEmail}
                 disabled={resending || timer > 0 || loading}
-                className="text-sm font-bold text-[var(--foreground)] hover:text-[var(--foreground)]-dark transition flex items-center gap-1 disabled:opacity-50"
+                className="text-sm font-bold text-[var(--foreground)] hover:text-[var(--foreground)]-dark transition flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                 >
                 {resending ? <ArrowsClockwise size={14} className="animate-spin" /> : null}
                 {timer > 0 ? `Resend in ${timer}s` : "Resend Link"}
@@ -247,22 +258,15 @@ const VerifyPending = () => {
                     handlePhoneSend(); 
                   }}
                   disabled={loading || timer > 0}
-                  className="text-sm font-bold text-[var(--foreground)] hover:text-[var(--foreground)]-dark transition disabled:opacity-50"
+                  className="text-sm font-bold text-[var(--foreground)] hover:text-[var(--foreground)]-dark transition disabled:opacity-50 cursor-pointer"
                 >
                   {timer > 0 ? `Resend available in ${timer}s` : "Resend SMS"}
                 </button>
             </div>
           )}
-          
-          <button 
-            onClick={() => navigate("/signup")}
-            className="text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition underline"
-          >
-              Go back to signup
-          </button>
         </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

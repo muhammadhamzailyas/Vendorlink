@@ -182,8 +182,7 @@ const SignupStep1 = ({
       variant="primary"
       disabled={isSubmitDisabled}
       loading={loading}
-      size="lg"
-      className="w-full shadow-soft font-normal"
+      className="w-full h-12 rounded-xl shadow-soft font-normal text-base"
     >
       Save & Continue
     </Button>

@@ -12,7 +12,7 @@ const PlanCard = ({ plan, isSelected, onSelect }) => (
     )}
   >
     {plan.featured && (
-      <div className="absolute top-0 right-0 bg-[var(--foreground)] text-[var(--foreground)] text-[10px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">
+      <div className="absolute top-0 right-0 bg-[var(--foreground)] text-[var(--background)] text-[10px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">
         Popular
       </div>
     )}

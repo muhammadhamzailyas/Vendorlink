@@ -98,14 +98,15 @@ const SignupStep4 = ({ plan, onPlanChange, onSubmit, onBack, loading: parentLoad
         ))}
       </div>
 
-      <div className="flex gap-3">
-        <Button variant="secondary" onClick={onBack} disabled={loading || parentLoading} className="h-12 w-1/3 rounded-xl font-normal">Back</Button>
+      <div className="flex gap-4 pt-4 border-t border-[var(--border)]/50">
+        <Button variant="secondary" onClick={onBack} disabled={loading || parentLoading} size="lg" className="flex-1 font-normal">Back</Button>
         <Button 
             variant="primary" 
             onClick={handleContinue} 
             loading={loading || parentLoading}
             disabled={!plan || loading || parentLoading}
-            className="h-12 w-2/3 rounded-xl text-base uppercase tracking-widest font-normal"
+            size="lg"
+            className="flex-1 font-normal shadow-soft"
         >
           Continue to Payment
         </Button>

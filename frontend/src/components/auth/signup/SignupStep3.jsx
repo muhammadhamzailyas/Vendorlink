@@ -70,14 +70,15 @@ const SignupStep3 = ({ data, onFileChange, onRemoveFile, isCompany, onSubmit, on
         </div>
       )}
 
-      <div className="flex gap-2 pt-4">
-        <Button variant="secondary" onClick={onBack} disabled={loading} className="h-12 w-1/2 rounded-xl font-normal">Back</Button>
+      <div className="flex gap-4 pt-4 border-t border-[var(--border)]/50">
+        <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
         <Button 
             variant="primary" 
             onClick={onSubmit} 
             loading={loading} 
             disabled={!isFormValid || loading}
-            className="h-12 w-1/2 rounded-xl text-sm font-normal"
+            size="lg"
+            className="flex-1 font-normal shadow-soft"
         >
           Continue
         </Button>

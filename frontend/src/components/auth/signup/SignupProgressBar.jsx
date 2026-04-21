@@ -15,19 +15,25 @@ const SignupProgressBar = ({ step }) => {
   const activeStepIndex = step - 1;
 
   return (
-    <div className="mb-12 relative w-full px-2">
-      {/* Connecting Lines Container */}
-      <div className="absolute top-5 left-8 right-8 h-0.5 bg-[var(--border)] -z-0" />
-      
-      {/* Active Connecting Line */}
-      <div 
-        className="absolute top-5 left-8 h-0.5 bg-[var(--foreground)] transition-all duration-500 ease-in-out -z-0" 
-        style={{ 
-          width: activeStepIndex > 0 
-            ? `${(activeStepIndex) / (totalSteps - 1) * 100}%` 
-            : '0%' 
-        }}
-      />
+    <div className="mb-12 relative w-full px-5">
+      {/* 
+          The connecting line container. 
+          First circle center is at 20px (w-10/2). 
+          Last circle center is at TotalWidth - 20px.
+          We use left-10 (px-5 + center offset) to span exactly center-to-center.
+      */}
+      <div className="absolute top-5 left-10 right-10 h-0.5 pointer-events-none">
+        {/* Background Gray Line */}
+        <div className="absolute inset-0 bg-[var(--border)]" />
+        
+        {/* Active Progress Line */}
+        <div 
+          className="absolute left-0 h-full bg-[var(--foreground)] transition-all duration-500 ease-in-out" 
+          style={{ 
+            width: `${(activeStepIndex / (totalSteps - 1)) * 100}%` 
+          }}
+        />
+      </div>
 
       <div className="flex justify-between relative z-10">
         {steps.map((s, index) => {
@@ -39,7 +45,7 @@ const SignupProgressBar = ({ step }) => {
               {/* Node */}
               <div
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border-2",
+                  "w-10 h-10 rounded-full flex items-center justify-center text-xs font-black transition-all duration-500 border-2",
                   isCompleted 
                     ? "bg-[var(--foreground)] border-[var(--foreground)] text-[var(--background)] shadow-sm" 
                     : isActive 
@@ -47,7 +53,7 @@ const SignupProgressBar = ({ step }) => {
                       : "bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)]"
                 )}
               >
-                {isCompleted ? <Check size={16} strokeWidth={3} /> : (index + 1)}
+                {isCompleted ? <Check size={16} weight="bold" /> : (index + 1)}
               </div>
 
               {/* Short Label below */}

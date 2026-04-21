@@ -108,7 +108,7 @@ const SignupStep2 = ({
 
     <div className="flex gap-4 pt-4 border-t border-[var(--border)]/50">
       <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
-      <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading} size="lg" className="flex-[2] shadow-soft font-normal">
+      <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading} size="lg" className="flex-1 shadow-soft font-normal">
         Continue
       </Button>
     </div>

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/cn";
 
-const InputOTP = React.forwardRef(({ className, length = 6, value, onChange, disabled, ...props }, ref) => {
+const InputOTP = React.forwardRef(({ className, length = 6, value = "", onChange, disabled, ...props }, ref) => {
   const inputRefs = React.useRef([]);
 
   const handleChange = (e, index) => {
@@ -10,6 +10,10 @@ const InputOTP = React.forwardRef(({ className, length = 6, value, onChange, dis
     if (val && !/^\d+$/.test(val)) return;
 
     const currentValues = value ? value.split("") : Array(length).fill("");
+    
+    // Handle the case where value might be shorter than length
+    while (currentValues.length < length) currentValues.push("");
+    
     currentValues[index] = val.substring(val.length - 1);
     const updatedValue = currentValues.join("");
     onChange(updatedValue);
@@ -34,11 +38,13 @@ const InputOTP = React.forwardRef(({ className, length = 6, value, onChange, dis
     
     // Focus last input or next empty
     const nextIndex = Math.min(pasteData.length, length - 1);
-    inputRefs.current[nextIndex].focus();
+    if (inputRefs.current[nextIndex]) {
+        inputRefs.current[nextIndex].focus();
+    }
   };
 
   return (
-    <div ref={ref} className={cn("flex items-center gap-2", className)} {...props}>
+    <div ref={ref} className={cn("flex items-center gap-3", className)} {...props}>
       {Array.from({ length }).map((_, index) => (
         <input
           key={index}
@@ -52,8 +58,12 @@ const InputOTP = React.forwardRef(({ className, length = 6, value, onChange, dis
           onKeyDown={(e) => handleKeyDown(e, index)}
           onPaste={handlePaste}
           disabled={disabled}
+          autoComplete="one-time-code"
           className={cn(
-            "flex h-12 w-10 md:h-14 md:w-12 items-center justify-center rounded-xl border border-[var(--input-border)] bg-[var(--muted)] text-center text-xl font-bold shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--input-focus)] disabled:cursor-not-allowed disabled:opacity-50"
+            "flex h-12 w-10 md:h-16 md:w-12 items-center justify-center rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] text-center text-2xl font-black text-[var(--foreground)] shadow-sm transition-all outline-none",
+            "focus:border-[var(--foreground)] focus:ring-4 focus:ring-[var(--foreground)]/5",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            value[index] ? "border-[var(--foreground)]" : "border-[var(--border)]"
           )}
         />
       ))}

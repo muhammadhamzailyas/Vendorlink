@@ -23,10 +23,10 @@ const DURATIONS = {
 const activeToasts = new Set();
 
 const TYPE_ICON = {
-  success: <CheckCircle className="h-5 w-5" style={{ stroke: 'var(--success)' }} />,
-  error: <WarningCircle className="h-5 w-5" style={{ stroke: 'var(--error)' }} />,
-  warning: <Warning className="h-5 w-5" style={{ stroke: 'var(--warning)' }} />,
-  info: <Info className="h-5 w-5" style={{ stroke: 'var(--info)' }} />,
+  success: <CheckCircle className="h-5 w-5" weight="fill" style={{ color: '#22c55e' }} />,
+  error: <WarningCircle className="h-5 w-5" weight="fill" style={{ color: '#ef4444' }} />,
+  warning: <Warning className="h-5 w-5" weight="fill" style={{ color: '#f59e0b' }} />,
+  info: <Info className="h-5 w-5" weight="fill" style={{ color: '#3b82f6' }} />,
 };
 
 const TYPE_METHOD = {
@@ -161,17 +161,44 @@ export const confirmToast = (
 };
 
 export const ToastViewport = () => (
-  <Toaster
-    position={CONFIG.position}
-    closeButton={CONFIG.closeButton}
-    visibleToasts={CONFIG.limit}
-    richColors
-    theme="light"
-    toastOptions={{
-      className: "rounded-xl border border-[var(--border)] bg-[var(--card)] !text-[var(--foreground)] font-bold shadow-lg !p-4",
-      descriptionClassName: "!text-[var(--muted-foreground)] text-xs font-medium mt-1",
-    }}
-  />
+  <>
+    <style dangerouslySetInnerHTML={{ __html: `
+      [data-sonner-toast] {
+        --toast-close-button-start: auto !important;
+        --toast-close-button-end: 12px !important;
+        --toast-close-button-top: 50% !important;
+        --toast-close-button-transform: translateY(-50%) !important;
+      }
+      [data-sonner-toast] [data-close-button] {
+        left: var(--toast-close-button-start) !important;
+        right: var(--toast-close-button-end) !important;
+        top: var(--toast-close-button-top) !important;
+        transform: var(--toast-close-button-transform) !important;
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #0f172a !important;
+        opacity: 1 !important;
+      }
+      [data-sonner-toast] [data-icon] {
+        margin-right: 12px !important;
+        flex-shrink: 0 !important;
+      }
+      [data-sonner-toast] [data-content] {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+      }
+    `}} />
+    <Toaster
+      position={CONFIG.position}
+      closeButton={CONFIG.closeButton}
+      visibleToasts={CONFIG.limit}
+      theme="light"
+      toastOptions={{
+        className: "rounded-2xl border border-[#e2e8f0] bg-white shadow-2xl !p-4 !pl-5",
+        descriptionClassName: "text-[#64748b] text-[11px] font-medium mt-0.5",
+      }}
+    />
+  </>
 );
 
 export const handleApiError = (

@@ -1,0 +1,61 @@
+import * as React from "react";
+import { ChevronLeft, ChevronRight } from "@phosphor-icons/react";
+import { DayPicker } from "react-day-picker";
+import { cn } from "@/lib/cn";
+import { buttonVariants } from "./Button";
+
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  ...props
+}) {
+  return (
+    <DayPicker
+      showOutsideDays={showOutsideDays}
+      className={cn("p-3", className)}
+      classNames={{
+        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+        month: "space-y-4",
+        caption: "flex justify-center pt-1 relative items-center",
+        caption_label: "text-sm font-semibold uppercase tracking-wider",
+        nav: "space-x-1 flex items-center",
+        nav_button: cn(
+          buttonVariants({ variant: "ghost" }),
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+        ),
+        nav_button_previous: "absolute left-1",
+        nav_button_next: "absolute right-1",
+        table: "w-full border-collapse space-y-1",
+        head_row: "flex",
+        head_cell:
+          "text-[var(--muted-foreground)] rounded-md w-9 font-normal text-[0.8rem] uppercase",
+        row: "flex w-full mt-2",
+        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-[var(--muted)]/50 [&:has([aria-selected])]:bg-[var(--muted)] first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        day: cn(
+          buttonVariants({ variant: "ghost" }),
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+        ),
+        day_range_end: "day-range-end",
+        day_selected:
+          "bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)] hover:text-[var(--background)] focus:bg-[var(--foreground)] focus:text-[var(--background)] rounded-xl",
+        day_today: "border border-[var(--foreground)]/30 text-[var(--foreground)] font-bold",
+        day_outside:
+          "day-outside text-[var(--muted-foreground)] opacity-50 aria-selected:bg-[var(--muted)]/50 aria-selected:text-[var(--muted-foreground)] aria-selected:opacity-30",
+        day_disabled: "text-[var(--muted-foreground)] opacity-50",
+        day_range_middle:
+          "aria-selected:bg-[var(--muted)] aria-selected:text-[var(--foreground)]",
+        day_hidden: "invisible",
+        ...classNames,
+      }}
+      components={{
+        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+      }}
+      {...props}
+    />
+  );
+}
+Calendar.displayName = "Calendar";
+
+export { Calendar };

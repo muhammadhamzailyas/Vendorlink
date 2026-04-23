@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { contractAPI } from "@/services/api";
 import { getUserData } from "@/lib/localStorage";
 import { formatDate } from "@/lib/dateUtils";
@@ -8,7 +8,26 @@ import StatusChip from "@/components/shared/StatusChip";
 import {
   ArrowLeft, Download, Check, X, Prohibit, Trash, CircleNotch, Info, Calendar, CurrencyDollar
 } from "@phosphor-icons/react";
-import { PageTransition, Button, Card, Input, Dialog, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Separator } from "@/components/ui";
+import { 
+  PageTransition, 
+  Button, 
+  Card, 
+  Input, 
+  Dialog, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow, 
+  Separator,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui";
 import { DetailMetaGrid, DetailMetaItem, DetailSection } from "@/components/shared/DetailLayout";
 
 const ContractDetail = () => {
@@ -147,6 +166,26 @@ const ContractDetail = () => {
   return (
     <PageTransition>
     <div className="space-y-8 pb-12">
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to={`/${user?.role}`}>Dashboard</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to={`/${user?.role}/contracts`}>Contracts</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{contract?.title || "Contract Detail"}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">{contract.title || "Contract Detail"}</h2>

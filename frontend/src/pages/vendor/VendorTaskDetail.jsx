@@ -1,12 +1,25 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { formatDate } from "@/lib/dateUtils";
 import api from "@/services/api";
 import ProposalForm from "./ProposalForm";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
 import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
 import { getUserData } from "@/lib/localStorage";
-import { Button, PageTransition, Card, Badge, Separator, Loader } from "@/components/ui";
+import { 
+  Button, 
+  PageTransition, 
+  Card, 
+  Badge, 
+  Separator, 
+  Loader,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui";
 import { ArrowLeft, Calendar, CurrencyDollar, Briefcase, Tag, CheckCircle, Clock, WarningCircle } from "@phosphor-icons/react";
 
 const getCategoryLabel = (category) => {
@@ -81,6 +94,26 @@ const VendorTaskDetail = () => {
   return (
     <PageTransition>
       <div className="mx-auto max-w-5xl space-y-8 pb-12">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/vendor">Dashboard</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/vendor/available-tasks">Marketplace</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{task?.title || "Task Detail"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="flex items-center justify-between gap-4">
             <Button variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight">
                 <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />

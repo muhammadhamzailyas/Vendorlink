@@ -1,11 +1,29 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft as ArrowBack, ClipboardText, Info } from "@phosphor-icons/react";
 import toastUtil from "@/lib/toast";
 import { formatDate } from "@/lib/dateUtils";
 
 import { proposalAPI, taskAPI } from "@/services/api";
-import { Button, Card, EmptyState, PageTransition, Skeleton, Tabs, TabsList, TabsTrigger, TabsContent, Badge, Separator } from "@/components/ui";
+import { 
+  Button, 
+  Card, 
+  EmptyState, 
+  PageTransition, 
+  Skeleton, 
+  Tabs, 
+  TabsList, 
+  TabsTrigger, 
+  TabsContent, 
+  Badge, 
+  Separator,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import { DetailSection } from "@/components/shared/DetailLayout";
 
@@ -133,6 +151,26 @@ const CompanyTaskDetail = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/company">Dashboard</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/company/my-tasks">My Tasks</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{task?.title || "Task Detail"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">{task.title || "Task Detail"}</h2>

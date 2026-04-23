@@ -1,7 +1,5 @@
 class NotificationController {
-  constructor(notificationService) {
-    this.notificationService = notificationService;
-
+  constructor() {
     // Bind all methods
     this.getUserNotifications = this.getUserNotifications.bind(this);
     this.markAsRead = this.markAsRead.bind(this);
@@ -10,6 +8,17 @@ class NotificationController {
     this.deleteNotification = this.deleteNotification.bind(this);
     this.deleteReadNotifications = this.deleteReadNotifications.bind(this);
     this.getUnreadCount = this.getUnreadCount.bind(this);
+  }
+
+  /**
+   * Helper to get notification service from request app
+   */
+  getService(req) {
+    const service = req.app.get("notificationService");
+    if (!service) {
+      throw new Error("NotificationService not found in app container");
+    }
+    return service;
   }
 
   async getUserNotifications(req, res) {
@@ -24,7 +33,8 @@ class NotificationController {
       if (type) filter.type = type;
       if (read !== undefined) filter.read = read === "true";
 
-      const result = await this.notificationService.getUserNotifications(
+      const service = this.getService(req);
+      const result = await service.getUserNotifications(
         userId,
         safePage,
         safeLimit,
@@ -43,7 +53,8 @@ class NotificationController {
       const { id } = req.params;
       const userId = req.user._id.toString();
 
-      const notification = await this.notificationService.markAsRead(userId, id);
+      const service = this.getService(req);
+      const notification = await service.markAsRead(userId, id);
       if (!notification) {
         return res.status(404).json({ error: "Notification not found" });
       }
@@ -64,7 +75,8 @@ class NotificationController {
         return res.status(400).json({ error: "notificationIds array is required" });
       }
 
-      const result = await this.notificationService.markMultipleAsRead(userId, notificationIds);
+      const service = this.getService(req);
+      const result = await service.markMultipleAsRead(userId, notificationIds);
       res.json({ message: "Notifications marked as read", modifiedCount: result.modifiedCount });
     } catch (error) {
       console.error("Error marking multiple notifications:", error);
@@ -75,7 +87,8 @@ class NotificationController {
   async markAllAsRead(req, res) {
     try {
       const userId = req.user._id.toString();
-      const result = await this.notificationService.markAllAsRead(userId);
+      const service = this.getService(req);
+      const result = await service.markAllAsRead(userId);
       res.json({ message: "All notifications marked as read", modifiedCount: result.modifiedCount });
     } catch (error) {
       console.error("Error marking all notifications:", error);
@@ -88,7 +101,8 @@ class NotificationController {
       const { id } = req.params;
       const userId = req.user._id.toString();
 
-      const result = await this.notificationService.deleteNotification(userId, id);
+      const service = this.getService(req);
+      const result = await service.deleteNotification(userId, id);
       if (!result) {
         return res.status(404).json({ error: "Notification not found" });
       }
@@ -103,7 +117,8 @@ class NotificationController {
   async deleteReadNotifications(req, res) {
     try {
       const userId = req.user._id.toString();
-      const result = await this.notificationService.deleteReadNotifications(userId);
+      const service = this.getService(req);
+      const result = await service.deleteReadNotifications(userId);
       res.json({ message: "Read notifications deleted", deletedCount: result.deletedCount });
     } catch (error) {
       console.error("Error deleting read notifications:", error);
@@ -114,7 +129,8 @@ class NotificationController {
   async getUnreadCount(req, res) {
     try {
       const userId = req.user._id.toString();
-      const count = await this.notificationService.getUnreadCount(userId);
+      const service = this.getService(req);
+      const count = await service.getUnreadCount(userId);
       res.json({ count });
     } catch (error) {
       console.error("Error getting unread count:", error);
@@ -123,4 +139,4 @@ class NotificationController {
   }
 }
 
-module.exports = NotificationController;
+module.exports = new NotificationController();

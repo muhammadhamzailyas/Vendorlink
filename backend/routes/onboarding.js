@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const onboardingController = require("../controller/onboardingcontroller");
 const { onboardingDocumentUpload } = require("../middleware/onboardingUpload");
-const authMiddleware = require("../middleware/authmiddle");
+const { authAllowUnprovisioned } = require("../middleware/authmiddle");
 
 router.get("/plans", onboardingController.getPlans.bind(onboardingController));
 
@@ -12,7 +12,7 @@ router.post("/create-payment-intent", onboardingController.createPaymentIntent.b
 // Unified final submission
 router.post(
   "/final-submit",
-  authMiddleware.authAllowUnprovisioned.bind(authMiddleware),
+  authAllowUnprovisioned,
   onboardingDocumentUpload,
   onboardingController.finalSubmit.bind(onboardingController)
 );

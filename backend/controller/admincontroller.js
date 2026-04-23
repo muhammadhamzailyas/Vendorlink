@@ -23,6 +23,138 @@ const ARCHIVE_RETENTION_MESSAGE =
   "Tasks, proposals, payments, chats, notifications, wallets, and transactions will be retained for audit and legal follow-up.";
 
 class AdminController {
+  constructor() {
+    this.getPendingUsers = this.getPendingUsers.bind(this);
+    this.getAllUsers = this.getAllUsers.bind(this);
+    this.approveUser = this.approveUser.bind(this);
+    this.rejectuser = this.rejectuser.bind(this);
+    this.deactivateUser = this.deactivateUser.bind(this);
+    this.getPendingVerifications = this.getPendingVerifications.bind(this);
+    this.approveVerification = this.approveVerification.bind(this);
+    this.rejectVerification = this.rejectVerification.bind(this);
+    this.getStats = this.getStats.bind(this);
+  }
+
+  async getStats(req, res) {
+    try {
+      const now = new Date();
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      // 1. Cumulative Platform Growth (Area Chart)
+      const usersGrowth = await User.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false } },
+        {
+          $group: {
+            _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+      ]);
+
+      const tasksGrowth = await Task.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo } } },
+        {
+          $group: {
+            _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+      ]);
+
+      // 2. Revenue vs Payout Gap (Stacked Bar Chart)
+      const revenueStats = await Payment.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo }, status: "completed" } },
+        {
+          $group: {
+            _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+            totalVolume: { $sum: "$amount" },
+            platformRevenue: { $sum: "$platformFee" },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+      ]);
+
+      // 3. Marketplace Balance (Donut Chart)
+      const userRoles = await User.aggregate([
+        { $match: { isDeleted: false, role: { $in: ["company", "vendor"] } } },
+        { $group: { _id: "$role", count: { $sum: 1 } } },
+      ]);
+
+      // 4. Task Conversion Funnel (Bar Chart)
+      const [openTasks, tasksWithProposals, activeContracts, completedTasks] = await Promise.all([
+          Task.countDocuments({ status: "open" }),
+          Proposal.distinct("taskId"),
+          Contract.countDocuments({ status: "active" }),
+          Task.countDocuments({ status: "completed" })
+      ]);
+
+      // 5. Settlement & Withdrawal Health (Pie Chart)
+      const withdrawalHealth = await Transaction.aggregate([
+        { $match: { type: "withdrawal" } },
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]);
+
+      // Process Monthly Data
+      const months = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+        months.push({
+          month: d.getMonth() + 1,
+          year: d.getFullYear(),
+          name: d.toLocaleString('default', { month: 'short' }),
+        });
+      }
+
+      const growthData = months.map(m => {
+        const u = usersGrowth.find(ug => ug._id.month === m.month && ug._id.year === m.year);
+        const t = tasksGrowth.find(tg => tg._id.month === m.month && tg._id.year === m.year);
+        const r = revenueStats.find(rs => rs._id.month === m.month && rs._id.year === m.year);
+        return {
+          name: m.name,
+          users: u ? u.count : 0,
+          tasks: t ? t.count : 0,
+          totalVolume: r ? r.totalVolume : 0,
+          revenue: r ? r.platformRevenue : 0,
+        };
+      });
+
+      // Calculate Percent Changes
+      const lastMonth = growthData[5];
+      const prevMonth = growthData[4];
+      const calculateChange = (curr, prev) => {
+          if (!prev) return 0;
+          return (((curr - prev) / prev) * 100).toFixed(1);
+      };
+
+      res.json({
+        growthData,
+        marketplaceBalance: userRoles.map(ur => ({ 
+            name: ur._id === "company" ? "Companies" : "Vendors", 
+            value: ur.count 
+        })),
+        taskFunnel: [
+            { name: "Open Tasks", value: openTasks },
+            { name: "With Proposals", value: tasksWithProposals.length },
+            { name: "Active Contracts", value: activeContracts },
+            { name: "Completed Tasks", value: completedTasks },
+        ],
+        withdrawalHealth: withdrawalHealth.map(wh => ({ 
+            name: wh._id.charAt(0).toUpperCase() + wh._id.slice(1), 
+            value: wh.count 
+        })),
+        changes: {
+            users: calculateChange(lastMonth.users, prevMonth.users),
+            tasks: calculateChange(lastMonth.tasks, prevMonth.tasks),
+            revenue: calculateChange(lastMonth.revenue, prevMonth.revenue),
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  }
+
   async getPendingUsers(req, res) {
     try {
       const pendingUsers = await User.find({ status: "pending", isDeleted: false }).select("-passwordHash");

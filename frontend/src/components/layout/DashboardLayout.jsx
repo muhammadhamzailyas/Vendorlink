@@ -207,7 +207,10 @@ const DashboardLayout = () => {
         />
 
         <div className="flex-1 overflow-y-auto bg-[var(--background)] custom-scrollbar">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className={cn(
+            "mx-auto px-4 py-8 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out",
+            isSidebarCollapsed ? "max-w-[1600px]" : "max-w-7xl"
+          )}>
             <Outlet />
           </div>
         </div>

@@ -14,19 +14,19 @@ class AuthMiddleware {
   /**
    * Internal helper to extract token from header
    */
-  extractBearerToken(req) {
+  extractBearerToken = (req) => {
     const authHeader = req.header("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return null;
     }
     return authHeader.split(" ")[1].trim();
-  }
+  };
 
   /**
    * STRICT: Verifies Firebase token AND ensures MongoDB user exists.
    * Use this for all protected application routes.
    */
-  async authmiddleware(req, res, next) {
+  authmiddleware = async (req, res, next) => {
     try {
       const token = this.extractBearerToken(req);
       if (!token) {
@@ -58,10 +58,6 @@ class AuthMiddleware {
 
       if (!user) {
         console.error(`[Auth] Error: User with UID ${decoded.uid} not found in MongoDB after retries.`);
-        // List all UIDs in DB for debug (optional, remove in production)
-        const allUsers = await User.find({}).limit(5).select("firebaseUid email role");
-        console.log("[Auth] Sample UIDs in DB:", JSON.stringify(allUsers));
-        
         return res.status(401).json({ 
           message: "User profile not synchronized. Please log in again.",
           code: "USER_NOT_SYNCED" 
@@ -79,13 +75,13 @@ class AuthMiddleware {
       console.error("[Auth] Middleware Exception:", error.message);
       return res.status(401).json({ message: "Invalid or expired session", error: error.message });
     }
-  }
+  };
 
   /**
    * LIGHT: Verifies Firebase token but DOES NOT require MongoDB user to exist.
    * Use this for session bootstrap or initial onboarding steps.
    */
-  async authAllowUnprovisioned(req, res, next) {
+  authAllowUnprovisioned = async (req, res, next) => {
     try {
       const token = this.extractBearerToken(req);
       if (!token) {
@@ -107,13 +103,13 @@ class AuthMiddleware {
       console.error("[Auth] Light Middleware Exception:", error.message);
       return res.status(401).json({ message: "Invalid or expired session", error: error.message });
     }
-  }
+  };
 
   /**
    * INTERNAL: Only verifies the Firebase token.
    * Useful for internal verification routes.
    */
-  async verifyFirebaseToken(req, res, next) {
+  verifyFirebaseToken = async (req, res, next) => {
     try {
       const token = this.extractBearerToken(req);
       if (!token) {
@@ -129,12 +125,12 @@ class AuthMiddleware {
     } catch (error) {
       return res.status(401).json({ message: "Verification failed" });
     }
-  }
+  };
 
   /**
    * Role-based access control
    */
-  requireRoles(...allowedRoles) {
+  requireRoles = (...allowedRoles) => {
     return (req, res, next) => {
       if (!req.user) {
         return res.status(401).json({ message: "Authentication required" });
@@ -148,17 +144,17 @@ class AuthMiddleware {
 
       next();
     };
-  }
+  };
 
   /**
    * Admin-only access
    */
-  adminmiddleware(req, res, next) {
+  adminmiddleware = (req, res, next) => {
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ message: "Admin access required" });
     }
     next();
-  }
+  };
 }
 
 module.exports = new AuthMiddleware();

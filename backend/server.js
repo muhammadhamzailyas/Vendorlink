@@ -32,7 +32,6 @@ const basePort = Number(process.env.PORT || 8002);
 // Initialize WebSocket + Notification services
 const wsService = new WebSocketService(server);
 const notificationService = new NotificationService(wsService);
-const notificationController = new NotificationController(notificationService);
 
 // Make services accessible from controllers via req.app.get(...)
 app.set("wsService", wsService);

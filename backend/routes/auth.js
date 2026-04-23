@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controller/authcontroller");
-const authMiddleware = require("../middleware/authmiddle");
+const { authmiddleware, authAllowUnprovisioned, verifyFirebaseToken } = require("../middleware/authmiddle");
 const { z } = require("zod");
 
 // Validations
@@ -47,7 +47,7 @@ router.post(
     req.headers.authorization = `Bearer ${req.body.idToken}`;
     next();
   },
-  authMiddleware.verifyFirebaseToken.bind(authMiddleware),
+  verifyFirebaseToken,
   authController.firebaseLogin
 );
 
@@ -58,7 +58,7 @@ router.post(
  */
 router.get(
   "/session/bootstrap", 
-  authMiddleware.authAllowUnprovisioned.bind(authMiddleware), 
+  authAllowUnprovisioned, 
   authController.sessionBootstrap
 );
 
@@ -69,7 +69,7 @@ router.get(
  */
 router.get(
   "/me", 
-  authMiddleware.authmiddleware.bind(authMiddleware), 
+  authmiddleware, 
   authController.getMe
 );
 
@@ -80,7 +80,7 @@ router.get(
  */
 router.put(
   "/me",
-  authMiddleware.authmiddleware.bind(authMiddleware),
+  authmiddleware,
   validateBody(updateProfileSchema),
   authController.updateMe
 );

@@ -10,8 +10,8 @@ import {
   Funnel,
   Pulse,
   ChartPie,
-  ArrowUp,
-  ArrowDown,
+  CaretUp,
+  CaretDown,
 } from "@phosphor-icons/react";
 import {
   Button,
@@ -22,7 +22,8 @@ import {
   ChartTooltipContent,
   DataTable,
   StatCard,
-  Card
+  Card,
+  Badge,
 } from "@/components/ui";
 import {
   LineChart,
@@ -104,21 +105,42 @@ const AdminDashboard = () => {
     }
   };
 
-  const ChangeIndicator = ({ value, label }) => {
-    const isPositive = parseFloat(value) >= 0;
+  const ChangeIndicator = ({ value }) => {
+    const val = parseFloat(value || 0);
+    const isPositive = val > 0;
+    const isNegative = val < 0;
+    
+    const colorClass = isPositive 
+        ? "bg-success/20 text-success border-success/30" 
+        : isNegative 
+            ? "bg-error/20 text-error border-error/30" 
+            : "bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)]";
+
     return (
-        <div className="flex items-center gap-1 mt-1">
-            <div className={cn(
-                "flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full",
-                isPositive ? "bg-success/10 text-success" : "bg-error/10 text-error"
-            )}>
-                {isPositive ? <ArrowUp size={10} weight="bold" /> : <ArrowDown size={10} weight="bold" />}
-                {Math.abs(value)}%
+        <div className={cn(
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+            colorClass
+        )}>
+            <div className="flex items-center gap-0.5">
+                {isPositive && <CaretUp size={10} weight="bold" />}
+                {isNegative && <CaretDown size={10} weight="bold" />}
+                <span className="text-[10px] font-black uppercase tracking-tight">
+                    {Math.abs(val)}%
+                </span>
             </div>
-            <span className="text-[10px] text-[var(--muted-foreground)] uppercase tracking-tighter">from last month</span>
+            <span className="text-[9px] font-bold uppercase tracking-tight opacity-90">
+                from last month
+            </span>
         </div>
     );
   };
+
+  const NoInfo = ({ message = "No data available yet" }) => (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 opacity-50">
+        <Pulse size={32} weight="thin" className="animate-pulse" />
+        <p className="text-[10px] font-black uppercase tracking-widest">{message}</p>
+    </div>
+  );
 
   const recentUserColumns = [
     {
@@ -174,32 +196,33 @@ const AdminDashboard = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-1">
-                <StatCard
+            <StatCard
                 title="Total Users"
                 value={stats.totalUsers}
                 icon={<People />}
                 link="/admin/users"
-                />
-                <ChangeIndicator value={stats.changes.users} />
-            </div>
-            <StatCard
-              title="Companies"
-              value={stats.totalCompanies}
-              icon={<Business />}
-              link="/admin/users?role=company"
+                trend={<ChangeIndicator value={stats.changes.users} />}
             />
             <StatCard
-              title="Vendors"
-              value={stats.totalVendors}
-              icon={<Storefront />}
-              link="/admin/users?role=vendor"
+                title="Companies"
+                value={stats.totalCompanies}
+                icon={<Business />}
+                link="/admin/users?role=company"
+                trend={<ChangeIndicator value={stats.changes.companies} />}
             />
             <StatCard
-              title="Pending Approvals"
-              value={stats.pendingApprovals}
-              icon={<Pending />}
-              link="/admin/pending"
+                title="Vendors"
+                value={stats.totalVendors}
+                icon={<Storefront />}
+                link="/admin/users?role=vendor"
+                trend={<ChangeIndicator value={stats.changes.vendors} />}
+            />
+            <StatCard
+                title="Pending Approvals"
+                value={stats.pendingApprovals}
+                icon={<Pending />}
+                link="/admin/pending"
+                trend={<ChangeIndicator value={stats.changes.pending} />}
             />
           </div>
 
@@ -208,33 +231,38 @@ const AdminDashboard = () => {
             <div className="lg:col-span-8">
               <Card>
                 <Card.Header className="pb-2 border-b-0">
-                  <div className="flex items-center gap-2">
-                      <TrendUp className="h-5 w-5 text-[var(--success)]" />
-                      <div>
-                          <Card.Title className="text-sm uppercase tracking-tight text-[var(--foreground)]">Platform Growth</Card.Title>
-                          <Card.Description className="text-xs text-[var(--muted-foreground)]">Cumulative users and tasks over time</Card.Description>
-                      </div>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                        <TrendUp className="h-5 w-5 text-[var(--success)]" />
+                        <div>
+                            <Card.Title className="text-sm uppercase tracking-tight text-[var(--foreground)]">Platform Growth</Card.Title>
+                            <Card.Description className="text-xs text-[var(--muted-foreground)]">Cumulative users and tasks over time</Card.Description>
+                        </div>
+                    </div>
+                    <ChangeIndicator value={stats.changes.tasks} />
                   </div>
                 </Card.Header>
                 <Card.Content className="h-[340px]">
-                  <ChartContainer className="h-full w-full mt-4 overflow-hidden">
-                    <ResponsiveContainer width="100%" height={300} minWidth={0}>
-                      <AreaChart data={stats.growthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.1}/>
-                            <stop offset="95%" stopColor="var(--foreground)" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
-                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Area type="monotone" dataKey="users" stroke="var(--foreground)" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={2} />
-                        <Area type="monotone" dataKey="tasks" stroke="var(--muted-foreground)" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+                  {stats.growthData.length === 0 ? <NoInfo message="No growth info available" /> : (
+                    <ChartContainer className="h-full w-full mt-4 overflow-hidden">
+                        <ResponsiveContainer width="100%" height={300} minWidth={0}>
+                        <AreaChart data={stats.growthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <defs>
+                            <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.1}/>
+                                <stop offset="95%" stopColor="var(--foreground)" stopOpacity={0}/>
+                            </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                            <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Area type="monotone" dataKey="users" stroke="var(--foreground)" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={2} />
+                            <Area type="monotone" dataKey="tasks" stroke="var(--muted-foreground)" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
+                        </AreaChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                  )}
                 </Card.Content>
               </Card>
             </div>
@@ -252,35 +280,39 @@ const AdminDashboard = () => {
                   </div>
                 </Card.Header>
                 <Card.Content className="h-[340px] flex flex-col justify-center">
-                  <ChartContainer className="h-[240px] w-full overflow-hidden">
-                    <ResponsiveContainer width="100%" height={240} minWidth={0}>
-                      <PieChart>
-                        <Pie
-                            data={stats.marketplaceBalance}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                        >
-                            <Cell fill="var(--foreground)" />
-                            <Cell fill="var(--muted)" />
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                  <div className="mt-4 flex flex-wrap justify-center gap-6">
-                      {stats.marketplaceBalance.map((entry, index) => (
-                        <div key={entry.name} className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: index === 0 ? 'var(--foreground)' : 'var(--muted)' }} />
-                            <span className="text-[10px] font-bold uppercase tracking-tight text-[var(--muted-foreground)]">
-                                {entry.name}: {entry.value}
-                            </span>
+                  {stats.marketplaceBalance.length === 0 ? <NoInfo message="No balance info available" /> : (
+                    <>
+                        <ChartContainer className="h-[240px] w-full overflow-hidden">
+                            <ResponsiveContainer width="100%" height={240} minWidth={0}>
+                            <PieChart>
+                                <Pie
+                                    data={stats.marketplaceBalance}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    <Cell fill="var(--foreground)" />
+                                    <Cell fill="var(--muted)" />
+                                </Pie>
+                                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                            </PieChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
+                        <div className="mt-4 flex flex-wrap justify-center gap-6">
+                            {stats.marketplaceBalance.map((entry, index) => (
+                                <div key={entry.name} className="flex items-center gap-2">
+                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: index === 0 ? 'var(--foreground)' : 'var(--muted)' }} />
+                                    <span className="text-[10px] font-bold uppercase tracking-tight text-[var(--muted-foreground)]">
+                                        {entry.name}: {entry.value}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
-                      ))}
-                  </div>
+                    </>
+                  )}
                 </Card.Content>
               </Card>
             </div>
@@ -301,18 +333,20 @@ const AdminDashboard = () => {
                     </div>
                 </Card.Header>
                 <Card.Content className="h-[300px]">
-                  <ChartContainer className="h-full w-full mt-4 overflow-hidden">
-                    <ResponsiveContainer width="100%" height={260} minWidth={0}>
-                      <BarChart data={stats.growthData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
-                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="totalVolume" stackId="a" fill="var(--muted)" radius={[0, 0, 0, 0]} />
-                        <Bar dataKey="revenue" stackId="a" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+                  {stats.growthData.filter(d => d.totalVolume > 0).length === 0 ? <NoInfo message="No financial info available" /> : (
+                    <ChartContainer className="h-full w-full mt-4 overflow-hidden">
+                        <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                        <BarChart data={stats.growthData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                            <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Bar dataKey="totalVolume" stackId="a" fill="var(--muted)" radius={[0, 0, 0, 0]} />
+                            <Bar dataKey="revenue" stackId="a" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                  )}
                 </Card.Content>
               </Card>
             </div>
@@ -330,17 +364,19 @@ const AdminDashboard = () => {
                   </div>
                 </Card.Header>
                 <Card.Content className="h-[300px]">
-                  <ChartContainer className="h-full w-full mt-4 overflow-hidden">
-                    <ResponsiveContainer width="100%" height={260} minWidth={0}>
-                      <BarChart layout="vertical" data={stats.taskFunnel} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
-                        <XAxis type="number" axisLine={false} tickLine={false} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
-                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground)', fontSize: 10, fontWeight: 'bold'}} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="value" fill="var(--foreground)" radius={[0, 4, 4, 0]} barSize={20} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+                  {stats.taskFunnel.every(f => f.value === 0) ? <NoInfo message="No funnel info available" /> : (
+                    <ChartContainer className="h-full w-full mt-4 overflow-hidden">
+                        <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                        <BarChart layout="vertical" data={stats.taskFunnel} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
+                            <XAxis type="number" axisLine={false} tickLine={false} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                            <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground)', fontSize: 10, fontWeight: 'bold'}} />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Bar dataKey="value" fill="var(--foreground)" radius={[0, 4, 4, 0]} barSize={20} />
+                        </BarChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                  )}
                 </Card.Content>
               </Card>
             </div>
@@ -358,35 +394,36 @@ const AdminDashboard = () => {
                     </div>
                     </Card.Header>
                     <Card.Content className="flex items-center justify-between py-6 min-h-[200px]">
-                        <div className="w-1/3 h-[200px]">
-                            <ResponsiveContainer width="100%" height={200} minWidth={0}>
-                                <PieChart>
-                                    <Pie
-                                        data={stats.withdrawalHealth}
-                                        innerRadius={40}
-                                        outerRadius={70}
-                                        paddingAngle={2}
-                                        dataKey="value"
-                                    >
-                                        {stats.withdrawalHealth.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.name === 'Completed' ? 'var(--success)' : entry.name === 'Pending' ? 'var(--warning)' : 'var(--error)'} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="w-2/3 grid grid-cols-3 gap-4 px-12">
-                            {stats.withdrawalHealth.map((entry, index) => (
-                                <div key={entry.name} className="p-4 rounded-2xl bg-[var(--muted)]/50 border border-[var(--border)]">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">{entry.name}</p>
-                                    <p className="text-2xl font-bold text-[var(--foreground)]">{entry.value}</p>
+                        {stats.withdrawalHealth.length === 0 ? <NoInfo message="No withdrawal data available yet" /> : (
+                            <>
+                                <div className="w-1/3 h-[200px]">
+                                    <ResponsiveContainer width="100%" height={200} minWidth={0}>
+                                        <PieChart>
+                                            <Pie
+                                                data={stats.withdrawalHealth}
+                                                innerRadius={40}
+                                                outerRadius={70}
+                                                paddingAngle={2}
+                                                dataKey="value"
+                                            >
+                                                {stats.withdrawalHealth.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.name === 'Completed' ? 'var(--success)' : entry.name === 'Pending' ? 'var(--warning)' : 'var(--error)'} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip />
+                                        </PieChart>
+                                    </ResponsiveContainer>
                                 </div>
-                            ))}
-                            {stats.withdrawalHealth.length === 0 && (
-                                <p className="col-span-3 text-center text-xs text-[var(--muted-foreground)] italic py-8">No withdrawal data available yet</p>
-                            )}
-                        </div>
+                                <div className="w-2/3 grid grid-cols-3 gap-4 px-12">
+                                    {stats.withdrawalHealth.map((entry, index) => (
+                                        <div key={entry.name} className="p-4 rounded-2xl bg-[var(--muted)]/50 border border-[var(--border)]">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">{entry.name}</p>
+                                            <p className="text-2xl font-bold text-[var(--foreground)]">{entry.value}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </Card.Content>
                 </Card>
             </div>

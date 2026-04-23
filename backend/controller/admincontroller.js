@@ -107,16 +107,42 @@ class AdminController {
         });
       }
 
+      // Detailed Monthly Stats for Percentage Calculation
+      const monthlyBreakdown = await User.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false } },
+        {
+          $group: {
+            _id: { 
+                month: { $month: "$createdAt" }, 
+                year: { $year: "$createdAt" },
+                role: "$role",
+                status: "$status"
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      const getMonthlyTotal = (m, filterFn) => {
+          return monthlyBreakdown
+            .filter(item => item._id.month === m.month && item._id.year === m.year && filterFn(item))
+            .reduce((sum, item) => sum + item.count, 0);
+      };
+
       const growthData = months.map(m => {
-        const u = usersGrowth.find(ug => ug._id.month === m.month && ug._id.year === m.year);
+        const uCount = getMonthlyTotal(m, () => true);
         const t = tasksGrowth.find(tg => tg._id.month === m.month && tg._id.year === m.year);
         const r = revenueStats.find(rs => rs._id.month === m.month && rs._id.year === m.year);
+        
         return {
           name: m.name,
-          users: u ? u.count : 0,
+          users: uCount,
           tasks: t ? t.count : 0,
           totalVolume: r ? r.totalVolume : 0,
           revenue: r ? r.platformRevenue : 0,
+          companies: getMonthlyTotal(m, (item) => item._id.role === "company"),
+          vendors: getMonthlyTotal(m, (item) => item._id.role === "vendor"),
+          pending: getMonthlyTotal(m, (item) => item._id.status === "pending"),
         };
       });
 
@@ -148,6 +174,9 @@ class AdminController {
             users: calculateChange(lastMonth.users, prevMonth.users),
             tasks: calculateChange(lastMonth.tasks, prevMonth.tasks),
             revenue: calculateChange(lastMonth.revenue, prevMonth.revenue),
+            companies: calculateChange(lastMonth.companies, prevMonth.companies),
+            vendors: calculateChange(lastMonth.vendors, prevMonth.vendors),
+            pending: calculateChange(lastMonth.pending, prevMonth.pending),
         }
       });
     } catch (error) {

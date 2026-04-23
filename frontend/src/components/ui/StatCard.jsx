@@ -13,6 +13,7 @@ export const StatCard = ({
   onClick,
   loading = false,
   className,
+  trend,
 }) => {
   const navigate = useNavigate();
 
@@ -53,17 +54,14 @@ export const StatCard = ({
           {loading ? (
             <Skeleton className="h-8 w-24 rounded-lg bg-[var(--muted)]" />
           ) : (
-            <p className="text-2xl font-extrabold tracking-tighter text-[var(--foreground)] uppercase">
-              {value}
-            </p>
+            <>
+                <p className="text-2xl font-extrabold tracking-tighter text-[var(--foreground)] uppercase">
+                {value}
+                </p>
+                {trend && <div>{trend}</div>}
+            </>
           )}
         </div>
-        {isInteractive && !loading && (
-            <div className="mt-4 flex items-center gap-1 text-[10px] font-extrabold text-[var(--muted-foreground)] uppercase tracking-widest transition-all duration-300 group-hover:text-[var(--foreground)]">
-                <span>Analyze</span>
-                <ArrowSquareOut className="h-3 w-3 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </div>
-        )}
       </Card.Content>
     </Card>
   );

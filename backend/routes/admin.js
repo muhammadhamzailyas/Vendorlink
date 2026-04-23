@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controller/admincontroller");
 const { authmiddleware, adminmiddleware } = require("../middleware/authmiddle");
+const authMiddleware = require("../middleware/authmiddle");
 
 // Apply middlewares
-router.use(authmiddleware);
-router.use(adminmiddleware);
+router.use(authMiddleware.authmiddleware.bind(authMiddleware));
+router.use(authMiddleware.adminmiddleware.bind(authMiddleware));
 
 // Define routes
 router.get("/pending", adminController.getPendingUsers);

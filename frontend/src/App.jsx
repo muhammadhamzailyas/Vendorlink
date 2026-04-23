@@ -120,7 +120,6 @@ import { Button, Loader } from "./components/ui";
 const LandingPage = lazy(() => import("./pages/landing/LandingPage.jsx"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
-const VerifyEmail = lazy(() => import("./pages/auth/VerifyEmail"));
 const VerifyPending = lazy(() => import("./pages/auth/VerifyPending"));
 const LinkedInCallback = lazy(() => import("./pages/auth/LinkedInCallback"));
 const Payment = lazy(() => import("./pages/auth/Payment"));
@@ -232,7 +231,6 @@ const App = () => (
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
-                    <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/verify-pending" element={<VerifyPending />} />
                     <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
                     <Route

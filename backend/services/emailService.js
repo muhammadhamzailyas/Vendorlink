@@ -67,35 +67,6 @@ class EmailService {
     });
   }
 
-  async sendVerificationEmail(user, token, code) {
-      const verifyUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/verify-email?token=${token}`;
-      const html = `
-        <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
-            <h1 style="font-size: 24px;">Verify your email address</h1>
-            <p>Hi ${user.fullName || user.email},</p>
-            <p>Thanks for registering. Please verify your email address by entering the code below or clicking the button:</p>
-            
-            <div style="background: #f4f4f5; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; border-radius: 12px; margin: 20px 0; color: #111827; border: 1px solid #e4e4e7;">
-                ${code}
-            </div>
-
-            <div style="text-align: center;">
-                <a href="${verifyUrl}" style="display: inline-block; margin: 10px 0; padding: 12px 24px; background: #111827; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">Verify via Link</a>
-            </div>
-
-            <p style="margin-top: 20px;">If the button does not work, copy and paste the following link into your browser:</p>
-            <p style="word-break: break-all; font-size: 12px; color: #71717a;">${verifyUrl}</p>
-            <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink. The code will expire in 15 minutes.</p>
-        </div>
-      `;
-      return this.sendEmail({
-          to: user.email,
-          subject: `${code} is your VendorLink verification code`,
-          html,
-      });
-  }
-
   async sendNewPasswordEmail(email, newPassword, username) {
       const loginUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/login`;
       const html = `

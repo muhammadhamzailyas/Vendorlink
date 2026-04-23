@@ -121,7 +121,6 @@ const LandingPage = lazy(() => import("./pages/landing/LandingPage.jsx"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
 const VerifyPending = lazy(() => import("./pages/auth/VerifyPending"));
-const LinkedInCallback = lazy(() => import("./pages/auth/LinkedInCallback"));
 const Payment = lazy(() => import("./pages/auth/Payment"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
 const TermsOfService = lazy(() => import("./pages/auth/TermsOfService"));
@@ -232,7 +231,6 @@ const App = () => (
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/verify-pending" element={<VerifyPending />} />
-                    <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
                     <Route
                       path="/forgot-password"
                       element={<ForgotPassword />}

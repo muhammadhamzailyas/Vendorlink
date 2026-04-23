@@ -141,3 +141,33 @@
   --badge-teal-text: theme(colors.teal.300);
   --badge-teal-border: theme(colors.teal.700);
 }
+
+/* =========================
+   SCROLLBAR AESTHETIC
+   ========================= */
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--ring);
+  }
+}

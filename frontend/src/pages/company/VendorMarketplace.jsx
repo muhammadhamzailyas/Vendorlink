@@ -171,11 +171,6 @@ const VendorMarketplace = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Vendor Marketplace</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">Review vendor activity, identify active partners, and open proposal details quickly.</p>
-        </div>
-
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Vendors"

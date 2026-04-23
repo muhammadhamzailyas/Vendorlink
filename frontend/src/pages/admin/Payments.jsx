@@ -6,7 +6,6 @@ import {
   TrendUp,
   Clock,
   WarningCircle,
-  ArrowsClockwise,
   Eye,
   Download,
   MagnifyingGlass,
@@ -90,19 +89,6 @@ const AdminPayments = () => {
   return (
     <PageTransition>
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Payment Registry</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">Review transaction outcomes, invoice flow, and payout health across the platform.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" size="xs" onClick={() => refetch()} className="font-bold uppercase tracking-tight">
-            <ArrowsClockwise className="h-3.5 w-3.5 mr-1.5" />
-            Sync Ledger
-          </Button>
-        </div>
-      </div>
-
       {/* Stats */}
       {statCards.length > 0 && (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

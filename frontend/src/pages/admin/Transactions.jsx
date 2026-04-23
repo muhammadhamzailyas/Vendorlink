@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowsDownUp as ArrowUpDown,
-  ArrowsClockwise,
   MagnifyingGlass,
   CheckCircle,
   XCircle,
@@ -80,17 +79,6 @@ const AdminTransactions = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Transactions</h1>
-            <p className="text-slate-500 dark:text-slate-400">Track deposits, withdrawals, fees, and approvals with clear operational context.</p>
-          </div>
-          <Button variant="secondary" onClick={() => refetch()}>
-            <ArrowsClockwise className="mr-2 h-4 w-4" />
-            ArrowsClockwise
-          </Button>
-        </div>
-
         {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1">

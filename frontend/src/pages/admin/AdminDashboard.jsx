@@ -6,7 +6,6 @@ import {
   Storefront,
   Clock as Pending,
   TrendUp,
-  ArrowsClockwise,
 } from "@phosphor-icons/react";
 import {
   Button,
@@ -151,14 +150,6 @@ const AdminDashboard = () => {
         <Skeleton className="h-96 w-full" />
       ) : (
         <>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-               <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Admin Overview</h2>
-               <p className="text-sm text-[var(--muted-foreground)]">Monitor platform growth and activity.</p>
-            </div>
-            <Button variant="secondary" icon={<ArrowsClockwise className="h-4 w-4" />} onClick={fetchDashboardData}>Refresh</Button>
-          </div>
-
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               title="Total Users"

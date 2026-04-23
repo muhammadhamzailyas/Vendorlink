@@ -30,7 +30,6 @@ const CompanyProgress = () => {
     return (
       <PageTransition>
         <div className="space-y-8">
-          <Skeleton className="h-9 w-48 rounded-xl" />
           <Loader />
         </div>
       </PageTransition>
@@ -40,11 +39,6 @@ const CompanyProgress = () => {
   return (
     <PageTransition>
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Project Progress</h1>
-        <p className="text-[var(--muted-foreground)]">Monitor active contracts and vendor delivery milestones at a glance.</p>
-      </div>
-
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

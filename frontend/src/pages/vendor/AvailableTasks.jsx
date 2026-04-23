@@ -124,13 +124,6 @@ const AvailableTasks = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Available Tasks</h1>
-          <p className="text-[var(--muted-foreground)]">
-            Discover new opportunities that match your skills and delivery capacity.
-          </p>
-        </div>
-
         <FilterSearchBar
           searchValue={search}
           onSearchChange={setMagnifyingGlass}

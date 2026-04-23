@@ -69,11 +69,6 @@ const AddTask = () => {
       <div className="mx-auto max-w-3xl space-y-8">
         <ApprovalStatusBanner />
 
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Post a New Task</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">Describe the work you need done and connect with the right vendor.</p>
-        </div>
-
         { !isApproved ? (
           <div className="rounded-lg bg-warning/15 px-4 py-3 text-sm text-warning font-medium border border-warning/20">
             Your account is pending approval. You cannot post tasks until approved by an admin.

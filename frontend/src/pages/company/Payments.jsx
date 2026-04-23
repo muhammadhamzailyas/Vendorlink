@@ -8,7 +8,6 @@ import {
   Wallet,
   CreditCard,
   PaperPlaneTilt as Send,
-  ArrowsClockwise,
   CheckCircle,
   Clock,
 } from "@phosphor-icons/react";
@@ -70,12 +69,6 @@ const CompanyPayments = () => {
     defaultValues: { amount: "", paymentType: "full", notes: "" },
   });
 
-  const handleArrowsClockwise = () => {
-    queryClient.invalidateQueries({ queryKey: ["company", "active-tasks"] });
-    refreshWallet();
-    showToast("success", "Data refreshed");
-  };
-
   const handleMakePayment = (task) => {
     if ((wallet?.balance || 0) < task.pendingAmount) {
       showToast("error", `Insufficient balance. Please deposit PKR ${task.pendingAmount - (wallet?.balance || 0)} more.`);
@@ -110,17 +103,6 @@ const CompanyPayments = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Payments</h1>
-            <p className="text-slate-500 dark:text-slate-400">Manage disbursements, pending balances, and wallet liquidity for active contracts.</p>
-          </div>
-          <Button variant="secondary" onClick={handleArrowsClockwise} className="w-full sm:w-auto">
-            <ArrowsClockwise className="mr-2 h-4 w-4" />
-            ArrowsClockwise
-          </Button>
-        </div>
-
         <Tabs value={tabValue} onChange={setTabValue} tabs={["Active Tasks", "Wallet"]} />
 
         {/* Tab: Active Tasks */}

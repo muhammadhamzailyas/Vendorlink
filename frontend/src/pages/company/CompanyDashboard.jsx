@@ -219,11 +219,7 @@ const CompanyDashboard = () => {
         <>
           <ApprovalStatusBanner />
           
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-               <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Company Overview</h2>
-               <p className="text-sm text-[var(--muted-foreground)]">Track task progress and proposal demand.</p>
-            </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
             <div className="flex flex-wrap items-center gap-3">
               <Button
                 variant="secondary"

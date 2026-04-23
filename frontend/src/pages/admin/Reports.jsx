@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ChartBar as Assessment,
   Users as People,
   Clock as PendingIcon,
   ListChecks as Task,
@@ -131,19 +130,6 @@ const Reports = () => {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Reports</h1>
-            <p className="text-slate-500 dark:text-slate-400">Review high-level user and task metrics with quick operational snapshots.</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="secondary" onClick={loadReportData}>
-              <Assessment className="mr-2 h-4 w-4" />
-              ArrowsClockwise
-            </Button>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {reportStatCards.map((stat) => (

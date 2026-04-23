@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowsClockwise, Users as People } from "@phosphor-icons/react";
+import { Users as People } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import toastUtil from "@/lib/toast";
@@ -272,10 +272,6 @@ const UserManagement = () => {
     });
   }, [users, searchTerm, tabOptions, activeTab]);
 
-  const handleArrowsClockwise = () => {
-    fetchUsers();
-  };
-
   const isDialogActionLoading = Boolean(
     confirmState.user?._id && actionLoading[confirmState.user._id]
   );
@@ -347,26 +343,6 @@ const UserManagement = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">
-              User Management
-            </h2>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              Review accounts and manage status from one place.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            icon={<ArrowsClockwise className="h-4 w-4" />}
-            onClick={handleArrowsClockwise}
-            className="uppercase font-bold tracking-tight text-[11px]"
-          >
-            ArrowsClockwise
-          </Button>
-        </div>
-
         <FilterSearchBar
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}

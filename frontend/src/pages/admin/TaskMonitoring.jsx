@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { ClipboardText as Assignment, CheckCircle as CheckCircle, Clock as PendingIcon, TrendUp, ArrowsClockwise as ArrowsClockwise } from "@phosphor-icons/react";
+import { ClipboardText as Assignment, CheckCircle as CheckCircle, Clock as PendingIcon, TrendUp } from "@phosphor-icons/react";
 import {
   BarChart,
   Bar,
@@ -169,18 +169,6 @@ const TaskMonitoring = () => {
   {loading ? (
   <Loader />  ) : (
     <>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Task Monitoring</h1>
-          <p className="text-[var(--muted-foreground)]">Monitor task throughput, timeline risk, and execution status across all companies.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button type="button" variant="secondary" size="sm" icon={<ArrowsClockwise className="h-4 w-4" />} onClick={fetchTasks} disabled={loading}>
-            ArrowsClockwise
-          </Button>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat, index) => (
           <StatCard key={`${stat.title}-${index}`} {...stat} />
@@ -250,11 +238,6 @@ const TaskMonitoring = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         tabs={["All Tasks", "Open", "In Progress", "Completed"]}
-        actions={(
-          <Button type="button" variant="secondary" size="sm" icon={<ArrowsClockwise className="h-4 w-4" />} onClick={fetchTasks}>
-            ArrowsClockwise
-          </Button>
-        )}
       />
 
       <DataTable

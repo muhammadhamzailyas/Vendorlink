@@ -38,13 +38,6 @@ const VendorProgress = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Progress</h1>
-          <p className="text-[var(--muted-foreground)]">
-            Track active contracts and report delivery milestones to your clients.
-          </p>
-        </div>
-
         {tasks.length === 0 ? (
           <EmptyState
             icon={ChartBar}

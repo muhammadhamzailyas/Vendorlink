@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Buildings, CheckCircle, XCircle, Clock, ArrowsClockwise, Storefront, Lightning } from "@phosphor-icons/react";
+import { Buildings, CheckCircle, XCircle, Clock, Storefront, Lightning } from "@phosphor-icons/react";
 import toastUtil from "@/lib/toast";
 import { adminService } from "@/services/api";
 import { Button, Card, Dialog, EmptyState, Label, PageTransition, Skeleton, StatCard, Textarea } from "@/components/ui";
@@ -138,18 +138,6 @@ const Pending = () => {
   return (
     <PageTransition>
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)] uppercase tracking-tight">Pending Verifications</h1>
-          <p className="text-[var(--muted-foreground)] text-sm">Review onboarding submissions, supporting documents, and approval decisions.</p>
-        </div>
-        <div className="flex items-center gap-3">
-            <Button variant="secondary" icon={<ArrowsClockwise className="h-4 w-4" />} onClick={loadPending}>
-              ArrowsClockwise
-            </Button>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Pending Total" value={stats.total} icon={<Clock />} />
         <StatCard title="Companies" value={stats.companies} icon={<Buildings />} />

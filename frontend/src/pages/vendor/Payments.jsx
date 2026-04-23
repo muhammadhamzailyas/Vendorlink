@@ -8,7 +8,6 @@ import {
   HandCoins,
   CheckCircle,
   Clock,
-  ArrowsClockwise,
   PaperPlaneTilt as Send,
   TrendUp,
   ArrowCircleDown,
@@ -94,26 +93,9 @@ const VendorPayments = () => {
     });
   };
 
-  const handleArrowsClockwise = () => {
-    queryClient.invalidateQueries({ queryKey: ["vendor", "payment-data"] });
-    refreshWallet();
-  };
-
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Revenue & Finance</h2>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              Track received payments, pending balances, and outgoing payment requests.
-            </p>
-          </div>
-          <Button variant="secondary" size="xs" icon={<ArrowsClockwise className="h-4 w-4" />} onClick={handleArrowsClockwise} className="font-bold uppercase tracking-tight">
-            Sync Ledger
-          </Button>
-        </div>
-
         {/* Summary Cards */}
         {summary && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

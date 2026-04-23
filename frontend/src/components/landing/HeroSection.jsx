@@ -7,12 +7,12 @@ import { Button } from "../ui";
 const HeroSection = () => {
   const [textIndex, setTextIndex] = useState(0);
   
-  const texts = useMemo(() => ["Post a Project", "Join as a Vendor"], []);
+  const texts = useMemo(() => ["Initiate Project", "Register Expertise"], []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % texts.length);
-    }, 3000);
+    }, 1200);
     return () => clearInterval(interval);
   }, [texts.length]);
 

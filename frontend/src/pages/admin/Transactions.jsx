@@ -12,7 +12,23 @@ import {
 } from "@phosphor-icons/react";
 import { paymentAPI } from "@/services/paymentAPI";
 import { showToast } from "@/lib/toast";
-import { Button, Input, Select, PageTransition, Skeleton, EmptyState, DataTable, Loader } from "@/components/ui";
+import { 
+  Button, 
+  Input, 
+  Select, 
+  PageTransition, 
+  Skeleton, 
+  EmptyState, 
+  DataTable, 
+  Loader,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import dayjs from "dayjs";
 
@@ -204,15 +220,50 @@ const AdminTransactions = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-              Previous
-            </Button>
-            <span className="text-sm text-[var(--muted-foreground)]">Page {page} of {totalPages}</span>
-            <Button variant="secondary" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-              Next
-            </Button>
-          </div>
+          <Pagination className="mt-4">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const p = i + 1;
+                if (totalPages > 7) {
+                    if (p !== 1 && p !== totalPages && (p < page - 1 || p > page + 1)) {
+                        if (p === page - 2 || p === page + 2) {
+                            return (
+                                <PaginationItem key={p}>
+                                    <PaginationEllipsis />
+                                </PaginationItem>
+                            );
+                        }
+                        return null;
+                    }
+                }
+
+                return (
+                  <PaginationItem key={p}>
+                    <PaginationLink
+                      isActive={page === p}
+                      onClick={() => setPage(p)}
+                    >
+                      {p}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </div>
     </PageTransition>

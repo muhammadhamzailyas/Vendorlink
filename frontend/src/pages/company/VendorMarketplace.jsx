@@ -2,7 +2,23 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Storefront as Storefront, CheckCircle as CheckCircle, Users as People, CurrencyDollar as AttachMoney, Envelope, Tag, ArrowRight } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import FilterSearchBar from "@/components/shared/FilterSearchBar";
-import { StatCard, Button, Card, EmptyState, PageTransition, Skeleton, Badge, Separator } from "@/components/ui";
+import { 
+  StatCard, 
+  Button, 
+  Card, 
+  EmptyState, 
+  PageTransition, 
+  Skeleton, 
+  Badge, 
+  Separator,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui";
 import { proposalAPI } from "@/services/api";
 
 const VendorCardSkeleton = () => (
@@ -96,10 +112,17 @@ const VendorMarketplace = () => {
   const [loading, setLoading] = useState(true);
   const [search, setMagnifyingGlass] = useState("");
   const [tab, setTab] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Reset to first page when search or tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, tab]);
 
   const loadData = async () => {
     try {
@@ -168,6 +191,12 @@ const VendorMarketplace = () => {
     };
   }, [vendors]);
 
+  const paginatedVendors = useMemo(() => {
+    return filteredVendors.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [filteredVendors, currentPage]);
+
+  const totalPages = Math.ceil(filteredVendors.length / ITEMS_PER_PAGE);
+
   return (
     <PageTransition>
       <div className="space-y-8">
@@ -230,15 +259,64 @@ const VendorMarketplace = () => {
             )}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {filteredVendors.map((vendor) => (
-              <VendorCard
-                key={vendor._id}
-                vendor={vendor}
-                onOpenProposals={() => navigate("/company/proposals")}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {paginatedVendors.map((vendor) => (
+                <VendorCard
+                  key={vendor._id}
+                  vendor={vendor}
+                  onOpenProposals={() => navigate("/company/proposals")}
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const page = i + 1;
+                    if (totalPages > 7) {
+                        if (page !== 1 && page !== totalPages && (page < currentPage - 1 || page > currentPage + 1)) {
+                            if (page === currentPage - 2 || page === currentPage + 2) {
+                                return (
+                                    <PaginationItem key={page}>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                );
+                            }
+                            return null;
+                        }
+                    }
+
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          isActive={currentPage === page}
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         )}
       </div>
     </PageTransition>

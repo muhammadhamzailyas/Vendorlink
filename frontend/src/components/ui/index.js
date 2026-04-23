@@ -6,7 +6,19 @@ export { default as Switch } from "./Switch";
 export { default as Textarea } from "./Textarea";
 export { default as Select } from "./Select";
 export { default as Card } from "./Card";
-export { default as Dialog } from "./Dialog";
+export {
+	Dialog,
+	DialogPortal,
+	DialogOverlay,
+	DialogClose,
+	DialogTrigger,
+	DialogContent,
+	DialogHeader,
+	DialogFooter,
+	DialogTitle,
+	DialogDescription,
+	DialogBody,
+} from "./Dialog";
 export { default as Tabs } from "./Tabs";
 export { default as EmptyState } from "./EmptyState";
 export { default as Skeleton } from "./Skeleton";

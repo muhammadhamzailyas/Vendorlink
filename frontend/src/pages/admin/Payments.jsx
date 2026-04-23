@@ -12,7 +12,25 @@ import {
 } from "@phosphor-icons/react";
 import { paymentAPI } from "@/services/paymentAPI";
 import { showToast } from "@/lib/toast";
-import { Button, Input, Select, Card, PageTransition, Skeleton, EmptyState, DataTable, StatCard, Badge } from "@/components/ui";
+import { 
+  Button, 
+  Input, 
+  Select, 
+  Card, 
+  PageTransition, 
+  Skeleton, 
+  EmptyState, 
+  DataTable, 
+  StatCard, 
+  Badge,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import dayjs from "dayjs";
 
@@ -204,17 +222,50 @@ const AdminPayments = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
-          <Button variant="secondary" size="xs" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="font-bold uppercase tracking-tight">
-            Prev
-          </Button>
-          <div className="px-4 py-1.5 rounded-lg bg-[var(--muted)]/50 border border-[var(--border)]/50 text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-widest">
-            Page {page} of {totalPages}
-          </div>
-          <Button variant="secondary" size="xs" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="font-bold uppercase tracking-tight">
-            Next
-          </Button>
-        </div>
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const p = i + 1;
+              if (totalPages > 7) {
+                  if (p !== 1 && p !== totalPages && (p < page - 1 || p > page + 1)) {
+                      if (p === page - 2 || p === page + 2) {
+                          return (
+                              <PaginationItem key={p}>
+                                  <PaginationEllipsis />
+                              </PaginationItem>
+                          );
+                      }
+                      return null;
+                  }
+              }
+
+              return (
+                <PaginationItem key={p}>
+                  <PaginationLink
+                    isActive={page === p}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
     </div>
     </PageTransition>

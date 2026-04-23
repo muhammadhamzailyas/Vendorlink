@@ -17,6 +17,13 @@ import {
   EmptyState,
   PageTransition,
   Skeleton,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
 } from "@/components/ui";
 import { adminService } from "@/services/api";
 import UserActionMenu from "@/components/admin/UserActionMenu";
@@ -43,7 +50,15 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  // ... (rest of states)
+
+  // Reset to first page when search or tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeTab]);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const [confirmState, setConfirmState] = useState({
@@ -340,6 +355,12 @@ const UserManagement = () => {
   const dialogUserLabel =
     confirmState.user?.companyName || confirmState.user?.email || "this user";
 
+  const paginatedUsers = useMemo(() => {
+    return filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+
   return (
     <PageTransition>
       <div className="space-y-8">
@@ -355,24 +376,74 @@ const UserManagement = () => {
         {loading ? (
           <Skeleton className="h-96 w-full rounded-2xl bg-[var(--muted)]" />
         ) : (
-          <DataTable
-            columns={userColumns}
-            data={filtered}
-            rowKey="_id"
-            emptyState={
-              <EmptyState
-                icon={People}
-                title="No users found"
-                description={
-                  searchTerm
-                    ? "Try adjusting your search criteria."
-                    : "No users match the selected filter."
-                }
-                className="border-none bg-transparent py-6 shadow-none"
-              />
-            }
-            emptyCellClassName="px-4 py-6"
-          />
+          <>
+            <DataTable
+              columns={userColumns}
+              data={paginatedUsers}
+              rowKey="_id"
+              emptyState={
+                <EmptyState
+                  icon={People}
+                  title="No users found"
+                  description={
+                    searchTerm
+                      ? "Try adjusting your search criteria."
+                      : "No users match the selected filter."
+                  }
+                  className="border-none bg-transparent py-6 shadow-none"
+                />
+              }
+              emptyCellClassName="px-4 py-6"
+            />
+
+            {totalPages > 1 && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const page = i + 1;
+                    // Basic ellipsis logic for many pages
+                    if (totalPages > 7) {
+                        if (page !== 1 && page !== totalPages && (page < currentPage - 1 || page > currentPage + 1)) {
+                            if (page === currentPage - 2 || page === currentPage + 2) {
+                                return (
+                                    <PaginationItem key={page}>
+                                        <PaginationEllipsis />
+                                    </PaginationItem>
+                                );
+                            }
+                            return null;
+                        }
+                    }
+
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          isActive={currentPage === page}
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         )}
 
         <UserDetailsModal

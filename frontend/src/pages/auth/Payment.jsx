@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle as CheckCircle, Layout as DashboardIcon } from "@phosphor-icons/react";
-import { Button } from "../../components/ui";
-import { getUserData } from "../../lib/localStorage";
+import { Button, Loader } from "../../components/ui";
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -39,11 +38,7 @@ const Payment = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--ring)]"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

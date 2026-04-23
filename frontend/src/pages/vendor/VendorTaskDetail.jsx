@@ -6,7 +6,7 @@ import ProposalForm from "./ProposalForm";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
 import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
 import { getUserData } from "@/lib/localStorage";
-import { Button, PageTransition, Card, Badge, Separator } from "@/components/ui";
+import { Button, PageTransition, Card, Badge, Separator, Loader } from "@/components/ui";
 import { ArrowLeft, Calendar, CurrencyDollar, Briefcase, Tag, CheckCircle, Clock, WarningCircle } from "@phosphor-icons/react";
 
 const getCategoryLabel = (category) => {
@@ -61,16 +61,7 @@ const VendorTaskDetail = () => {
   };
 
   if (loading) {
-    return (
-      <PageTransition>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--ring)] border-t-transparent" />
-            <p className="text-sm font-bold uppercase tracking-widest text-[var(--muted-foreground)] animate-pulse">Synchronizing task data...</p>
-          </div>
-        </div>
-      </PageTransition>
-    );
+    return <Loader />;
   }
 
   if (!task) {

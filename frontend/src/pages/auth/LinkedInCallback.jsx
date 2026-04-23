@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../../services/api";
 import toastUtil from "../../lib/toast";
 
+import { Loader } from "../../components/ui";
+
 const LinkedInCallback = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,7 +17,7 @@ const LinkedInCallback = () => {
       toastUtil.error("LinkedIn login failed: No code received");
       navigate("/login");
     }
-  }, [location, navigate, handleLinkedInLogin]);
+  }, [location, navigate]);
 
   const handleLinkedInLogin = useCallback(async (code) => {
     try {
@@ -38,14 +40,7 @@ const LinkedInCallback = () => {
     }
   }, [navigate]);
 
-  return (
-    <div className="flex h-screen items-center justify-center bg-[var(--background)]">
-      <div className="flex flex-col items-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--ring)] border-t-transparent" />
-        <p className="mt-4 text-sm font-medium text-[var(--muted-foreground)]">Verifying LinkedIn Account...</p>
-      </div>
-    </div>
-  );
+  return <Loader />;
 };
 
 export default LinkedInCallback;

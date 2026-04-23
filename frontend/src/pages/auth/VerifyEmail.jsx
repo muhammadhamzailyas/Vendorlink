@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import toastUtil from "../../lib/toast";
 import { authService } from "../../services/api";
-import { Button } from "../../components/ui";
+import { Button, Spinner } from "../../components/ui";
 import AuthLayout from "../../components/auth/AuthLayout";
 import { CheckCircle, XCircle, Info } from "@phosphor-icons/react";
 
@@ -46,7 +46,7 @@ const VerifyEmail = () => {
   const getIcon = () => {
     if (status === "success") return <CheckCircle size={48} className="text-success" />;
     if (status === "error" || status === "invalid") return <XCircle size={48} className="text-danger" />;
-    return <Info size={48} className="text-[var(--foreground)] opacity-20 animate-pulse" />;
+    return <Spinner size={48} />;
   };
 
   return (
@@ -81,9 +81,9 @@ const VerifyEmail = () => {
         )}
 
         {status === "pending" && (
-          <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-widest font-medium animate-pulse">
-            Processing Security Token...
-          </p>
+          <div className="py-2">
+            <Spinner size={32} />
+          </div>
         )}
       </div>
     </AuthLayout>

@@ -70,7 +70,7 @@ const useUserSession = () => {
 
 const UserSessionProvider = ({ children }) => {
   const { isInitializing } = useUserSession();
-  if (isInitializing) return <Loader text="Synchronizing session..." />;
+  if (isInitializing) return <Loader />;
   return children;
 };
 

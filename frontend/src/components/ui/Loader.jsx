@@ -1,14 +1,13 @@
 import React from "react";
+import { ClipLoader } from "react-spinners";
 
-const Loader = ({ text }) => (
-  <div className="flex h-screen items-center justify-center bg-[var(--muted)]">
-    <div className="flex flex-col items-center">
-      <div
-        className="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--border)] border-t-foreground/80"
-        role="status"
-      />
-      {text && <span className="mt-3 text-sm text-[var(--muted-foreground)]">{text}</span>}
-    </div>
+export const Spinner = ({ size = 40, color = "var(--foreground)" }) => (
+  <ClipLoader color={color} size={size} speedMultiplier={0.8} />
+);
+
+const Loader = () => (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--background)]">
+    <Spinner />
   </div>
 );
 

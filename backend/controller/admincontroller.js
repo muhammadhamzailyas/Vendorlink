@@ -34,11 +34,30 @@ class AdminController {
 
   async getAllUsers(req, res) {
     try {
-      const all = await User.find({
+      const users = await User.find({
         status: { $ne: "incomplete" },
         isDeleted: false,
-      }).select("-passwordHash");
-      res.json(all);
+      })
+        .select("-passwordHash")
+        .lean();
+
+      const userIds = users.map((u) => u._id);
+      const [companies, vendors] = await Promise.all([
+        Company.find({ userId: { $in: userIds } }).lean(),
+        Vendor.find({ userId: { $in: userIds } }).lean(),
+      ]);
+
+      const companyMap = new Map(companies.map((c) => [String(c.userId), c]));
+      const vendorMap = new Map(vendors.map((v) => [String(v.userId), v]));
+
+      const payload = users.map((user) => ({
+        ...user,
+        companyName: companyMap.get(String(user._id))?.companyName || "",
+        companyProfile: companyMap.get(String(user._id)) || null,
+        vendorProfile: vendorMap.get(String(user._id)) || null,
+      }));
+
+      res.json(payload);
     } catch (error) {
       res.status(500).json({ message: "Server error", error: error.message });
     }

@@ -7,14 +7,14 @@ import toastUtil from "../../../lib/toast";
 const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [isProcessing, setIsConnected] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!stripe || !elements) return;
 
-    setIsConnected(true);
+    setIsProcessing(true);
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
@@ -22,66 +22,60 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
     });
 
     if (error) {
+      console.error("Payment confirmation error:", error);
       toastUtil.error(error.message || "Payment failed");
-      setIsConnected(false);
+      setIsProcessing(false);
     } else if (paymentIntent && paymentIntent.status === "succeeded") {
       toastUtil.success("Payment authorized successfully!");
       onPaymentSuccess(paymentIntent.id);
+    } else {
+      setIsProcessing(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-      <div className="bg-muted border border-ring/10 p-5 rounded-2xl">
+    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="bg-muted/50 border border-border/50 p-5 rounded-2xl">
           <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xs font-normal uppercase tracking-widest text-muted-foreground">Order Summary</h3>
-              <span className="px-2.5 py-1 bg-foreground text-background text-[10px] font-normal rounded-lg uppercase tracking-tight">
-                {planName}
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Order Summary</h3>
+              <span className="px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded uppercase tracking-tighter">
+                One-time activation
               </span>
           </div>
           <div className="flex justify-between items-baseline">
-              <span className="text-muted-foreground text-sm font-normal">Monthly Subscription</span>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-normal text-foreground">${planPrice}</span>
-                <span className="text-xs font-normal text-muted-foreground">/mo</span>
+              <span className="text-foreground text-sm font-medium">Professional Profile Activation</span>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-3xl font-black tracking-tighter text-foreground">${planPrice}</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">USD</span>
               </div>
           </div>
       </div>
 
       <div className="space-y-4">
-        <div className="p-1">
+        <div className="payment-element-wrapper">
             <PaymentElement options={{ 
-              layout: 'tabs',
-              appearance: {
-                theme: 'none',
-                variables: {
-                  fontFamily: 'inherit',
-                  colorBackground: 'var(--input-bg)',
-                  colorText: 'var(--foreground)',
-                  colorDanger: 'var(--error)',
-                  borderRadius: '12px',
-                  spacingGridRow: '16px',
-                },
-                rules: {
-                  '.Input': {
-                    border: '1px solid var(--border)',
-                    boxShadow: 'var(--shadow-xs)',
-                  },
-                  '.Input:focus': {
-                    border: '1px solid var(--foreground)',
+              layout: 'tabs', // Changed to tabs with defaultCollapsed: false to strictly show Card fields
+              paymentMethodOrder: ['card'],
+              business: { name: 'VendorLink' },
+              fields: {
+                billingDetails: {
+                  address: {
+                    country: 'never', // Hide country to keep it clean, as we already have address
                   }
                 }
               }
             }} />
         </div>
 
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground bg-muted/30 p-3 rounded-xl border border-border/50">
-            <Lock size={12} className="shrink-0" />
-            <span className="font-normal uppercase tracking-tight">Secure encryption active. No amount will be charged until your account is verified.</span>
+        <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground bg-foreground/5 p-4 rounded-xl border border-foreground/10">
+            <Lock size={14} weight="bold" className="shrink-0 text-foreground/40" />
+            <span className="font-bold uppercase tracking-tight leading-tight">
+                Secure 256-bit encryption. Payment processed by Stripe.
+            </span>
         </div>
       </div>
 
-      <div className="flex gap-4 pt-2 border-t border-border/50">
+      <div className="flex gap-4 pt-4">
         <Button 
           type="button" 
           variant="secondary" 
@@ -108,6 +102,3 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
 };
 
 export default StripePaymentForm;
-
-
-

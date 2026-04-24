@@ -45,7 +45,7 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { adminService } from "@/services/api";
-import { getUserData } from "@/lib/localStorage";
+import { useUser } from "@/context/UserContext";
 import StatusChip from "@/components/shared/StatusChip";
 import UserAvatar from "@/components/shared/UserAvatar";
 import { cn } from "@/lib/cn";
@@ -54,6 +54,7 @@ dayjs.extend(relativeTime);
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCompanies: 0,
@@ -69,11 +70,10 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = getUserData();
     if (user && user.role === "admin") {
         fetchDashboardData();
     }
-  }, []);
+  }, [user]);
 
   const fetchDashboardData = async () => {
     try {

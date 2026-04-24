@@ -19,9 +19,7 @@ class StripeService {
         amount: Math.round(amount * 100), // Stripe expects cents
         currency,
         metadata,
-        automatic_payment_methods: {
-          enabled: true,
-        },
+        payment_method_types: ["card"], // Specifically target cards only
       });
 
       return {
@@ -39,12 +37,21 @@ class StripeService {
    */
   async verifyPayment(paymentIntentId) {
     try {
+      if (!stripe) return false;
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       return paymentIntent.status === "succeeded";
     } catch (error) {
       console.error("Stripe verification error:", error.message);
       return false;
     }
+  }
+
+  /**
+   * Construct event from webhook payload
+   */
+  constructEvent(payload, sig, endpointSecret) {
+    if (!stripe) throw new Error("Stripe not configured");
+    return stripe.webhooks.constructEvent(payload, sig, endpointSecret);
   }
 }
 

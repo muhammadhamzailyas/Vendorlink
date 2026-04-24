@@ -33,7 +33,9 @@ const SignupStep1 = ({
     // Phone validation - Universal for all countries using libphonenumber metadata
     if (data.phone) {
         // Validate the full international number (including country code)
-        const fullPhone = `${data.countryCode}${data.phone}`;
+        // Strip non-digit characters from data.phone (it might contain spaces/dashes from PhoneInputField)
+        const strippedPhone = data.phone.replace(/\D/g, "");
+        const fullPhone = `${data.countryCode}${strippedPhone}`;
         if (!isValidPhoneNumber(fullPhone)) {
             errs.phone = "Invalid format";
         }

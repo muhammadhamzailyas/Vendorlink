@@ -39,6 +39,7 @@ const VendorBusinessFields = ({ data, errors = {}, onChange }) => (
             <Input
               placeholder="Business Name"
               value={data.businessName}
+              error={errors.businessName}
               onChange={(e) => onChange({ businessName: e.target.value })}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { contractAPI } from "@/services/api";
-import { getUserData } from "@/lib/localStorage";
+import { useUser } from "@/context/UserContext";
 import { formatDate } from "@/lib/dateUtils";
 import { showToast, confirmToast } from "@/lib/toast";
 import StatusChip from "@/components/shared/StatusChip";
@@ -33,7 +33,7 @@ import { DetailMetaGrid, DetailMetaItem, DetailSection } from "@/components/shar
 const ContractDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const user = getUserData();
+  const { user } = useUser();
   const [contract, setContract] = useState(null);
   const [loading, setLoading] = useState(true);
   const [noteText, setNoteText] = useState("");

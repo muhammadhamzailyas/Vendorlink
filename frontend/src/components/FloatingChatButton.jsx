@@ -1,13 +1,13 @@
 import React from "react";
 import { ChatCircleText } from "@phosphor-icons/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getUserData } from "@/lib/localStorage";
+import { useUser } from "../context/UserContext";
 import { Button } from "@/components/ui";
 
 const FloatingChatButton = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = getUserData();
+  const { user } = useUser();
 
   if (!user || user.role === "admin") return null;
 

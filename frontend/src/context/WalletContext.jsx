@@ -22,6 +22,12 @@ const WalletProvider = ({ children }) => {
     currency: "PKR",
   });
   const [transactions, setTransactions] = useState([]);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    pages: 1,
+    currentPage: 1,
+    limit: 20
+  });
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -35,7 +41,7 @@ const WalletProvider = ({ children }) => {
   const mountedRef = useRef(true);
 
   const loadWallet = useCallback(
-    async (showLoading = true) => {
+    async (page = 1, limit = 20, showLoading = true) => {
       if (!checkAuth()) return;
 
       if (abortControllerRef.current) {
@@ -47,7 +53,7 @@ const WalletProvider = ({ children }) => {
       setError(null);
 
       try {
-        const response = await paymentAPI.getWallet();
+        const response = await paymentAPI.getWallet({ page, limit });
 
         if (mountedRef.current && !abortControllerRef.current.signal.aborted) {
           if (response?.data?.success && response?.data?.data) {
@@ -59,6 +65,9 @@ const WalletProvider = ({ children }) => {
               totalReceived: 0,
             });
             setTransactions(response.data.data.transactions || []);
+            if (response.data.data.pagination) {
+              setPagination(response.data.data.pagination);
+            }
           } else if (response?.data?.wallet) {
             setWallet(response.data.wallet);
             setTransactions(response.data.transactions || []);
@@ -83,8 +92,8 @@ const WalletProvider = ({ children }) => {
   const refreshWallet = useCallback(() => {
     if (!checkAuth()) return;
     setRefreshing(true);
-    loadWallet(false);
-  }, [loadWallet, checkAuth]);
+    loadWallet(pagination.currentPage, pagination.limit, false);
+  }, [loadWallet, checkAuth, pagination]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -117,6 +126,7 @@ const WalletProvider = ({ children }) => {
   const value = {
     wallet,
     transactions,
+    pagination,
     loading,
     refreshing,
     error,

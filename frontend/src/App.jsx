@@ -1,23 +1,22 @@
 // App entry point
-import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { Suspense, lazy } from "react";
 import {
-  Routes,
-  Route,
-  BrowserRouter as Router,
+  createBrowserRouter,
+  RouterProvider,
   Navigate,
+  Outlet,
 } from "react-router-dom";
 import { ToastViewport } from "./lib/toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { authService } from "./services/api";
-
-import { auth } from "./lib/firebase";
-import { onIdTokenChanged } from "firebase/auth";
 
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import { NotificationProvider } from "./context/NotificationContext";
 import { WalletProvider } from "./context/WalletContext";
 import { UserProvider, useUser } from "./context/UserContext";
+import { Button, Loader } from "./components/ui";
+import FloatingChatButton from "./components/FloatingChatButton";
+import ScrollToTop from "./components/ScrollToTop";
 
 const UserSessionProvider = ({ children }) => {
   const { loading } = useUser();
@@ -66,8 +65,6 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-import { Button, Loader } from "./components/ui";
-
 const LandingPage = lazy(() => import("./pages/landing/LandingPage.jsx"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
@@ -87,9 +84,7 @@ const CompanyDashboard = lazy(() => import("./pages/company/CompanyDashboard"));
 const CompanyProposals = lazy(() => import("./pages/company/CompanyProposal"));
 const AddTaskForm = lazy(() => import("./pages/company/AddTask"));
 const CompanyTaskDetail = lazy(() => import("./pages/company/TaskDetail"));
-const VendorMarketplace = lazy(
-  () => import("./pages/company/VendorMarketplace")
-,);
+const VendorMarketplace = lazy(() => import("./pages/company/VendorMarketplace"));
 const MyTaskPage = lazy(() => import("./pages/company/MyTaskPage"));
 const CompanyProfile = lazy(() => import("./pages/company/Profile"));
 const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));
@@ -100,25 +95,15 @@ const VendorContracts = lazy(() => import("./pages/vendor/Contracts"));
 const VendorProfile = lazy(() => import("./pages/vendor/Profile"));
 const SharedSettings = lazy(() => import("./pages/shared/Settings"));
 const SharedFeedback = lazy(() => import("./pages/shared/Feedback"));
-
-// New feature pages
 const ChatPage = lazy(() => import("./pages/shared/ChatPage"));
-const NotificationsPage = lazy(
-  () => import("./pages/shared/NotificationsPage"),
-);
+const NotificationsPage = lazy(() => import("./pages/shared/NotificationsPage"));
 const ContractDetail = lazy(() => import("./pages/shared/ContractDetail"));
 const CompanyContracts = lazy(() => import("./pages/company/Contracts"));
 const CompanyProgress = lazy(() => import("./pages/company/CompanyProgress"));
-const CompanyTaskProgressDetail = lazy(
-  () => import("./pages/company/CompanyTaskProgressDetail"),
-);
+const CompanyTaskProgressDetail = lazy(() => import("./pages/company/CompanyTaskProgressDetail"));
 const CreateContract = lazy(() => import("./pages/company/CreateContract"));
 const VendorProgress = lazy(() => import("./pages/vendor/VendorProgress"));
-const VendorTaskProgressDetail = lazy(
-  () => import("./pages/vendor/TaskProgressDetail"),
-);
-
-// Payment & AI features
+const VendorTaskProgressDetail = lazy(() => import("./pages/vendor/TaskProgressDetail"));
 const CompanyPayments = lazy(() => import("./pages/company/Payments"));
 const VendorPayments = lazy(() => import("./pages/vendor/Payments"));
 const AdminPayments = lazy(() => import("./pages/admin/Payments"));
@@ -127,8 +112,22 @@ const AdminTransactions = lazy(() => import("./pages/admin/Transactions"));
 const PaymentSuccess = lazy(() => import("./pages/shared/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/shared/PaymentCancel"));
 
-import FloatingChatButton from "./components/FloatingChatButton";
-import ScrollToTop from "./components/ScrollToTop";
+const AppLayout = () => (
+    <>
+        <ScrollToTop />
+        <UserProvider>
+            <UserSessionProvider>
+                <NotificationProvider>
+                    <WalletProvider>
+                        <Suspense fallback={<Loader />}>
+                            <Outlet />
+                        </Suspense>
+                    </WalletProvider>
+                </NotificationProvider>
+            </UserSessionProvider>
+        </UserProvider>
+    </>
+);
 
 const AdminLayout = () => (
   <ProtectedRoutes role="admin">
@@ -156,6 +155,90 @@ const VendorLayout = () => (
   </ProtectedRoutes>
 );
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <AppLayout />,
+    children: [
+      { index: true, element: <LandingPage /> },
+      { path: "login", element: <Login /> },
+      { path: "signup", element: <Signup /> },
+      { path: "verify-email", element: <EmailVerification /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "terms", element: <TermsOfService /> },
+      { path: "privacy", element: <PrivacyPolicy /> },
+      { path: "payment", element: <Payment /> },
+      {
+        path: "admin",
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <AdminDashboard /> },
+          { path: "users", element: <UserManagement /> },
+          { path: "pending", element: <Pending /> },
+          { path: "task-monitoring", element: <TaskMonitoring /> },
+          { path: "contract", element: <SharedContract /> },
+          { path: "contract/:id", element: <ContractDetail /> },
+          { path: "reports", element: <Reports /> },
+          { path: "settings", element: <AdminSettings /> },
+          { path: "messages", element: <ChatPage /> },
+          { path: "notifications", element: <NotificationsPage /> },
+          { path: "payments", element: <AdminPayments /> },
+          { path: "payments/:id", element: <AdminPaymentDetail /> },
+          { path: "transactions", element: <AdminTransactions /> },
+        ],
+      },
+      {
+        path: "company",
+        element: <CompanyLayout />,
+        children: [
+          { index: true, element: <CompanyDashboard /> },
+          { path: "add-task", element: <AddTaskForm /> },
+          { path: "vendor-marketplace", element: <VendorMarketplace /> },
+          { path: "my-tasks", element: <MyTaskPage /> },
+          { path: "contract", element: <SharedContract /> },
+          { path: "contracts", element: <CompanyContracts /> },
+          { path: "contract/create", element: <CreateContract /> },
+          { path: "contract/:id", element: <ContractDetail /> },
+          { path: "profile", element: <CompanyProfile /> },
+          { path: "tasks", element: <MyTaskPage /> },
+          { path: "proposals", element: <CompanyProposals /> },
+          { path: "task/:id", element: <CompanyTaskDetail /> },
+          { path: "progress", element: <CompanyProgress /> },
+          { path: "task/:taskId/progress", element: <CompanyTaskProgressDetail /> },
+          { path: "messages", element: <ChatPage /> },
+          { path: "notifications", element: <NotificationsPage /> },
+          { path: "settings", element: <SharedSettings /> },
+          { path: "feedback", element: <SharedFeedback /> },
+          { path: "payments", element: <CompanyPayments /> },
+        ],
+      },
+      {
+        path: "vendor",
+        element: <VendorLayout />,
+        children: [
+          { index: true, element: <VendorDashboard /> },
+          { path: "available-tasks", element: <AvailableTasks /> },
+          { path: "my-proposals", element: <MyProposals /> },
+          { path: "contracts", element: <VendorContracts /> },
+          { path: "contract/:id", element: <ContractDetail /> },
+          { path: "profile", element: <VendorProfile /> },
+          { path: "task/:id", element: <VendorTaskDetail /> },
+          { path: "progress", element: <VendorProgress /> },
+          { path: "task/:taskId/progress", element: <VendorTaskProgressDetail /> },
+          { path: "messages", element: <ChatPage /> },
+          { path: "notifications", element: <NotificationsPage /> },
+          { path: "settings", element: <SharedSettings /> },
+          { path: "feedback", element: <SharedFeedback /> },
+          { path: "payments", element: <VendorPayments /> },
+        ],
+      },
+      { path: "payment-success", element: <PaymentSuccess /> },
+      { path: "payment-cancel", element: <PaymentCancel /> },
+      { path: "*", element: <Navigate to="/" replace /> },
+    ],
+  },
+]);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -170,133 +253,9 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
         <ToastViewport />
-        <Router>
-          <ScrollToTop />
-          <UserProvider>
-            <UserSessionProvider>
-              <NotificationProvider>
-                <WalletProvider>
-                <Suspense fallback={<Loader />}>
-                  <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/verify-email" element={<EmailVerification />} />
-                    <Route
-                      path="/forgot-password"
-                      element={<ForgotPassword />}
-                    />
-                    <Route path="/terms" element={<TermsOfService />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/payment" element={<Payment />} />
-
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<AdminDashboard />} />
-                      <Route path="users" element={<UserManagement />} />
-                      <Route path="pending" element={<Pending />} />
-                      <Route
-                        path="task-monitoring"
-                        element={<TaskMonitoring />}
-                      />
-                      <Route path="contract" element={<SharedContract />} />
-                      <Route path="contract/:id" element={<ContractDetail />} />
-                      <Route path="reports" element={<Reports />} />
-                      <Route path="settings" element={<AdminSettings />} />
-                      <Route path="messages" element={<ChatPage />} />
-                      <Route
-                        path="notifications"
-                        element={<NotificationsPage />}
-                      />
-                      <Route path="payments" element={<AdminPayments />} />
-                      <Route
-                        path="payments/:id"
-                        element={<AdminPaymentDetail />}
-                      />
-                      <Route
-                        path="transactions"
-                        element={<AdminTransactions />}
-                      />
-                    </Route>
-
-                    <Route path="/company" element={<CompanyLayout />}>
-                      <Route index element={<CompanyDashboard />} />
-                      <Route path="add-task" element={<AddTaskForm />} />
-                      <Route
-                        path="vendor-marketplace"
-                        element={<VendorMarketplace />}
-                      />
-                      <Route path="my-tasks" element={<MyTaskPage />} />
-                      <Route path="contract" element={<SharedContract />} />
-                      <Route path="contracts" element={<CompanyContracts />} />
-                      <Route
-                        path="contract/create"
-                        element={<CreateContract />}
-                      />
-                      <Route path="contract/:id" element={<ContractDetail />} />
-                      <Route path="profile" element={<CompanyProfile />} />
-                      <Route path="tasks" element={<MyTaskPage />} />
-                      <Route path="proposals" element={<CompanyProposals />} />
-                      <Route path="task/:id" element={<CompanyTaskDetail />} />
-                      <Route path="progress" element={<CompanyProgress />} />
-                      <Route
-                        path="task/:taskId/progress"
-                        element={<CompanyTaskProgressDetail />}
-                      />
-                      <Route path="messages" element={<ChatPage />} />
-                      <Route
-                        path="notifications"
-                        element={<NotificationsPage />}
-                      />
-                      <Route path="settings" element={<SharedSettings />} />
-                      <Route path="feedback" element={<SharedFeedback />} />
-                      <Route path="payments" element={<CompanyPayments />} />
-                    </Route>
-
-                    <Route path="/vendor" element={<VendorLayout />}>
-                      <Route index element={<VendorDashboard />} />
-                      <Route
-                        path="available-tasks"
-                        element={<AvailableTasks />}
-                      />
-                      <Route path="my-proposals" element={<MyProposals />} />
-                      <Route path="contracts" element={<VendorContracts />} />
-                      <Route path="contract/:id" element={<ContractDetail />} />
-                      <Route path="profile" element={<VendorProfile />} />
-                      <Route path="task/:id" element={<VendorTaskDetail />} />
-                      <Route path="progress" element={<VendorProgress />} />
-                      <Route
-                        path="task/:taskId/progress"
-                        element={<VendorTaskProgressDetail />}
-                      />
-                      <Route path="messages" element={<ChatPage />} />
-                      <Route
-                        path="notifications"
-                        element={<NotificationsPage />}
-                      />
-                      <Route path="settings" element={<SharedSettings />} />
-                      <Route path="feedback" element={<SharedFeedback />} />
-                      <Route path="payments" element={<VendorPayments />} />
-                    </Route>
-
-                    <Route
-                      path="/payment-success"
-                      element={<PaymentSuccess />}
-                    />
-                    <Route path="/payment-cancel" element={<PaymentCancel />} />
-
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </Suspense>
-              </WalletProvider>
-            </NotificationProvider>
-          </UserSessionProvider>
-        </UserProvider>
-      </Router>
+        <RouterProvider router={router} />
     </QueryClientProvider>
   </ErrorBoundary>
 );
 
 export default App;
-
-
-

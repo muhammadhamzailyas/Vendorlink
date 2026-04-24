@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { chatAPI } from "@/services/api";
 import { useChat } from "@/hooks/useChat";
-import { getUserData } from "@/lib/localStorage";
+import { useUser } from "@/context/UserContext";
 import { formatDate } from "@/lib/dateUtils";
 import {
   ChatCircleText, PaperPlaneTilt as Send, ArrowLeft, Trash, CircleNotch,
@@ -14,7 +14,7 @@ import UserAvatar from "@/components/shared/UserAvatar";
 const ChatPage = () => {
   const { conversationId } = useParams();
   const navigate = useNavigate();
-  const currentUser = getUserData();
+  const { user: currentUser } = useUser();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [loadingConversations, setLoadingConversations] = useState(true);

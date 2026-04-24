@@ -35,7 +35,9 @@ export const UserProvider = ({ children }) => {
             setUser(serverUser);
           }
         } catch (error) {
-          console.error("User session sync error:", error);
+          if (error.response?.status !== 401) {
+            console.error("User session sync error:", error);
+          }
           setUser(null);
         }
       } else {

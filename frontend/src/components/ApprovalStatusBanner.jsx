@@ -1,30 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { XCircle, ShieldWarning, WarningCircle } from "@phosphor-icons/react";
-import { getUserData } from "@/lib/localStorage";
-import toastUtil from "@/lib/toast";
+import React from "react";
+import { XCircle, ShieldWarning } from "@phosphor-icons/react";
+import { useUser } from "../context/UserContext";
 import { Alert, AlertTitle, AlertDescription } from "./ui";
 
 const ApprovalStatusBanner = () => {
-  const [user, setUser] = useState(getUserData());
-
-  useEffect(() => {
-    const handleStatusUpdate = (event) => {
-      setUser(event.detail);
-    };
-
-    const handleApproval = (event) => {
-      toastUtil.success("Account approved");
-      setUser(event.detail);
-    };
-
-    window.addEventListener("userStatusUpdated", handleStatusUpdate);
-    window.addEventListener("userApproved", handleApproval);
-
-    return () => {
-      window.removeEventListener("userStatusUpdated", handleStatusUpdate);
-      window.removeEventListener("userApproved", handleApproval);
-    };
-  }, []);
+  const { user } = useUser();
 
   if (!user || user.role === "admin") {
     return null;

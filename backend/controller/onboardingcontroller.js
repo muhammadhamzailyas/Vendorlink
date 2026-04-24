@@ -7,11 +7,7 @@ const Wallet = require("../model/Wallet");
 const emailService = require("../services/emailService");
 const stripeService = require("../services/stripeService");
 
-const defaultPlans = [
-  { id: "free", name: "Standard", price: 0, visibility: "standard" },
-  { id: "premium", name: "Premium", price: 20, visibility: "better" },
-  { id: "enterprise", name: "Enterprise", price: 50, visibility: "best" },
-];
+const ONBOARDING_FEE = 30; // Fixed $30 activation fee
 
 /**
  * OnboardingController handles the final steps of user registration.
@@ -148,12 +144,12 @@ class OnboardingController {
   }
 
   async getPlans(req, res) {
-    return res.json(defaultPlans);
+    // Return empty array or single plan as we removed selection
+    return res.json([{ id: "activation_fee", name: "Professional Activation", price: ONBOARDING_FEE }]);
   }
 
   /**
    * Finalizes user profile and creates role-specific entries.
-   * Atomic operation using MongoDB Transactions (if supported).
    */
   async finalSubmit(req, res) {
     console.log("[Onboarding] Starting finalSubmit process...");
@@ -161,26 +157,19 @@ class OnboardingController {
     let isTransactionStarted = false;
 
     try {
-      // 1. Transaction Start (Optional/Resilient)
       try {
         await session.startTransaction();
         isTransactionStarted = true;
       } catch (err) {
-        console.warn("[Onboarding] MongoDB Transactions not supported. Continuing without transaction.");
+        console.warn("[Onboarding] MongoDB Transactions not supported.");
       }
 
-      // 2. Body Parsing (Resilient to Multer/Multipart differences)
-      let { account, details, plan: planId, stripePaymentId } = req.body;
+      let { account, details, stripePaymentId } = req.body;
       
       const parseJson = (val, fieldName) => {
-        if (!val) {
-            return null;
-        }
+        if (!val) return null;
         if (typeof val === "string") {
-            try { return JSON.parse(val); } catch (e) { 
-                console.error(`[Onboarding] Failed to parse JSON for ${fieldName}:`, val);
-                return null; 
-            }
+            try { return JSON.parse(val); } catch (e) { return null; }
         }
         return val;
       };
@@ -188,32 +177,24 @@ class OnboardingController {
       account = parseJson(account, "account");
       details = parseJson(details, "details");
 
-      // IDENTITY: Always use the verified Firebase UID from the token
       const firebaseUid = req.firebaseUser?.uid;
-
       if (!firebaseUid) {
         if (isTransactionStarted) await session.abortTransaction();
         return res.status(401).json({ message: "Unverified identity" });
       }
 
-      if (!account || !account.role || !planId) {
-        console.error("[Onboarding] Missing critical fields:", { 
-            hasAccount: !!account, 
-            role: account?.role, 
-            planId 
-        });
+      if (!account || !account.role || !stripePaymentId) {
         if (isTransactionStarted) await session.abortTransaction();
-        return res.status(400).json({ 
-            message: "Missing required registration data",
-            details: {
-                account: !account ? "missing" : "ok",
-                role: !account?.role ? "missing" : "ok",
-                plan: !planId ? "missing" : "ok"
-            }
-        });
+        return res.status(400).json({ message: "Missing required registration data or payment token" });
       }
 
-      // Map uploaded files to path strings
+      // Verify Stripe Payment
+      const isVerified = await stripeService.verifyPayment(stripePaymentId);
+      if (!isVerified) {
+          if (isTransactionStarted) await session.abortTransaction();
+          return res.status(400).json({ message: "Payment verification failed" });
+      }
+
       const documents = {};
       if (req.files) {
         Object.keys(req.files).forEach((key) => {
@@ -223,29 +204,11 @@ class OnboardingController {
           }
         });
       }
-      console.log("[Onboarding] Mapped Documents:", Object.keys(documents));
 
-      const selectedPlan = defaultPlans.find(p => p.id === planId);
       const normalizedEmail = (req.firebaseUser.email || account.email || "").trim().toLowerCase();
 
-      // 3. User Resolution
       let user = await User.findOne({ firebaseUid }).session(isTransactionStarted ? session : null);
-      console.log("[Onboarding] User lookup result:", user ? "Found" : "Not Found");
 
-      // 4. Stripe Verification (Non-blocking for Free Plan)
-      if (selectedPlan && selectedPlan.price > 0) {
-          if (!stripePaymentId) {
-              if (isTransactionStarted) await session.abortTransaction();
-              return res.status(400).json({ message: "Payment required for selected plan" });
-          }
-          const isVerified = await stripeService.verifyPayment(stripePaymentId);
-          if (!isVerified) {
-              if (isTransactionStarted) await session.abortTransaction();
-              return res.status(400).json({ message: "Payment verification failed" });
-          }
-      }
-
-      // 5. User Creation/Update
       if (!user) {
         let username = normalizedEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "");
         const existingUsername = await User.findOne({ username }).session(isTransactionStarted ? session : null);
@@ -265,18 +228,16 @@ class OnboardingController {
       user.status = "pending"; 
       user.profileCompleted = true;
       user.onboardingStep = 5;
-      user.selectedPlan = planId;
+      user.selectedPlan = "premium"; // Kept for schema compatibility
       user.emailVerified = true;
 
       await user.save({ session: isTransactionStarted ? session : null });
 
-      // 6. Initialize Wallet
       const existingWallet = await Wallet.findOne({ userId: user._id }).session(isTransactionStarted ? session : null);
       if (!existingWallet) {
         await Wallet.create([{ userId: user._id, balance: 0 }], { session: isTransactionStarted ? session : null });
       }
 
-      // 7. Profile Specifics
       const profileOptions = { upsert: true, session: isTransactionStarted ? session : null };
       if (account.role === "company") {
         await Company.findOneAndUpdate(
@@ -331,23 +292,19 @@ class OnboardingController {
         );
       }
 
-      // 8. Transaction Record
-      if (stripePaymentId && selectedPlan && selectedPlan.price > 0) {
-          await Transaction.create([{
-              fromUserId: user._id,
-              toUserId: null,
-              amount: selectedPlan.price,
-              type: "subscription",
-              status: "completed",
-              paymentMethod: "stripe",
-              description: `${selectedPlan.name} Subscription Plan`,
-              gateway: { name: "stripe", transactionId: stripePaymentId }
-          }], { session: isTransactionStarted ? session : null });
-      }
+      await Transaction.create([{
+          fromUserId: user._id,
+          toUserId: null,
+          amount: ONBOARDING_FEE,
+          type: "subscription",
+          status: "completed",
+          paymentMethod: "stripe",
+          description: `Professional Activation Fee`,
+          gateway: { name: "stripe", transactionId: stripePaymentId }
+      }], { session: isTransactionStarted ? session : null });
 
       if (isTransactionStarted) await session.commitTransaction();
 
-      // 9. Post-registration Notifications
       this.sendWelcomeNotifications(user, req.app?.get("notificationService"));
 
       return res.status(201).json({ 
@@ -358,7 +315,7 @@ class OnboardingController {
     } catch (error) {
       if (isTransactionStarted) await session.abortTransaction();
       console.error("[Onboarding] Final submit error:", error);
-      return res.status(500).json({ message: "Onboarding failed. Please try again.", error: error.message });
+      return res.status(500).json({ message: "Onboarding failed.", error: error.message });
     } finally {
       session.endSession();
     }
@@ -388,15 +345,10 @@ class OnboardingController {
 
   async createPaymentIntent(req, res) {
       try {
-          const { planId } = req.body;
-          const plan = defaultPlans.find(p => p.id === planId);
-          if (!plan || plan.price <= 0) {
-              return res.status(400).json({ message: "Invalid plan or no payment required" });
-          }
-
-          const intent = await stripeService.createPaymentIntent(plan.price, "usd", {
-              planId: plan.id,
-              planName: plan.name
+          // Always charge the fixed activation fee
+          const intent = await stripeService.createPaymentIntent(ONBOARDING_FEE, "usd", {
+              type: "onboarding_activation",
+              feeName: "Professional Activation"
           });
 
           return res.json(intent);

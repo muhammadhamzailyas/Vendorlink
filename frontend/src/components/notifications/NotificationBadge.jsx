@@ -6,6 +6,8 @@ import { formatDate } from "../../lib/dateUtils";
 import { Button, Card, Popover, PopoverContent, PopoverTrigger, ScrollArea, Separator, Badge } from "../ui";
 import { cn } from "@/lib/cn";
 
+import { useUser } from "../../context/UserContext";
+
 const priorityDot = {
   urgent: "bg-error",
   high: "bg-warning",
@@ -16,14 +18,9 @@ const priorityDot = {
 const NotificationBadge = ({ className }) => {
   const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { user } = useUser();
 
-  const getRole = () => {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "{}").role || "";
-    } catch {
-      return "";
-    }
-  };
+  const getRole = () => user?.role || "";
 
   const recent = notifications.slice(0, 5);
 

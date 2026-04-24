@@ -82,30 +82,38 @@ class PaymentController {
 
   async depositMoney(req, res) {
     try {
-      const { amount, paymentMethod } = req.body;
+      const { amount, paymentMethod } = req.body; // Amount in PKR
       const companyId = req.user.id;
 
-      if (amount < 100) {
-        return res.status(400).json({ error: "Minimum deposit is PKR 100" });
+      if (amount < 1000) {
+        return res.status(400).json({ error: "Minimum deposit is PKR 1,000" });
       }
 
+      // Stripe doesn't support PKR for PaymentIntents in many regions.
+      // Convert PKR to USD for Stripe. Fixed rate for prototype: 1 USD = 280 PKR
+      const conversionRate = 280;
+      const amountUSD = Math.round((amount / conversionRate) * 100) / 100;
+
       const stripeService = require("../services/stripeService");
-      const paymentIntent = await stripeService.createPaymentIntent(amount, "pkr", {
+      const paymentIntent = await stripeService.createPaymentIntent(amountUSD, "usd", {
         companyId,
         type: "wallet_deposit",
+        amountPKR: amount.toString(),
       });
 
       const transaction = new Transaction({
         fromUserId: companyId,
         toUserId: companyId,
-        amount,
+        amount, // Store original PKR amount
         type: "deposit",
         status: "pending",
         paymentMethod: paymentMethod || "stripe",
-        description: `Wallet deposit of PKR ${amount}`,
+        description: `Wallet deposit of PKR ${amount.toLocaleString()} (approx. $${amountUSD})`,
         gateway: {
           name: "stripe",
           paymentIntentId: paymentIntent.id,
+          currency: "USD",
+          gatewayAmount: amountUSD,
         },
       });
       await transaction.save();
@@ -116,11 +124,64 @@ class PaymentController {
         data: {
           clientSecret: paymentIntent.clientSecret,
           transactionId: transaction._id,
+          amountUSD,
         },
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  }
+
+  // ==================== STRIPE WEBHOOK ====================
+
+  async handleWebhook(req, res) {
+    const sig = req.headers["stripe-signature"];
+    const stripeService = require("../services/stripeService");
+    let event;
+
+    try {
+      event = stripeService.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+      console.error(`Webhook Error: ${err.message}`);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === "payment_intent.succeeded") {
+      const paymentIntent = event.data.object;
+      const { companyId, type, amountPKR } = paymentIntent.metadata;
+
+      if (type === "wallet_deposit") {
+        // Use the PKR amount from metadata if available, otherwise convert back
+        const conversionRate = 280;
+        const depositAmountPKR = amountPKR ? parseFloat(amountPKR) : (paymentIntent.amount / 100) * conversionRate;
+
+        try {
+          // Update transaction
+          const transaction = await Transaction.findOneAndUpdate(
+            { "gateway.paymentIntentId": paymentIntent.id },
+            { status: "completed", completedAt: new Date(), amount: depositAmountPKR },
+            { new: true }
+          );
+
+          if (transaction) {
+            // Credit wallet
+            await Wallet.findOneAndUpdate(
+              { userId: companyId },
+              { 
+                $inc: { balance: depositAmountPKR, totalDeposited: depositAmountPKR },
+                $set: { lastTransactionAt: new Date() }
+              },
+              { upsert: true }
+            );
+            console.log(`Successfully deposited PKR ${depositAmountPKR} to wallet ${companyId}`);
+          }
+        } catch (error) {
+          console.error("Error processing deposit webhook:", error);
+        }
+      }
+    }
+
+    res.json({ received: true });
   }
 
   // ==================== MAKE PAYMENT ====================
@@ -286,6 +347,38 @@ class PaymentController {
         { userId: payment.companyId, lockedBalance: { $gte: payment.amount } },
         { $inc: { lockedBalance: -payment.amount } }
       );
+
+      // Credit platform fee to admin wallet
+      if (payment.platformFee > 0) {
+        try {
+          const admin = await User.findOne({ role: "admin" });
+          if (admin) {
+            await Wallet.findOneAndUpdate(
+              { userId: admin._id },
+              { 
+                $inc: { balance: payment.platformFee, totalReceived: payment.platformFee },
+                $set: { lastTransactionAt: new Date() }
+              },
+              { upsert: true }
+            );
+            
+            // Create transaction for platform fee
+            const feeTransaction = new Transaction({
+              fromUserId: payment.companyId,
+              toUserId: admin._id,
+              amount: payment.platformFee,
+              type: "platform_fee",
+              status: "completed",
+              description: `Platform fee for payment ${payment.invoiceNumber}`,
+              paymentId: payment._id,
+              completedAt: new Date(),
+            });
+            await feeTransaction.save();
+          }
+        } catch (error) {
+          console.error("Error crediting platform fee:", error);
+        }
+      }
 
       payment.vendorConfirmed = true;
       payment.vendorConfirmedAt = new Date();

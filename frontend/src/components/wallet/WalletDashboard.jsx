@@ -31,7 +31,7 @@ const withdrawSchema = z.object({
 });
 
 const WalletDashboard = () => {
-  const { wallet, transactions, loading, refreshWallet, formatCurrency } = useWallet();
+  const { wallet, transactions, pagination, loading, refreshWallet, loadWallet, formatCurrency } = useWallet();
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
 
@@ -133,43 +133,72 @@ const WalletDashboard = () => {
                         className="border-0 bg-transparent py-16"
                         />
                     ) : (
-                        <DataTable
-                            data={transactions}
-                            sectionClassName="border-0 bg-transparent shadow-none"
-                            contentWrapperClassName="overflow-x-auto"
-                            tableClassName="w-full"
-                            showTableHeader
-                            columns={[
-                                {
-                                key: "type",
-                                label: "Type",
-                                cellClassName: "px-6 py-4",
-                                render: (txn) => (
-                                    <Badge variant={typeColors[txn.type] || "outline"} className="font-bold uppercase tracking-widest text-[9px] px-2">
-                                    {txn.type}
-                                    </Badge>
-                                ),
-                                },
-                                {
-                                key: "amount",
-                                label: "Amount",
-                                cellClassName: "px-6 py-4",
-                                render: (txn) => <span className="font-extrabold tracking-tighter text-foreground uppercase">PKR {txn.amount?.toLocaleString()}</span>,
-                                },
-                                {
-                                key: "status",
-                                label: "Status",
-                                cellClassName: "px-6 py-4",
-                                render: (txn) => <StatusChip status={txn.status} />,
-                                },
-                                {
-                                key: "createdAt",
-                                label: "Timestamp",
-                                cellClassName: "px-6 py-4",
-                                render: (txn) => <span className="text-muted-foreground font-bold text-[11px] uppercase">{dayjs(txn.createdAt).format("MMM D, YYYY")}</span>,
-                                },
-                            ]}
-                        />
+                        <>
+                            <DataTable
+                                data={transactions}
+                                sectionClassName="border-0 bg-transparent shadow-none"
+                                contentWrapperClassName="overflow-x-auto"
+                                tableClassName="w-full"
+                                showTableHeader
+                                columns={[
+                                    {
+                                    key: "type",
+                                    label: "Type",
+                                    cellClassName: "px-6 py-4",
+                                    render: (txn) => (
+                                        <Badge variant={typeColors[txn.type] || "outline"} className="font-bold uppercase tracking-widest text-[9px] px-2">
+                                        {txn.type}
+                                        </Badge>
+                                    ),
+                                    },
+                                    {
+                                    key: "amount",
+                                    label: "Amount",
+                                    cellClassName: "px-6 py-4",
+                                    render: (txn) => <span className="font-extrabold tracking-tighter text-foreground uppercase">PKR {txn.amount?.toLocaleString()}</span>,
+                                    },
+                                    {
+                                    key: "status",
+                                    label: "Status",
+                                    cellClassName: "px-6 py-4",
+                                    render: (txn) => <StatusChip status={txn.status} />,
+                                    },
+                                    {
+                                    key: "createdAt",
+                                    label: "Timestamp",
+                                    cellClassName: "px-6 py-4",
+                                    render: (txn) => <span className="text-muted-foreground font-bold text-[11px] uppercase">{dayjs(txn.createdAt).format("MMM D, YYYY")}</span>,
+                                    },
+                                ]}
+                            />
+                            {pagination.pages > 1 && (
+                                <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-muted/10">
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                        Page {pagination.currentPage} of {pagination.pages}
+                                    </span>
+                                    <div className="flex gap-2">
+                                        <Button 
+                                            variant="outline" 
+                                            size="xs" 
+                                            disabled={pagination.currentPage <= 1}
+                                            onClick={() => loadWallet(pagination.currentPage - 1)}
+                                            className="h-8 px-3 font-bold uppercase tracking-tight text-[10px]"
+                                        >
+                                            Prev
+                                        </Button>
+                                        <Button 
+                                            variant="outline" 
+                                            size="xs" 
+                                            disabled={pagination.currentPage >= pagination.pages}
+                                            onClick={() => loadWallet(pagination.currentPage + 1)}
+                                            className="h-8 px-3 font-bold uppercase tracking-tight text-[10px]"
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </Card.Content>
             </Card>

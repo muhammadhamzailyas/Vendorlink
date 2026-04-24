@@ -80,9 +80,9 @@ const EmailVerification = () => {
             </div>
         </div>
 
-        <div className="space-y-6">
-            <div className="bg-muted border border-border/50 p-5 rounded-2xl flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
+        <div class="space-y-6">
+            <div className="bg-muted border border-border/50 p-5 rounded-2xl flex items-center justify-center gap-3">
+                <CheckCircle className="h-5 w-5 text-success shrink-0" />
                 <p className="text-sm text-foreground font-medium leading-relaxed">
                     We are waiting for you to click the link in your email. This page will update automatically once verified.
                 </p>

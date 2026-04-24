@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import { Info } from "@phosphor-icons/react";
-import { Button } from "../../ui";
-import PlanCard from "./PlanCard";
+import React, { useState, useEffect } from "react";
+import { Info, CreditCard } from "@phosphor-icons/react";
+import { Button, Loader } from "../../ui";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripePaymentForm from "./StripePaymentForm";
@@ -10,112 +9,140 @@ import toastUtil from "../../../lib/toast";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const PLANS = [
-  {
-    id: "free",
-    name: "Standard",
-    price: "0",
-    description: "Perfect for getting started",
-    features: ["Standard Profile Visibility", "Up to 5 Proposals/month", "Community Support"],
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: "20",
-    description: "For professionals who want to grow",
-    features: ["Priority Profile Visibility", "Unlimited Proposals", "Direct Support", "Analytics Dashboard"],
-    featured: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "50",
-    description: "For large teams and agencies",
-    features: ["Top-tier Visibility", "Account Manager", "Custom API Access", "Bulk Task Management"],
-  },
-];
-
-const SignupStep4 = ({ plan, onPlanChange, onSubmit, onBack, loading: parentLoading }) => {
-  const [showPayment, setShowPayment] = useState(false);
+const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
   const [clientSecret, setClientSecret] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState(null);
   
-  const selectedPlan = PLANS.find(p => p.id === plan);
+  useEffect(() => {
+    let mounted = true;
+    const initializePayment = async () => {
+      try {
+        setLoading(true);
+        setInitError(null);
+        // Fixed $30 activation fee
+        const res = await onboardingService.createPaymentIntent("activation_fee");
+        if (mounted) {
+            setClientSecret(res.data.clientSecret);
+        }
+      } catch (error) {
+        console.error("Payment initialization error:", error);
+        if (mounted) {
+            setInitError(error.response?.data?.message || error.message || "Failed to initialize payment");
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
 
-  const handleContinue = async () => {
-    if (plan === "free") {
-      onSubmit(); // Proceed to review
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await onboardingService.createPaymentIntent(plan);
-      setClientSecret(res.data.clientSecret);
-      setShowPayment(true);
-    } catch (error) {
-      toastUtil.handleApiError(error, { defaultMessage: "Failed to initialize payment" });
-    } finally {
-      setLoading(false);
-    }
-  };
+    initializePayment();
+    return () => { mounted = false; };
+  }, []);
 
   const onPaymentSuccess = (stripePaymentId) => {
-    // Pass the payment ID back to parent
     onSubmit(stripePaymentId);
   };
 
-  if (showPayment && clientSecret) {
+  if (loading) {
+      return (
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+              <Loader className="h-10 w-10" />
+              <p className="text-sm font-medium text-muted-foreground animate-pulse">Initializing secure payment gateway...</p>
+          </div>
+      );
+  }
+
+  if (clientSecret) {
     return (
-      <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-        <StripePaymentForm 
-          planName={selectedPlan.name}
-          planPrice={selectedPlan.price}
-          onPaymentSuccess={onPaymentSuccess}
-          onBack={() => setShowPayment(false)}
-        />
-      </Elements>
+      <div className="space-y-6">
+        <div className="bg-muted border border-ring/20 p-4 rounded-xl flex items-start gap-3">
+            <Info className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
+            <p className="text-sm text-foreground font-medium leading-relaxed">
+                Complete your one-time activation fee to finalize your professional profile. Payment is securely processed via Stripe.
+            </p>
+        </div>
+
+        <Elements 
+          stripe={stripePromise} 
+          options={{ 
+            clientSecret, 
+            appearance: { 
+              theme: 'none',
+              variables: {
+                fontFamily: 'Inter, system-ui, sans-serif',
+                colorBackground: '#ffffff',
+                colorText: '#000000',
+                colorPrimary: '#0570de',
+                colorDanger: '#ef4444',
+                colorSuccess: '#30b130',
+                colorWarning: '#e69e2c',
+                colorTextSecondary: '#4d4d4d',
+                colorTextPlaceholder: '#757575',
+                // Component specific
+                buttonColorBackground: '#0570de',
+                buttonColorText: '#ffffff',
+                // Accessible colors
+                accessibleColorOnColorPrimary: '#ffffff',
+                accessibleColorOnColorBackground: '#000000',
+                accessibleColorOnColorSuccess: '#fff',
+                accessibleColorOnColorDanger: '#000000',
+                accessibleColorOnColorWarning: '#000000',
+                // Icon colors
+                iconColor: '#4d4d4d',
+                iconHoverColor: '#000000',
+                iconCardErrorColor: '#ef4444',
+                iconCheckmarkColor: '#0570de',
+                borderRadius: '12px',
+                spacingGridRow: '16px',
+              },
+              rules: {
+                '.Input': {
+                  border: '1px solid #e2e8f0',
+                  padding: '12px',
+                  backgroundColor: '#f8fafc', // Matching website bg-muted style as requested
+                  transition: 'all 0.2s ease',
+                },
+                '.Input:focus': {
+                  border: '1px solid #000000',
+                  boxShadow: '0 0 0 3px rgba(5, 112, 222, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.08)',
+                  backgroundColor: '#ffffff',
+                },
+                '.Label': {
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '6px',
+                  color: '#4d4d4d',
+                }
+              }
+            } 
+          }}
+        >
+          <StripePaymentForm 
+            planName="Professional Activation"
+            planPrice="30"
+            onPaymentSuccess={onPaymentSuccess}
+            onBack={onBack}
+          />
+        </Elements>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-muted border border-ring/20 p-4 rounded-xl flex items-start gap-3">
-          <Info className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
-          <p className="text-sm text-foreground font-medium leading-relaxed">
-              Note: Payment will NOT be deducted until your account is verified by our team. You can choose a plan now to set up your profile.
-          </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {PLANS.map((p) => (
-          <PlanCard 
-            key={p.id}
-            plan={p}
-            isSelected={plan === p.id}
-            onSelect={onPlanChange}
-          />
-        ))}
-      </div>
-
-      <div className="flex gap-4 pt-4 border-t border-border/50">
-        <Button variant="secondary" onClick={onBack} disabled={loading || parentLoading} size="lg" className="flex-1 font-normal">Back</Button>
-        <Button 
-            variant="primary" 
-            onClick={handleContinue} 
-            loading={loading || parentLoading}
-            disabled={!plan || loading || parentLoading}
-            size="lg"
-            className="flex-1 font-normal shadow-soft"
-        >
-          {plan === "free" ? "Continue" : "Continue to Payment"}
-        </Button>
-      </div>
+    <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+        <div className="h-16 w-16 bg-error/10 text-error rounded-full flex items-center justify-center">
+            <CreditCard size={32} weight="duotone" />
+        </div>
+        <div className="space-y-2">
+            <h3 className="text-lg font-bold">Payment Setup Failed</h3>
+            <p className="text-sm text-muted-foreground max-w-xs">{initError || "We couldn't connect to our payment provider. Please try again or check your connection."}</p>
+        </div>
+        <Button variant="secondary" onClick={() => window.location.reload()}>Retry</Button>
+        <Button variant="ghost" size="sm" onClick={onBack}>Go Back</Button>
     </div>
   );
 };
 
 export default SignupStep4;
-
-
-

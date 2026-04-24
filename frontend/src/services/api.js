@@ -9,6 +9,17 @@ const api = axios.create({
   timeout: 15000,
 });
 
+// Debug interceptor for network errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (!error.response) {
+            console.error("Network Error or DNS issue:", error.message);
+        }
+        return Promise.reject(error);
+    }
+);
+
 /**
  * Interceptor to attach Firebase ID Token to every request.
  * This is the ONLY authentication source trusted by the backend.

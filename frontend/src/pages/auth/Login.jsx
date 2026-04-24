@@ -6,7 +6,7 @@ import {
 } from "@phosphor-icons/react";
 import toastUtil from "../../lib/toast";
 import { authService } from "../../services/api";
-import { getUserData } from "../../lib/localStorage";
+import { useUser } from "../../context/UserContext";
 import AuthLayout from "../../components/auth/AuthLayout";
 import { Button, Input } from "../../components/ui";
 import { signInWithGoogle, isFirebaseConfigured, signInFirebase } from "../../lib/firebase";
@@ -17,10 +17,10 @@ const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+  const { user, setUser } = useUser();
 
   // Redirect if already logged in and profile is fetched
   useEffect(() => {
-    const user = getUserData();
     if (user && user.id && user.role && user.role !== "unassigned") {
       const roleRoutes = {
         admin: "/admin",
@@ -49,8 +49,8 @@ const Login = () => {
         throw new Error("Failed to sync user profile");
       }
 
-      // We only store the user object. Token is handled by Firebase SDK + API Interceptor.
-      localStorage.setItem("user", JSON.stringify(backendUser));
+      // We only store the user in context. Token is handled by Firebase SDK + API Interceptor.
+      setUser(backendUser);
       
       toastUtil.success("Login successful");
 
@@ -115,7 +115,7 @@ const Login = () => {
       const backendUser = loginRes.data?.user || loginRes.user;
 
       if (backendUser) {
-        localStorage.setItem("user", JSON.stringify(backendUser));
+        setUser(backendUser);
         if (backendUser.role === "unassigned") {
           navigate("/signup", { replace: true });
         } else {

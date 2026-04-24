@@ -1,24 +1,24 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignOut } from "@phosphor-icons/react";
-import { authService } from "@/services/api";
+import { useUser } from "@/context/UserContext";
+import { signOutFirebase } from "@/lib/firebase";
 import { PageTransition, Button, Card } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const user = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
-    } catch {
-      return {};
-    }
-  }, []);
+  const { user } = useUser();
 
-  const logout = () => {
-    authService.logout();
-    navigate("/login");
+  const logout = async () => {
+    try {
+      await signOutFirebase();
+      localStorage.removeItem("user");
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (

@@ -72,15 +72,17 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
         <MagnifyingGlassableSelect
           value={data.businessType}
           placeholder="Business Type"
-          searchPlaceholder="MagnifyingGlass type..."
+          searchPlaceholder="Search type..."
           options={BUSINESS_TYPE_OPTIONS}
+          error={errors.businessType}
           onChange={(val) => onChange({ businessType: val })}
         />
         <MagnifyingGlassableSelect
           value={data.industry}
           placeholder="Industry/Sector"
-          searchPlaceholder="MagnifyingGlass industry..."
+          searchPlaceholder="Search industry..."
           options={INDUSTRY_OPTIONS}
+          error={errors.industry}
           onChange={(val) => onChange({ industry: val })}
         />
     </div>
@@ -113,15 +115,17 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
         <MagnifyingGlassableSelect
           value={data.yearEstablished}
           placeholder="Year Established"
-          searchPlaceholder="MagnifyingGlass year..."
+          searchPlaceholder="Search year..."
           options={YEAR_OPTIONS}
+          error={errors.yearEstablished}
           onChange={(val) => onChange({ yearEstablished: val })}
         />
         <MagnifyingGlassableSelect
           value={data.companySize}
           placeholder="Company Size"
-          searchPlaceholder="MagnifyingGlass size..."
+          searchPlaceholder="Search size..."
           options={COMPANY_SIZE_OPTIONS}
+          error={errors.companySize}
           onChange={(val) => onChange({ companySize: val })}
         />
     </div>
@@ -134,6 +138,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
       className="min-h-24"
       placeholder="Briefly describe your company and services..."
       value={data.description}
+      error={errors.description}
       onChange={(e) => onChange({ description: e.target.value })}
     />
   </>

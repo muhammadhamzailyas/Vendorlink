@@ -31,7 +31,7 @@ import Header from "./Header";
 import FloatingChatButton from "../FloatingChatButton";
 import { Skeleton } from "../ui";
 import { cn } from "@/lib/cn";
-import { getUserData } from "../../lib/localStorage";
+import { useUser } from "../../context/UserContext";
 import { signOutFirebase } from "../../lib/firebase";
 
 const MENU_CONFIG = {
@@ -103,25 +103,20 @@ const PAGE_SUBTITLES = {
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useUser();
 
-  const [role, setRole] = useState(null);
-  const [user, setUser] = useState(null);
+  const role = user?.role;
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("sidebarCollapsed") === "true";
   });
 
   useEffect(() => {
-    const storedUser = getUserData();
-
-    if (!storedUser || !storedUser.id) {
+    if (!user) {
       navigate("/login");
       return;
     }
-
-    setUser(storedUser);
-    setRole(storedUser.role);
-  }, [navigate]);
+  }, [user, navigate]);
 
   useEffect(() => {
     if (!user || !role) return;

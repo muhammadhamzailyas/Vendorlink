@@ -14,6 +14,7 @@ import UserAvatar from "@/components/shared/UserAvatar";
 import StatusChip from "@/components/shared/StatusChip";
 import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
 import { Button, Card, Input, PageTransition, Textarea } from "@/components/ui";
+import { useUser } from "../context/UserContext";
 
 const getDefaultValues = (userType) => ({
   companyName: "",
@@ -40,7 +41,10 @@ const buildSchema = (userType) =>
     profileImage: z.string(),
   });
 
-const UserProfile = ({ userType = "company" }) => {
+const UserProfile = ({ userType: propUserType }) => {
+  const { user: contextUser, refreshUser } = useUser();
+  const userType = propUserType || contextUser?.role || "company";
+
   const [profileMeta, setProfileMeta] = useState({
     role: userType,
     status: "pending",
@@ -66,12 +70,6 @@ const UserProfile = ({ userType = "company" }) => {
     () => JSON.stringify(formData) !== JSON.stringify(initialData),
     [formData, initialData]
   );
-
-  const getCurrentUser = () => JSON.parse(localStorage.getItem("user") || "{}");
-  const getCurrentUserId = () => {
-    const localUser = getCurrentUser();
-    return localUser._id || localUser.id || "";
-  };
 
   const hydrateForm = useCallback((payload, fallbackUser) => {
     const userDataFromApi = payload.user || fallbackUser;
@@ -113,19 +111,19 @@ const UserProfile = ({ userType = "company" }) => {
 
   const fetchProfile = useCallback(async () => {
     try {
-      const localUser = getCurrentUser();
       const onboardingRes = await api.get("/onboarding/me");
-      hydrateForm(onboardingRes.data || {}, localUser);
+      hydrateForm(onboardingRes.data || {}, contextUser);
     } catch (error) {
       console.error("Error fetching profile:", error);
-      const userData = getCurrentUser();
-      hydrateForm({ user: userData }, userData);
+      hydrateForm({ user: contextUser }, contextUser);
     }
-  }, [hydrateForm]);
+  }, [hydrateForm, contextUser]);
 
   useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+    if (contextUser) {
+      fetchProfile();
+    }
+  }, [fetchProfile, contextUser]);
 
   const fileInputRef = useRef(null);
   const triggerProfileImageInput = () => fileInputRef.current?.click();
@@ -163,13 +161,8 @@ const UserProfile = ({ userType = "company" }) => {
 
   const handleSave = async (data) => {
     try {
-      const userId = getCurrentUserId();
-      if (!userId) {
-        throw new Error("User ID not found in local storage");
-      }
-
       // 1) Save user-level profile fields.
-      const userUpdateRes = await api.put("/auth/me", {
+      await api.put("/auth/me", {
         username: data.username,
         email: data.email,
         profileImage: data.profileImage || "",
@@ -199,23 +192,7 @@ const UserProfile = ({ userType = "company" }) => {
 
       await api.put("/onboarding/step2/business", rolePayload);
 
-      const localUser = getCurrentUser();
-      const backendUser = userUpdateRes?.data?.user || {};
-      const mergedUser = {
-        ...localUser,
-        ...backendUser,
-        companyName: data.companyName,
-        phone: data.phone,
-        location: data.location,
-        description: data.description,
-        profileImage: data.profileImage || "",
-        _id: localUser._id || localUser.id,
-        id: localUser.id || localUser._id,
-      };
-
-      localStorage.setItem("user", JSON.stringify(mergedUser));
-      window.dispatchEvent(new CustomEvent("userStatusUpdated", { detail: mergedUser }));
-
+      await refreshUser();
       toastUtil.success("Profile updated successfully");
       fetchProfile();
     } catch (error) {

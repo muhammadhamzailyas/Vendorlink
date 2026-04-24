@@ -53,8 +53,9 @@ const SignupStep2 = ({
                 <MagnifyingGlassableSelect
                 value={data.category}
                 placeholder="Service Category"
-                searchPlaceholder="MagnifyingGlass category..."
+                searchPlaceholder="Search category..."
                 options={VENDOR_CATEGORY_OPTIONS}
+                error={errors.category}
                 onChange={(val) => onChange({ category: val })}
                 />
                 <Input
@@ -62,6 +63,7 @@ const SignupStep2 = ({
                 type="number"
                 numericOnly
                 value={data.yearsOfExperience}
+                error={errors.yearsOfExperience}
                 onChange={(e) => onChange({ yearsOfExperience: e.target.value })}
                 />
             </div>
@@ -105,7 +107,7 @@ const SignupStep2 = ({
         )}
     </div>
 
-    <AddressFields data={data} onChange={onChange} />
+    <AddressFields data={data} errors={errors} onChange={onChange} />
 
     <div className="flex gap-4 pt-4 border-t border-border/50">
       <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>

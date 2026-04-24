@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Navigate } from "react-router-dom";
-import { getUserData } from "../../lib/localStorage";
+import { useUser } from "../../context/UserContext";
 import Navbar from "../../components/landing/Navbar";
 import HeroSection from "../../components/landing/HeroSection";
 import HowItWorksSection from "../../components/landing/HowItWorksSection";
@@ -9,7 +9,7 @@ import AboutSection from "../../components/landing/AboutSection";
 import Footer from "../../components/landing/Footer";
 
 const LandingPage = () => {
-  const user = getUserData();
+  const { user } = useUser();
 
   const scrollToSection = useCallback((id) => {
     const element = document.getElementById(id);

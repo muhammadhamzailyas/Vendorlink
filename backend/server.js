@@ -67,6 +67,13 @@ app.use(
   })
 );
 
+// Stripe Webhook MUST be before express.json()
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  require("./controller/paymentController").handleWebhook.bind(require("./controller/paymentController"))
+);
+
 const requestBodyLimit = process.env.REQUEST_BODY_LIMIT || "5mb";
 app.use(express.json({ limit: requestBodyLimit }));
 app.use(express.urlencoded({ extended: true, limit: requestBodyLimit }));

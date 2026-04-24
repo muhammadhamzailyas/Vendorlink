@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FileText as Description, CheckCircle as CheckCircle, ClipboardText as Assignment } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 import api from "@/services/api";
-import { getUserData } from "@/lib/localStorage";
+import { useUser } from "@/context/UserContext";
 import { EmptyState, PageTransition, Loader, StatCard, DataTable } from "@/components/ui";
 import FilterSearchBar from "@/components/shared/FilterSearchBar";
 import StatusChip from "@/components/shared/StatusChip";
 import UserAvatar from "@/components/shared/UserAvatar";
 
 const Contract = () => {
-  const user = getUserData();
+  const { user } = useUser();
   const role = user?.role;
 
   const [rows, setRows] = useState([]);

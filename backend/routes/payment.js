@@ -3,7 +3,11 @@ const router = express.Router();
 const paymentController = require("../controller/paymentController");
 const { authmiddleware, adminmiddleware } = require("../middleware/authmiddle");
 
-// Apply auth middleware to all routes
+// ==================== WEBHOOK ROUTE ====================
+// Must be before authmiddleware and express.json()
+router.post("/webhook", express.raw({ type: "application/json" }), paymentController.handleWebhook.bind(paymentController));
+
+// Apply auth middleware to all other routes
 router.use(authmiddleware);
 
 // ==================== WALLET ROUTES ====================

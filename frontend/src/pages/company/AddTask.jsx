@@ -23,9 +23,9 @@ const CATEGORIES = [
 ];
 
 const schema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  requirements: z.string().min(1, "Requirements are required"),
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  description: z.string().min(50, "Description must be at least 50 characters to provide enough context for vendors"),
+  requirements: z.string().min(30, "Requirements must be at least 30 characters"),
   budget: z.coerce.number().positive("Enter a valid budget greater than zero"),
   deadline: z.string().min(1, "Deadline is required"),
   category: z.string().min(1, "Category is required"),

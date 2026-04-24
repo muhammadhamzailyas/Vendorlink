@@ -28,7 +28,7 @@ import {
 } from "@/components/ui";
 
 const milestoneSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(3, "Title is too short"),
   description: z.string().optional(),
   amount: z.coerce.number().positive("Amount must be greater than zero"),
   deadline: z.string().min(1, "Deadline is required"),
@@ -36,11 +36,11 @@ const milestoneSchema = z.object({
 
 const contractFormSchema = z.object({
   proposalId: z.string().min(1, "Proposal ID is required"),
-  title: z.string().optional(),
-  description: z.string().optional(),
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  description: z.string().min(30, "Description should be at least 30 characters"),
   category: z.string().optional(),
-  scope: z.string().optional(),
-  deliverables: z.string().optional(),
+  scope: z.string().min(50, "Scope must be at least 50 characters to ensure legal clarity"),
+  deliverables: z.string().min(20, "Deliverables must be at least 20 characters"),
   projectStartDate: z.string().min(1, "Start date is required"),
   projectEndDate: z.string().optional(),
   milestones: z.array(milestoneSchema).min(1, "At least one milestone is required"),

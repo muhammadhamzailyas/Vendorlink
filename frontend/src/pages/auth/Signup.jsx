@@ -255,13 +255,33 @@ const Signup = () => {
     const isCompany = step1.role === "company";
     
     if (isCompany) {
-      if (!step2.companyName || !step2.businessType || !step2.industry || !step2.city) {
-        toastUtil.validationError("Please provide essential company details");
+      if (!step2.companyName || step2.companyName.length < 3) {
+        toastUtil.validationError("Company name must be at least 3 characters");
+        return;
+      }
+      if (!step2.businessType || !step2.industry) {
+        toastUtil.validationError("Please select business type and industry");
+        return;
+      }
+      if (!step2.city) {
+        toastUtil.validationError("City is required");
         return;
       }
     } else {
-      if (!step2.cnicNumber || !step2.category || !step2.bio || !step2.city) {
-        toastUtil.validationError("Please provide essential professional details");
+      if (!step2.cnicNumber || step2.cnicNumber.length < 15) {
+        toastUtil.validationError("Please enter a valid 13-digit CNIC");
+        return;
+      }
+      if (!step2.category) {
+        toastUtil.validationError("Please select a professional category");
+        return;
+      }
+      if (!step2.bio || step2.bio.length < 20) {
+        toastUtil.validationError("Bio should be at least 20 characters");
+        return;
+      }
+      if (!step2.city) {
+        toastUtil.validationError("City is required");
         return;
       }
     }

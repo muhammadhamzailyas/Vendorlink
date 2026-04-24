@@ -151,7 +151,7 @@ const Login = () => {
         <Input
           className="h-12 rounded-xl bg-input-bg px-4"
           placeholder="Email"
-          type="text"
+          type="email"
           name="email"
           value={formData.email}
           onChange={handleChange}

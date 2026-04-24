@@ -41,9 +41,18 @@ const SignupStep1 = ({
 
     // Password validation
     if (!isOAuth) {
-        if (data.password && data.password.length < 8) {
-            errs.password = "Password must be at least 8 characters";
+        const pass = data.password || "";
+        const hasUpper = /[A-Z]/.test(pass);
+        const hasLower = /[a-z]/.test(pass);
+        const hasNumber = /[0-9]/.test(pass);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+
+        if (pass.length < 8) {
+            errs.password = "Min 8 characters required";
+        } else if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+            errs.password = "Must include uppercase, lowercase, number & special char";
         }
+
         if (data.confirmPassword && data.password && data.password !== data.confirmPassword) {
             errs.confirmPassword = "Passwords do not match";
         }

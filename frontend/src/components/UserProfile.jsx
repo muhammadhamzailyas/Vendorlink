@@ -29,14 +29,14 @@ const getDefaultValues = (userType) => ({
 
 const buildSchema = (userType) =>
   z.object({
-    companyName: z.string().trim().min(1, "Display name is required"),
-    username: z.string().trim().min(1, "Username is required"),
+    companyName: z.string().trim().min(3, "Display name must be at least 3 characters"),
+    username: z.string().trim().min(3, "Username must be at least 3 characters"),
     email: z.string().trim().min(1, "Email is required").email("Enter a valid email address"),
-    [userType === "vendor" ? "category" : "industry"]: z.string().trim(),
+    [userType === "vendor" ? "category" : "industry"]: z.string().trim().min(2, "Please specify your field"),
     skills: z.string().trim(),
-    phone: z.string().trim(),
-    location: z.string().trim(),
-    description: z.string().trim(),
+    phone: z.string().trim().min(7, "Enter a valid phone number"),
+    location: z.string().trim().min(2, "Location is required"),
+    description: z.string().trim().min(20, "Description should be at least 20 characters for professional clarity"),
     profileImage: z.string(),
   });
 

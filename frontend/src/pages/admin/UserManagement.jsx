@@ -51,6 +51,7 @@ const UserManagement = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [actionLoading, setActionLoading] = useState({});
   const ITEMS_PER_PAGE = 10;
 
   // ... (rest of states)

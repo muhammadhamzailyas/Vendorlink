@@ -22,10 +22,17 @@ const VendorBusinessFields = ({ data, onChange }) => (
     <Input
       className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
       placeholder="National ID / Passport / CNIC Number"
-      type="number"
-      numericOnly
+      type="text"
       value={data.cnicNumber}
-      onChange={(e) => onChange({ cnicNumber: e.target.value })}
+      onChange={(e) => {
+        let val = e.target.value.replace(/\D/g, ""); // Digits only
+        if (val.length > 5 && val.length <= 12) {
+          val = val.slice(0, 5) + "-" + val.slice(5);
+        } else if (val.length > 12) {
+          val = val.slice(0, 5) + "-" + val.slice(5, 12) + "-" + val.slice(12, 13);
+        }
+        onChange({ cnicNumber: val });
+      }}
     />
     {data.vendorType === "Registered Business" && (
         <>
@@ -39,18 +46,26 @@ const VendorBusinessFields = ({ data, onChange }) => (
                 <Input
                   className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
                   placeholder="Reg Number (optional)"
-                  type="number"
-                  numericOnly
+                  type="text"
                   value={data.registrationNumber}
-                  onChange={(e) => onChange({ registrationNumber: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    onChange({ registrationNumber: val });
+                  }}
                 />
                 <Input
                   className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
                   placeholder="Tax ID / VAT / NTN (optional)"
-                  type="number"
-                  numericOnly
+                  type="text"
                   value={data.ntn}
-                  onChange={(e) => onChange({ ntn: e.target.value })}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/\D/g, "");
+                    // Format NTN for PK: XXXXXXX-X
+                    if (val.length > 7) {
+                        val = val.slice(0, 7) + "-" + val.slice(7, 8);
+                    }
+                    onChange({ ntn: val });
+                  }}
                 />
             </div>
         </>

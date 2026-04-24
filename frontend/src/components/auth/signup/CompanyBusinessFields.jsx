@@ -88,18 +88,26 @@ const CompanyBusinessFields = ({ data, onChange }) => (
         <Input
           className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
           placeholder="Registration Number / License No."
-          type="number"
-          numericOnly
+          type="text"
           value={data.registrationNumber}
-          onChange={(e) => onChange({ registrationNumber: e.target.value })}
+          onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, "");
+            onChange({ registrationNumber: val });
+          }}
         />
         <Input
           className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
           placeholder="Tax ID / VAT / NTN Number"
-          type="number"
-          numericOnly
+          type="text"
           value={data.ntn}
-          onChange={(e) => onChange({ ntn: e.target.value })}
+          onChange={(e) => {
+            let val = e.target.value.replace(/\D/g, "");
+            // Format NTN for PK: XXXXXXX-X
+            if (val.length > 7) {
+                val = val.slice(0, 7) + "-" + val.slice(7, 8);
+            }
+            onChange({ ntn: val });
+          }}
         />
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

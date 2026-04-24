@@ -98,26 +98,29 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
             </PopoverContent>
           </Popover>
 
-          {/* Numeric Input */}
+          {/* Numeric Input with Formatting */}
           <input
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none font-medium [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none font-medium"
             placeholder="Phone Number"
-            type="number"
+            type="text"
             value={phone}
-            onKeyDown={(e) => {
-              if (
-                [46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
-                (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
-                (e.keyCode >= 35 && e.keyCode <= 40)
-              ) {
-                return;
-              }
-              if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
-                e.preventDefault();
-              }
-            }}
             onChange={(e) => {
-              const val = e.target.value;
+              let val = e.target.value.replace(/\D/g, ""); // Keep only digits
+              
+              // Apply formatting based on ISO code
+              if (isoCode === "PK") {
+                if (val.length > 3) {
+                  val = val.slice(0, 3) + "-" + val.slice(3, 10);
+                }
+              } else {
+                // Generic formatting for other countries (e.g., groups of 3 or 4)
+                if (val.length > 3 && val.length <= 6) {
+                  val = val.slice(0, 3) + " " + val.slice(3);
+                } else if (val.length > 6) {
+                  val = val.slice(0, 3) + " " + val.slice(3, 6) + " " + val.slice(6, 10);
+                }
+              }
+              
               onChange({ phone: val });
             }}
           />

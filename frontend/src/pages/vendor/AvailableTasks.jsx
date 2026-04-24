@@ -14,9 +14,9 @@ import FilterSearchBar from "@/components/shared/FilterSearchBar";
 import StatusChip from "@/components/shared/StatusChip";
 
 const CATEGORY_CLASS_MAP = {
-  "web-development": "bg-foreground text-white",
-  "mobile-development": "bg-foreground-light text-white",
-  "graphic-design": "bg-foreground text-white",
+  "web-development": "bg-foreground text-background",
+  "mobile-development": "bg-foreground-light text-background",
+  "graphic-design": "bg-foreground text-background",
   "digital-marketing": "bg-muted text-foreground",
   "content-writing": "bg-muted text-foreground",
   seo: "bg-muted text-foreground",

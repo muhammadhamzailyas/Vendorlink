@@ -174,9 +174,9 @@ export const ToastViewport = () => (
         right: var(--toast-close-button-end) !important;
         top: var(--toast-close-button-top) !important;
         transform: var(--toast-close-button-transform) !important;
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
-        color: #0f172a !important;
+        background: var(--muted) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--foreground) !important;
         opacity: 1 !important;
       }
       [data-sonner-toast] [data-icon] {
@@ -184,7 +184,7 @@ export const ToastViewport = () => (
         flex-shrink: 0 !important;
       }
       [data-sonner-toast] [data-content] {
-        color: #0f172a !important;
+        color: var(--foreground) !important;
         font-weight: 600 !important;
       }
     `}} />
@@ -192,10 +192,10 @@ export const ToastViewport = () => (
       position={CONFIG.position}
       closeButton={CONFIG.closeButton}
       visibleToasts={CONFIG.limit}
-      theme="light"
+      theme="dark"
       toastOptions={{
-        className: "rounded-2xl border border-[#e2e8f0] bg-white shadow-2xl !p-4 !pl-5",
-        descriptionClassName: "text-[#64748b] text-[11px] font-medium mt-0.5",
+        className: "rounded-2xl border border-border bg-card shadow-2xl !p-4 !pl-5",
+        descriptionClassName: "text-muted-foreground text-[11px] font-medium mt-0.5",
       }}
     />
   </>

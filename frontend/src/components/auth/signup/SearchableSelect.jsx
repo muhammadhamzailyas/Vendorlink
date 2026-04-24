@@ -38,7 +38,7 @@ const MagnifyingGlassableSelect = ({
           <CaretDown className={cn("h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform", open && "rotate-180")} />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-white border-border shadow-xl rounded-xl overflow-hidden" align="start">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover border-border shadow-xl rounded-xl overflow-hidden" align="start">
         <div className="p-2 border-b border-border/50 bg-muted/30">
           <div className="relative">
             <MagnifyingGlass className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -64,7 +64,7 @@ const MagnifyingGlassableSelect = ({
                 }}
                 className={cn(
                   "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all text-left",
-                  value === opt.value ? "bg-foreground text-foreground" : "text-foreground hover:bg-muted"
+                  value === opt.value ? "bg-foreground text-background" : "text-foreground hover:bg-muted"
                 )}
               >
                 <span>{opt.label}</span>

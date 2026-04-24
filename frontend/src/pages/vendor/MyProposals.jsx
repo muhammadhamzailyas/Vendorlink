@@ -192,7 +192,7 @@ const MyProposals = () => {
                 label: "Contracts",
                 icon: <Briefcase className="h-3.5 w-3.5" />,
                 onClick: () => navigate("/vendor/contracts"),
-                className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-white hover:bg-foreground-light",
+                className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background hover:opacity-90",
               });
             }
 

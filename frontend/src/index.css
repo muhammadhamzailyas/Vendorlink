@@ -7,6 +7,7 @@
 
   --color-background: theme(colors.neutral.950);
   --color-foreground: theme(colors.neutral.200);
+  --color-foreground-light: theme(colors.neutral.300);
 
   --color-card: theme(colors.neutral.900);
   --color-card-foreground: theme(colors.neutral.200);

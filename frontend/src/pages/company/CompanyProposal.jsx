@@ -219,7 +219,7 @@ const CompanyProposals = () => {
                       label: "Accept",
                       icon: <CheckCircle className="h-3.5 w-3.5" />,
                       onClick: (row) => handleOpenDialog(row, "accept"),
-                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-white hover:bg-foreground-light",
+                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background hover:opacity-90",
                     },
                     {
                       key: "reject",
@@ -238,7 +238,7 @@ const CompanyProposals = () => {
                       label: "Contract",
                       icon: <Contract className="h-3.5 w-3.5" />,
                       onClick: (row) => navigate(`/company/contracts/create?proposalId=${row._id}`),
-                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-white hover:bg-foreground-light",
+                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background hover:opacity-90",
                     },
                     {
                       key: "chat",

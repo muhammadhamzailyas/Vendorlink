@@ -165,7 +165,7 @@ const ChatPage = () => {
                   <UserAvatar user={getOtherUser(selectedConversation)} size="sm" />
                   <div>
                     <p className="text-sm font-bold text-foreground uppercase tracking-tight">{getOtherUser(selectedConversation).username}</p>
-                    {otherUserTyping ? <p className="text-[10px] font-bold text-foreground animate-pulse uppercase tracking-widest">typing...</p> : null}
+                    {otherUserTyping ? <p className="text-[10px] font-bold text-success animate-pulse uppercase tracking-widest">typing...</p> : null}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ const ChatPage = () => {
                         <div key={msg._id || i} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                             <div className={`max-w-[85%] rounded-2xl border px-4 py-2.5 shadow-soft ${
                                 isMine
-                                ? "bg-foreground text-white border-transparent rounded-tr-none"
+                                ? "bg-foreground text-background border-transparent rounded-tr-none"
                                 : "border-border/50 bg-card text-foreground rounded-tl-none"
                             }`}>
                             <p className="whitespace-pre-wrap text-[13px] font-medium leading-relaxed">{msg.message}</p>

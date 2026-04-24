@@ -83,30 +83,64 @@ const Signup = () => {
     }
   });
 
-  // Resume detection: ONLY if coming from verification page with explicit state
+  // Draft Persistence & Resume Detection
   useEffect(() => {
-    const resumeOnboarding = async () => {
+    const loadDraft = async () => {
+      // 1. Try to load from localStorage first
+      const savedDraft = localStorage.getItem("vendorlink_signup_draft");
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          setFormData(prev => ({
+            ...prev,
+            ...parsed,
+            // Ensure step1 sensitive fields aren't stale
+            step1: { ...prev.step1, ...parsed.step1, password: "", confirmPassword: "" }
+          }));
+        } catch (e) {
+          console.warn("Failed to parse signup draft");
+        }
+      }
+
+      // 2. Handle explicit resume from Verification page
       const { auth } = await import("../../lib/firebase");
       const user = auth.currentUser;
       const stateResume = location.state?.resumeStep;
       const stateVerified = location.state?.isVerified;
 
-      // Only auto-forward if returning from verification page
-      if (stateResume && stateVerified && user) {
+      if (stateResume && stateVerified) {
           setStep(stateResume);
+          // If we just verified, update local state
+          setFormData(prev => ({
+            ...prev,
+            step1: { ...prev.step1, emailVerified: true }
+          }));
           return;
       }
-      
-      // We removed "Priority 2" (automatic detection on mount).
-      // This ensures that on refresh or close/open, the user starts at Step 1 with empty fields.
+
+      // 3. Auto-resume if already verified but didn't finish
+      if (user && user.emailVerified && step === 1) {
+          setStep(2);
+      }
     };
     
-    // Clear any residual draft data on mount
-    localStorage.removeItem("vendorlink_signup_draft");
-    sessionStorage.removeItem("vendorlink_signup_draft");
-
-    resumeOnboarding();
+    loadDraft();
   }, [location.state]);
+
+  // Auto-save draft on data changes
+  useEffect(() => {
+    if (step > 1) {
+        const draftToSave = { ...formData };
+        delete draftToSave.step1.password;
+        delete draftToSave.step1.confirmPassword;
+        localStorage.setItem("vendorlink_signup_draft", JSON.stringify(draftToSave));
+    }
+  }, [formData, step]);
+
+  const handleStartOver = () => {
+    localStorage.removeItem("vendorlink_signup_draft");
+    window.location.reload();
+  };
 
   const nextStep = () => setStep((prev) => Math.min(TOTAL_STEPS, prev + 1));
   const prevStep = () => setStep((prev) => Math.max(1, prev - 1));
@@ -151,28 +185,18 @@ const Signup = () => {
     try {
       const { auth, createFirebaseUser, signInFirebase } = await import("../../lib/firebase");
       let firebaseUser = auth.currentUser;
-      let isExistingUser = false;
 
-      // 1. If not logged in, or logged in as a different person, try to create or sign in
+      // 1. Create or Identify Firebase User
       if (!firebaseUser || firebaseUser.email !== step1.email) {
         try {
-          // Attempt A: Create new
           firebaseUser = await createFirebaseUser(step1.email, step1.password);
         } catch (error) {
-          console.debug("[Signup] Create attempt failed:", error.code);
-          
           if (error.code === "auth/email-already-in-use") {
             try {
-              // Attempt B: Seamless login
               firebaseUser = await signInFirebase(step1.email, step1.password);
-              isExistingUser = true;
             } catch (loginError) {
-              console.error("[Signup] Seamless login failed error code:", loginError.code);
-              
               if (loginError.code === "auth/wrong-password" || loginError.code === "auth/invalid-credential") {
                 throw new Error("EMAIL_EXISTS_WRONG_PASSWORD");
-              } else if (loginError.code === "auth/account-exists-with-different-credential") {
-                throw new Error("EMAIL_EXISTS_DIFFERENT_METHOD");
               } else {
                 throw loginError;
               }
@@ -181,72 +205,31 @@ const Signup = () => {
             throw error;
           }
         }
-      } else {
-        // Already logged in as this email, just continue
-        isExistingUser = true;
       }
 
       if (!firebaseUser) throw new Error("Authentication failed");
 
-      const idToken = await firebaseUser.getIdToken(true);
-
-      // Step 2: Provision/Sync Mongo profile record
-      const loginRes = await authService.firebaseLogin(idToken);
-      const backendUser = loginRes.data?.user || loginRes.user;
-
-      // Merge backend data with what the user just typed in the form
-      const syncedUser = {
-        ...backendUser,
-        fullName: step1.fullName,
-        role: step1.role,
-        phone: `${step1.countryCode}${step1.phone}`
-      };
-
-      localStorage.setItem("user", JSON.stringify(syncedUser));
-
-      // Verification Enforcement: Redirect if email is not verified
+      // 2. Email Verification Enforcement
       if (!firebaseUser.emailVerified) {
-        toastUtil.info("Account created. Please verify your email to continue.");
-        navigate("/verify-email", { 
-          state: { 
-            email: firebaseUser.email, 
-          } 
-        });
+        const { sendEmailVerification } = await import("firebase/auth");
+        await sendEmailVerification(firebaseUser);
+        toastUtil.info("Verification link sent. Please verify your email to continue.");
+        navigate("/verify-email", { state: { email: firebaseUser.email } });
         return;
       }
 
-      if (isExistingUser) {
-        toastUtil.success("Welcome back! Resuming your application.");
-        if (backendUser?.role && backendUser.role !== "unassigned") {
-            navigate("/login");
-            return;
-        }
-      } else {
-        toastUtil.success("Account created! Continue onboarding.");
-      }
-
+      // If already verified, move to next step immediately
+      toastUtil.success("Email verified. Continuing onboarding.");
       setFormData(prev => ({
         ...prev,
         step1: { ...prev.step1, emailVerified: true },
       }));
-      
       nextStep();
     } catch (error) {
-      console.error("Step 1 Submission Error:", error);
-      let msg = "Signup failed. Please try again.";
-      
-      if (error.message === "EMAIL_EXISTS_WRONG_PASSWORD") {
-        msg = "This email is already registered. Please check your password or use Google if you signed up with that.";
-      } else if (error.message === "EMAIL_EXISTS_DIFFERENT_METHOD") {
-        msg = "This email was registered using a different method (like Google). Please click 'Continue with Google' above.";
-      } else if (error.code === "auth/invalid-email") {
-        msg = "Invalid email address.";
-      } else if (error.code === "auth/weak-password") {
-        msg = "Password is too weak (min 6 characters).";
-      } else if (error.code === "auth/too-many-requests") {
-        msg = "Too many failed attempts. Please try again later or reset your password.";
-      }
-      
+      console.error("Step 1 Error:", error);
+      let msg = error.message === "EMAIL_EXISTS_WRONG_PASSWORD" 
+        ? "This email is already registered with a different password."
+        : "Signup failed. Please check your connection.";
       toastUtil.error(msg);
     } finally {
       setLoading(false);

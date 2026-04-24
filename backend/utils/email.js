@@ -24,7 +24,7 @@ const sendApprovalEmail = async (userEmail, companyName) => {
 
     const mailOptions = {
       from:
-        process.env.EMAIL_USER || '"Vendor System" <noreply@vendorsystem.com>',
+        process.env.EMAIL_USER || '"VendorLink" <support.vendorlink@gmail.com>',
       to: userEmail,
       subject: "Account Approved - Vendor Collaboration System",
       html: `
@@ -56,7 +56,7 @@ const sendRejectionEmail = async (userEmail, companyName) => {
 
     const mailOptions = {
       from:
-        process.env.EMAIL_USER || '"Vendor System" <noreply@vendorsystem.com>',
+        process.env.EMAIL_USER || '"VendorLink" <support.vendorlink@gmail.com>',
       to: userEmail,
       subject: "Application Status - Vendor Collaboration System",
       html: `
@@ -88,7 +88,7 @@ const sendPendingReviewEmail = async (userEmail, displayName) => {
 
     const mailOptions = {
       from:
-        process.env.EMAIL_USER || '"Vendor System" <noreply@vendorsystem.com>',
+        process.env.EMAIL_USER || '"VendorLink" <support.vendorlink@gmail.com>',
       to: userEmail,
       subject: "Account Submitted - Pending Review",
       html: `

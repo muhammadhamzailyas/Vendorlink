@@ -37,7 +37,7 @@ class EmailService {
     if (!this.transporter) return { success: false, error: "Transporter not ready" };
     try {
         const info = await this.transporter.sendMail({
-            from: process.env.EMAIL_FROM || '"VendorLink" <noreply@vendorlink.com>',
+            from: process.env.EMAIL_FROM || '"VendorLink" <support.vendorlink@gmail.com>',
             to,
             subject,
             html

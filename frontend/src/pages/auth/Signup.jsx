@@ -204,13 +204,12 @@ const Signup = () => {
 
       localStorage.setItem("user", JSON.stringify(syncedUser));
 
-      // Verification Enforcement: If email/password signup and not verified, redirect
+      // Verification Enforcement: Redirect if email is not verified
       if (!firebaseUser.emailVerified) {
         toastUtil.info("Account created. Please verify your email to continue.");
-        navigate("/verify-pending", { 
+        navigate("/verify-email", { 
           state: { 
             email: firebaseUser.email, 
-            phone: `${step1.countryCode}${step1.phone}` 
           } 
         });
         return;

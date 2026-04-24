@@ -98,20 +98,20 @@ const ChatPage = () => {
     <PageTransition>
     <div className="space-y-8 h-full">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Messages</h2>
-        <p className="text-sm text-[var(--muted-foreground)]">Collaborate with stakeholders in real-time on task delivery and contract context.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Messages</h2>
+        <p className="text-sm text-muted-foreground">Collaborate with stakeholders in real-time on task delivery and contract context.</p>
       </div>
 
       <div className="grid h-[calc(100vh-16rem)] grid-cols-1 gap-4 md:grid-cols-[20rem_minmax(0,1fr)]">
         <Card className={`${selectedConversation ? "hidden md:flex" : "flex"} flex-col overflow-hidden`}>
-          <Card.Header className="pb-3 border-b border-[var(--border)]/50">
+          <Card.Header className="pb-3 border-b border-border/50">
             <Card.Title className="text-sm font-bold uppercase tracking-tight">Conversations</Card.Title>
             <Card.Description className="text-xs">All active task and contract threads.</Card.Description>
           </Card.Header>
           <ScrollArea className="flex-1">
             <Card.Content className="px-0 py-0">
                 {loadingConversations ? (
-                <div className="flex justify-center py-8"><CircleNotch className="w-6 h-6 animate-spin text-[var(--muted-foreground)]/70" /></div>
+                <div className="flex justify-center py-8"><CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" /></div>
                 ) : conversations.length === 0 ? (
                 <EmptyState icon={ChatCircleText} title="No conversations yet" className="border-0 bg-transparent py-8 shadow-none" />
                 ) : (
@@ -122,19 +122,19 @@ const ChatPage = () => {
                     <div key={conv._id}>
                         <div
                             onClick={() => handleSelectConversation(conv)}
-                            className={`flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-[var(--muted)]/50 ${isSelected ? "bg-[var(--muted)]" : ""}`}
+                            className={`flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-muted/50 ${isSelected ? "bg-muted" : ""}`}
                         >
                             <UserAvatar user={other} size="md" />
                             <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-[var(--foreground)]">{other.username}</p>
-                            <p className="truncate text-xs text-[var(--muted-foreground)] font-medium">{conv.lastMessage || "No messages"}</p>
+                            <p className="truncate text-sm font-bold text-foreground">{other.username}</p>
+                            <p className="truncate text-xs text-muted-foreground font-medium">{conv.lastMessage || "No messages"}</p>
                             </div>
                             <Button
                             type="button"
                             variant="ghost"
                             size="xs"
                             onClick={(e) => handleDeleteConversation(conv._id, e)}
-                            className="h-8 w-8 p-0 text-[var(--muted-foreground)]/40 hover:text-danger hover:bg-danger-surface"
+                            className="h-8 w-8 p-0 text-muted-foreground/40 hover:text-danger hover:bg-danger-surface"
                             >
                             <Trash className="w-4 h-4" />
                             </Button>
@@ -151,33 +151,33 @@ const ChatPage = () => {
         <Card className={`${selectedConversation ? "flex" : "hidden md:flex"} flex-col overflow-hidden shadow-soft`}>
           {selectedConversation ? (
             <>
-              <Card.Header className="gap-3 border-b border-[var(--border)]/50 sm:flex-row sm:items-center sm:justify-between py-3 px-5">
+              <Card.Header className="gap-3 border-b border-border/50 sm:flex-row sm:items-center sm:justify-between py-3 px-5">
                 <div className="flex items-center gap-3">
                   <Button
                     type="button"
                     variant="ghost"
                     size="xs"
                     onClick={() => setSelectedConversation(null)}
-                    className="h-8 w-8 p-0 text-[var(--muted-foreground)] md:hidden"
+                    className="h-8 w-8 p-0 text-muted-foreground md:hidden"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </Button>
                   <UserAvatar user={getOtherUser(selectedConversation)} size="sm" />
                   <div>
-                    <p className="text-sm font-bold text-[var(--foreground)] uppercase tracking-tight">{getOtherUser(selectedConversation).username}</p>
-                    {otherUserTyping ? <p className="text-[10px] font-bold text-[var(--foreground)] animate-pulse uppercase tracking-widest">typing...</p> : null}
+                    <p className="text-sm font-bold text-foreground uppercase tracking-tight">{getOtherUser(selectedConversation).username}</p>
+                    {otherUserTyping ? <p className="text-[10px] font-bold text-foreground animate-pulse uppercase tracking-widest">typing...</p> : null}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className={`h-2 w-2 rounded-full ${isConnected ? "bg-success" : "bg-danger"}`} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)]">{isConnected ? "Connected" : "Offline"}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{isConnected ? "Connected" : "Offline"}</span>
                 </div>
               </Card.Header>
 
-              <ScrollArea className="flex-1 bg-[var(--muted)]/20 px-5">
+              <ScrollArea className="flex-1 bg-muted/20 px-5">
                 <Card.Content className="space-y-4 py-6 px-0 border-none shadow-none bg-transparent">
                     {messagesLoading ? (
-                    <div className="flex justify-center py-8"><CircleNotch className="w-6 h-6 animate-spin text-[var(--muted-foreground)]/70" /></div>
+                    <div className="flex justify-center py-8"><CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" /></div>
                     ) : messages.length === 0 ? (
                     <EmptyState
                         icon={ChatCircleText}
@@ -192,11 +192,11 @@ const ChatPage = () => {
                         <div key={msg._id || i} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                             <div className={`max-w-[85%] rounded-2xl border px-4 py-2.5 shadow-soft ${
                                 isMine
-                                ? "bg-[var(--foreground)] text-white border-transparent rounded-tr-none"
-                                : "border-[var(--border)]/50 bg-[var(--card)] text-[var(--foreground)] rounded-tl-none"
+                                ? "bg-foreground text-white border-transparent rounded-tr-none"
+                                : "border-border/50 bg-card text-foreground rounded-tl-none"
                             }`}>
                             <p className="whitespace-pre-wrap text-[13px] font-medium leading-relaxed">{msg.message}</p>
-                            <p className={`mt-1 text-[9px] font-bold uppercase tracking-tight text-right ${isMine ? "text-white/60" : "text-[var(--muted-foreground)]/60"}`}>
+                            <p className={`mt-1 text-[9px] font-bold uppercase tracking-tight text-right ${isMine ? "text-white/60" : "text-muted-foreground/60"}`}>
                                 {msg.createdAt ? formatDate(msg.createdAt) : ""}
                             </p>
                             </div>
@@ -209,7 +209,7 @@ const ChatPage = () => {
               </ScrollArea>
 
               <Separator />
-              <Card.Footer className="p-4 bg-[var(--muted)]/30">
+              <Card.Footer className="p-4 bg-muted/30">
                 <form 
                     onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                     className="flex w-full items-center gap-3"
@@ -222,7 +222,7 @@ const ChatPage = () => {
                       sendTyping();
                     }}
                     placeholder="Type your message..."
-                    className="flex-1 rounded-xl bg-[var(--card)] border-[var(--border)]/50 h-11"
+                    className="flex-1 rounded-xl bg-card border-border/50 h-11"
                   />
                   <Button
                     type="submit"
@@ -235,7 +235,7 @@ const ChatPage = () => {
               </Card.Footer>
             </>
           ) : (
-            <Card.Content className="flex flex-1 items-center justify-center bg-[var(--muted)]/10 px-0">
+            <Card.Content className="flex flex-1 items-center justify-center bg-muted/10 px-0">
               <EmptyState
                 icon={ChatCircleText}
                 title="Select a conversation"
@@ -252,3 +252,6 @@ const ChatPage = () => {
 };
 
 export default ChatPage;
+
+
+

@@ -14,14 +14,14 @@ import FilterSearchBar from "@/components/shared/FilterSearchBar";
 import StatusChip from "@/components/shared/StatusChip";
 
 const CATEGORY_CLASS_MAP = {
-  "web-development": "bg-[var(--foreground)] text-white",
-  "mobile-development": "bg-[var(--foreground)]-light text-white",
-  "graphic-design": "bg-[var(--foreground)] text-white",
-  "digital-marketing": "bg-[var(--muted)] text-[var(--foreground)]",
-  "content-writing": "bg-[var(--muted)] text-[var(--foreground)]",
-  seo: "bg-[var(--muted)] text-[var(--foreground)]",
-  "data-entry": "bg-[var(--muted)] text-[var(--foreground)]",
-  other: "bg-[var(--muted)] text-[var(--foreground)]/80",
+  "web-development": "bg-foreground text-white",
+  "mobile-development": "bg-foreground-light text-white",
+  "graphic-design": "bg-foreground text-white",
+  "digital-marketing": "bg-muted text-foreground",
+  "content-writing": "bg-muted text-foreground",
+  seo: "bg-muted text-foreground",
+  "data-entry": "bg-muted text-foreground",
+  other: "bg-muted text-foreground/80",
 };
 
 const formatCategoryLabel = (category) =>
@@ -32,11 +32,11 @@ const formatCategoryLabel = (category) =>
 
 const getCategoryClassName = (category) => {
   const normalized = String(category || "other").trim().toLowerCase();
-  return CATEGORY_CLASS_MAP[normalized] || "bg-[var(--muted)] text-[var(--foreground)]/80";
+  return CATEGORY_CLASS_MAP[normalized] || "bg-muted text-foreground/80";
 };
 
 const TaskCard = ({ task, onView }) => (
-  <Card className="overflow-hidden rounded-2xl border-[var(--border)]/80 bg-[var(--card)]/95 shadow-[var(--shadow-soft)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+  <Card className="overflow-hidden rounded-2xl border-border/80 bg-card/95 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
     <Card.Content className="space-y-4 p-5">
       <div className="flex items-start justify-between gap-3">
         <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getCategoryClassName(task.category)}`}>
@@ -46,25 +46,25 @@ const TaskCard = ({ task, onView }) => (
       </div>
 
       <div className="space-y-2">
-        <h3 className="line-clamp-2 text-lg font-semibold text-[var(--foreground)]">{task.title || "Untitled task"}</h3>
-        <p className="line-clamp-3 text-sm leading-6 text-[var(--muted-foreground)]">
+        <h3 className="line-clamp-2 text-lg font-semibold text-foreground">{task.title || "Untitled task"}</h3>
+        <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
           {task.description || "No description provided."}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 text-sm text-[var(--muted-foreground)] sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 text-sm text-muted-foreground sm:grid-cols-2">
         <div className="flex items-center gap-2">
-          <AttachMoney className="h-4 w-4 text-[var(--muted-foreground)]" />
-          <span className="font-medium text-[var(--foreground)]">${task.budget?.toLocaleString() || 0}</span>
+          <AttachMoney className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium text-foreground">${task.budget?.toLocaleString() || 0}</span>
         </div>
         <div className="flex items-center gap-2">
-          <DateRange className="h-4 w-4 text-[var(--muted-foreground)]" />
+          <DateRange className="h-4 w-4 text-muted-foreground" />
           <span>{task.deadline ? dayjs(task.deadline).format("MMM DD, YYYY") : "No deadline"}</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
-        <Business className="h-4 w-4 text-[var(--muted-foreground)]" />
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Business className="h-4 w-4 text-muted-foreground" />
         <span className="truncate">{task.companyId?.companyName || "Company"}</span>
       </div>
 
@@ -154,3 +154,6 @@ const AvailableTasks = () => {
 };
 
 export default AvailableTasks;
+
+
+

@@ -75,27 +75,27 @@ const EmailVerification = () => {
     >
       <div className="space-y-8">
         <div className="flex justify-center">
-            <div className="h-20 w-20 bg-[var(--muted)] text-[var(--foreground)] rounded-full flex items-center justify-center">
+            <div className="h-20 w-20 bg-muted text-foreground rounded-full flex items-center justify-center">
                 <Envelope size={40} />
             </div>
         </div>
 
         <div className="space-y-6">
-            <div className="bg-[var(--muted)] border border-[var(--border)]/50 p-5 rounded-2xl flex items-start gap-3">
+            <div className="bg-muted border border-border/50 p-5 rounded-2xl flex items-start gap-3">
                 <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
-                <p className="text-sm text-[var(--foreground)] font-medium leading-relaxed">
+                <p className="text-sm text-foreground font-medium leading-relaxed">
                     We are waiting for you to click the link in your email. This page will update automatically once verified.
                 </p>
             </div>
         </div>
 
-        <div className="flex flex-col items-center gap-4 pt-4 border-t border-[var(--border)]/40">
+        <div className="flex flex-col items-center gap-4 pt-4 border-t border-border/40">
             <div className="flex items-center gap-2">
-                <p className="text-sm text-[var(--muted-foreground)] font-medium">Didn't receive it?</p>
+                <p className="text-sm text-muted-foreground font-medium">Didn't receive it?</p>
                 <button
                   onClick={handleResendEmail}
                   disabled={loading || timer > 0}
-                  className="text-sm font-bold text-[var(--foreground)] disabled:opacity-50 cursor-pointer"
+                  className="text-sm font-bold text-foreground disabled:opacity-50 cursor-pointer"
                 >
                   {timer > 0 ? `Resend in ${timer}s` : "Resend Now"}
                 </button>
@@ -107,3 +107,6 @@ const EmailVerification = () => {
 };
 
 export default EmailVerification;
+
+
+

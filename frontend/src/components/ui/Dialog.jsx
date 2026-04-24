@@ -30,7 +30,7 @@ const DialogContent = React.forwardRef(({ className, children, onX, ...props }, 
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-[var(--border)]/50 bg-[var(--card)] shadow-soft sm:max-w-lg animate-in fade-in zoom-in-95 duration-200",
+        "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/50 bg-card shadow-soft sm:max-w-lg animate-in fade-in zoom-in-95 duration-200",
         className
       )}
       {...props}
@@ -56,7 +56,7 @@ const DialogHeader = ({
 }) => (
   <div
     className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left border-b border-[var(--border)]/50 px-6 py-5 bg-[var(--muted)]/30",
+      "flex flex-col space-y-1.5 text-center sm:text-left border-b border-border/50 px-6 py-5 bg-muted/30",
       className
     )}
     {...props}
@@ -70,7 +70,7 @@ const DialogFooter = ({
 }) => (
   <div
     className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 border-t border-[var(--border)]/50 px-6 py-4 bg-[var(--muted)]/30",
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 border-t border-border/50 px-6 py-4 bg-muted/30",
       className
     )}
     {...props}
@@ -82,7 +82,7 @@ const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-base font-extrabold tracking-tight text-[var(--foreground)] uppercase",
+      "text-base font-extrabold tracking-tight text-foreground uppercase",
       className
     )}
     {...props}
@@ -93,7 +93,7 @@ DialogTitle.displayName = DialogPrimitive.Title.displayName;
 const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm leading-relaxed text-[var(--muted-foreground)]", className)}
+    className={cn("text-sm leading-relaxed text-muted-foreground", className)}
     {...props}
   />
 ));
@@ -137,3 +137,6 @@ export {
 };
 
 export default Dialog;
+
+
+

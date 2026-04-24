@@ -50,27 +50,27 @@ const VendorProgress = () => {
               <StaggerItem key={task.taskId}>
                 <Card
                   onClick={() => navigate(`/vendor/task/${task.taskId}/progress`)}
-                  className="p-4 cursor-pointer transition-colors hover:bg-[var(--muted)]"
+                  className="p-4 cursor-pointer transition-colors hover:bg-muted"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="text-sm font-semibold text-[var(--foreground)]">{task.taskTitle}</h3>
-                      <p className="text-xs text-[var(--muted-foreground)]">{task.companyName} &middot; {task.category}</p>
+                      <h3 className="text-sm font-semibold text-foreground">{task.taskTitle}</h3>
+                      <p className="text-xs text-muted-foreground">{task.companyName} &middot; {task.category}</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-[var(--muted-foreground)]/70" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground/70" />
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <div className="h-2 rounded-full bg-[var(--muted)] overflow-hidden">
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-[var(--foreground)] transition-all"
+                          className="h-full rounded-full bg-foreground transition-all"
                           style={{ width: `${task.progress}%` }}
                         />
                       </div>
                     </div>
-                    <span className="text-sm font-semibold text-[var(--foreground)]/80">{task.progress}%</span>
+                    <span className="text-sm font-semibold text-foreground/80">{task.progress}%</span>
                   </div>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-[var(--muted-foreground)]">
+                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                     <span>Status: {task.currentStatus}</span>
                     <span>Budget: PKR {(task.budget || 0).toLocaleString()}</span>
                     {task.deadline && <span>Due: {formatDate(task.deadline)}</span>}
@@ -86,3 +86,6 @@ const VendorProgress = () => {
 };
 
 export default VendorProgress;
+
+
+

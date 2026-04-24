@@ -17,8 +17,8 @@ export function DatePicker({ value, onChange, placeholder = "Pick a date", class
         <Button
           variant="secondary"
           className={cn(
-            "w-full justify-start text-left font-normal h-11 rounded-xl border-[var(--input-border)] bg-[var(--input-bg)]",
-            !value && "text-[var(--muted-foreground)]",
+            "w-full justify-start text-left font-normal h-11 rounded-xl border-input-border bg-input-bg",
+            !value && "text-muted-foreground",
             className
           )}
           disabled={disabled}
@@ -38,3 +38,6 @@ export function DatePicker({ value, onChange, placeholder = "Pick a date", class
     </Popover>
   );
 }
+
+
+

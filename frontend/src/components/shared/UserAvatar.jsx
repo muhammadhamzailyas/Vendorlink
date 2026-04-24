@@ -52,7 +52,7 @@ const UserAvatar = ({ user, name, size = "md", className = "" }) => {
   const sizeClass = sizeClassMap[size] || sizeClassMap.md;
 
   return (
-    <Avatar className={cn(sizeClass, "rounded-xl border border-[var(--border)]/50 shadow-soft", className)}>
+    <Avatar className={cn(sizeClass, "rounded-xl border border-border/50 shadow-soft", className)}>
       {avatarSrc && (
         <AvatarImage 
           src={avatarSrc} 
@@ -60,7 +60,7 @@ const UserAvatar = ({ user, name, size = "md", className = "" }) => {
           className="object-cover"
         />
       )}
-      <AvatarFallback className="rounded-xl bg-[var(--muted)] text-[var(--foreground)] font-bold">
+      <AvatarFallback className="rounded-xl bg-muted text-foreground font-bold">
         {initials}
       </AvatarFallback>
     </Avatar>
@@ -68,3 +68,6 @@ const UserAvatar = ({ user, name, size = "md", className = "" }) => {
 };
 
 export default UserAvatar;
+
+
+

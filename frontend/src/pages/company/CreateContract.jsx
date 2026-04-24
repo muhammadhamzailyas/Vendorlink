@@ -178,8 +178,8 @@ const CreateContract = () => {
       <div className="mx-auto max-w-5xl space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Create Contract</h2>
-            <p className="text-sm text-[var(--muted-foreground)]">Define scope, milestones, and payment terms before issuing.</p>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Create Contract</h2>
+            <p className="text-sm text-muted-foreground">Define scope, milestones, and payment terms before issuing.</p>
           </div>
           <Button type="button" variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -328,11 +328,11 @@ const CreateContract = () => {
             <FormSection
               title="Milestones & Budget"
               description="Break work into milestones with amount and deadline expectations."
-              actions={<span className="text-xs font-bold uppercase tracking-tight text-[var(--muted-foreground)]">Total: PKR {totalBudget.toLocaleString()}</span>}
+              actions={<span className="text-xs font-bold uppercase tracking-tight text-muted-foreground">Total: PKR {totalBudget.toLocaleString()}</span>}
             >
               {fields.map((field, index) => (
-                <Card key={field.id} className="border-dashed shadow-none bg-[var(--card)]/50">
-                  <div className="p-4 border-b border-[var(--border)]/50 flex items-center justify-between">
+                <Card key={field.id} className="border-dashed shadow-none bg-card/50">
+                  <div className="p-4 border-b border-border/50 flex items-center justify-between">
                     <h4 className="text-xs font-bold uppercase tracking-tight">Milestone {index + 1}</h4>
                     {fields.length > 1 && (
                       <Button
@@ -603,7 +603,7 @@ const CreateContract = () => {
                 control={control}
                 name="confidentialityClause"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-3 transition-colors hover:bg-[var(--muted)]/50">
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-xl border border-border bg-card px-3 py-3 transition-colors hover:bg-muted/50">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -634,7 +634,7 @@ const CreateContract = () => {
                 </FormActionRow>
               )}
             >
-              <p className="text-xs font-medium text-[var(--muted-foreground)]">
+              <p className="text-xs font-medium text-muted-foreground">
                 Ensure payment terms, milestones, and legal clauses match the proposal before submission.
               </p>
             </FormSection>
@@ -646,3 +646,6 @@ const CreateContract = () => {
 };
 
 export default CreateContract;
+
+
+

@@ -7,10 +7,10 @@ const Checkbox = React.forwardRef(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      "peer h-4 w-4 shrink-0 rounded-sm border border-[var(--input-border)] bg-[var(--background)] shadow-xs transition-colors cursor-pointer",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+      "peer h-4 w-4 shrink-0 rounded-sm border border-input-border bg-background shadow-xs transition-colors cursor-pointer",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       "disabled:cursor-not-allowed disabled:opacity-50",
-      "data-[state=checked]:border-[var(--ring)] data-[state=checked]:bg-[var(--foreground)] data-[state=checked]:text-[var(--background)]",
+      "data-[state=checked]:border-ring data-[state=checked]:bg-foreground data-[state=checked]:text-background",
       className
     )}
     {...props}
@@ -24,3 +24,5 @@ const Checkbox = React.forwardRef(({ className, ...props }, ref) => (
 Checkbox.displayName = "Checkbox";
 
 export default Checkbox;
+
+

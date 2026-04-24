@@ -5,77 +5,82 @@
      CORE SEMANTIC TOKENS (Brand Dark Identity)
      ========================= */
 
-  --background: theme(colors.neutral.950);
-  --foreground: theme(colors.neutral.200);
+  --color-background: theme(colors.neutral.950);
+  --color-foreground: theme(colors.neutral.200);
 
-  --card: theme(colors.neutral.900);
-  --card-foreground: theme(colors.neutral.200);
+  --color-card: theme(colors.neutral.900);
+  --color-card-foreground: theme(colors.neutral.200);
 
-  --popover: theme(colors.neutral.900);
-  --popover-foreground: theme(colors.neutral.200);
+  --color-popover: theme(colors.neutral.900);
+  --color-popover-foreground: theme(colors.neutral.200);
 
-  --border: theme(colors.neutral.700);
-  --input: theme(colors.neutral.700);
+  --color-border: theme(colors.neutral.700);
+  --color-input: theme(colors.neutral.700);
 
-  --muted: theme(colors.neutral.800);
-  --muted-foreground: theme(colors.neutral.400);
+  --color-muted: theme(colors.neutral.800);
+  --color-muted-foreground: theme(colors.neutral.400);
 
-  --accent: theme(colors.neutral.800);
-  --accent-foreground: theme(colors.neutral.200);
+  --color-accent: theme(colors.neutral.800);
+  --color-accent-foreground: theme(colors.neutral.200);
 
-  --ring: theme(colors.neutral.500);
+  --color-ring: theme(colors.neutral.500);
 
   /* =========================
      INTERACTIVE STATES
      ========================= */
 
-  --hover: theme(colors.neutral.800);
-  --active: theme(colors.neutral.700);
+  --color-hover: theme(colors.neutral.800);
+  --color-active: theme(colors.neutral.700);
 
   /* =========================
      INPUT SYSTEM
      ========================= */
 
-  --input-bg: #1a1a1a;
-  --input-border: theme(colors.neutral.700);
-  --input-focus: theme(colors.neutral.500);
+  --color-input-bg: #1a1a1a;
+  --color-input-border: theme(colors.neutral.700);
+  --color-input-focus: theme(colors.neutral.500);
 
   /* =========================
      STATUS COLORS (semantic, NOT layout)
      ========================= */
 
-  --success: #4ade80;
-  --error: #f87171;
-  --warning: #fbbf24;
-  --info: #60a5fa;
+  --color-success: #4ade80;
+  --color-error: #f87171;
+  --color-warning: #fbbf24;
+  --color-info: #60a5fa;
 
   /* =========================
      BADGES (structured like shadcn variants)
      ========================= */
 
-  --badge-blue-bg: theme(colors.blue.900);
-  --badge-blue-text: theme(colors.blue.300);
-  --badge-blue-border: theme(colors.blue.700);
+  --color-badge-blue-bg: theme(colors.blue.900);
+  --color-badge-blue-text: theme(colors.blue.300);
+  --color-badge-blue-border: theme(colors.blue.700);
 
-  --badge-green-bg: theme(colors.green.900);
-  --badge-green-text: theme(colors.green.300);
-  --badge-green-border: theme(colors.green.700);
+  --color-badge-green-bg: theme(colors.green.900);
+  --color-badge-green-text: theme(colors.green.300);
+  --color-badge-green-border: theme(colors.green.700);
 
-  --badge-amber-bg: theme(colors.amber.900);
-  --badge-amber-text: theme(colors.amber.300);
-  --badge-amber-border: theme(colors.amber.700);
+  --color-badge-amber-bg: theme(colors.amber.900);
+  --color-badge-amber-text: theme(colors.amber.300);
+  --color-badge-amber-border: theme(colors.amber.700);
 
-  --badge-red-bg: theme(colors.red.900);
-  --badge-red-text: theme(colors.red.300);
-  --badge-red-border: theme(colors.red.700);
+  --color-badge-red-bg: theme(colors.red.900);
+  --color-badge-red-text: theme(colors.red.300);
+  --color-badge-red-border: theme(colors.red.700);
 
-  --badge-purple-bg: theme(colors.purple.900);
-  --badge-purple-text: theme(colors.purple.300);
-  --badge-purple-border: theme(colors.purple.700);
+  --color-badge-purple-bg: theme(colors.purple.900);
+  --color-badge-purple-text: theme(colors.purple.300);
+  --color-badge-purple-border: theme(colors.purple.700);
 
-  --badge-teal-bg: theme(colors.teal.900);
-  --badge-teal-text: theme(colors.teal.300);
-  --badge-teal-border: theme(colors.teal.700);
+  --color-badge-teal-bg: theme(colors.teal.900);
+  --color-badge-teal-text: theme(colors.teal.300);
+  --color-badge-teal-border: theme(colors.teal.700);
+
+  /* =========================
+     SHADOWS
+     ========================= */
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.1), 0 2px 10px -1px rgba(0, 0, 0, 0.05);
 }
 
 /* =========================
@@ -85,7 +90,7 @@
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--border) var(--background);
+    scrollbar-color: var(--color-border) var(--color-background);
   }
 
   ::-webkit-scrollbar {
@@ -94,23 +99,23 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--background) !important;
+    background: var(--color-background) !important;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: var(--color-border);
     border-radius: 10px;
     transition: background 0.2s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--ring);
+    background: var(--color-ring);
   }
 
   /* Target specific containers that might have forced backgrounds */
   .custom-scrollbar::-webkit-scrollbar-track,
   [data-radix-scroll-area-viewport]::-webkit-scrollbar-track {
-    background: var(--background) !important;
+    background: var(--color-background) !important;
   }
 }
 

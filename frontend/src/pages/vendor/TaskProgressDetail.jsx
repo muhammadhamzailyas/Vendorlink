@@ -58,7 +58,7 @@ const TaskProgressDetail = () => {
     return (
       <PageTransition>
         <div className="flex justify-center py-12">
-          <CircleNotch className="h-6 w-6 animate-spin text-[var(--muted-foreground)]/70" />
+          <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground/70" />
         </div>
       </PageTransition>
     );
@@ -78,7 +78,7 @@ const TaskProgressDetail = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight uppercase">{data?.task?.title || "Task Progress"}</h1>
-            <p className="text-sm text-[var(--muted-foreground)]">
+            <p className="text-sm text-muted-foreground">
               Track delivery progression and submit milestone updates for company visibility.
             </p>
           </div>
@@ -113,8 +113,8 @@ const TaskProgressDetail = () => {
 
           <div className="mt-8 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60">Execution Roadmap</span>
-              <span className="text-xs font-bold text-[var(--foreground)]">{data?.currentProgress || 0}% Completed</span>
+              <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground/60">Execution Roadmap</span>
+              <span className="text-xs font-bold text-foreground">{data?.currentProgress || 0}% Completed</span>
             </div>
             <Progress value={data?.currentProgress || 0} className="h-2.5" />
           </div>
@@ -122,7 +122,7 @@ const TaskProgressDetail = () => {
 
         {showForm && (
           <DetailSection title="Add Progress Update" description="Submit a new progress checkpoint for this task.">
-            <Card className="bg-[var(--muted)]/10 border-[var(--border)]/50 shadow-none">
+            <Card className="bg-muted/10 border-border/50 shadow-none">
                 <Card.Content className="p-6">
                     <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -142,8 +142,8 @@ const TaskProgressDetail = () => {
                     </div>
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <Label className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/80">Progress Completion</Label>
-                            <span className="text-sm font-bold text-[var(--foreground)]">{form.percentage}%</span>
+                            <Label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground/80">Progress Completion</Label>
+                            <span className="text-sm font-bold text-foreground">{form.percentage}%</span>
                         </div>
                         <Slider
                         min={0}
@@ -178,24 +178,24 @@ const TaskProgressDetail = () => {
 
         <DetailSection title="Update History" description="Timeline of submitted progress entries for company review.">
           {(!data?.progressUpdates || data.progressUpdates.length === 0) ? (
-            <div className="py-12 text-center rounded-2xl border-2 border-dashed border-[var(--border)]/50 bg-[var(--muted)]/20">
-              <ChartBar className="mx-auto mb-3 h-10 w-10 text-[var(--muted-foreground)]/30" />
-              <p className="text-sm font-bold uppercase tracking-tight text-[var(--muted-foreground)]/60">No progress entries yet</p>
+            <div className="py-12 text-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
+              <ChartBar className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
+              <p className="text-sm font-bold uppercase tracking-tight text-muted-foreground/60">No progress entries yet</p>
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2">
               {data.progressUpdates.map((update) => (
-                <Card key={update._id} className="shadow-soft border-[var(--border)]/50 hover:border-[var(--ring)]/20 transition-all">
-                  <Card.Header className="pb-3 border-b border-[var(--border)]/50 flex flex-row items-center justify-between py-3.5 px-5 bg-[var(--muted)]/20">
+                <Card key={update._id} className="shadow-soft border-border/50 hover:border-ring/20 transition-all">
+                  <Card.Header className="pb-3 border-b border-border/50 flex flex-row items-center justify-between py-3.5 px-5 bg-muted/20">
                     <StatusChip status={update.status || "in-progress"} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)]/60">{update.updateDate ? formatDate(update.updateDate) : ""}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{update.updateDate ? formatDate(update.updateDate) : ""}</span>
                   </Card.Header>
                   <Card.Content className="p-5">
-                    <p className="text-[13px] font-medium leading-relaxed text-[var(--foreground)]/80 mb-6 min-h-12">{update.comment}</p>
+                    <p className="text-[13px] font-medium leading-relaxed text-foreground/80 mb-6 min-h-12">{update.comment}</p>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <span className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/50">Completion</span>
-                            <span className="text-[11px] font-bold text-[var(--foreground)]">{update.percentage}%</span>
+                            <span className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/50">Completion</span>
+                            <span className="text-[11px] font-bold text-foreground">{update.percentage}%</span>
                         </div>
                         <Progress value={update.percentage} className="h-1.5" />
                     </div>
@@ -211,3 +211,6 @@ const TaskProgressDetail = () => {
 };
 
 export default TaskProgressDetail;
+
+
+

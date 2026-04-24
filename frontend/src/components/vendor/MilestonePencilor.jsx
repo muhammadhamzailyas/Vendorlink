@@ -5,8 +5,8 @@ import { Button, Card, Input, Textarea } from "../ui";
 const MilestonePencilor = ({ milestones, onChange, onAdd, onRemove, disabled, errors = [] }) => (
   <div className="space-y-4">
     <div className="space-y-1">
-      <h3 className="text-base font-semibold text-[var(--foreground)]">Project Milestones (Optional)</h3>
-      <p className="text-xs text-[var(--muted-foreground)]">Break work into milestones for clearer delivery and payment checkpoints.</p>
+      <h3 className="text-base font-semibold text-foreground">Project Milestones (Optional)</h3>
+      <p className="text-xs text-muted-foreground">Break work into milestones for clearer delivery and payment checkpoints.</p>
     </div>
 
     {milestones.map((milestone, index) => {
@@ -97,3 +97,6 @@ const MilestonePencilor = ({ milestones, onChange, onAdd, onRemove, disabled, er
 );
 
 export default MilestonePencilor;
+
+
+

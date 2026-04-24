@@ -20,3 +20,5 @@ export const getLocalStorageString = (key, defaultValue = null) => {
 export const getUserData = () => {
   return getLocalStorageItem("user", {});
 };
+
+

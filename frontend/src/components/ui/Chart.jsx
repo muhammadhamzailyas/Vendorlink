@@ -12,7 +12,7 @@ const ChartContainer = React.forwardRef(
       <div
         ref={ref}
         className={cn(
-          "flex justify-center text-xs [&_.recharts-cartesian-grid-horizontal_line]:stroke-[var(--border)]/50 [&_.recharts-cartesian-grid-vertical_line]:stroke-[var(--border)]/50 [&_.recharts-curve.recharts-line]:stroke-[var(--foreground)] [&_.recharts-dot]:fill-[var(--card)] [&_.recharts-dot]:stroke-[var(--foreground)] [&_.recharts-layer]:outline-none [&_.recharts-polar-grid-concentric-polygon]:stroke-[var(--border)] [&_.recharts-polar-grid-concentric-path]:stroke-[var(--border)] [&_.recharts-polar-grid-horizontal]:stroke-[var(--border)] [&_.recharts-polar-grid-vertical]:stroke-[var(--border)] [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[var(--muted)] [&_.recharts-scatter-gradient-stop-0]:stop-color-[var(--foreground)] [&_.recharts-scatter-gradient-stop-1]:stop-color-[var(--foreground)]/30 [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex justify-center text-xs [&_.recharts-cartesian-grid-horizontal_line]:stroke-border/50 [&_.recharts-cartesian-grid-vertical_line]:stroke-border/50 [&_.recharts-curve.recharts-line]:stroke-foreground [&_.recharts-dot]:fill-card [&_.recharts-dot]:stroke-foreground [&_.recharts-layer]:outline-none [&_.recharts-polar-grid-concentric-polygon]:stroke-border [&_.recharts-polar-grid-concentric-path]:stroke-border [&_.recharts-polar-grid-horizontal]:stroke-border [&_.recharts-polar-grid-vertical]:stroke-border [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-scatter-gradient-stop-0]:stop-color-foreground [&_.recharts-scatter-gradient-stop-1]:stop-color-foreground/30 [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
           className
         )}
         {...props}
@@ -52,12 +52,12 @@ const ChartTooltipContent = React.forwardRef(
       <div
         ref={ref}
         className={cn(
-          "grid min-w-[8rem] items-start gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--card)] p-2.5 shadow-soft",
+          "grid min-w-[8rem] items-start gap-1.5 rounded-xl border border-border bg-card p-2.5 shadow-soft",
           className
         )}
       >
         {!hideLabel && (
-          <div className={cn("text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-tight", labelClassName)}>
+          <div className={cn("text-xs font-bold text-muted-foreground uppercase tracking-tight", labelClassName)}>
             {labelFormatter ? labelFormatter(label, payload) : label}
           </div>
         )}
@@ -73,7 +73,7 @@ const ChartTooltipContent = React.forwardRef(
                 {!hideIndicator && (
                   <div
                     className={cn(
-                      "shrink-0 rounded-[2px] border-[1.5px] border-[var(--border)]",
+                      "shrink-0 rounded-[2px] border-[1.5px] border-border",
                       indicator === "dot" && "h-2.5 w-2.5 rounded-full",
                       indicator === "line" && "w-1",
                       indicator === "dashed" &&
@@ -86,12 +86,12 @@ const ChartTooltipContent = React.forwardRef(
                 )}
                 <div className="flex flex-1 items-center justify-between gap-4 leading-none">
                   <div className="grid gap-0.5">
-                    <span className="text-xs text-[var(--muted-foreground)]">
+                    <span className="text-xs text-muted-foreground">
                       {itemConfig?.label || item.name}
                     </span>
                   </div>
                   {item.value && (
-                    <span className="font-mono font-bold text-[var(--foreground)]">
+                    <span className="font-mono font-bold text-foreground">
                       {formatter
                         ? formatter(item.value, item.name, item, index, payload)
                         : item.value.toLocaleString()}
@@ -113,3 +113,6 @@ export {
   ChartTooltip,
   ChartTooltipContent,
 }
+
+
+

@@ -60,7 +60,7 @@ const CompanyTaskProgressDetail = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Task Progress</h1>
-          <p className="text-[var(--muted-foreground)]">Review historical updates, current delivery state, and completion trajectory.</p>
+          <p className="text-muted-foreground">Review historical updates, current delivery state, and completion trajectory.</p>
         </div>
         <Button variant="secondary" size="sm" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate(-1)}>
           Back
@@ -77,11 +77,11 @@ const CompanyTaskProgressDetail = () => {
 
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
-            <span className="text-[var(--muted-foreground)] font-medium">Overall Progress</span>
+            <span className="text-muted-foreground font-medium">Overall Progress</span>
             <span className="font-semibold">{stats?.currentProgress || 0}%</span>
           </div>
-          <div className="h-3 rounded-full bg-[var(--muted)] overflow-hidden">
-            <div className="h-full rounded-full bg-[var(--foreground)] transition-all" style={{ width: `${stats?.currentProgress || 0}%` }} />
+          <div className="h-3 rounded-full bg-muted overflow-hidden">
+            <div className="h-full rounded-full bg-foreground transition-all" style={{ width: `${stats?.currentProgress || 0}%` }} />
           </div>
         </div>
 
@@ -105,7 +105,7 @@ const CompanyTaskProgressDetail = () => {
             {updates.map((u, i) => (
               <div key={u._id || i} className="flex gap-3">
                 <div className="flex flex-col items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${u.status === "completed" ? "bg-[var(--foreground)] text-white" : u.status === "delayed" ? "bg-danger-surface text-danger" : "bg-[var(--muted)] text-[var(--muted-foreground)]"}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${u.status === "completed" ? "bg-foreground text-white" : u.status === "delayed" ? "bg-danger-surface text-danger" : "bg-muted text-muted-foreground"}`}>
                     {u.status === "completed" ? <CheckCircle className="w-4 h-4" /> : u.status === "delayed" ? <WarningCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                   </div>
                   {i < updates.length - 1 ? <div className="w-px flex-1 bg-border my-1" /> : null}
@@ -113,9 +113,9 @@ const CompanyTaskProgressDetail = () => {
                 <div className="flex-1 pb-4">
                   <div className="flex items-center justify-between gap-2">
                     <StatusChip status={u.status?.replace("_", "-")} />
-                    <span className="text-xs text-[var(--muted-foreground)]/70">{formatDate(u.updateDate || u.createdAt)}</span>
+                    <span className="text-xs text-muted-foreground/70">{formatDate(u.updateDate || u.createdAt)}</span>
                   </div>
-                  {u.comment ? <p className="mt-1 text-sm text-[var(--muted-foreground)]">{u.comment}</p> : null}
+                  {u.comment ? <p className="mt-1 text-sm text-muted-foreground">{u.comment}</p> : null}
                 </div>
               </div>
             ))}
@@ -128,3 +128,6 @@ const CompanyTaskProgressDetail = () => {
 };
 
 export default CompanyTaskProgressDetail;
+
+
+

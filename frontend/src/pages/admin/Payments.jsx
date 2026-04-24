@@ -117,31 +117,31 @@ const AdminPayments = () => {
       )}
 
       {/* Filters */}
-      <Card className="p-4 shadow-soft border-[var(--border)]/50">
+      <Card className="p-4 shadow-soft border-border/50">
         <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-                <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]/50 z-10" />
+                <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 z-10" />
                 <Input
                     type="text"
                     placeholder="MagnifyingGlass by invoice, company, vendor..."
                     value={filters.search}
                     onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="pl-9 bg-[var(--muted)]/20"
+                    className="pl-9 bg-muted/20"
                 />
             </div>
             <Select
                 value={filters.status}
                 onChange={(val) => { setFilters({ ...filters, status: val }); setPage(1); }}
                 options={statusOptions}
-                className="w-full sm:w-48 bg-[var(--muted)]/20"
+                className="w-full sm:w-48 bg-muted/20"
             />
         </div>
       </Card>
 
       {/* Table */}
-      <Card className="shadow-soft border-[var(--border)]/50 overflow-hidden">
-        <Card.Header className="pb-4 border-b border-[var(--border)]/50 bg-[var(--muted)]/20">
-            <Card.Title className="text-xs font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]">Transaction Log</Card.Title>
+      <Card className="shadow-soft border-border/50 overflow-hidden">
+        <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
+            <Card.Title className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Transaction Log</Card.Title>
         </Card.Header>
         <Card.Content className="p-0">
             {isLoading ? (
@@ -161,25 +161,25 @@ const AdminPayments = () => {
                     key: "invoiceNumber",
                     label: "Invoice",
                     cellClassName: "px-6 py-4",
-                    render: (p) => <span className="font-bold text-[11px] uppercase text-[var(--muted-foreground)]">{p.invoiceNumber || "-"}</span>,
+                    render: (p) => <span className="font-bold text-[11px] uppercase text-muted-foreground">{p.invoiceNumber || "-"}</span>,
                     },
                     {
                     key: "company",
                     label: "Origin (Company)",
                     cellClassName: "px-6 py-4",
-                    render: (p) => <span className="text-sm font-bold text-[var(--foreground)] truncate block w-40">{p.company?.companyName || p.company?.username || "-"}</span>,
+                    render: (p) => <span className="text-sm font-bold text-foreground truncate block w-40">{p.company?.companyName || p.company?.username || "-"}</span>,
                     },
                     {
                     key: "vendor",
                     label: "Destination (Vendor)",
                     cellClassName: "px-6 py-4",
-                    render: (p) => <span className="text-sm font-bold text-[var(--foreground)] truncate block w-40">{p.vendor?.businessName || p.vendor?.username || "-"}</span>,
+                    render: (p) => <span className="text-sm font-bold text-foreground truncate block w-40">{p.vendor?.businessName || p.vendor?.username || "-"}</span>,
                     },
                     {
                     key: "amount",
                     label: "Amount",
                     cellClassName: "px-6 py-4",
-                    render: (p) => <span className="font-extrabold text-sm text-[var(--foreground)] uppercase tracking-tight">PKR {p.amount?.toLocaleString()}</span>,
+                    render: (p) => <span className="font-extrabold text-sm text-foreground uppercase tracking-tight">PKR {p.amount?.toLocaleString()}</span>,
                     },
                     {
                     key: "status",
@@ -191,7 +191,7 @@ const AdminPayments = () => {
                     key: "createdAt",
                     label: "Date",
                     cellClassName: "px-6 py-4",
-                    render: (p) => <span className="text-[var(--muted-foreground)] font-bold text-[11px] uppercase">{dayjs(p.createdAt).format("MMM D, YYYY")}</span>,
+                    render: (p) => <span className="text-muted-foreground font-bold text-[11px] uppercase">{dayjs(p.createdAt).format("MMM D, YYYY")}</span>,
                     },
                 ]}
                 showRowActions
@@ -203,7 +203,7 @@ const AdminPayments = () => {
                     title: "View Details",
                     icon: <Eye className="h-3.5 w-3.5" />,
                     onClick: () => navigate(`/admin/payments/${p._id}`),
-                    className: "inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight text-[var(--foreground)]/80 hover:bg-[var(--muted)] transition-all",
+                    className: "inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight text-foreground/80 hover:bg-muted transition-all",
                     },
                     {
                     key: "invoice",
@@ -212,7 +212,7 @@ const AdminPayments = () => {
                     icon: <Download className="h-3.5 w-3.5" />,
                     onClick: () => handleDownloadInvoice(p._id),
                     hidden: !p.invoiceNumber,
-                    className: "inline-flex items-center gap-1 rounded-lg bg-[var(--muted)]/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight text-[var(--foreground)] hover:bg-[var(--muted)]/50 transition-all",
+                    className: "inline-flex items-center gap-1 rounded-lg bg-muted/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight text-foreground hover:bg-muted/50 transition-all",
                     },
                 ])}
                 />
@@ -273,3 +273,6 @@ const AdminPayments = () => {
 };
 
 export default AdminPayments;
+
+
+

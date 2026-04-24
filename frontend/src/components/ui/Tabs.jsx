@@ -25,7 +25,7 @@ const Tabs = ({ value, onChange, tabs, children, className }) => {
       className={cn("w-full", className)}
     >
       {tabs ? (
-        <TabsPrimitive.List className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--muted)] p-1 text-[var(--muted-foreground)] border border-[var(--border)]">
+        <TabsPrimitive.List className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground border border-border">
           {tabs.map((tab, index) => {
             const rawValue = typeof tab === "string" ? index : tab.value ?? index;
             const valueString = String(rawValue);
@@ -37,8 +37,8 @@ const Tabs = ({ value, onChange, tabs, children, className }) => {
                 value={valueString}
                 className={cn(
                   "inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-bold transition-all duration-200 uppercase tracking-tight",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--input-focus)]/20",
-                  "data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--background)] data-[state=active]:shadow-soft"
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-focus/20",
+                  "data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-soft"
                 )}
               >
                 {label}
@@ -70,3 +70,6 @@ TabsContent.displayName = TabsPrimitive.Content.displayName;
 
 export default Tabs;
 export { TabsList, TabsTrigger, TabsContent };
+
+
+

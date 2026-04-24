@@ -69,8 +69,8 @@ const MyProposals = () => {
       cellClassName: "px-6 py-4",
       render: (proposal) => (
         <>
-          <p className="text-sm font-semibold text-[var(--foreground)]">{proposal.taskId?.title || "Untitled task"}</p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Budget: ${proposal.taskId?.budget?.toLocaleString() || "0"}</p>
+          <p className="text-sm font-semibold text-foreground">{proposal.taskId?.title || "Untitled task"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Budget: ${proposal.taskId?.budget?.toLocaleString() || "0"}</p>
         </>
       ),
     },
@@ -84,7 +84,7 @@ const MyProposals = () => {
         return (
           <div className="flex items-center gap-2">
             <UserAvatar user={company} name={companyName} size="md" />
-            <span className="text-sm text-[var(--foreground)]/80">{companyName}</span>
+            <span className="text-sm text-foreground/80">{companyName}</span>
           </div>
         );
       },
@@ -98,7 +98,7 @@ const MyProposals = () => {
     {
       key: "bid",
       label: "Bid",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-foreground",
       render: (proposal) => `$${proposal.bidAmount?.toLocaleString() || "0"}`,
     },
     {
@@ -107,8 +107,8 @@ const MyProposals = () => {
       cellClassName: "px-6 py-4",
       render: (proposal) => (
         <>
-          <p className="text-sm text-[var(--foreground)]">{formatDate(proposal.submittedAt)}</p>
-          <p className="text-xs text-[var(--muted-foreground)]">Deadline: {formatDate(proposal.proposedDeadline)}</p>
+          <p className="text-sm text-foreground">{formatDate(proposal.submittedAt)}</p>
+          <p className="text-xs text-muted-foreground">Deadline: {formatDate(proposal.proposedDeadline)}</p>
         </>
       ),
     },
@@ -182,7 +182,7 @@ const MyProposals = () => {
                 label: "View Task",
                 icon: <Visibility className="h-3.5 w-3.5" />,
                 onClick: (row) => navigate(`/vendor/task/${row.taskId?._id}`),
-                className: "inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]/80 hover:bg-[var(--muted)]",
+                className: "inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 hover:bg-muted",
               },
             ];
 
@@ -192,7 +192,7 @@ const MyProposals = () => {
                 label: "Contracts",
                 icon: <Briefcase className="h-3.5 w-3.5" />,
                 onClick: () => navigate("/vendor/contracts"),
-                className: "inline-flex items-center gap-1 rounded-lg bg-[var(--foreground)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--foreground)]-light",
+                className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-white hover:bg-foreground-light",
               });
             }
 
@@ -206,3 +206,6 @@ const MyProposals = () => {
 };
 
 export default MyProposals;
+
+
+

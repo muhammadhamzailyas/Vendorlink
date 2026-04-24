@@ -22,7 +22,7 @@ import {
 import { proposalAPI } from "@/services/api";
 
 const VendorCardSkeleton = () => (
-  <Card className="overflow-hidden rounded-2xl border-[var(--border)]/50 shadow-soft">
+  <Card className="overflow-hidden rounded-2xl border-border/50 shadow-soft">
     <Card.Content className="space-y-4 p-6">
       <div className="flex items-center gap-3">
         <Skeleton className="h-12 w-12 rounded-xl" />
@@ -45,48 +45,48 @@ const VendorCard = ({ vendor, onOpenProposals }) => {
   const avgBid = Math.round(vendor.totalBid / vendor.totalProposals || 0);
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-[var(--border)]/50 bg-[var(--card)] shadow-soft transition-all duration-300 hover:shadow-md hover:border-[var(--ring)]/20 group">
+    <Card className="overflow-hidden rounded-2xl border-border/50 bg-card shadow-soft transition-all duration-300 hover:shadow-md hover:border-ring/20 group">
       <Card.Content className="p-6">
         <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--muted)]/40 text-[var(--foreground)] font-bold text-lg shadow-xs">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/40 text-foreground font-bold text-lg shadow-xs">
                     {(vendor.username || "V")[0].toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-[var(--foreground)] uppercase tracking-tight truncate group-hover:text-[var(--foreground)] transition-colors">{vendor.username || "Vendor"}</h3>
-                    <p className="truncate text-xs font-medium text-[var(--muted-foreground)] flex items-center gap-1.5">
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-tight truncate group-hover:text-foreground transition-colors">{vendor.username || "Vendor"}</h3>
+                    <p className="truncate text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                         <Envelope size={10} className="opacity-50" />
                         {vendor.email || "No email"}
                     </p>
                 </div>
             </div>
-            <Badge variant="outline" className="font-bold uppercase tracking-tighter text-[9px] bg-[var(--muted)]/30">
+            <Badge variant="outline" className="font-bold uppercase tracking-tighter text-[9px] bg-muted/30">
                 {vendor.vendorType || "General"}
             </Badge>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-3 rounded-xl bg-[var(--muted)]/20 border border-[var(--border)]/30">
-                <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60 mb-1">Total Bids</p>
-                <p className="text-sm font-bold text-[var(--foreground)]">{vendor.totalProposals}</p>
+            <div className="p-3 rounded-xl bg-muted/20 border border-border/30">
+                <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-1">Total Bids</p>
+                <p className="text-sm font-bold text-foreground">{vendor.totalProposals}</p>
             </div>
-            <div className="p-3 rounded-xl bg-[var(--muted)]/20 border border-[var(--border)]/30">
-                <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60 mb-1">Success Rate</p>
-                <p className="text-sm font-bold text-[var(--foreground)]">{vendor.acceptedProposals > 0 ? Math.round((vendor.acceptedProposals / vendor.totalProposals) * 100) : 0}%</p>
+            <div className="p-3 rounded-xl bg-muted/20 border border-border/30">
+                <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-1">Success Rate</p>
+                <p className="text-sm font-bold text-foreground">{vendor.acceptedProposals > 0 ? Math.round((vendor.acceptedProposals / vendor.totalProposals) * 100) : 0}%</p>
             </div>
         </div>
 
         <div className="space-y-2 mb-8">
             <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-[var(--muted-foreground)] uppercase tracking-tight flex items-center gap-1.5">
+                <span className="font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-1.5">
                     <AttachMoney size={12} />
                     Avg. Bid Value
                 </span>
-                <span className="font-extrabold text-[var(--foreground)]">PKR {avgBid.toLocaleString()}</span>
+                <span className="font-extrabold text-foreground">PKR {avgBid.toLocaleString()}</span>
             </div>
             <Separator className="opacity-30" />
             <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-[var(--muted-foreground)] uppercase tracking-tight">Active Contracts</span>
+                <span className="font-bold text-muted-foreground uppercase tracking-tight">Active Contracts</span>
                 <span className="font-extrabold text-jade-600">{vendor.acceptedProposals}</span>
             </div>
         </div>
@@ -324,3 +324,6 @@ const VendorMarketplace = () => {
 };
 
 export default VendorMarketplace;
+
+
+

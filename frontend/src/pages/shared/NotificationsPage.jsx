@@ -38,8 +38,8 @@ const NotificationsPage = () => {
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Notifications</h2>
-            <p className="text-sm text-[var(--muted-foreground)]">Track system events, status updates, and activity alerts.</p>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Notifications</h2>
+            <p className="text-sm text-muted-foreground">Track system events, status updates, and activity alerts.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             {unreadCount > 0 && (
@@ -71,22 +71,22 @@ const NotificationsPage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="bg-[var(--muted)]/50 p-1 h-auto flex flex-wrap justify-start gap-1 w-fit mb-6">
+            <TabsList className="bg-muted/50 p-1 h-auto flex flex-wrap justify-start gap-1 w-fit mb-6">
                 <TabsTrigger 
                     value="all"
-                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--foreground)] transition-all"
+                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground transition-all"
                 >
                     All
                 </TabsTrigger>
                 <TabsTrigger 
                     value="unread"
-                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--foreground)] transition-all"
+                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground transition-all"
                 >
                     Unread
                 </TabsTrigger>
                 <TabsTrigger 
                     value="read"
-                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--foreground)] transition-all"
+                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground transition-all"
                 >
                     Read
                 </TabsTrigger>
@@ -95,7 +95,7 @@ const NotificationsPage = () => {
             {loading && notifications.length === 0 ? (
                 <Card>
                     <div className="flex justify-center py-12">
-                    <CircleNotch className="w-6 h-6 animate-spin text-[var(--muted-foreground)]/70" />
+                    <CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" />
                     </div>
                 </Card>
             ) : filteredNotifications.length === 0 ? (
@@ -105,8 +105,8 @@ const NotificationsPage = () => {
                 description={activeTab === "unread" ? "You have no unread notifications." : "You are all caught up."}
             />
             ) : (
-            <Card className="overflow-hidden shadow-soft border-[var(--border)]/50">
-                <Card.Header className="pb-3 border-b border-[var(--border)]/50">
+            <Card className="overflow-hidden shadow-soft border-border/50">
+                <Card.Header className="pb-3 border-b border-border/50">
                     <Card.Title className="text-sm font-bold uppercase tracking-tight">Notification Feed</Card.Title>
                     <Card.Description className="text-xs">Latest updates from tasks, contracts, and account activity.</Card.Description>
                 </Card.Header>
@@ -115,18 +115,18 @@ const NotificationsPage = () => {
                         <div
                         key={notif._id}
                         className={`flex items-start gap-3 p-4 rounded-xl border-l-4 ${getPriorityColor(notif.priority)} ${
-                            notif.read ? "bg-[var(--card)]/50" : "bg-[var(--muted)]/30"
-                        } border border-[var(--border)]/50 transition-colors hover:shadow-sm`}
+                            notif.read ? "bg-card/50" : "bg-muted/30"
+                        } border border-border/50 transition-colors hover:shadow-sm`}
                         >
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                            <p className={`text-sm ${notif.read ? "text-[var(--foreground)]/80 font-medium" : "font-extrabold text-[var(--foreground)]"}`}>
+                            <p className={`text-sm ${notif.read ? "text-foreground/80 font-medium" : "font-extrabold text-foreground"}`}>
                                 {notif.title}
                             </p>
-                            {!notif.read && <div className="w-2 h-2 rounded-full bg-[var(--foreground)] shrink-0" />}
+                            {!notif.read && <div className="w-2 h-2 rounded-full bg-foreground shrink-0" />}
                             </div>
-                            <p className="text-sm text-[var(--muted-foreground)] font-medium mt-0.5">{notif.message}</p>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)]/40 mt-2.5">
+                            <p className="text-sm text-muted-foreground font-medium mt-0.5">{notif.message}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-2.5">
                             {notif.createdAt ? getRelativeTime(notif.createdAt) : ""}
                             </p>
                         </div>
@@ -137,7 +137,7 @@ const NotificationsPage = () => {
                                 variant="ghost"
                                 size="xs"
                                 onClick={() => markAsRead(notif._id)}
-                                className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                                 title="Mark as read"
                             >
                                 <Check className="w-4 h-4" />
@@ -148,7 +148,7 @@ const NotificationsPage = () => {
                             variant="ghost"
                             size="xs"
                             onClick={() => deleteNotification(notif._id)}
-                            className="h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-danger hover:bg-danger-surface"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-danger hover:bg-danger-surface"
                             title="Delete"
                             >
                             <Trash className="w-4 h-4" />
@@ -180,3 +180,6 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
+
+
+

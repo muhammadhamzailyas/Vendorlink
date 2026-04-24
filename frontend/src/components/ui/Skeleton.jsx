@@ -2,13 +2,13 @@ import React from "react";
 import { cn } from "@/lib/cn";
 
 const Skeleton = ({ className, ...props }) => (
-  <div className={cn("animate-pulse rounded-md bg-[var(--muted)]", className)} {...props} />
+  <div className={cn("animate-pulse rounded-md bg-muted", className)} {...props} />
 );
 
 Skeleton.Card = ({ className }) => (
   <div
     className={cn(
-      "rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3",
+      "rounded-xl border border-border bg-card p-5 space-y-3",
       className
     )}
   >
@@ -37,7 +37,7 @@ Skeleton.Page = ({ rows = 3 }) => (
 );
 
 Skeleton.Stat = () => (
-  <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-2.5">
+  <div className="rounded-xl border border-border bg-card p-5 space-y-2.5">
     <div className="flex items-center justify-between">
       <Skeleton className="h-3 w-20" />
       <Skeleton className="h-9 w-9 rounded-lg" />
@@ -56,3 +56,6 @@ Skeleton.StatGrid = ({ count = 4 }) => (
 );
 
 export default Skeleton;
+
+
+

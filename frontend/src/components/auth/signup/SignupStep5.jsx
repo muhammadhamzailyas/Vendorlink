@@ -5,11 +5,11 @@ import { Button, Card, ScrollArea } from "../../ui";
 // eslint-disable-next-line no-unused-vars
 const ReviewSection = ({ icon: Icon, title, children }) => (
   <div className="space-y-3">
-    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)]/60 px-1">
+    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
       <Icon size={14} />
       <span>{title}</span>
     </div>
-    <Card className="p-4 bg-[var(--muted)]/30 border-[var(--border)]/50">
+    <Card className="p-4 bg-muted/30 border-border/50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6">
         {children}
       </div>
@@ -19,8 +19,8 @@ const ReviewSection = ({ icon: Icon, title, children }) => (
 
 const ReviewItem = ({ label, value }) => (
   <div className="space-y-1">
-    <p className="text-[10px] text-[var(--muted-foreground)] font-medium">{label}</p>
-    <p className="text-sm font-bold text-[var(--foreground)] truncate">{value || "—"}</p>
+    <p className="text-[10px] text-muted-foreground font-medium">{label}</p>
+    <p className="text-sm font-bold text-foreground truncate">{value || "—"}</p>
   </div>
 );
 
@@ -30,11 +30,11 @@ const SignupStep5 = ({ data, onSubmit, onBack, loading }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-center justify-center text-center space-y-2 mb-2">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--foreground)] text-[var(--foreground)] mb-2">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground text-foreground mb-2">
           <ShieldCheck size={24} />
         </div>
         <h3 className="text-xl font-bold tracking-tight">Review & Submit</h3>
-        <p className="text-xs text-[var(--muted-foreground)] font-medium max-w-sm">
+        <p className="text-xs text-muted-foreground font-medium max-w-sm">
           Please verify your information before submitting for review.
         </p>
       </div>
@@ -83,14 +83,14 @@ const SignupStep5 = ({ data, onSubmit, onBack, loading }) => {
       </ScrollArea>
 
       <div className="pt-2">
-        <div className="bg-[var(--muted)] border border-[var(--ring)]/10 p-4 rounded-xl flex items-start gap-3 mb-6">
-            <CheckCircle className="h-5 w-5 text-[var(--foreground)] shrink-0 mt-0.5" />
-            <p className="text-xs text-[var(--foreground)] font-medium leading-relaxed">
+        <div className="bg-muted border border-ring/10 p-4 rounded-xl flex items-start gap-3 mb-6">
+            <CheckCircle className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-foreground font-medium leading-relaxed">
                 By submitting, you agree to our Terms and that your account will be reviewed for authenticity within 24-48 hours.
             </p>
         </div>
 
-        <div className="flex w-full gap-4 pt-4 border-t border-[var(--border)]/50">
+        <div className="flex w-full gap-4 pt-4 border-t border-border/50">
           <Button 
             variant="secondary" 
             onClick={onBack} 
@@ -117,3 +117,6 @@ const SignupStep5 = ({ data, onSubmit, onBack, loading }) => {
 };
 
 export default SignupStep5;
+
+
+

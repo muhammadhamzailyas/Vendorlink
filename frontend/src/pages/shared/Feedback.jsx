@@ -36,8 +36,8 @@ const Feedback = () => {
     <PageTransition>
       <div className="mx-auto max-w-3xl space-y-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Share Feedback</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">Tell us about product issues, ideas, or requests so we can improve VendorLink.</p>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Share Feedback</h2>
+          <p className="text-sm text-muted-foreground">Tell us about product issues, ideas, or requests so we can improve VendorLink.</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -81,3 +81,6 @@ const Feedback = () => {
 };
 
 export default Feedback;
+
+
+

@@ -91,7 +91,7 @@ const Contract = () => {
     {
       key: "title",
       label: "Title",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-foreground",
       render: (row) => row.title,
     },
     {
@@ -101,7 +101,7 @@ const Contract = () => {
       render: (row) => (
         <div className="flex items-center gap-2">
           <UserAvatar user={row.partnerUser || {}} name={row.partner} size="md" />
-          <span className="text-sm text-[var(--foreground)]/80">{row.partner}</span>
+          <span className="text-sm text-foreground/80">{row.partner}</span>
         </div>
       ),
     },
@@ -114,13 +114,13 @@ const Contract = () => {
     {
       key: "value",
       label: "Value",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80",
       render: (row) => `$${row.amount.toLocaleString()}`,
     },
     {
       key: "updated",
       label: "Updated",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80",
       render: (row) => (row.date ? dayjs(row.date).format("MMM DD, YYYY") : "N/A"),
     },
   ];
@@ -186,3 +186,6 @@ const Contract = () => {
 };
 
 export default Contract;
+
+
+

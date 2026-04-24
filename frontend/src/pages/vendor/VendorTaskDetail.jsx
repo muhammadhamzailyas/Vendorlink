@@ -122,23 +122,23 @@ const VendorTaskDetail = () => {
             <ApprovalStatusBanner />
         </div>
         
-        <Card className="overflow-hidden shadow-soft border-[var(--border)]/50">
-          <div className="bg-[var(--muted)]/20 p-6 sm:p-8 border-b border-[var(--border)]/50">
+        <Card className="overflow-hidden shadow-soft border-border/50">
+          <div className="bg-muted/20 p-6 sm:p-8 border-b border-border/50">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                 <div className="space-y-4 flex-1">
                 <div className="flex flex-wrap gap-2">
                     <Badge variant={task.status === "open" ? "success" : task.status === "in-progress" ? "info" : "secondary"} className="font-bold uppercase tracking-widest px-3 py-1">
                     {task.status}
                     </Badge>
-                    <Badge variant="outline" className="font-bold uppercase tracking-widest px-3 py-1 border-[var(--border)]/50 text-[var(--muted-foreground)] bg-[var(--card)]">
+                    <Badge variant="outline" className="font-bold uppercase tracking-widest px-3 py-1 border-border/50 text-muted-foreground bg-card">
                         <Tag className="mr-1.5 h-3.5 w-3.5" />
                         {getCategoryLabel(task.category)}
                     </Badge>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tighter text-[var(--foreground)] uppercase leading-tight">
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tighter text-foreground uppercase leading-tight">
                     {task.title}
                 </h1>
-                <p className="text-[15px] text-[var(--foreground)]/70 font-medium leading-relaxed max-w-3xl">
+                <p className="text-[15px] text-foreground/70 font-medium leading-relaxed max-w-3xl">
                     {task.description}
                 </p>
                 </div>
@@ -160,18 +160,18 @@ const VendorTaskDetail = () => {
           <Card.Content className="p-6 sm:p-8 space-y-10">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {[
-                { label: "Company", value: task.companyId?.companyName || "N/A", icon: <Briefcase className="text-[var(--foreground)]" /> },
+                { label: "Company", value: task.companyId?.companyName || "N/A", icon: <Briefcase className="text-foreground" /> },
                 { label: "Budget", value: `PKR ${task.budget?.toLocaleString()}`, icon: <CurrencyDollar className="text-jade-600" /> },
                 { label: "Deadline", value: formatDate(task.deadline), icon: <Clock className="text-warning" /> },
                 { label: "Posted On", value: formatDate(task.createdAt), icon: <Calendar className="text-sky-600" /> },
                 ].map((item, index) => (
-                <div key={index} className="flex flex-col gap-3 p-5 rounded-2xl bg-[var(--muted)]/20 border border-[var(--border)]/30 transition-all hover:bg-[var(--muted)]/30">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--card)] border border-[var(--border)]/50 shadow-xs">
+                <div key={index} className="flex flex-col gap-3 p-5 rounded-2xl bg-muted/20 border border-border/30 transition-all hover:bg-muted/30">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-card border border-border/50 shadow-xs">
                         {React.cloneElement(item.icon, { size: 16, strokeWidth: 2.5 })}
                     </div>
                     <div>
-                        <span className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60 block mb-0.5">{item.label}</span>
-                        <span className="text-sm font-bold text-[var(--foreground)] truncate block">{item.value}</span>
+                        <span className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 block mb-0.5">{item.label}</span>
+                        <span className="text-sm font-bold text-foreground truncate block">{item.value}</span>
                     </div>
                 </div>
                 ))}
@@ -179,10 +179,10 @@ const VendorTaskDetail = () => {
 
             <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-8 rounded-full bg-[var(--foreground)]" />
-                    <h2 className="text-xs font-extrabold uppercase tracking-widest text-[var(--foreground)]">Detailed Requirements</h2>
+                    <div className="h-1.5 w-8 rounded-full bg-foreground" />
+                    <h2 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Detailed Requirements</h2>
                 </div>
-                <div className="p-6 rounded-2xl bg-[var(--muted)]/20 border border-[var(--border)]/30 text-[14px] font-medium leading-relaxed whitespace-pre-wrap text-[var(--foreground)]/80 shadow-inner">
+                <div className="p-6 rounded-2xl bg-muted/20 border border-border/30 text-[14px] font-medium leading-relaxed whitespace-pre-wrap text-foreground/80 shadow-inner">
                 {task.requirements || "No specific requirements provided."}
                 </div>
             </div>
@@ -190,11 +190,11 @@ const VendorTaskDetail = () => {
         </Card>
 
         {myProposal && (
-          <Card className={`overflow-hidden shadow-soft border-[var(--border)]/50 border-l-4 ${myProposal.status === "accepted" ? "border-l-jade-600" : "border-l-warning"}`}>
-            <Card.Header className="bg-[var(--muted)]/20 px-6 py-5 border-b border-[var(--border)]/50">
+          <Card className={`overflow-hidden shadow-soft border-border/50 border-l-4 ${myProposal.status === "accepted" ? "border-l-jade-600" : "border-l-warning"}`}>
+            <Card.Header className="bg-muted/20 px-6 py-5 border-b border-border/50">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h2 className="text-sm font-bold uppercase tracking-tight text-[var(--foreground)] flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-[var(--foreground)]" />
+                <h2 className="text-sm font-bold uppercase tracking-tight text-foreground flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-foreground" />
                     My Proposal Status
                 </h2>
                 <Badge variant={myProposal.status === "accepted" ? "success" : myProposal.status === "rejected" ? "error" : "warning"} className="font-bold uppercase tracking-widest px-4 py-1.5 shadow-sm">
@@ -205,19 +205,19 @@ const VendorTaskDetail = () => {
             
             <Card.Content className="p-6 sm:p-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="p-5 rounded-2xl bg-[var(--muted)]/20 border border-[var(--border)]/20 shadow-xs">
-                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60 mb-1.5">Your Bid Price</p>
-                    <p className="text-2xl font-extrabold text-[var(--foreground)] uppercase tracking-tighter">PKR {myProposal.bidAmount?.toLocaleString()}</p>
+                <div className="p-5 rounded-2xl bg-muted/20 border border-border/20 shadow-xs">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Your Bid Price</p>
+                    <p className="text-2xl font-extrabold text-foreground uppercase tracking-tighter">PKR {myProposal.bidAmount?.toLocaleString()}</p>
                 </div>
-                <div className="p-5 rounded-2xl bg-[var(--muted)]/20 border border-[var(--border)]/20 shadow-xs">
-                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60 mb-1.5">Proposed Deadline</p>
-                    <p className="text-2xl font-extrabold text-[var(--foreground)] uppercase tracking-tighter">{formatDate(myProposal.proposedDeadline)}</p>
+                <div className="p-5 rounded-2xl bg-muted/20 border border-border/20 shadow-xs">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Proposed Deadline</p>
+                    <p className="text-2xl font-extrabold text-foreground uppercase tracking-tighter">{formatDate(myProposal.proposedDeadline)}</p>
                 </div>
                 </div>
 
                 <div className="space-y-3">
-                <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60">Proposal Statement</p>
-                <div className="text-sm font-medium leading-relaxed text-[var(--foreground)]/80 bg-[var(--card)] p-5 rounded-xl border border-[var(--border)]/50 shadow-inner italic">
+                <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Proposal Statement</p>
+                <div className="text-sm font-medium leading-relaxed text-foreground/80 bg-card p-5 rounded-xl border border-border/50 shadow-inner italic">
                     "{myProposal.proposalText}"
                 </div>
                 </div>
@@ -256,3 +256,6 @@ const VendorTaskDetail = () => {
 };
 
 export default VendorTaskDetail;
+
+
+

@@ -11,7 +11,7 @@ export const Typography = React.forwardRef(
       helper: "text-helper leading-none",
       large: "text-lg font-semibold",
       small: "text-sm font-medium leading-none",
-      muted: "text-sm text-[var(--muted-foreground)]",
+      muted: "text-sm text-muted-foreground",
     }
 
     const defaultComponents = {
@@ -37,3 +37,6 @@ export const Typography = React.forwardRef(
   }
 )
 Typography.displayName = "Typography"
+
+
+

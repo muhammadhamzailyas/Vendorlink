@@ -6,9 +6,12 @@ export const Spinner = ({ size = 40, color = "var(--foreground)" }) => (
 );
 
 const Loader = () => (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--background)]">
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background">
     <Spinner />
   </div>
 );
 
 export default Loader;
+
+
+

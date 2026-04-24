@@ -42,20 +42,20 @@ const Payment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--muted)] flex items-center justify-center py-16 px-4">
+    <div className="min-h-screen bg-muted flex items-center justify-center py-16 px-4">
       <div className="w-full max-w-sm">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-10 text-center shadow-sm sm:p-12">
+        <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm sm:p-12">
           <div className="mb-6 flex justify-center">
-            <div className="h-20 w-20 rounded-full border border-[var(--border)] bg-[var(--muted)] flex items-center justify-center">
-              <CheckCircle size={50} className="text-[var(--foreground)]" />
+            <div className="h-20 w-20 rounded-full border border-border bg-muted flex items-center justify-center">
+              <CheckCircle size={50} className="text-foreground" />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold mb-4 text-[var(--foreground)]">
+          <h1 className="text-3xl font-bold mb-4 text-foreground">
             Under Progress
           </h1>
 
-          <p className="text-[var(--muted-foreground)] mb-8 leading-relaxed">
+          <p className="text-muted-foreground mb-8 leading-relaxed">
             Payment integration is currently under development. You can access
             your dashboard and start using VendorLink with the free plan.
           </p>
@@ -75,3 +75,6 @@ const Payment = () => {
 };
 
 export default Payment;
+
+
+

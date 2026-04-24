@@ -6,7 +6,7 @@ const PasswordInputField = ({ placeholder, value, onChange, showPassword, onTogg
   return (
     <div className="relative">
       <Input
-        className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 pr-11 font-medium"
+        className="h-12 rounded-xl border-0 bg-muted px-4 pr-11 font-medium"
         placeholder={placeholder}
         type={showPassword ? "text" : "password"}
         value={value}
@@ -15,7 +15,7 @@ const PasswordInputField = ({ placeholder, value, onChange, showPassword, onTogg
       <button
         type="button"
         onClick={onToggle}
-        className="absolute right-3 top-1/2 -translate-y-1/2 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 p-0 text-muted-foreground hover:text-foreground transition-colors"
       >
         {showPassword ? <VisibilityOff size={20} /> : <Visibility size={20} />}
       </button>
@@ -24,3 +24,6 @@ const PasswordInputField = ({ placeholder, value, onChange, showPassword, onTogg
 };
 
 export default PasswordInputField;
+
+
+

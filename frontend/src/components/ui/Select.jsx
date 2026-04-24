@@ -12,7 +12,7 @@ const Select = React.forwardRef(
         {label && (
           <Label
             htmlFor={selectId}
-            className="mb-1.5 block text-[13px] font-bold tracking-tight text-[var(--foreground)]/80 uppercase"
+            className="mb-1.5 block text-[13px] font-bold tracking-tight text-foreground/80 uppercase"
           >
             {label}
           </Label>
@@ -22,10 +22,10 @@ const Select = React.forwardRef(
             ref={ref}
             id={selectId}
             className={cn(
-              "flex h-11 w-full appearance-none rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2 pr-10 text-sm text-[var(--foreground)] shadow-xs transition-all duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--input-focus)]/15 focus-visible:border-[var(--input-focus)] focus-visible:shadow-soft",
-              "disabled:cursor-not-allowed disabled:bg-[var(--muted)] disabled:opacity-50",
-              error && "border-[var(--error)] focus-visible:ring-[var(--error)]/15",
+              "flex h-11 w-full appearance-none rounded-xl border border-input-border bg-input-bg px-4 py-2 pr-10 text-sm text-foreground shadow-xs transition-all duration-200",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-focus/15 focus-visible:border-input-focus focus-visible:shadow-soft",
+              "disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50",
+              error && "border-error focus-visible:ring-error/15",
               className
             )}
             {...props}
@@ -45,7 +45,7 @@ const Select = React.forwardRef(
               </>
             )}
           </select>
-          <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
+          <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         </div>
         {error && (
           <p className="mt-1 text-xs text-danger">{error}</p>
@@ -58,3 +58,6 @@ const Select = React.forwardRef(
 Select.displayName = "Select";
 
 export default Select;
+
+
+

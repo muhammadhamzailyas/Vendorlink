@@ -11,7 +11,7 @@ const Textarea = React.forwardRef(
         {label && (
           <Label
             htmlFor={inputId}
-            className="mb-1.5 block text-sm font-medium text-[var(--foreground)]/80"
+            className="mb-1.5 block text-sm font-medium text-foreground/80"
           >
             {label}
           </Label>
@@ -20,10 +20,10 @@ const Textarea = React.forwardRef(
           ref={ref}
           id={inputId}
           className={cn(
-            "flex min-h-[96px] w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--foreground)] shadow-xs transition-colors placeholder:text-[var(--muted-foreground)]",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--input-focus)]/15 focus-visible:border-[var(--input-focus)]",
-            "disabled:cursor-not-allowed disabled:bg-[var(--muted)] disabled:opacity-50",
-            error && "border-[var(--error)] focus-visible:ring-[var(--error)]/15",
+            "flex min-h-[96px] w-full rounded-lg border border-input-border bg-input-bg px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-focus/15 focus-visible:border-input-focus",
+            "disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-50",
+            error && "border-error focus-visible:ring-error/15",
             className
           )}
           {...props}
@@ -39,3 +39,6 @@ const Textarea = React.forwardRef(
 Textarea.displayName = "Textarea";
 
 export default Textarea;
+
+
+

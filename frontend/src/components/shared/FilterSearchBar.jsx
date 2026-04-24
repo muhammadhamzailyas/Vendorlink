@@ -20,7 +20,7 @@ const FilterSearchBar = ({
   const hasTabs = tabs.length > 0;
 
   return (
-    <Card className={cn("mb-8 overflow-hidden shadow-soft border-[var(--border)] bg-[var(--card)]", className)}>
+    <Card className={cn("mb-8 overflow-hidden shadow-soft border-border bg-card", className)}>
       <div className="flex flex-col gap-5 p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           {hasTabs ? (
@@ -37,7 +37,7 @@ const FilterSearchBar = ({
           ) : null}
 
           <div className="relative min-w-0 flex-1">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] z-10">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground z-10">
               <MagnifyingGlass size={18} />
             </div>
             <Input
@@ -53,18 +53,18 @@ const FilterSearchBar = ({
         </div>
 
         {hasTabs && showFilters ? (
-        <div className="border-t border-[var(--border)] pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="border-t border-border pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
           <Tabs 
             value={tabs[activeTab]} 
             onValueChange={(value) => onTabChange(tabs.indexOf(value))}
             className="w-full"
           >
-            <TabsList className="bg-[var(--muted)] p-1 h-auto flex flex-wrap justify-start gap-1 border border-[var(--border)]">
+            <TabsList className="bg-muted p-1 h-auto flex flex-wrap justify-start gap-1 border border-border">
               {tabs.map((label, index) => (
                 <TabsTrigger 
                   key={index} 
                   value={label}
-                  className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--background)] transition-all"
+                  className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-background transition-all"
                 >
                   {label}
                 </TabsTrigger>
@@ -79,5 +79,8 @@ const FilterSearchBar = ({
 };
 
 export default FilterSearchBar;
+
+
+
 
 

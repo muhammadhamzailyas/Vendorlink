@@ -14,6 +14,8 @@ export const getStatusColor = (status) => {
     case "suspended":
       return { color: "text-danger", bgcolor: "bg-danger-surface" };
     default:
-      return { color: "text-[var(--muted-foreground)]", bgcolor: "bg-[var(--muted)]" };
+      return { color: "text-muted-foreground", bgcolor: "bg-muted" };
   }
 };
+
+

@@ -43,24 +43,24 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
     : menuItems;
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[var(--border)] bg-[var(--card)]/80 px-4 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md sm:px-6">
       <div className="flex items-center gap-3 min-w-0">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 text-[var(--muted-foreground)]">
+            <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 text-muted-foreground">
               <List className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-72 bg-[var(--card)] border-r border-[var(--border)]">
+          <SheetContent side="left" className="p-0 w-72 bg-card border-r border-border">
             <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
             <SheetDescription className="sr-only">Access site navigation and user settings.</SheetDescription>
             <SheetHeader className="p-6 text-left space-y-0 pb-5">
-              <div className="flex items-center gap-2 font-extrabold tracking-tight text-[var(--foreground)] uppercase text-base">
+              <div className="flex items-center gap-2 font-extrabold tracking-tight text-foreground uppercase text-base">
                 <img src={logo} alt="Logo" className="h-8 w-8" />
                 Vendorlink
               </div>
             </SheetHeader>
-            <div className="h-px bg-[var(--border)]" />
+            <div className="h-px bg-border" />
             <ScrollArea className="h-[calc(100vh-80px)] px-3 py-6">
               <nav className="flex flex-col gap-1">
                 {filteredMenuItems.map((item) => {
@@ -72,10 +72,10 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
                         variant="ghost"
                         className={cn(
                           "w-full justify-start gap-3 h-11",
-                          active ? "bg-[var(--muted)] text-[var(--foreground)]" : "text-[var(--muted-foreground)]"
+                          active ? "bg-muted text-foreground" : "text-muted-foreground"
                         )}
                       >
-                        <Icon className={cn("h-5 w-5", active ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]")} />
+                        <Icon className={cn("h-5 w-5", active ? "text-foreground" : "text-muted-foreground")} />
                         <span className="font-bold uppercase tracking-tight text-[10px]">{item.text}</span>
                       </Button>
                     </Link>
@@ -87,11 +87,11 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
         </Sheet>
 
         <div className="min-w-0">
-          <h1 className="truncate text-sm font-extrabold text-[var(--foreground)] uppercase tracking-tight sm:text-base">
+          <h1 className="truncate text-sm font-extrabold text-foreground uppercase tracking-tight sm:text-base">
             {pageTitle}
           </h1>
           {pageSubtitle && (
-            <p className="hidden sm:block truncate text-xs font-medium text-[var(--muted-foreground)]">
+            <p className="hidden sm:block truncate text-xs font-medium text-muted-foreground">
               {pageSubtitle}
             </p>
           )}
@@ -106,36 +106,36 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-10 gap-2 rounded-xl px-2 hover:bg-[var(--muted)] border border-transparent hover:border-[var(--border)]">
+            <Button variant="ghost" className="h-10 gap-2 rounded-xl px-2 hover:bg-muted border border-transparent hover:border-border">
               <UserAvatar user={user} size="sm" />
               <div className="hidden flex-col items-start text-left sm:flex min-w-[80px]">
-                <span className="text-xs font-bold leading-none truncate w-24 text-[var(--foreground)]">{user?.username}</span>
-                <span className="text-[10px] text-[var(--muted-foreground)] uppercase leading-none mt-1">{user?.role}</span>
+                <span className="text-xs font-bold leading-none truncate w-24 text-foreground">{user?.username}</span>
+                <span className="text-[10px] text-muted-foreground uppercase leading-none mt-1">{user?.role}</span>
               </div>
-              <CaretRight className="h-4 w-4 text-[var(--muted-foreground)] hidden sm:block" />
+              <CaretRight className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl border border-[var(--border)]">
-            <div className="flex items-center gap-3 p-2 mb-2 bg-[var(--muted)] rounded-lg">
+          <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl border border-border">
+            <div className="flex items-center gap-3 p-2 mb-2 bg-muted rounded-lg">
                 <UserAvatar user={user} size="md" />
                 <div className="flex flex-col">
-                    <span className="text-sm font-bold truncate w-40 text-[var(--foreground)]">{user?.companyName || user?.username}</span>
-                    <span className="text-[10px] text-[var(--muted-foreground)] uppercase">{user?.email}</span>
+                    <span className="text-sm font-bold truncate w-40 text-foreground">{user?.companyName || user?.username}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase">{user?.email}</span>
                 </div>
             </div>
-            <div className="h-px bg-[var(--border)] my-2" />
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-[var(--muted)]">
-              <Link to={`/${user?.role}/profile`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+            <div className="h-px bg-border my-2" />
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-muted">
+              <Link to={`/${user?.role}/profile`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground hover:text-foreground">
                 <User className="h-4 w-4" /> Profile
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-[var(--muted)]">
-              <Link to={`/${user?.role}/settings`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-muted">
+              <Link to={`/${user?.role}/settings`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground hover:text-foreground">
                 <Gear className="h-4 w-4" /> Settings
               </Link>
             </DropdownMenuItem>
-            <div className="h-px bg-[var(--border)] my-2" />
-            <DropdownMenuItem onClick={onLogout} className="rounded-lg cursor-pointer py-2 text-[var(--error)] focus:bg-[var(--error)]/5 font-bold uppercase tracking-tight text-[10px]">
+            <div className="h-px bg-border my-2" />
+            <DropdownMenuItem onClick={onLogout} className="rounded-lg cursor-pointer py-2 text-error focus:bg-error/5 font-bold uppercase tracking-tight text-[10px]">
               <SignOut className="h-4 w-4 mr-2" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -146,3 +146,6 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
 };
 
 export default Header;
+
+
+

@@ -14,14 +14,14 @@ const DetailField = ({
   return (
     <div
       className={cn(
-        "rounded-xl border border-[var(--border)]/50 bg-[var(--muted)]/30 px-4 py-3.5 shadow-xs transition-all duration-300 hover:shadow-soft",
+        "rounded-xl border border-border/50 bg-muted/30 px-4 py-3.5 shadow-xs transition-all duration-300 hover:shadow-soft",
         colSpan === 2 && "sm:col-span-2",
         className
       )}
     >
       <p
         className={cn(
-          "text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] mb-1",
+          "text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1",
           labelClassName
         )}
       >
@@ -30,7 +30,7 @@ const DetailField = ({
       {isReactElement ? (
         children
       ) : (
-        <div className={cn("text-sm font-extrabold tracking-tight text-[var(--foreground)]", valueClassName)}>
+        <div className={cn("text-sm font-extrabold tracking-tight text-foreground", valueClassName)}>
           {children}
         </div>
       )}
@@ -39,3 +39,5 @@ const DetailField = ({
 };
 
 export { DetailField };
+
+

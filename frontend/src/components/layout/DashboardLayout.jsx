@@ -174,17 +174,17 @@ const DashboardLayout = () => {
 
   if (!user || !role) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[var(--background)]">
+      <div className="flex justify-center items-center h-screen bg-background">
         <div className="text-center">
-          <Skeleton className="h-10 w-64 mb-4 bg-[var(--muted)]" />
-          <Skeleton className="h-4 w-48 mx-auto bg-[var(--muted)]" />
+          <Skeleton className="h-10 w-64 mb-4 bg-muted" />
+          <Skeleton className="h-4 w-48 mx-auto bg-muted" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[var(--background)] overflow-hidden p-4">
+    <div className="flex h-screen bg-background overflow-hidden p-4">
       <Sidebar
         menuItems={main}
         collapsed={isSidebarCollapsed}
@@ -195,7 +195,7 @@ const DashboardLayout = () => {
       />
 
       <main className={cn(
-        "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out border border-[var(--border)] bg-[var(--card)] rounded-2xl overflow-hidden shadow-sm",
+        "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out border border-border bg-card rounded-2xl overflow-hidden shadow-sm",
         isSidebarCollapsed ? "lg:ml-[112px]" : "lg:ml-[288px]"
       )}>
         <Header 
@@ -206,7 +206,7 @@ const DashboardLayout = () => {
           onLogout={handleSignOut}
         />
 
-        <div className="flex-1 overflow-y-auto bg-[var(--background)] custom-scrollbar">
+        <div className="flex-1 overflow-y-auto bg-background custom-scrollbar">
           <div className={cn(
             "mx-auto px-4 py-8 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out",
             isSidebarCollapsed ? "max-w-[1600px]" : "max-w-7xl"
@@ -222,3 +222,6 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
+
+
+

@@ -32,16 +32,16 @@ const DetailProposalCard = ({
 
   return (
     <Card
-      className={`h-full ${proposal.status === "accepted" ? "border-[var(--ring)]/50 bg-[var(--muted)]/20" : "border-[var(--border)]"}`}
+      className={`h-full ${proposal.status === "accepted" ? "border-ring/50 bg-muted/20" : "border-border"}`}
     >
       <Card.Header>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            <h3 className="flex items-center text-base font-bold text-[var(--foreground)]">
-              <Person className="mr-2 text-[var(--foreground)]" />
+            <h3 className="flex items-center text-base font-bold text-foreground">
+              <Person className="mr-2 text-foreground" />
               {proposal.vendorId?.username}
             </h3>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-tight text-[var(--muted-foreground)]/60">
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-tight text-muted-foreground/60">
               Submitted {formatDate(proposal.submittedAt)}
             </p>
           </div>
@@ -50,31 +50,31 @@ const DetailProposalCard = ({
       </Card.Header>
 
       <Card.Content>
-        <div className="grid grid-cols-1 gap-3 text-sm text-[var(--foreground)]/80 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 text-sm text-foreground/80 sm:grid-cols-2">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Bid Amount</span>
-            <p className="flex items-center text-sm font-bold text-[var(--foreground)]">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Bid Amount</span>
+            <p className="flex items-center text-sm font-bold text-foreground">
               <CurrencyDollar className="h-4 w-4 mr-1.5 text-success" />
               PKR {proposal.bidAmount?.toLocaleString()}
             </p>
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Proposed Deadline</span>
-            <p className="flex items-center text-sm font-bold text-[var(--foreground)]">
-              <Clock className="mr-1.5 h-4 w-4 text-[var(--foreground)]" />
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Proposed Deadline</span>
+            <p className="flex items-center text-sm font-bold text-foreground">
+              <Clock className="mr-1.5 h-4 w-4 text-foreground" />
               {formatDate(proposal.proposedDeadline)}
             </p>
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Availability</span>
-            <p className="flex items-center text-sm font-bold text-[var(--foreground)]">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Availability</span>
+            <p className="flex items-center text-sm font-bold text-foreground">
               <Bolt className="mr-1.5 h-4 w-4 text-warning" />
               {proposal.availability}
             </p>
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Budget Utilization</span>
-            <p className="flex items-center text-sm font-bold text-[var(--foreground)]">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Budget Utilization</span>
+            <p className="flex items-center text-sm font-bold text-foreground">
               <Percent className="mr-1.5 h-4 w-4 text-info" />
               {budgetUsage}%
             </p>
@@ -82,9 +82,9 @@ const DetailProposalCard = ({
         </div>
 
         {expanded && (
-          <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--muted)]/70 p-4 shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
-            <h4 className="text-[10px] font-extrabold text-[var(--muted-foreground)] uppercase tracking-widest mb-2">Proposal Narrative</h4>
-            <p className="text-sm font-medium leading-relaxed text-[var(--foreground)]/80 whitespace-pre-wrap">
+          <div className="mt-4 rounded-xl border border-border bg-muted/70 p-4 shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
+            <h4 className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-2">Proposal Narrative</h4>
+            <p className="text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
               {proposal.proposalText}
             </p>
           </div>
@@ -96,7 +96,7 @@ const DetailProposalCard = ({
             variant="ghost"
             size="sm"
             onClick={() => setExpanded(!expanded)}
-            className="h-9 font-bold uppercase tracking-tight text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
+            className="h-9 font-bold uppercase tracking-tight text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             {expanded ? <CaretUp className="mr-1.5 h-4 w-4" /> : <CaretDown className="mr-1.5 h-4 w-4" />}
             {expanded ? "Show Less" : "Show More"}
@@ -156,8 +156,8 @@ const DetailProposalCard = ({
         </div>
 
         {proposal.status === "accepted" && (
-          <div className="mt-4 flex items-center justify-center rounded-lg bg-[var(--muted)]/40 py-2 border border-[var(--ring)]/10">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--foreground)]">
+          <div className="mt-4 flex items-center justify-center rounded-lg bg-muted/40 py-2 border border-ring/10">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-foreground">
               Accepted on {formatDate(proposal.acceptedAt)}
             </span>
           </div>
@@ -168,3 +168,6 @@ const DetailProposalCard = ({
 };
 
 export default DetailProposalCard;
+
+
+

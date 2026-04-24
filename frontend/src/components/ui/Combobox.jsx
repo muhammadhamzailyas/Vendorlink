@@ -33,7 +33,7 @@ export function Combobox({
           variant="secondary"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between rounded-xl h-11 border-[var(--input-border)] bg-[var(--input-bg)] font-normal text-sm", className)}
+          className={cn("w-full justify-between rounded-xl h-11 border-input-border bg-input-bg font-normal text-sm", className)}
         >
           {value
             ? options.find((option) => option.value === value)?.label
@@ -72,3 +72,6 @@ export function Combobox({
     </Popover>
   );
 }
+
+
+

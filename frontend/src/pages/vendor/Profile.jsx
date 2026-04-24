@@ -6,3 +6,6 @@ const VendorProfile = () => {
 };
 
 export default VendorProfile;
+
+
+

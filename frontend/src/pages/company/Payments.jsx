@@ -111,19 +111,19 @@ const CompanyPayments = () => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <Card.Content className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Wallet Balance</p>
-                  <p className="mt-1 text-2xl font-bold text-[var(--foreground)]">{formatCurrency(wallet?.balance)}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Wallet Balance</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{formatCurrency(wallet?.balance)}</p>
                 </Card.Content>
               </Card>
               <Card>
                 <Card.Content className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Active Contracts</p>
-                  <p className="mt-1 text-2xl font-bold text-[var(--foreground)]">{activeTasks.length}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Active Contracts</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{activeTasks.length}</p>
                 </Card.Content>
               </Card>
               <Card>
                 <Card.Content className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Pending Disbursement</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pending Disbursement</p>
                   <p className="mt-1 text-2xl font-bold text-warning-muted-fg">{formatCurrency(pendingTotal)}</p>
                 </Card.Content>
               </Card>
@@ -144,22 +144,22 @@ const CompanyPayments = () => {
                   >
                     <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3 sm:gap-4">
                       <div>
-                        <p className="text-[var(--muted-foreground)]">Total Budget</p>
-                        <p className="font-semibold text-[var(--foreground)]">{formatCurrency(task.totalBudget)}</p>
+                        <p className="text-muted-foreground">Total Budget</p>
+                        <p className="font-semibold text-foreground">{formatCurrency(task.totalBudget)}</p>
                       </div>
                       <div>
-                        <p className="text-[var(--muted-foreground)]">Paid</p>
+                        <p className="text-muted-foreground">Paid</p>
                         <p className="font-semibold text-success">{formatCurrency(task.totalPaid)}</p>
                       </div>
                       <div>
-                        <p className="text-[var(--muted-foreground)]">Pending</p>
+                        <p className="text-muted-foreground">Pending</p>
                         <p className="font-semibold text-warning-muted-fg">{formatCurrency(task.pendingAmount)}</p>
                       </div>
                     </div>
 
-                    <div className="h-2 overflow-hidden rounded-full bg-[var(--muted)]">
+                    <div className="h-2 overflow-hidden rounded-full bg-muted">
                       <div
-                        className="h-full rounded-full bg-[var(--foreground)] transition-all"
+                        className="h-full rounded-full bg-foreground transition-all"
                         style={{ width: `${task.totalBudget > 0 ? (task.totalPaid / task.totalBudget) * 100 : 0}%` }}
                       />
                     </div>
@@ -172,11 +172,11 @@ const CompanyPayments = () => {
                     ) : null}
 
                     {task.payments && task.payments.length > 0 ? (
-                      <div className="rounded-xl border border-[var(--border)] bg-[var(--muted)]/60 p-3">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Payment History</p>
+                      <div className="rounded-xl border border-border bg-muted/60 p-3">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Payment History</p>
                         <div className="space-y-2">
                           {task.payments.slice(0, 3).map((p) => (
-                            <div key={p._id} className="flex flex-col items-start justify-between gap-1.5 rounded-lg bg-[var(--input-bg)] px-3 py-2 text-sm sm:flex-row sm:items-center sm:gap-2">
+                            <div key={p._id} className="flex flex-col items-start justify-between gap-1.5 rounded-lg bg-input-bg px-3 py-2 text-sm sm:flex-row sm:items-center sm:gap-2">
                               <div className="flex items-center gap-2">
                                 {p.status === "completed" ? (
                                   <CheckCircle className="h-4 w-4 text-success" />
@@ -185,8 +185,8 @@ const CompanyPayments = () => {
                                 )}
                                 <span className="capitalize">{p.paymentType}</span>
                               </div>
-                              <span className="font-semibold text-[var(--foreground)]">{formatCurrency(p.amount)}</span>
-                              <span className="text-[var(--muted-foreground)]/70">{dayjs(p.createdAt).format("MMM D")}</span>
+                              <span className="font-semibold text-foreground">{formatCurrency(p.amount)}</span>
+                              <span className="text-muted-foreground/70">{dayjs(p.createdAt).format("MMM D")}</span>
                             </div>
                           ))}
                         </div>
@@ -235,16 +235,16 @@ const CompanyPayments = () => {
               {...form.register("notes")}
             />
 
-            <div className="rounded-lg bg-[var(--muted)] p-3 text-sm">
+            <div className="rounded-lg bg-muted p-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-[var(--muted-foreground)]">Amount</span>
+                <span className="text-muted-foreground">Amount</span>
                 <span>PKR {parseFloat(watchAmount || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-[var(--muted-foreground)]">
+              <div className="flex justify-between text-muted-foreground">
                 <span>Platform Fee (5%)</span>
                 <span>PKR {(parseFloat(watchAmount || 0) * 0.05).toLocaleString()}</span>
               </div>
-              <div className="mt-1 flex justify-between border-t border-[var(--border)] pt-1 font-semibold">
+              <div className="mt-1 flex justify-between border-t border-border pt-1 font-semibold">
                 <span>Vendor Receives</span>
                 <span>PKR {(parseFloat(watchAmount || 0) * 0.95).toLocaleString()}</span>
               </div>
@@ -267,3 +267,6 @@ const CompanyPayments = () => {
 };
 
 export default CompanyPayments;
+
+
+

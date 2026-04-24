@@ -149,7 +149,7 @@ const Login = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          className="h-12 rounded-xl bg-[var(--input-bg)] px-4"
+          className="h-12 rounded-xl bg-input-bg px-4"
           placeholder="Email"
           type="text"
           name="email"
@@ -161,7 +161,7 @@ const Login = () => {
 
         <div className="relative">
           <Input
-            className="h-12 rounded-xl bg-[var(--input-bg)] px-4 pr-11"
+            className="h-12 rounded-xl bg-input-bg px-4 pr-11"
             placeholder="Password"
             type={showPassword ? "text" : "password"}
             name="password"
@@ -175,7 +175,7 @@ const Login = () => {
             onClick={() => setShowPassword(!showPassword)}
             variant="ghost"
             size="sm"
-            className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 p-0 text-[var(--muted-foreground)] hover:bg-transparent"
+            className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 p-0 text-muted-foreground hover:bg-transparent"
           >
             {showPassword ? <VisibilityOff size={20} /> : <Visibility size={20} />}
           </Button>
@@ -184,7 +184,7 @@ const Login = () => {
         <div className="flex justify-end pt-2">
           <Link
             to="/forgot-password"
-            className="text-xs uppercase tracking-widest text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition"
+            className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition"
           >
             Forgot Password?
           </Link>
@@ -205,3 +205,6 @@ const Login = () => {
 };
 
 export default Login;
+
+
+

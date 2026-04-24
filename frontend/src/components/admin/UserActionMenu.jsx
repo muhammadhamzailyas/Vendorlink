@@ -32,7 +32,7 @@ const UserActionMenu = ({
         className="h-8 w-8 rounded-full"
       >
         {actionLoading ? (
-          <CircleNotch className="h-5 w-5 animate-spin text-[var(--muted-foreground)]" />
+          <CircleNotch className="h-5 w-5 animate-spin text-muted-foreground" />
         ) : (
           <MoreVert className="w-5 h-5" />
         )}
@@ -41,7 +41,7 @@ const UserActionMenu = ({
     <DropdownMenuContent align="end" className="w-48 p-1.5">
       <DropdownMenuItem 
         onClick={onView}
-        className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] focus:text-[var(--foreground)] focus:bg-[var(--muted)] cursor-pointer"
+        className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted cursor-pointer"
       >
         <Visibility className="mr-2 w-4 h-4" /> View Details
       </DropdownMenuItem>
@@ -51,7 +51,7 @@ const UserActionMenu = ({
           <DropdownMenuItem 
             onClick={onSuspend}
             disabled={actionLoading}
-            className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] focus:text-[var(--foreground)] focus:bg-[var(--muted)] cursor-pointer"
+            className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted cursor-pointer"
           >
             <Block className="mr-2 w-4 h-4" /> Suspend
           </DropdownMenuItem>
@@ -70,3 +70,6 @@ const UserActionMenu = ({
 );
 
 export default UserActionMenu;
+
+
+

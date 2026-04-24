@@ -32,18 +32,18 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-      <div className="bg-[var(--muted)] border border-[var(--ring)]/10 p-5 rounded-2xl">
+      <div className="bg-muted border border-ring/10 p-5 rounded-2xl">
           <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xs font-normal uppercase tracking-widest text-[var(--muted-foreground)]">Order Summary</h3>
-              <span className="px-2.5 py-1 bg-[var(--foreground)] text-[var(--background)] text-[10px] font-normal rounded-lg uppercase tracking-tight">
+              <h3 className="text-xs font-normal uppercase tracking-widest text-muted-foreground">Order Summary</h3>
+              <span className="px-2.5 py-1 bg-foreground text-background text-[10px] font-normal rounded-lg uppercase tracking-tight">
                 {planName}
               </span>
           </div>
           <div className="flex justify-between items-baseline">
-              <span className="text-[var(--muted-foreground)] text-sm font-normal">Monthly Subscription</span>
+              <span className="text-muted-foreground text-sm font-normal">Monthly Subscription</span>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-normal text-[var(--foreground)]">${planPrice}</span>
-                <span className="text-xs font-normal text-[var(--muted-foreground)]">/mo</span>
+                <span className="text-2xl font-normal text-foreground">${planPrice}</span>
+                <span className="text-xs font-normal text-muted-foreground">/mo</span>
               </div>
           </div>
       </div>
@@ -75,13 +75,13 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
             }} />
         </div>
 
-        <div className="flex items-center gap-2 text-[10px] text-[var(--muted-foreground)] bg-[var(--muted)]/30 p-3 rounded-xl border border-[var(--border)]/50">
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground bg-muted/30 p-3 rounded-xl border border-border/50">
             <Lock size={12} className="shrink-0" />
             <span className="font-normal uppercase tracking-tight">Secure encryption active. No amount will be charged until your account is verified.</span>
         </div>
       </div>
 
-      <div className="flex gap-4 pt-2 border-t border-[var(--border)]/50">
+      <div className="flex gap-4 pt-2 border-t border-border/50">
         <Button 
           type="button" 
           variant="secondary" 
@@ -108,3 +108,6 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
 };
 
 export default StripePaymentForm;
+
+
+

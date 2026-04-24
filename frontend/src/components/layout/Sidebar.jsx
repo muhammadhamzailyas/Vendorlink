@@ -27,7 +27,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
 
   return (
     <aside className={cn(
-      "fixed left-4 top-4 bottom-4 z-40 hidden flex-col border border-[var(--border)] bg-[var(--card)] transition-all duration-300 lg:flex rounded-2xl shadow-sm",
+      "fixed left-4 top-4 bottom-4 z-40 hidden flex-col border border-border bg-card transition-all duration-300 lg:flex rounded-2xl shadow-sm",
       collapsed ? "w-20" : "w-64"
     )}>
       <div className={cn(
@@ -54,7 +54,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
             variant="ghost" 
             size="icon" 
             onClick={onToggleCollapse}
-            className="h-9 w-9 text-[var(--muted-foreground)] hover:bg-[var(--muted)]/50 transition-colors"
+            className="h-9 w-9 text-muted-foreground hover:bg-muted/50 transition-colors"
           >
             <SidebarSimple className="h-5 w-5" />
           </Button>
@@ -67,21 +67,21 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
             variant="ghost" 
             size="icon" 
             onClick={onToggleCollapse}
-            className="h-9 w-9 text-[var(--muted-foreground)] hover:bg-[var(--muted)]/50 transition-colors"
+            className="h-9 w-9 text-muted-foreground hover:bg-muted/50 transition-colors"
           >
             <SidebarSimple className="h-5 w-5" />
           </Button>
         </div>
       )}
       
-      <div className="h-px bg-[var(--border)] mx-4" />
+      <div className="h-px bg-border mx-4" />
 
       <ScrollArea className="flex-1 px-3">
         <div className="flex flex-col gap-6 py-6">
           {/* Navigation Section */}
           <div className="flex flex-col gap-1">
             {!collapsed && (
-              <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--muted-foreground)] opacity-50">
+              <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50">
                 Navigation
               </p>
             )}
@@ -103,11 +103,11 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                         "w-full justify-start gap-3 h-10 transition-all duration-200",
                         collapsed ? "px-0 justify-center" : "px-3",
                         active 
-                          ? "bg-[var(--muted)] text-[var(--foreground)] shadow-xs" 
-                          : "text-[var(--muted-foreground)] hover:bg-[var(--muted)]/50 hover:text-[var(--foreground)]"
+                          ? "bg-muted text-foreground shadow-xs" 
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                       )}
                     >
-                      <Icon className={cn("h-5 w-5 shrink-0", active ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]")} />
+                      <Icon className={cn("h-5 w-5 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
                       {!collapsed && <span className="truncate font-bold uppercase tracking-tight text-[10px]">{item.text}</span>}
                     </Button>
                   </Link>
@@ -123,7 +123,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
             )) && (
             <div className="flex flex-col gap-1">
               {!collapsed && (
-                <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--muted-foreground)] opacity-50">
+                <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50">
                   Others
                 </p>
               )}
@@ -145,11 +145,11 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                           "w-full justify-start gap-3 h-10 transition-all duration-200",
                           collapsed ? "px-0 justify-center" : "px-3",
                           active 
-                            ? "bg-[var(--muted)] text-[var(--foreground)] shadow-xs" 
-                            : "text-[var(--muted-foreground)] hover:bg-[var(--muted)]/50 hover:text-[var(--foreground)]"
+                            ? "bg-muted text-foreground shadow-xs" 
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                         )}
                       >
-                        <Icon className={cn("h-5 w-5 shrink-0", active ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]")} />
+                        <Icon className={cn("h-5 w-5 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
                         {!collapsed && <span className="truncate font-bold uppercase tracking-tight text-[10px]">{item.text}</span>}
                       </Button>
                     </Link>
@@ -164,3 +164,6 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
 };
 
 export default Sidebar;
+
+
+

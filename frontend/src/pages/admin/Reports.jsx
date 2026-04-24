@@ -97,13 +97,13 @@ const Reports = () => {
     {
       key: "title",
       label: "Recent Task",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-foreground",
       render: (task) => task.title || "Untitled Task",
     },
     {
       key: "company",
       label: "Company",
-      cellClassName: "px-6 py-4 text-sm text-[var(--muted-foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-muted-foreground",
       render: (task) => task.companyId?.companyName || task.companyId?.email || "N/A",
     },
     {
@@ -115,7 +115,7 @@ const Reports = () => {
     {
       key: "deadline",
       label: "Deadline",
-      cellClassName: "px-6 py-4 text-sm text-[var(--muted-foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-muted-foreground",
       render: (task) => (task.deadline ? dayjs(task.deadline).format("MMM DD, YYYY") : "N/A"),
     },
   ];
@@ -145,23 +145,23 @@ const Reports = () => {
               <Card>
                 <Card.Header>
                   <div className="flex items-center gap-3">
-                    <People className="h-5 w-5 text-[var(--foreground)]" />
+                    <People className="h-5 w-5 text-foreground" />
                     <Card.Title>User Overview</Card.Title>
                   </div>
                   <Card.Description>Current approval state across platform users</Card.Description>
                 </Card.Header>
                 <Card.Content className="space-y-2">
-                  <p className="text-sm text-[var(--muted-foreground)] flex justify-between">
+                  <p className="text-sm text-muted-foreground flex justify-between">
                     <span>Approved:</span> 
-                    <span className="font-bold text-[var(--foreground)]">{userStats.approved}</span>
+                    <span className="font-bold text-foreground">{userStats.approved}</span>
                   </p>
-                  <p className="text-sm text-[var(--muted-foreground)] flex justify-between">
+                  <p className="text-sm text-muted-foreground flex justify-between">
                     <span>Pending:</span> 
-                    <span className="font-bold text-[var(--foreground)]">{userStats.pending}</span>
+                    <span className="font-bold text-foreground">{userStats.pending}</span>
                   </p>
-                  <p className="text-sm text-[var(--muted-foreground)] flex justify-between">
+                  <p className="text-sm text-muted-foreground flex justify-between">
                     <span>Rejected:</span> 
-                    <span className="font-bold text-[var(--foreground)]">{userStats.rejected}</span>
+                    <span className="font-bold text-foreground">{userStats.rejected}</span>
                   </p>
                 </Card.Content>
               </Card>
@@ -169,23 +169,23 @@ const Reports = () => {
               <Card>
                 <Card.Header>
                   <div className="flex items-center gap-3">
-                    <Task className="h-5 w-5 text-[var(--foreground)]" />
+                    <Task className="h-5 w-5 text-foreground" />
                     <Card.Title>Task Overview</Card.Title>
                   </div>
                   <Card.Description>Current task distribution by workflow status</Card.Description>
                 </Card.Header>
                 <Card.Content className="space-y-2">
-                  <p className="text-sm text-[var(--muted-foreground)] flex justify-between">
+                  <p className="text-sm text-muted-foreground flex justify-between">
                     <span>Open:</span> 
-                    <span className="font-bold text-[var(--foreground)]">{taskStats.open}</span>
+                    <span className="font-bold text-foreground">{taskStats.open}</span>
                   </p>
-                  <p className="text-sm text-[var(--muted-foreground)] flex justify-between">
+                  <p className="text-sm text-muted-foreground flex justify-between">
                     <span>In Progress:</span> 
-                    <span className="font-bold text-[var(--foreground)]">{taskStats.inProgress}</span>
+                    <span className="font-bold text-foreground">{taskStats.inProgress}</span>
                   </p>
-                  <p className="text-sm text-[var(--muted-foreground)] flex justify-between">
+                  <p className="text-sm text-muted-foreground flex justify-between">
                     <span>Completed:</span> 
-                    <span className="font-bold text-[var(--foreground)]">{taskStats.completed}</span>
+                    <span className="font-bold text-foreground">{taskStats.completed}</span>
                   </p>
                 </Card.Content>
               </Card>
@@ -209,3 +209,6 @@ const Reports = () => {
 };
 
 export default Reports;
+
+
+

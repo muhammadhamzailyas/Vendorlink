@@ -310,13 +310,13 @@ const UserManagement = () => {
     {
       key: "email",
       label: "Email",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]",
+      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-muted-foreground",
       render: (user) => user.email,
     },
     {
       key: "role",
       label: "Role",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-[var(--foreground)]/80 capitalize",
+      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-foreground/80 capitalize",
       render: (user) => user.role,
     },
     {
@@ -328,7 +328,7 @@ const UserManagement = () => {
     {
       key: "registered",
       label: "Registered",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]",
+      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-muted-foreground",
       render: (user) => (
         <>
           <div>{dayjs(user.createdAt).format("MMM DD, YYYY")}</div>
@@ -375,7 +375,7 @@ const UserManagement = () => {
         />
 
         {loading ? (
-          <Skeleton className="h-96 w-full rounded-2xl bg-[var(--muted)]" />
+          <Skeleton className="h-96 w-full rounded-2xl bg-muted" />
         ) : (
           <>
             <DataTable
@@ -506,3 +506,6 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+
+
+

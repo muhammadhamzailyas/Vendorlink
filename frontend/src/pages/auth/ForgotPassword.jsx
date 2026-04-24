@@ -57,7 +57,7 @@ const ForgotPassword = () => {
             autoComplete="email"
             placeholder="Enter your email"
             aria-label="Email input for password reset"
-            className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4"
+            className="h-12 rounded-xl border-0 bg-muted px-4"
           />
 
           <Button
@@ -76,6 +76,9 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
+
+
+
 
 
 

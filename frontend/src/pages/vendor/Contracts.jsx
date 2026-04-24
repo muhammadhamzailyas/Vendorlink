@@ -74,7 +74,7 @@ const Contracts = () => {
     {
       key: "task",
       label: "Task",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)]",
+      cellClassName: "px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground",
       render: (contract) => contract.taskTitle,
     },
     {
@@ -84,7 +84,7 @@ const Contracts = () => {
       render: (contract) => (
         <div className="flex items-center gap-2">
           <UserAvatar user={contract.companyUser || {}} name={contract.company} size="md" />
-          <span className="whitespace-nowrap text-sm text-[var(--muted-foreground)]">{contract.company}</span>
+          <span className="whitespace-nowrap text-sm text-muted-foreground">{contract.company}</span>
         </div>
       ),
     },
@@ -97,13 +97,13 @@ const Contracts = () => {
     {
       key: "value",
       label: "Value",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]",
+      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-muted-foreground",
       render: (contract) => `$${contract.value.toLocaleString()}`,
     },
     {
       key: "accepted",
       label: "Accepted",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]",
+      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-muted-foreground",
       render: (contract) => (contract.acceptedAt ? dayjs(contract.acceptedAt).format("MMM DD, YYYY") : "N/A"),
     },
   ];
@@ -167,7 +167,7 @@ const Contracts = () => {
           subtitle="Contracts derived from accepted proposals and their current task status"
           tableClassName="w-full min-w-[860px]"
           bodyClassName="divide-y divide-border"
-          rowClassName="hover:bg-[var(--muted)]"
+          rowClassName="hover:bg-muted"
         />
       )}
     </div>
@@ -176,3 +176,6 @@ const Contracts = () => {
 };
 
 export default Contracts;
+
+
+

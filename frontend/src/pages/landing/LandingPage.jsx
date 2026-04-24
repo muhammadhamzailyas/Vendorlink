@@ -43,7 +43,7 @@ const LandingPage = () => {
   }
 
   return (
-    <main className="bg-[var(--background)] min-h-screen">
+    <main className="bg-background min-h-screen">
       <Navbar scrollToSection={scrollToSection} />
       <HeroSection />
       <HowItWorksSection />
@@ -55,3 +55,6 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+
+
+

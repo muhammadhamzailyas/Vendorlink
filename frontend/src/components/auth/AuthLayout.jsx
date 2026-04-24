@@ -26,11 +26,11 @@ const AuthLayout = ({
   }, []);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6 overflow-hidden bg-[var(--muted)]">
+    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6 overflow-hidden bg-muted">
       <div className={`w-full ${maxWidth} relative z-10`}>
         <Card
           className={cn(
-            "overflow-hidden transition-all duration-500 ease-out motion-reduce:transition-none shadow-sm border-[var(--border)] bg-[var(--card)]",
+            "overflow-hidden transition-all duration-500 ease-out motion-reduce:transition-none shadow-sm border-border bg-card",
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
           )}
         >
@@ -41,10 +41,10 @@ const AuthLayout = ({
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
               )}
             >
-              <Card.Title className="text-2xl md:text-3xl font-bold mb-2 text-[var(--foreground)]">
+              <Card.Title className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
                 {title}
               </Card.Title>
-              <Card.Description className="text-sm md:text-md text-[var(--muted-foreground)]">
+              <Card.Description className="text-sm md:text-md text-muted-foreground">
                 {subtitle}
               </Card.Description>
             </div>
@@ -75,9 +75,9 @@ const AuthLayout = ({
                     mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
                   )}
                 >
-                  <div className="flex-1 h-px bg-[var(--border)]" />
-                  <span className="text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">Or</span>
-                  <div className="flex-1 h-px bg-[var(--border)]" />
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Or</span>
+                  <div className="flex-1 h-px bg-border" />
                 </div>
               </>
             )}
@@ -93,16 +93,16 @@ const AuthLayout = ({
             </div>
           </Card.Content>
 
-          <Card.Footer className="justify-center pt-5 pb-6 bg-[var(--muted)] border-t border-[var(--border)]">
-            <p className="text-center text-sm text-[var(--muted-foreground)]">
+          <Card.Footer className="justify-center pt-5 pb-6 bg-muted border-t border-border">
+            <p className="text-center text-sm text-muted-foreground">
               {footerText}{" "}
-              <Link to={footerLinkTo} className="font-bold transition text-[var(--foreground)] hover:opacity-80">
+              <Link to={footerLinkTo} className="font-bold transition text-foreground hover:opacity-80">
                 {footerLinkText}
               </Link>
               {extraFooterLink && (
                 <>
                   {" "}or{" "}
-                  <Link to={extraFooterLink.to} className="font-bold transition text-[var(--foreground)] hover:opacity-80">
+                  <Link to={extraFooterLink.to} className="font-bold transition text-foreground hover:opacity-80">
                     {extraFooterLink.text}
                   </Link>
                 </>
@@ -116,3 +116,6 @@ const AuthLayout = ({
 };
 
 export default AuthLayout;
+
+
+

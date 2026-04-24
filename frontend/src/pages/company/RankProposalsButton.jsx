@@ -54,14 +54,14 @@ const RankProposalsButton = ({ taskId, onRankingComplete, disabled }) => {
 
   if (ranking) {
     return (
-      <Card className="border-[var(--ring)]/20 bg-[var(--muted)]/30 p-4">
+      <Card className="border-ring/20 bg-muted/30 p-4">
         <div className="mb-3 flex items-center gap-2">
-          <CircleNotch className="h-4 w-4 animate-spin text-[var(--foreground)]" />
-          <span className="text-sm font-semibold text-[var(--foreground)]">AI Ranking in Progress</span>
+          <CircleNotch className="h-4 w-4 animate-spin text-foreground" />
+          <span className="text-sm font-semibold text-foreground">AI Ranking in Progress</span>
         </div>
-        <p className="mb-3 text-xs text-[var(--muted-foreground)]">{step}</p>
+        <p className="mb-3 text-xs text-muted-foreground">{step}</p>
         <Progress value={progress} className="h-2" />
-        <p className="mt-1 text-right text-xs text-[var(--muted-foreground)]">{Math.round(progress)}%</p>
+        <p className="mt-1 text-right text-xs text-muted-foreground">{Math.round(progress)}%</p>
       </Card>
     );
   }
@@ -79,3 +79,6 @@ const RankProposalsButton = ({ taskId, onRankingComplete, disabled }) => {
 };
 
 export default RankProposalsButton;
+
+
+

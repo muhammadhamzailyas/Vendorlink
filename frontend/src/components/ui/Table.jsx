@@ -25,7 +25,7 @@ TableBody.displayName = "TableBody";
 export const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
-    className={cn("border-b border-[var(--border)]/50 transition-all duration-200 hover:bg-[var(--muted)]/30", className)}
+    className={cn("border-b border-border/50 transition-all duration-200 hover:bg-muted/30", className)}
     {...props}
   />
 ));
@@ -35,7 +35,7 @@ export const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-6 text-left align-middle text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] [&:has([role=checkbox])]:pr-0",
+      "h-12 px-6 text-left align-middle text-[11px] font-bold uppercase tracking-wider text-muted-foreground [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}
@@ -46,13 +46,16 @@ TableHead.displayName = "TableHead";
 export const TableCell = React.forwardRef(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("px-6 py-4 align-middle text-sm text-[var(--foreground)]/80 [&:has([role=checkbox])]:pr-0", className)}
+    className={cn("px-6 py-4 align-middle text-sm text-foreground/80 [&:has([role=checkbox])]:pr-0", className)}
     {...props}
   />
 ));
 TableCell.displayName = "TableCell";
 
 export const TableCaption = React.forwardRef(({ className, ...props }, ref) => (
-  <caption ref={ref} className={cn("mt-4 text-sm text-[var(--muted-foreground)]", className)} {...props} />
+  <caption ref={ref} className={cn("mt-4 text-sm text-muted-foreground", className)} {...props} />
 ));
 TableCaption.displayName = "TableCaption";
+
+
+

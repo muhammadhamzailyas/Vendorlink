@@ -9,7 +9,7 @@ const SignupStep3 = ({ data, onFileChange, onRemoveFile, isCompany, onSubmit, on
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-medium text-[var(--muted-foreground)] mb-2">Verification Documents (Max 5MB each)</p>
+      <p className="text-sm font-medium text-muted-foreground mb-2">Verification Documents (Max 5MB each)</p>
       
       {isCompany ? (
         <div className="grid grid-cols-1 gap-4">
@@ -70,7 +70,7 @@ const SignupStep3 = ({ data, onFileChange, onRemoveFile, isCompany, onSubmit, on
         </div>
       )}
 
-      <div className="flex gap-4 pt-4 border-t border-[var(--border)]/50">
+      <div className="flex gap-4 pt-4 border-t border-border/50">
         <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
         <Button 
             variant="primary" 
@@ -88,3 +88,6 @@ const SignupStep3 = ({ data, onFileChange, onRemoveFile, isCompany, onSubmit, on
 };
 
 export default SignupStep3;
+
+
+

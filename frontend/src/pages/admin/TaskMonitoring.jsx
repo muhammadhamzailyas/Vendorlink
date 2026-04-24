@@ -114,13 +114,13 @@ const TaskMonitoring = () => {
   {
   key: "title",
   label: "Task Title",
-  cellClassName: "px-6 py-4 text-sm font-semibold text-[var(--foreground)]",
+  cellClassName: "px-6 py-4 text-sm font-semibold text-foreground",
   render: (task) => task.title || "N/A",
   },
   {
   key: "company",
   label: "Company",
-  cellClassName: "px-6 py-4 text-sm text-[var(--muted-foreground)]",
+  cellClassName: "px-6 py-4 text-sm text-muted-foreground",
   render: (task) => task.companyName || "N/A",
   },
   {
@@ -134,11 +134,11 @@ const TaskMonitoring = () => {
   label: "Created",
   render: (task) => (
   <>
-  <p className="text-sm text-[var(--foreground)]">
+  <p className="text-sm text-foreground">
   {task.createdAt ? dayjs(task.createdAt).format("MMM DD, YYYY") : "N/A"}
   </p>
   {task.createdAt && (
-  <p className="text-xs text-[var(--muted-foreground)]">
+  <p className="text-xs text-muted-foreground">
   {dayjs(task.createdAt).fromNow()}
   </p>
   )}
@@ -150,7 +150,7 @@ const TaskMonitoring = () => {
   label: "Deadline",
   render: (task) => (
   <>
-  <p className="text-sm text-[var(--foreground)]">
+  <p className="text-sm text-foreground">
   {task.deadline ? dayjs(task.deadline).format("MMM DD, YYYY") : "N/A"}
   </p>
   {task.deadline && dayjs(task.deadline).isBefore(dayjs()) && task.status !== "completed" && (
@@ -180,7 +180,7 @@ const TaskMonitoring = () => {
         <Card>
           <Card.Header>
             <div className="flex items-center gap-2">
-              <Assignment className="h-5 w-5 text-[var(--foreground)]" />
+              <Assignment className="h-5 w-5 text-foreground" />
               <Card.Title>Task Status Distribution</Card.Title>
             </div>
             <Card.Description>Current split across open, active, and completed work</Card.Description>
@@ -205,7 +205,7 @@ const TaskMonitoring = () => {
         <Card>
           <Card.Header>
             <div className="flex items-center gap-2">
-              <TrendUp className="h-5 w-5 text-[var(--foreground)]" />
+              <TrendUp className="h-5 w-5 text-foreground" />
               <Card.Title>Task Trends</Card.Title>
             </div>
             <Card.Description>Task volume by current workflow stage</Card.Description>
@@ -265,3 +265,6 @@ const TaskMonitoring = () => {
 };
 
 export default TaskMonitoring;
+
+
+

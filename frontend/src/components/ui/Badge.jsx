@@ -9,15 +9,15 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)]",
-        outline: "border-[var(--border)] text-[var(--foreground)]",
-        success: "border-[var(--badge-green-border)] bg-[var(--badge-green-bg)] text-[var(--badge-green-text)]",
-        warning: "border-[var(--badge-amber-border)] bg-[var(--badge-amber-bg)] text-[var(--badge-amber-text)]",
-        info: "border-[var(--badge-blue-border)] bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)]",
-        error: "border-[var(--badge-red-border)] bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]",
-        destructive: "border-[var(--badge-red-border)] bg-[var(--badge-red-bg)] text-[var(--badge-red-text)] shadow-sm",
-        purple: "border-[var(--badge-purple-border)] bg-[var(--badge-purple-bg)] text-[var(--badge-purple-text)]",
-        teal: "border-[var(--badge-teal-border)] bg-[var(--badge-teal-bg)] text-[var(--badge-teal-text)]",
+          "border-border bg-muted text-muted-foreground",
+        outline: "border-border text-foreground",
+        success: "border-badge-green-border bg-badge-green-bg text-badge-green-text",
+        warning: "border-badge-amber-border bg-badge-amber-bg text-badge-amber-text",
+        info: "border-badge-blue-border bg-badge-blue-bg text-badge-blue-text",
+        error: "border-badge-red-border bg-badge-red-bg text-badge-red-text",
+        destructive: "border-badge-red-border bg-badge-red-bg text-badge-red-text shadow-sm",
+        purple: "border-badge-purple-border bg-badge-purple-bg text-badge-purple-text",
+        teal: "border-badge-teal-border bg-badge-teal-bg text-badge-teal-text",
       },
     },
     defaultVariants: {
@@ -33,3 +33,6 @@ function Badge({ className, variant, ...props }) {
 }
 
 export { Badge, badgeVariants };
+
+
+

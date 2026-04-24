@@ -32,8 +32,8 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
     <div className="w-full">
       <div 
         className={cn(
-          "flex h-12 w-full items-stretch overflow-hidden rounded-xl bg-[var(--muted)] transition-all focus-within:ring-2 focus-within:ring-primary/20",
-          "border border-transparent focus-within:border-[var(--ring)]/30"
+          "flex h-12 w-full items-stretch overflow-hidden rounded-xl bg-muted transition-all focus-within:ring-2 focus-within:ring-primary/20",
+          "border border-transparent focus-within:border-ring/30"
         )}
       >
           {/* Custom Popover Country Selector (themed) */}
@@ -41,23 +41,23 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
             <PopoverTrigger asChild>
               <button 
                 type="button"
-                className="flex items-center gap-2 border-r border-[var(--border)]/20 bg-[var(--muted)]/30 px-3 transition-colors hover:bg-[var(--muted)]/50"
+                className="flex items-center gap-2 border-r border-border/20 bg-muted/30 px-3 transition-colors hover:bg-muted/50"
               >
-                <div className="flex h-3.5 w-5 overflow-hidden rounded-sm border border-[var(--border)]/10 bg-[var(--muted)] shrink-0">
+                <div className="flex h-3.5 w-5 overflow-hidden rounded-sm border border-border/10 bg-muted shrink-0">
                     {SelectedFlag ? <SelectedFlag /> : <span className="text-[8px]">{isoCode}</span>}
                 </div>
-                <span className="text-sm font-bold text-[var(--foreground)] tabular-nums whitespace-nowrap">{countryCode}</span>
-                <CaretDown className={cn("h-3.5 w-3.5 text-[var(--muted-foreground)]/60 transition-transform shrink-0", open && "rotate-180")} />
+                <span className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap">{countryCode}</span>
+                <CaretDown className={cn("h-3.5 w-3.5 text-muted-foreground/60 transition-transform shrink-0", open && "rotate-180")} />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-[340px] p-2 bg-popover border-[var(--border)] shadow-xl rounded-2xl overflow-hidden" align="start">
+            <PopoverContent className="w-[340px] p-2 bg-popover border-border shadow-xl rounded-2xl overflow-hidden" align="start">
               <div className="mb-2 p-1">
-                  <div className="relative bg-[var(--muted)]/50 rounded-lg overflow-hidden border border-[var(--border)]/50">
-                      <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]/60" />
+                  <div className="relative bg-muted/50 rounded-lg overflow-hidden border border-border/50">
+                      <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                       <input 
                         autoFocus
                         placeholder="MagnifyingGlass country..."
-                        className="w-full bg-transparent pl-9 pr-3 py-2.5 text-xs focus:outline-none text-[var(--foreground)] font-semibold"
+                        className="w-full bg-transparent pl-9 pr-3 py-2.5 text-xs focus:outline-none text-foreground font-semibold"
                         value={search}
                         onChange={(e) => setMagnifyingGlass(e.target.value)}
                       />
@@ -78,16 +78,16 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
                                 }}
                                 className={cn(
                                   "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all",
-                                  isoCode === c.code ? "bg-[var(--foreground)] text-[var(--foreground)] shadow-md" : "text-[var(--foreground)] hover:bg-[var(--muted)]"
+                                  isoCode === c.code ? "bg-foreground text-foreground shadow-md" : "text-foreground hover:bg-muted"
                                 )}
                               >
                                 <span className="flex items-center gap-3 pointer-events-none overflow-hidden flex-1">
-                                  <div className="flex h-3 w-5 overflow-hidden rounded-[1px] border border-[var(--border)]/10 shrink-0">
+                                  <div className="flex h-3 w-5 overflow-hidden rounded-[1px] border border-border/10 shrink-0">
                                       {CountryFlag && <CountryFlag />}
                                   </div>
                                   <span className="truncate">{c.name}</span>
                                 </span>
-                                <span className={cn("pointer-events-none shrink-0 tabular-nums text-right min-w-[60px] text-[11px]", isoCode === c.code ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]")}>
+                                <span className={cn("pointer-events-none shrink-0 tabular-nums text-right min-w-[60px] text-[11px]", isoCode === c.code ? "text-foreground" : "text-muted-foreground")}>
                                     {c.dial}
                                 </span>
                               </button>
@@ -100,7 +100,7 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
 
           {/* Numeric Input with Formatting */}
           <input
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none font-medium"
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none font-medium"
             placeholder="Phone Number"
             type="text"
             value={phone}
@@ -130,3 +130,6 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
 };
 
 export default PhoneInputField;
+
+
+

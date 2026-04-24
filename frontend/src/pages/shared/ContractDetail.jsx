@@ -138,7 +138,7 @@ const ContractDetail = () => {
     return (
       <PageTransition>
       <div className="space-y-8">
-        <div className="flex justify-center py-12"><CircleNotch className="w-6 h-6 animate-spin text-[var(--muted-foreground)]/70" /></div>
+        <div className="flex justify-center py-12"><CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" /></div>
       </div>
       </PageTransition>
     );
@@ -148,7 +148,7 @@ const ContractDetail = () => {
     return (
       <PageTransition>
       <div className="space-y-8">
-        <div className="text-center py-12 text-[var(--muted-foreground)]">Contract not found</div>
+        <div className="text-center py-12 text-muted-foreground">Contract not found</div>
       </div>
       </PageTransition>
     );
@@ -188,8 +188,8 @@ const ContractDetail = () => {
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">{contract.title || "Contract Detail"}</h2>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)]/60">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">{contract.title || "Contract Detail"}</h2>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
               <span>ID: {contract._id}</span>
               <Separator orientation="vertical" className="h-3" />
               <span>Created {formatDate(contract.createdAt)}</span>
@@ -209,18 +209,18 @@ const ContractDetail = () => {
             <DetailSection title="Contract Narrative" description="Document work scope, expected deliverables, and project identity.">
                 <div className="space-y-6">
                     <div>
-                        <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)] mb-2 flex items-center gap-1.5">
-                            <Info size={12} className="text-[var(--foreground)]" />
+                        <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
+                            <Info size={12} className="text-foreground" />
                             Description
                         </h4>
-                        <p className="text-sm font-medium leading-relaxed text-[var(--foreground)]/80 bg-[var(--muted)]/30 p-4 rounded-xl border border-[var(--border)]/50">
+                        <p className="text-sm font-medium leading-relaxed text-foreground/80 bg-muted/30 p-4 rounded-xl border border-border/50">
                             {contract.description || "No description provided."}
                         </p>
                     </div>
                     {contract.scope && (
                         <div>
-                            <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)] mb-2">Scope of Work</h4>
-                            <p className="text-sm font-medium leading-relaxed text-[var(--foreground)]/80">
+                            <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground mb-2">Scope of Work</h4>
+                            <p className="text-sm font-medium leading-relaxed text-foreground/80">
                                 {contract.scope}
                             </p>
                         </div>
@@ -229,9 +229,9 @@ const ContractDetail = () => {
             </DetailSection>
 
             <DetailSection title="Milestones & Deliverables" description="Financial checkpoints and delivery expectations.">
-                <Card className="overflow-hidden border-[var(--border)]/50 shadow-soft">
+                <Card className="overflow-hidden border-border/50 shadow-soft">
                     <Table>
-                        <TableHeader className="bg-[var(--muted)]/50">
+                        <TableHeader className="bg-muted/50">
                             <TableRow>
                                 <TableHead className="text-[10px] font-bold uppercase tracking-tight">Title</TableHead>
                                 <TableHead className="text-[10px] font-bold uppercase tracking-tight">Deadline</TableHead>
@@ -242,15 +242,15 @@ const ContractDetail = () => {
                         <TableBody>
                             {contract.milestones?.length > 0 ? (
                                 contract.milestones.map((m, i) => (
-                                    <TableRow key={i} className="group hover:bg-[var(--muted)]/20 transition-colors">
+                                    <TableRow key={i} className="group hover:bg-muted/20 transition-colors">
                                         <TableCell>
-                                            <div className="font-bold text-sm text-[var(--foreground)]">{m.title}</div>
-                                            {m.description && <div className="text-[11px] text-[var(--muted-foreground)] mt-0.5 line-clamp-1">{m.description}</div>}
+                                            <div className="font-bold text-sm text-foreground">{m.title}</div>
+                                            {m.description && <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{m.description}</div>}
                                         </TableCell>
-                                        <TableCell className="text-sm font-medium text-[var(--foreground)]/80">
+                                        <TableCell className="text-sm font-medium text-foreground/80">
                                             {m.deadline ? formatDate(m.deadline) : "N/A"}
                                         </TableCell>
-                                        <TableCell className="text-sm font-bold text-[var(--foreground)]">
+                                        <TableCell className="text-sm font-bold text-foreground">
                                             PKR {m.amount?.toLocaleString()}
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -260,7 +260,7 @@ const ContractDetail = () => {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center text-sm text-[var(--muted-foreground)]">
+                                    <TableCell colSpan={4} className="h-24 text-center text-sm text-muted-foreground">
                                         No milestones defined for this contract.
                                     </TableCell>
                                 </TableRow>
@@ -271,14 +271,14 @@ const ContractDetail = () => {
             </DetailSection>
 
             <DetailSection title="Discussion & Context" description="Shared communication history for this agreement.">
-                <Card className="bg-[var(--muted)]/20 border-[var(--border)]/50 shadow-none">
+                <Card className="bg-muted/20 border-border/50 shadow-none">
                     <Card.Content className="p-4 space-y-4">
                         {contract.notes?.length > 0 ? (
                         <div className="space-y-3">
                             {contract.notes.map((note, i) => (
-                            <div key={i} className="group relative flex flex-col gap-1 p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]/50 shadow-soft">
-                                <p className="text-[13px] font-medium text-[var(--foreground)]/80 leading-relaxed">{note.content}</p>
-                                <p className="text-[9px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/40 mt-1">
+                            <div key={i} className="group relative flex flex-col gap-1 p-4 rounded-xl bg-card border border-border/50 shadow-soft">
+                                <p className="text-[13px] font-medium text-foreground/80 leading-relaxed">{note.content}</p>
+                                <p className="text-[9px] font-extrabold uppercase tracking-widest text-muted-foreground/40 mt-1">
                                     {note.createdAt ? formatDate(note.createdAt) : ""}
                                 </p>
                             </div>
@@ -286,7 +286,7 @@ const ContractDetail = () => {
                         </div>
                         ) : (
                             <div className="text-center py-6">
-                                <p className="text-xs font-bold uppercase tracking-tight text-[var(--muted-foreground)]/60">No notes added yet</p>
+                                <p className="text-xs font-bold uppercase tracking-tight text-muted-foreground/60">No notes added yet</p>
                             </div>
                         )}
                         
@@ -297,7 +297,7 @@ const ContractDetail = () => {
                                 onChange={(e) => setNoteText(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
                                 placeholder="Add a clarification note..."
-                                className="flex-1 h-11 bg-[var(--card)] rounded-xl border-[var(--border)]/50"
+                                className="flex-1 h-11 bg-card rounded-xl border-border/50"
                             />
                             <Button onClick={handleAddNote} className="h-11 px-6 font-bold uppercase tracking-tight shadow-soft">
                                 Add Note
@@ -309,22 +309,22 @@ const ContractDetail = () => {
           </div>
 
           <div className="space-y-6">
-            <Card className="shadow-soft border-[var(--border)]/50">
+            <Card className="shadow-soft border-border/50">
                 <Card.Header className="pb-3">
-                    <Card.Title className="text-xs font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]">Contract Summary</Card.Title>
+                    <Card.Title className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Contract Summary</Card.Title>
                 </Card.Header>
                 <Card.Content className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60">Total Budget</p>
-                            <p className="text-lg font-bold text-[var(--foreground)] flex items-center gap-1">
+                            <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60">Total Budget</p>
+                            <p className="text-lg font-bold text-foreground flex items-center gap-1">
                                 <CurrencyDollar size={16} className="text-success" />
                                 {contract.totalBudget?.toLocaleString()}
                             </p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60">Category</p>
-                            <p className="text-sm font-bold text-[var(--foreground)] uppercase tracking-tight truncate">{contract.category || "General"}</p>
+                            <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60">Category</p>
+                            <p className="text-sm font-bold text-foreground uppercase tracking-tight truncate">{contract.category || "General"}</p>
                         </div>
                     </div>
 
@@ -332,18 +332,18 @@ const ContractDetail = () => {
 
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--muted-foreground)] uppercase">
-                                <Calendar size={14} className="text-[var(--foreground)]" />
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase">
+                                <Calendar size={14} className="text-foreground" />
                                 Start Date
                             </div>
-                            <span className="text-[11px] font-bold text-[var(--foreground)]">{contract.projectStartDate ? formatDate(contract.projectStartDate) : "N/A"}</span>
+                            <span className="text-[11px] font-bold text-foreground">{contract.projectStartDate ? formatDate(contract.projectStartDate) : "N/A"}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--muted-foreground)] uppercase">
-                                <Calendar size={14} className="text-[var(--foreground)]" />
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase">
+                                <Calendar size={14} className="text-foreground" />
                                 End Date
                             </div>
-                            <span className="text-[11px] font-bold text-[var(--foreground)]">{contract.projectEndDate ? formatDate(contract.projectEndDate) : "N/A"}</span>
+                            <span className="text-[11px] font-bold text-foreground">{contract.projectEndDate ? formatDate(contract.projectEndDate) : "N/A"}</span>
                         </div>
                     </div>
 
@@ -351,16 +351,16 @@ const ContractDetail = () => {
 
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase">Company Approved</span>
-                            <div className={`h-2 w-2 rounded-full ${contract.companyApproved ? "bg-success" : "bg-[var(--muted)]"}`} />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">Company Approved</span>
+                            <div className={`h-2 w-2 rounded-full ${contract.companyApproved ? "bg-success" : "bg-muted"}`} />
                         </div>
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase">Vendor Approved</span>
-                            <div className={`h-2 w-2 rounded-full ${contract.vendorApproved ? "bg-success" : "bg-[var(--muted)]"}`} />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">Vendor Approved</span>
+                            <div className={`h-2 w-2 rounded-full ${contract.vendorApproved ? "bg-success" : "bg-muted"}`} />
                         </div>
                     </div>
                 </Card.Content>
-                <Card.Footer className="bg-[var(--muted)]/30 p-4 border-t border-[var(--border)]/50 flex flex-col gap-2">
+                <Card.Footer className="bg-muted/30 p-4 border-t border-border/50 flex flex-col gap-2">
                     {canApprove && (
                         <Button onClick={handleApprove} disabled={actionLoading} variant="primary" className="w-full font-bold uppercase tracking-tight shadow-soft">
                             <Check className="w-4 h-4 mr-1.5" />
@@ -379,7 +379,7 @@ const ContractDetail = () => {
                             Cancel Contract
                         </Button>
                     )}
-                    <Button onClick={handleDownload} variant="outline" className="w-full font-bold uppercase tracking-tight border-[var(--border)]/50 bg-[var(--card)]">
+                    <Button onClick={handleDownload} variant="outline" className="w-full font-bold uppercase tracking-tight border-border/50 bg-card">
                         <Download className="w-4 h-4 mr-1.5" />
                         Download HTML
                     </Button>
@@ -392,13 +392,13 @@ const ContractDetail = () => {
                 </Card.Footer>
             </Card>
 
-            <Card className="border-[var(--ring)]/10 bg-[var(--muted)]/10 shadow-none">
+            <Card className="border-ring/10 bg-muted/10 shadow-none">
                 <Card.Content className="p-4">
                     <div className="flex gap-3">
-                        <div className="mt-0.5 rounded-full bg-[var(--foreground)]/10 p-1">
-                            <Info size={14} className="text-[var(--foreground)]" />
+                        <div className="mt-0.5 rounded-full bg-foreground/10 p-1">
+                            <Info size={14} className="text-foreground" />
                         </div>
-                        <p className="text-[11px] font-medium leading-relaxed text-[var(--muted-foreground)] italic">
+                        <p className="text-[11px] font-medium leading-relaxed text-muted-foreground italic">
                             Both parties must approve the contract before it transitions to "Active" status. Once active, milestone tracking begins.
                         </p>
                     </div>
@@ -444,3 +444,6 @@ const ContractDetail = () => {
 };
 
 export default ContractDetail;
+
+
+

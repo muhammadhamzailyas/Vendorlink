@@ -63,7 +63,7 @@ const YEAR_OPTIONS = Array.from(
 const CompanyBusinessFields = ({ data, onChange }) => (
   <>
     <Input
-      className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+      className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
       placeholder="Company/Business Name"
       value={data.companyName}
       onChange={(e) => onChange({ companyName: e.target.value })}
@@ -86,7 +86,7 @@ const CompanyBusinessFields = ({ data, onChange }) => (
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+          className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
           placeholder="Registration Number / License No."
           type="text"
           value={data.registrationNumber}
@@ -96,7 +96,7 @@ const CompanyBusinessFields = ({ data, onChange }) => (
           }}
         />
         <Input
-          className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+          className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
           placeholder="Tax ID / VAT / NTN Number"
           type="text"
           value={data.ntn}
@@ -127,13 +127,13 @@ const CompanyBusinessFields = ({ data, onChange }) => (
         />
     </div>
     <Input
-      className="h-12 rounded-xl border-0 bg-[var(--muted)] px-4 font-medium"
+      className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
       placeholder="Company Website (optional)"
       value={data.website}
       onChange={(e) => onChange({ website: e.target.value })}
     />
     <Textarea
-      className="min-h-24 rounded-xl border-0 bg-[var(--muted)] px-4 py-3 font-medium"
+      className="min-h-24 rounded-xl border-0 bg-muted px-4 py-3 font-medium"
       placeholder="Briefly describe your company and services..."
       value={data.description}
       onChange={(e) => onChange({ description: e.target.value })}
@@ -142,3 +142,6 @@ const CompanyBusinessFields = ({ data, onChange }) => (
 );
 
 export default CompanyBusinessFields;
+
+
+

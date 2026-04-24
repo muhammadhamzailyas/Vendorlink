@@ -95,7 +95,7 @@ const WalletDashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--ring)] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-ring border-t-transparent" />
       </div>
     );
   }
@@ -111,14 +111,14 @@ const WalletDashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2 space-y-8">
-            <Card className="shadow-soft border-[var(--border)]/50">
-                <Card.Header className="pb-4 border-b border-[var(--border)]/50 bg-[var(--muted)]/20">
+            <Card className="shadow-soft border-border/50">
+                <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
                             <Card.Title className="text-sm font-bold uppercase tracking-tight">Ledger & Pulse</Card.Title>
                             <Card.Description className="text-xs">Latest wallet activity and transfer records.</Card.Description>
                         </div>
-                        <Button variant="outline" size="xs" onClick={refreshWallet} className="font-bold uppercase tracking-tight bg-[var(--card)]">
+                        <Button variant="outline" size="xs" onClick={refreshWallet} className="font-bold uppercase tracking-tight bg-card">
                             <ArrowsClockwise className="h-3.5 w-3.5 mr-1.5" />
                             Sync Wallet
                         </Button>
@@ -154,7 +154,7 @@ const WalletDashboard = () => {
                                 key: "amount",
                                 label: "Amount",
                                 cellClassName: "px-6 py-4",
-                                render: (txn) => <span className="font-extrabold tracking-tighter text-[var(--foreground)] uppercase">PKR {txn.amount?.toLocaleString()}</span>,
+                                render: (txn) => <span className="font-extrabold tracking-tighter text-foreground uppercase">PKR {txn.amount?.toLocaleString()}</span>,
                                 },
                                 {
                                 key: "status",
@@ -166,7 +166,7 @@ const WalletDashboard = () => {
                                 key: "createdAt",
                                 label: "Timestamp",
                                 cellClassName: "px-6 py-4",
-                                render: (txn) => <span className="text-[var(--muted-foreground)] font-bold text-[11px] uppercase">{dayjs(txn.createdAt).format("MMM D, YYYY")}</span>,
+                                render: (txn) => <span className="text-muted-foreground font-bold text-[11px] uppercase">{dayjs(txn.createdAt).format("MMM D, YYYY")}</span>,
                                 },
                             ]}
                         />
@@ -176,10 +176,10 @@ const WalletDashboard = () => {
         </div>
 
         <div className="space-y-6">
-            <Card className="shadow-soft border-[var(--border)]/50">
-                <Card.Header className="pb-3 border-b border-[var(--border)]/50 bg-[var(--muted)]/20 px-5 py-4">
-                    <Card.Title className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)] flex items-center gap-2">
-                        <ShieldCheck className="h-3.5 w-3.5 text-[var(--foreground)]" />
+            <Card className="shadow-soft border-border/50">
+                <Card.Header className="pb-3 border-b border-border/50 bg-muted/20 px-5 py-4">
+                    <Card.Title className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                        <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
                         Treasury Actions
                     </Card.Title>
                 </Card.Header>
@@ -207,7 +207,7 @@ const WalletDashboard = () => {
 
                     {showDeposit && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
-                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60">Load Capital</p>
+                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Load Capital</p>
                             <form onSubmit={depositForm.handleSubmit(onDeposit)} className="space-y-4">
                                 <Input
                                     label="PKR Amount"
@@ -215,13 +215,13 @@ const WalletDashboard = () => {
                                     placeholder="Min 100"
                                     error={depositForm.formState.errors.amount?.message}
                                     {...depositForm.register("amount")}
-                                    className="h-11 bg-[var(--muted)]/20"
+                                    className="h-11 bg-muted/20"
                                 />
                                 <Select
                                     label="Gateway"
                                     options={paymentMethods}
                                     {...depositForm.register("paymentMethod")}
-                                    className="h-11 bg-[var(--muted)]/20"
+                                    className="h-11 bg-muted/20"
                                 />
                                 <Button type="submit" loading={depositMutation.isPending} className="w-full font-bold uppercase tracking-tight h-11">
                                     Finalize Deposit
@@ -232,7 +232,7 @@ const WalletDashboard = () => {
 
                     {showWithdraw && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
-                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60">Asset Liquidation</p>
+                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Asset Liquidation</p>
                             <form onSubmit={withdrawForm.handleSubmit(onWithdraw)} className="space-y-4">
                                 <Input
                                     label="PKR Amount"
@@ -240,13 +240,13 @@ const WalletDashboard = () => {
                                     placeholder="Min 500"
                                     error={withdrawForm.formState.errors.amount?.message}
                                     {...withdrawForm.register("amount")}
-                                    className="h-11 bg-[var(--muted)]/20"
+                                    className="h-11 bg-muted/20"
                                 />
                                 <Select
                                     label="Payout Method"
                                     options={paymentMethods}
                                     {...withdrawForm.register("paymentMethod")}
-                                    className="h-11 bg-[var(--muted)]/20"
+                                    className="h-11 bg-muted/20"
                                 />
                                 <Button type="submit" loading={withdrawMutation.isPending} variant="primary" className="w-full font-bold uppercase tracking-tight h-11 bg-warning hover:bg-warning-dark border-none">
                                     Initiate Payout
@@ -257,9 +257,9 @@ const WalletDashboard = () => {
                 </Card.Content>
             </Card>
 
-            <Card className="border-[var(--ring)]/10 bg-[var(--muted)]/10 shadow-none">
+            <Card className="border-ring/10 bg-muted/10 shadow-none">
                 <Card.Content className="p-4">
-                    <p className="text-[10px] font-bold leading-relaxed text-[var(--muted-foreground)] uppercase tracking-tight italic">
+                    <p className="text-[10px] font-bold leading-relaxed text-muted-foreground uppercase tracking-tight italic">
                         All transactions are processed through encrypted channels and verified by the treasury audit team before settlement.
                     </p>
                 </Card.Content>
@@ -271,3 +271,6 @@ const WalletDashboard = () => {
 };
 
 export default WalletDashboard;
+
+
+

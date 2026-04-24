@@ -60,10 +60,10 @@ const InputOTP = React.forwardRef(({ className, length = 6, value = "", onChange
           disabled={disabled}
           autoComplete="one-time-code"
           className={cn(
-            "flex h-12 w-10 md:h-16 md:w-12 items-center justify-center rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] text-center text-2xl font-black text-[var(--foreground)] shadow-sm transition-all outline-none",
-            "focus:border-[var(--foreground)] focus:ring-4 focus:ring-[var(--foreground)]/5",
+            "flex h-12 w-10 md:h-16 md:w-12 items-center justify-center rounded-2xl border-2 border-border bg-card text-center text-2xl font-black text-foreground shadow-sm transition-all outline-none",
+            "focus:border-foreground focus:ring-4 focus:ring-foreground/5",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            value[index] ? "border-[var(--foreground)]" : "border-[var(--border)]"
+            value[index] ? "border-foreground" : "border-border"
           )}
         />
       ))}
@@ -74,3 +74,6 @@ const InputOTP = React.forwardRef(({ className, length = 6, value = "", onChange
 InputOTP.displayName = "InputOTP";
 
 export { InputOTP };
+
+
+

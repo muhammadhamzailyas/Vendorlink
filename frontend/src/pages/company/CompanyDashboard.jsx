@@ -172,8 +172,8 @@ const CompanyDashboard = () => {
       cellClassName: "px-6 py-4",
       render: (task) => (
         <>
-          <p className="text-sm font-semibold text-[var(--foreground)]">{task.title || "Untitled task"}</p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{task.category || "General"}</p>
+          <p className="text-sm font-semibold text-foreground">{task.title || "Untitled task"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{task.category || "General"}</p>
         </>
       ),
     },
@@ -186,13 +186,13 @@ const CompanyDashboard = () => {
     {
       key: "budget",
       label: "Budget",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-foreground",
       render: (task) => `$${(task.budget || 0).toLocaleString()}`,
     },
     {
       key: "proposals",
       label: "Proposals",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80",
       render: (task) => proposalsByTaskId[task._id] || 0,
     },
     {
@@ -201,8 +201,8 @@ const CompanyDashboard = () => {
       cellClassName: "px-6 py-4",
       render: (task) => (
         <>
-          <p className="text-sm text-[var(--foreground)]">{dayjs(task.createdAt).format("MMM DD, YYYY")}</p>
-          <p className="text-xs text-[var(--muted-foreground)]">{dayjs(task.createdAt).fromNow()}</p>
+          <p className="text-sm text-foreground">{dayjs(task.createdAt).format("MMM DD, YYYY")}</p>
+          <p className="text-xs text-muted-foreground">{dayjs(task.createdAt).fromNow()}</p>
         </>
       ),
     },
@@ -250,7 +250,7 @@ const CompanyDashboard = () => {
               <Card>
                 <Card.Header className="pb-2">
                   <div className="flex items-center gap-2">
-                      <TrendUp className="h-5 w-5 text-[var(--foreground)]" />
+                      <TrendUp className="h-5 w-5 text-foreground" />
                       <div>
                           <Card.Title className="text-sm uppercase tracking-tight">Task Pulse Trends</Card.Title>
                           <Card.Description className="text-xs">Task creation volume across the last six months</Card.Description>
@@ -277,7 +277,7 @@ const CompanyDashboard = () => {
               <Card>
                 <Card.Header className="pb-2">
                   <div className="flex items-center gap-2">
-                      <PieChartIcon className="h-5 w-5 text-[var(--foreground)]" />
+                      <PieChartIcon className="h-5 w-5 text-foreground" />
                       <div>
                           <Card.Title className="text-sm uppercase tracking-tight">Task Status Split</Card.Title>
                           <Card.Description className="text-xs">Open, active, and completed work</Card.Description>
@@ -303,7 +303,7 @@ const CompanyDashboard = () => {
                           {taskStatusData.map((entry) => (
                           <div key={entry.name} className="flex items-center gap-2">
                               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                              <span className="text-[11px] font-bold uppercase tracking-tight text-[var(--muted-foreground)]">{entry.name}</span>
+                              <span className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground">{entry.name}</span>
                           </div>
                           ))}
                       </div>
@@ -324,7 +324,7 @@ const CompanyDashboard = () => {
               <Card>
                 <Card.Header className="pb-2">
                   <div className="flex items-center gap-2">
-                      <BarChartIcon className="h-5 w-5 text-[var(--foreground)]" />
+                      <BarChartIcon className="h-5 w-5 text-foreground" />
                       <div>
                           <Card.Title className="text-sm uppercase tracking-tight">Proposals per Task</Card.Title>
                           <Card.Description className="text-xs">Top 5 tasks by proposal count</Card.Description>
@@ -360,7 +360,7 @@ const CompanyDashboard = () => {
               <Card>
                 <Card.Header className="pb-2">
                   <div className="flex items-center gap-2">
-                      <PieChartIcon className="h-5 w-5 text-[var(--foreground)]" />
+                      <PieChartIcon className="h-5 w-5 text-foreground" />
                       <div>
                           <Card.Title className="text-sm uppercase tracking-tight">Budget Allocation</Card.Title>
                           <Card.Description className="text-xs">Spending distribution by category</Card.Description>
@@ -402,7 +402,7 @@ const CompanyDashboard = () => {
             title="Recent Tasks"
             subtitle="Track latest tasks and proposal activity"
             emptyState="No tasks found yet."
-            emptyCellClassName="px-6 py-10 text-center text-sm text-[var(--muted-foreground)]"
+            emptyCellClassName="px-6 py-10 text-center text-sm text-muted-foreground"
           />
         </>
       )}
@@ -412,3 +412,6 @@ const CompanyDashboard = () => {
 };
 
 export default CompanyDashboard;
+
+
+

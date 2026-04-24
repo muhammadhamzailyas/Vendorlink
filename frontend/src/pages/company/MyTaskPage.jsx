@@ -59,8 +59,8 @@ const MyTaskPage = () => {
       label: "Task Title",
       render: (task) => (
         <>
-          <p className="text-sm font-semibold text-[var(--foreground)]">{task.title}</p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-0.5 line-clamp-1">{task.description || "No description"}</p>
+          <p className="text-sm font-semibold text-foreground">{task.title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{task.description || "No description"}</p>
         </>
       ),
     },
@@ -152,3 +152,6 @@ const MyTaskPage = () => {
 };
 
 export default MyTaskPage;
+
+
+

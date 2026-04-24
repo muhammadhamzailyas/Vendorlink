@@ -11,7 +11,7 @@ const PaymentSuccess = () => {
       <div className="mx-auto max-w-3xl space-y-8 py-10">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Payment Successful</h1>
-          <p className="text-[var(--muted-foreground)]">
+          <p className="text-muted-foreground">
             Your transaction has been recorded and wallet balances will update shortly.
           </p>
         </div>
@@ -19,7 +19,7 @@ const PaymentSuccess = () => {
         <Card>
           <Card.Content className="py-10 text-center">
             <CheckCircle className="mx-auto mb-4 h-16 w-16 text-success" />
-            <p className="mx-auto max-w-lg text-sm leading-6 text-[var(--muted-foreground)]">
+            <p className="mx-auto max-w-lg text-sm leading-6 text-muted-foreground">
               The payment completed successfully. You can return to your payment dashboard to view updated transaction history and balance details.
             </p>
           </Card.Content>
@@ -35,3 +35,6 @@ const PaymentSuccess = () => {
 };
 
 export default PaymentSuccess;
+
+
+

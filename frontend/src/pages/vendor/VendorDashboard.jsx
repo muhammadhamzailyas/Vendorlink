@@ -163,15 +163,15 @@ const VendorDashboard = () => {
       cellClassName: "px-6 py-4",
       render: (proposal) => (
         <>
-          <p className="text-sm font-semibold text-[var(--foreground)]">{proposal.task?.title || "Untitled task"}</p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Proposal #{proposal._id?.slice(-6) || "N/A"}</p>
+          <p className="text-sm font-semibold text-foreground">{proposal.task?.title || "Untitled task"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Proposal #{proposal._id?.slice(-6) || "N/A"}</p>
         </>
       ),
     },
     {
       key: "category",
       label: "Category",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80",
       render: (proposal) => proposal.task?.category || "General",
     },
     {
@@ -183,7 +183,7 @@ const VendorDashboard = () => {
     {
       key: "bid",
       label: "Bid",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-foreground",
       render: (proposal) => `$${(proposal.bidAmount || proposal.amount || 0).toLocaleString()}`,
     },
     {
@@ -192,8 +192,8 @@ const VendorDashboard = () => {
       cellClassName: "px-6 py-4",
       render: (proposal) => (
         <>
-          <p className="text-sm text-[var(--foreground)]">{dayjs(proposal.createdAt).format("MMM DD, YYYY")}</p>
-          <p className="text-xs text-[var(--muted-foreground)]">{dayjs(proposal.createdAt).fromNow()}</p>
+          <p className="text-sm text-foreground">{dayjs(proposal.createdAt).format("MMM DD, YYYY")}</p>
+          <p className="text-xs text-muted-foreground">{dayjs(proposal.createdAt).fromNow()}</p>
         </>
       ),
     },
@@ -239,7 +239,7 @@ const VendorDashboard = () => {
               <Card>
                 <Card.Header>
                   <div className="flex items-center gap-2">
-                    <AttachMoney className="h-5 w-5 text-[var(--foreground)]" />
+                    <AttachMoney className="h-5 w-5 text-foreground" />
                     <Card.Title>Monthly Earnings</Card.Title>
                   </div>
                   <Card.Description>Contract earnings over the last six months</Card.Description>
@@ -262,7 +262,7 @@ const VendorDashboard = () => {
               <Card>
                 <Card.Header>
                   <div className="flex items-center gap-2">
-                    <PieChartIcon className="h-5 w-5 text-[var(--foreground)]" />
+                    <PieChartIcon className="h-5 w-5 text-foreground" />
                     <Card.Title>Proposal Outcomes</Card.Title>
                   </div>
                   <Card.Description>Current acceptance and rejection mix</Card.Description>
@@ -284,7 +284,7 @@ const VendorDashboard = () => {
                         {proposalStatusData.map((entry) => (
                           <div key={entry.name} className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-[11px] font-bold uppercase tracking-tight text-[var(--muted-foreground)]">{entry.name}</span>
+                            <span className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground">{entry.name}</span>
                           </div>
                         ))}
                       </div>
@@ -305,7 +305,7 @@ const VendorDashboard = () => {
               <Card>
                 <Card.Header>
                   <div className="flex items-center gap-2">
-                    <BarChartIcon className="h-5 w-5 text-[var(--foreground)]" />
+                    <BarChartIcon className="h-5 w-5 text-foreground" />
                     <Card.Title>Proposals by Category</Card.Title>
                   </div>
                   <Card.Description>Pulse across task categories</Card.Description>
@@ -337,7 +337,7 @@ const VendorDashboard = () => {
               <Card>
                 <Card.Header>
                   <div className="flex items-center gap-2">
-                    <TrendUp className="h-5 w-5 text-[var(--foreground)]" />
+                    <TrendUp className="h-5 w-5 text-foreground" />
                     <Card.Title>Growth Overview</Card.Title>
                   </div>
                   <Card.Description>Cumulative earnings growth</Card.Description>
@@ -366,7 +366,7 @@ const VendorDashboard = () => {
             title="Recent Proposals"
             subtitle="Latest proposal submissions and outcomes"
             emptyState="No proposals found yet."
-            emptyCellClassName="px-6 py-10 text-center text-sm text-[var(--muted-foreground)]"
+            emptyCellClassName="px-6 py-10 text-center text-sm text-muted-foreground"
           />
         </div>
       )}
@@ -375,3 +375,6 @@ const VendorDashboard = () => {
 };
 
 export default VendorDashboard;
+
+
+

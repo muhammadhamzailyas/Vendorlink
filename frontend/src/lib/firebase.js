@@ -100,3 +100,5 @@ export const isFirebaseConfigured = () => {
 };
 
 export { auth, signInWithPhoneNumber };
+
+

@@ -68,7 +68,7 @@ const SignupStep1 = ({
   ];
 
   const ErrorMsg = ({ children }) => (
-    <p className="text-[11px] text-[var(--error)] mt-1.5 font-bold uppercase tracking-tight animate-in fade-in slide-in-from-top-1">
+    <p className="text-[11px] text-error mt-1.5 font-bold uppercase tracking-tight animate-in fade-in slide-in-from-top-1">
         {children}
     </p>
   );
@@ -83,7 +83,7 @@ const SignupStep1 = ({
     }}
   >
     <div>
-      <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)]">
+      <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-muted-foreground">
         Account Type
       </Label>
       <Tabs
@@ -158,20 +158,20 @@ const SignupStep1 = ({
       </div>
     )}
 
-    <div className="flex items-start gap-3 text-sm text-[var(--foreground)] pt-1">
+    <div className="flex items-start gap-3 text-sm text-foreground pt-1">
       <Checkbox
         id="terms"
         checked={data.agreeToTerms}
         onCheckedChange={(checked) => onChange({ agreeToTerms: !!checked })}
         className="mt-1"
       />
-      <Label htmlFor="terms" className="leading-relaxed text-sm text-[var(--foreground)] cursor-pointer select-none">
+      <Label htmlFor="terms" className="leading-relaxed text-sm text-foreground cursor-pointer select-none">
         I agree to the{" "}
-        <Link to="/terms" className="text-[var(--foreground)] hover:opacity-80 underline underline-offset-4">
+        <Link to="/terms" className="text-foreground hover:opacity-80 underline underline-offset-4">
           Terms of Service
         </Link>
         {" "}and{" "}
-        <Link to="/privacy" className="text-[var(--foreground)] hover:opacity-80 underline underline-offset-4">
+        <Link to="/privacy" className="text-foreground hover:opacity-80 underline underline-offset-4">
           Privacy Policy
         </Link>
       </Label>
@@ -191,3 +191,6 @@ const SignupStep1 = ({
 };
 
 export default SignupStep1;
+
+
+

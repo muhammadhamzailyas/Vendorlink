@@ -12,7 +12,7 @@ const GoogleAuthButton = ({ onClick, disabled = false, loading = false, fullWidt
       variant="secondary"
       size={fullWidth ? "default" : "icon"}
       className={cn(
-        "rounded-xl border-[var(--border)] bg-[var(--card)] shadow-soft hover:bg-[var(--muted)] hover:text-[var(--foreground)] text-[var(--foreground)] transition-all font-normal",
+        "rounded-xl border-border bg-card shadow-soft hover:bg-muted hover:text-foreground text-foreground transition-all font-normal",
         fullWidth ? "flex-1 h-12 gap-2" : "h-12 w-12"
       )}
       aria-label="Sign in with Google"
@@ -31,3 +31,6 @@ const GoogleAuthButton = ({ onClick, disabled = false, loading = false, fullWidt
 };
 
 export default GoogleAuthButton;
+
+
+

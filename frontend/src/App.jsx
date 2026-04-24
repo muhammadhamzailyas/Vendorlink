@@ -90,12 +90,12 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-[var(--muted)] p-6">
-          <div className="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center shadow-sm">
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">
+        <div className="flex min-h-screen items-center justify-center bg-muted p-6">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 text-center shadow-sm">
+            <h2 className="text-lg font-semibold text-foreground">
               Something went wrong.
             </h2>
-            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+            <p className="mt-2 text-sm text-muted-foreground">
               Please reload the page to continue.
             </p>
             <Button
@@ -343,3 +343,6 @@ const App = () => (
 );
 
 export default App;
+
+
+

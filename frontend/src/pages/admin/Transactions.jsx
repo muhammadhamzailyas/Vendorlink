@@ -44,7 +44,7 @@ const typeColors = {
   withdrawal: "text-warning bg-warning-light",
   payment: "text-info bg-info-light",
   refund: "text-purple-600 bg-purple-50",
-  fee: "text-[var(--muted-foreground)] bg-[var(--muted)]",
+  fee: "text-muted-foreground bg-muted",
 };
 
 const AdminTransactions = () => {
@@ -98,7 +98,7 @@ const AdminTransactions = () => {
         {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1">
-            <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]/70" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
             <Input
               type="text"
               placeholder="Search transactions..."
@@ -144,7 +144,7 @@ const AdminTransactions = () => {
                 label: "Type",
                 render: (t) => {
                   const Icon = typeIcons[t.type] || ArrowUpDown;
-                  const color = typeColors[t.type] || "text-[var(--muted-foreground)] bg-[var(--muted)]";
+                  const color = typeColors[t.type] || "text-muted-foreground bg-muted";
                   return (
                     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
                       <Icon className="h-3.5 w-3.5" />
@@ -180,13 +180,13 @@ const AdminTransactions = () => {
               {
                 key: "description",
                 label: "Description",
-                cellClassName: "max-w-xs truncate px-4 sm:px-6 py-3 sm:py-4 text-sm text-[var(--muted-foreground)]",
+                cellClassName: "max-w-xs truncate px-4 sm:px-6 py-3 sm:py-4 text-sm text-muted-foreground",
                 render: (t) => t.description || "-",
               },
               {
                 key: "createdAt",
                 label: "Date",
-                render: (t) => <span className="text-[var(--muted-foreground)]">{dayjs(t.createdAt).format("MMM D, YYYY")}</span>,
+                render: (t) => <span className="text-muted-foreground">{dayjs(t.createdAt).format("MMM D, YYYY")}</span>,
               },
             ]}
             showRowActions
@@ -271,3 +271,6 @@ const AdminTransactions = () => {
 };
 
 export default AdminTransactions;
+
+
+

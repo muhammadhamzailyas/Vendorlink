@@ -70,8 +70,8 @@ const CompanyContracts = () => {
       cellClassName: "px-6 py-4",
       render: (contract) => (
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-[var(--foreground)]">{contract.title || "Untitled Contract"}</p>
-          <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">
+          <p className="truncate text-sm font-semibold text-foreground">{contract.title || "Untitled Contract"}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Task: {contract.taskId?.title || "N/A"}
           </p>
         </div>
@@ -80,7 +80,7 @@ const CompanyContracts = () => {
     {
       key: "vendor",
       label: "Vendor",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80",
       render: (contract) => contract.vendorId?.username || "N/A",
     },
     {
@@ -92,13 +92,13 @@ const CompanyContracts = () => {
     {
       key: "budget",
       label: "Budget",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80",
       render: (contract) => (contract.totalBudget ? `PKR ${contract.totalBudget.toLocaleString()}` : "-"),
     },
     {
       key: "created",
       label: "Created",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80",
       render: (contract) => (contract.createdAt ? formatDate(contract.createdAt) : "N/A"),
     },
     {
@@ -165,3 +165,6 @@ const CompanyContracts = () => {
 
 
 export default CompanyContracts;
+
+
+

@@ -124,3 +124,6 @@ const UserDetailsPDF = ({ user }) => (
 );
 
 export default UserDetailsPDF;
+
+
+

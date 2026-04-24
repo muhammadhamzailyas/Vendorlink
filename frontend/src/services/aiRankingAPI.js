@@ -18,3 +18,5 @@ export const aiRankingAPI = {
     return api.get(`/ai/vendor-history/${vendorId}`);
   },
 };
+
+

@@ -50,28 +50,28 @@ const Settings = () => {
           )}
         >
           <FormFieldGrid>
-            <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+            <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Email</p>
-                    <p className="text-sm font-bold text-[var(--foreground)] truncate">{user.email || "-"}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Email</p>
+                    <p className="text-sm font-bold text-foreground truncate">{user.email || "-"}</p>
                 </Card.Content>
             </Card>
-            <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+            <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Role</p>
-                    <p className="text-sm font-bold capitalize text-[var(--foreground)]">{user.role || "-"}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Role</p>
+                    <p className="text-sm font-bold capitalize text-foreground">{user.role || "-"}</p>
                 </Card.Content>
             </Card>
-            <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+            <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Status</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Status</p>
                     <StatusChip status={user.status || "incomplete"} />
                 </Card.Content>
             </Card>
-            <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+            <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Selected Plan</p>
-                    <p className="text-sm font-bold uppercase text-[var(--foreground)]">{user.selectedPlan || "free"}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Selected Plan</p>
+                    <p className="text-sm font-bold uppercase text-foreground">{user.selectedPlan || "free"}</p>
                 </Card.Content>
             </Card>
           </FormFieldGrid>
@@ -82,3 +82,6 @@ const Settings = () => {
 };
 
 export default Settings;
+
+
+

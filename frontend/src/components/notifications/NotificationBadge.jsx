@@ -7,10 +7,10 @@ import { Button, Card, Popover, PopoverContent, PopoverTrigger, ScrollArea, Sepa
 import { cn } from "@/lib/cn";
 
 const priorityDot = {
-  urgent: "bg-[var(--error)]",
-  high: "bg-[var(--warning)]",
-  normal: "bg-[var(--foreground)]",
-  low: "bg-[var(--border)]",
+  urgent: "bg-error",
+  high: "bg-warning",
+  normal: "bg-foreground",
+  low: "bg-border",
 };
 
 const NotificationBadge = ({ className }) => {
@@ -47,10 +47,10 @@ const NotificationBadge = ({ className }) => {
           type="button"
           variant="ghost"
           size="sm"
-          className={cn("relative h-9 w-9 p-0 rounded-xl hover:bg-[var(--muted)]", className)}
+          className={cn("relative h-9 w-9 p-0 rounded-xl hover:bg-muted", className)}
           aria-label="Notifications"
         >
-          <Bell className="w-5 h-5 text-[var(--muted-foreground)]" />
+          <Bell className="w-5 h-5 text-muted-foreground" />
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
@@ -62,17 +62,17 @@ const NotificationBadge = ({ className }) => {
         </Button>
       </PopoverTrigger>
       
-      <PopoverContent align="end" className="w-80 p-0 overflow-hidden shadow-soft border-[var(--border)]/50">
-        <div className="flex items-center justify-between px-5 py-4 bg-[var(--muted)]/30">
-          <span className="text-xs font-extrabold text-[var(--foreground)] uppercase tracking-tight">Notifications</span>
+      <PopoverContent align="end" className="w-80 p-0 overflow-hidden shadow-soft border-border/50">
+        <div className="flex items-center justify-between px-5 py-4 bg-muted/30">
+          <span className="text-xs font-extrabold text-foreground uppercase tracking-tight">Notifications</span>
           {unreadCount > 0 && (
-            <span className="text-[10px] font-bold text-[var(--foreground)] uppercase tracking-wider">{unreadCount} unread</span>
+            <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">{unreadCount} unread</span>
           )}
         </div>
         <Separator />
 
         {recent.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm font-medium text-[var(--muted-foreground)]">No notifications</div>
+          <div className="px-5 py-8 text-center text-sm font-medium text-muted-foreground">No notifications</div>
         ) : (
           <ScrollArea className="max-h-80">
             {recent.map((n) => (
@@ -81,15 +81,15 @@ const NotificationBadge = ({ className }) => {
                 variant="ghost"
                 onClick={() => handleClick(n)}
                 className={cn(
-                  "group w-full h-auto flex items-start justify-start gap-3 px-5 py-4 border-b border-[var(--border)]/50 text-left transition-colors hover:bg-[var(--muted)]/50 rounded-none",
-                  !n.read ? "bg-[var(--muted)]/30" : "bg-[var(--card)]"
+                  "group w-full h-auto flex items-start justify-start gap-3 px-5 py-4 border-b border-border/50 text-left transition-colors hover:bg-muted/50 rounded-none",
+                  !n.read ? "bg-muted/30" : "bg-card"
                 )}
               >
                 <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 shadow-sm ${priorityDot[n.priority] || priorityDot.normal}`} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-bold text-[var(--foreground)] truncate group-hover:text-[var(--foreground)] transition-colors">{n.title}</p>
-                  <p className="text-[11px] font-medium text-[var(--muted-foreground)] line-clamp-2 mt-0.5">{n.message}</p>
-                  <p className="text-[10px] font-bold text-[var(--muted-foreground)]/40 uppercase tracking-tighter mt-1.5">{formatDate(n.createdAt)}</p>
+                  <p className="text-[13px] font-bold text-foreground truncate group-hover:text-foreground transition-colors">{n.title}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground line-clamp-2 mt-0.5">{n.message}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-tighter mt-1.5">{formatDate(n.createdAt)}</p>
                 </div>
               </Button>
             ))}
@@ -100,7 +100,7 @@ const NotificationBadge = ({ className }) => {
         <Button
           variant="ghost"
           onClick={() => navigate(`/${getRole()}/notifications`)}
-          className="w-full h-auto py-3.5 text-center text-[11px] font-extrabold text-[var(--muted-foreground)] uppercase tracking-tight bg-[var(--muted)]/30 hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-all rounded-none"
+          className="w-full h-auto py-3.5 text-center text-[11px] font-extrabold text-muted-foreground uppercase tracking-tight bg-muted/30 hover:bg-muted hover:text-foreground transition-all rounded-none"
         >
           View All Notifications
         </Button>
@@ -110,3 +110,5 @@ const NotificationBadge = ({ className }) => {
 };
 
 export default NotificationBadge;
+
+

@@ -89,7 +89,7 @@ const CompanyProposals = () => {
       cellClassName: "px-6 py-4",
       render: (proposal) => {
         const taskTitle = proposal.taskId?.title || proposal.task?.title || "Untitled task";
-        return <p className="text-sm font-semibold text-[var(--foreground)]">{taskTitle}</p>;
+        return <p className="text-sm font-semibold text-foreground">{taskTitle}</p>;
       },
     },
     {
@@ -102,7 +102,7 @@ const CompanyProposals = () => {
         return (
           <div className="flex items-center gap-2">
             <UserAvatar user={vendor} name={vendorName} size="md" />
-            <span className="text-sm text-[var(--foreground)]/80">{vendorName}</span>
+            <span className="text-sm text-foreground/80">{vendorName}</span>
           </div>
         );
       },
@@ -110,7 +110,7 @@ const CompanyProposals = () => {
     {
       key: "bid",
       label: "Bid",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]",
+      cellClassName: "px-6 py-4 text-sm text-foreground",
       render: (proposal) => `$${(proposal.bidAmount || 0).toLocaleString()}`,
     },
     {
@@ -127,8 +127,8 @@ const CompanyProposals = () => {
         const createdAt = proposal.submittedAt || proposal.createdAt;
         return (
           <>
-            <p className="text-sm text-[var(--foreground)]">{createdAt ? dayjs(createdAt).format("MMM DD, YYYY") : "-"}</p>
-            <p className="text-xs text-[var(--muted-foreground)]">{createdAt ? dayjs(createdAt).fromNow() : ""}</p>
+            <p className="text-sm text-foreground">{createdAt ? dayjs(createdAt).format("MMM DD, YYYY") : "-"}</p>
+            <p className="text-xs text-muted-foreground">{createdAt ? dayjs(createdAt).fromNow() : ""}</p>
           </>
         );
       },
@@ -219,14 +219,14 @@ const CompanyProposals = () => {
                       label: "Accept",
                       icon: <CheckCircle className="h-3.5 w-3.5" />,
                       onClick: (row) => handleOpenDialog(row, "accept"),
-                      className: "inline-flex items-center gap-1 rounded-lg bg-[var(--foreground)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--foreground)]-light",
+                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-white hover:bg-foreground-light",
                     },
                     {
                       key: "reject",
                       label: "Reject",
                       icon: <XCircle className="h-3.5 w-3.5" />,
                       onClick: (row) => handleOpenDialog(row, "reject"),
-                      className: "inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]/80 hover:bg-[var(--muted)]",
+                      className: "inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 hover:bg-muted",
                     },
                   ];
                 }
@@ -238,14 +238,14 @@ const CompanyProposals = () => {
                       label: "Contract",
                       icon: <Contract className="h-3.5 w-3.5" />,
                       onClick: (row) => navigate(`/company/contracts/create?proposalId=${row._id}`),
-                      className: "inline-flex items-center gap-1 rounded-lg bg-[var(--foreground)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--foreground)]-light",
+                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-white hover:bg-foreground-light",
                     },
                     {
                       key: "chat",
                       label: "Chat",
                       icon: <Chat className="h-3.5 w-3.5" />,
                       onClick: (row) => navigate(`/company/chat?taskId=${row.taskId?._id || row.task?._id}`),
-                      className: "inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--foreground)]/80 hover:bg-[var(--muted)]",
+                      className: "inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 hover:bg-muted",
                     },
                   ];
                 }
@@ -268,14 +268,14 @@ const CompanyProposals = () => {
             </Dialog.Description>
           </Dialog.Header>
           <Dialog.Body>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--muted)] p-4 text-sm text-[var(--foreground)]/80">
-              <p className="font-semibold text-[var(--foreground)]">
+            <div className="rounded-2xl border border-border bg-muted p-4 text-sm text-foreground/80">
+              <p className="font-semibold text-foreground">
                 {decisionDialog.proposal?.taskId?.title || decisionDialog.proposal?.task?.title || "Untitled task"}
               </p>
-              <p className="mt-1 text-[var(--muted-foreground)]">
+              <p className="mt-1 text-muted-foreground">
                 Vendor: {decisionDialog.proposal?.vendorId?.username || decisionDialog.proposal?.vendorId?.companyName || decisionDialog.proposal?.vendorId?.email || "Vendor"}
               </p>
-              <p className="mt-1 text-[var(--muted-foreground)]">
+              <p className="mt-1 text-muted-foreground">
                 Bid: ${Number(decisionDialog.proposal?.bidAmount || 0).toLocaleString()}
               </p>
             </div>
@@ -297,3 +297,6 @@ const CompanyProposals = () => {
 };
 
 export default CompanyProposals;
+
+
+

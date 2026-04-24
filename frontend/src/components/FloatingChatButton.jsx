@@ -23,10 +23,13 @@ const FloatingChatButton = () => {
         className="h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
         size="xs"
       >
-        <ChatCircleText className="h-6 w-6 text-[var(--foreground)]" />
+        <ChatCircleText className="h-6 w-6 text-foreground" />
       </Button>
     </div>
   );
 };
 
 export default FloatingChatButton;
+
+
+

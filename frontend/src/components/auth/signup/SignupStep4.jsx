@@ -80,9 +80,9 @@ const SignupStep4 = ({ plan, onPlanChange, onSubmit, onBack, loading: parentLoad
 
   return (
     <div className="space-y-6">
-      <div className="bg-[var(--muted)] border border-[var(--ring)]/20 p-4 rounded-xl flex items-start gap-3">
-          <Info className="h-5 w-5 text-[var(--foreground)] shrink-0 mt-0.5" />
-          <p className="text-sm text-[var(--foreground)] font-medium leading-relaxed">
+      <div className="bg-muted border border-ring/20 p-4 rounded-xl flex items-start gap-3">
+          <Info className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground font-medium leading-relaxed">
               Note: Payment will NOT be deducted until your account is verified by our team. You can choose a plan now to set up your profile.
           </p>
       </div>
@@ -98,7 +98,7 @@ const SignupStep4 = ({ plan, onPlanChange, onSubmit, onBack, loading: parentLoad
         ))}
       </div>
 
-      <div className="flex gap-4 pt-4 border-t border-[var(--border)]/50">
+      <div className="flex gap-4 pt-4 border-t border-border/50">
         <Button variant="secondary" onClick={onBack} disabled={loading || parentLoading} size="lg" className="flex-1 font-normal">Back</Button>
         <Button 
             variant="primary" 
@@ -116,3 +116,6 @@ const SignupStep4 = ({ plan, onPlanChange, onSubmit, onBack, loading: parentLoad
 };
 
 export default SignupStep4;
+
+
+

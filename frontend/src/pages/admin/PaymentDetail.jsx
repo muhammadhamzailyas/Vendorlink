@@ -114,9 +114,9 @@ const PaymentDetail = () => {
             Back
           </Button>
           <div className="min-w-0">
-            <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase truncate">Payment Context</h2>
-            <p className="font-bold text-[11px] text-[var(--muted-foreground)] uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                <Hash size={12} className="text-[var(--foreground)]" />
+            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase truncate">Payment Context</h2>
+            <p className="font-bold text-[11px] text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                <Hash size={12} className="text-foreground" />
                 {payment.invoiceNumber || "PROVISIONAL"}
             </p>
           </div>
@@ -124,7 +124,7 @@ const PaymentDetail = () => {
         <div className="flex items-center gap-3 shrink-0">
           <StatusChip status={payment.status} />
           {payment.invoiceNumber && (
-            <Button variant="outline" size="xs" onClick={handleDownloadInvoice} className="font-bold uppercase tracking-tight bg-[var(--card)] shadow-soft">
+            <Button variant="outline" size="xs" onClick={handleDownloadInvoice} className="font-bold uppercase tracking-tight bg-card shadow-soft">
               <Download className="h-3.5 w-3.5 mr-1.5" />
               Download PDF
             </Button>
@@ -134,22 +134,22 @@ const PaymentDetail = () => {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Payment Info */}
-        <Card className="lg:col-span-2 shadow-soft border-[var(--border)]/50 overflow-hidden">
-          <Card.Header className="pb-4 border-b border-[var(--border)]/50 bg-[var(--muted)]/20">
+        <Card className="lg:col-span-2 shadow-soft border-border/50 overflow-hidden">
+          <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
             <div className="flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-[var(--foreground)]" />
+                <Receipt className="h-4 w-4 text-foreground" />
                 <Card.Title className="text-sm font-bold uppercase tracking-tight">Financial Breakdown</Card.Title>
             </div>
           </Card.Header>
           <Card.Content className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-                <div className="p-5 rounded-2xl bg-[var(--muted)]/20 border border-[var(--border)]/30">
-                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60 mb-1.5">Gross Amount</p>
-                    <p className="text-2xl font-extrabold text-[var(--foreground)] tracking-tighter uppercase">PKR {payment.amount?.toLocaleString()}</p>
+                <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Gross Amount</p>
+                    <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">PKR {payment.amount?.toLocaleString()}</p>
                 </div>
-                <div className="p-5 rounded-2xl bg-[var(--muted)]/20 border border-[var(--border)]/30">
-                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]/60 mb-1.5">Platform Revenue</p>
-                    <p className="text-2xl font-extrabold text-[var(--foreground)] tracking-tighter uppercase">PKR {payment.platformFee?.toLocaleString()}</p>
+                <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Platform Revenue</p>
+                    <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">PKR {payment.platformFee?.toLocaleString()}</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-jade-400/10 border border-jade-600/20">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-jade-600/60 mb-1.5">Net Payout</p>
@@ -158,31 +158,31 @@ const PaymentDetail = () => {
             </div>
 
             <div className="space-y-4 max-w-xl">
-                <div className="flex items-center justify-between py-2 border-b border-[var(--border)]/30">
-                    <span className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-tight flex items-center gap-2">
+                <div className="flex items-center justify-between py-2 border-b border-border/30">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-2">
                         <Info size={14} className="opacity-40" />
                         Transaction Type
                     </span>
-                    <Badge variant="outline" className="font-bold uppercase tracking-tighter text-[10px] bg-[var(--muted)]/30">
+                    <Badge variant="outline" className="font-bold uppercase tracking-tighter text-[10px] bg-muted/30">
                         {payment.paymentType?.replace("_", " ")}
                     </Badge>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-[var(--border)]/30">
-                    <span className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-tight flex items-center gap-2">
+                <div className="flex items-center justify-between py-2 border-b border-border/30">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-2">
                         <CreditCard size={14} className="opacity-40" />
                         Settlement Method
                     </span>
-                    <span className="text-xs font-extrabold text-[var(--foreground)] uppercase tracking-tight">{payment.paymentMethod?.replace("_", " ") || "UNSPECIFIED"}</span>
+                    <span className="text-xs font-extrabold text-foreground uppercase tracking-tight">{payment.paymentMethod?.replace("_", " ") || "UNSPECIFIED"}</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-[var(--border)]/30">
-                    <span className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-tight flex items-center gap-2">
+                <div className="flex items-center justify-between py-2 border-b border-border/30">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-2">
                         <Calendar size={14} className="opacity-40" />
                         Initiated At
                     </span>
-                    <span className="text-xs font-extrabold text-[var(--foreground)] uppercase tracking-tight">{dayjs(payment.createdAt).format("MMM D, YYYY h:mm A")}</span>
+                    <span className="text-xs font-extrabold text-foreground uppercase tracking-tight">{dayjs(payment.createdAt).format("MMM D, YYYY h:mm A")}</span>
                 </div>
                 {payment.completedAt && (
-                    <div className="flex items-center justify-between py-2 border-b border-[var(--border)]/30 bg-jade-400/5 px-2 -mx-2 rounded-lg">
+                    <div className="flex items-center justify-between py-2 border-b border-border/30 bg-jade-400/5 px-2 -mx-2 rounded-lg">
                         <span className="text-xs font-bold text-jade-600 uppercase tracking-tight flex items-center gap-2">
                             <CheckCircle size={14} />
                             Completed At
@@ -191,7 +191,7 @@ const PaymentDetail = () => {
                     </div>
                 )}
                 <div className="flex items-center justify-between py-2">
-                    <span className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-tight flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-2">
                         <ShieldCheck size={14} className="opacity-40" />
                         Vendor Acknowledged
                     </span>
@@ -207,40 +207,40 @@ const PaymentDetail = () => {
 
         {/* Parties */}
         <div className="space-y-6">
-          <Card className="shadow-soft border-[var(--border)]/50">
-            <Card.Header className="pb-3 border-b border-[var(--border)]/50 bg-[var(--muted)]/20 px-5 py-4">
+          <Card className="shadow-soft border-border/50">
+            <Card.Header className="pb-3 border-b border-border/50 bg-muted/20 px-5 py-4">
               <div className="flex items-center gap-2">
-                <Buildings className="h-4 w-4 text-[var(--foreground)]" />
-                <Card.Title className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]">Company (Origin)</Card.Title>
+                <Buildings className="h-4 w-4 text-foreground" />
+                <Card.Title className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">Company (Origin)</Card.Title>
               </div>
             </Card.Header>
             <Card.Content className="p-5 space-y-4">
                 <div>
-                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60 mb-0.5">Name</p>
-                    <p className="text-sm font-bold text-[var(--foreground)] truncate">{payment.company?.companyName || payment.company?.username || "—"}</p>
+                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Name</p>
+                    <p className="text-sm font-bold text-foreground truncate">{payment.company?.companyName || payment.company?.username || "—"}</p>
                 </div>
                 <div>
-                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60 mb-0.5">Identifier (Email)</p>
-                    <p className="text-sm font-bold text-[var(--foreground)] truncate">{payment.company?.email || "—"}</p>
+                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Identifier (Email)</p>
+                    <p className="text-sm font-bold text-foreground truncate">{payment.company?.email || "—"}</p>
                 </div>
             </Card.Content>
           </Card>
 
-          <Card className="shadow-soft border-[var(--border)]/50">
-            <Card.Header className="pb-3 border-b border-[var(--border)]/50 bg-[var(--muted)]/20 px-5 py-4">
+          <Card className="shadow-soft border-border/50">
+            <Card.Header className="pb-3 border-b border-border/50 bg-muted/20 px-5 py-4">
               <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-[var(--foreground)]" />
-                <Card.Title className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)]">Vendor (Destination)</Card.Title>
+                <User className="h-4 w-4 text-foreground" />
+                <Card.Title className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">Vendor (Destination)</Card.Title>
               </div>
             </Card.Header>
             <Card.Content className="p-5 space-y-4">
                 <div>
-                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60 mb-0.5">Business Name</p>
-                    <p className="text-sm font-bold text-[var(--foreground)] truncate">{payment.vendor?.businessName || payment.vendor?.username || "—"}</p>
+                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Business Name</p>
+                    <p className="text-sm font-bold text-foreground truncate">{payment.vendor?.businessName || payment.vendor?.username || "—"}</p>
                 </div>
                 <div>
-                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-[var(--muted-foreground)]/60 mb-0.5">Identifier (Email)</p>
-                    <p className="text-sm font-bold text-[var(--foreground)] truncate">{payment.vendor?.email || "—"}</p>
+                    <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Identifier (Email)</p>
+                    <p className="text-sm font-bold text-foreground truncate">{payment.vendor?.email || "—"}</p>
                 </div>
             </Card.Content>
           </Card>
@@ -250,7 +250,7 @@ const PaymentDetail = () => {
             <Card className="border-warning/20 bg-warning/5 shadow-none">
                 <Card.Content className="p-4">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-warning/70 mb-2">Audit Notes</p>
-                    <p className="text-[13px] font-medium leading-relaxed text-[var(--foreground)]/80 italic">{payment.notes}</p>
+                    <p className="text-[13px] font-medium leading-relaxed text-foreground/80 italic">{payment.notes}</p>
                 </Card.Content>
             </Card>
           )}
@@ -262,3 +262,6 @@ const PaymentDetail = () => {
 };
 
 export default PaymentDetail;
+
+
+

@@ -18,21 +18,21 @@ export const DataTable = ({
   action,
   showSectionHeader = false,
   showTableHeader = true,
-  sectionClassName = "overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-soft",
-  sectionHeaderClassName = "border-b border-[var(--border)] bg-[var(--card)] px-5 py-5 sm:px-6",
+  sectionClassName = "overflow-hidden rounded-xl border border-border bg-card shadow-soft",
+  sectionHeaderClassName = "border-b border-border bg-card px-5 py-5 sm:px-6",
   contentWrapperClassName = "overflow-x-auto [-webkit-overflow-scrolling:touch]",
   rowKey = "_id",
   emptyState,
   emptyColSpan,
   tableClassName = "w-full min-w-[720px]",
-  headClassName = "bg-[var(--muted)]",
-  bodyClassName = "divide-y divide-[var(--border)]/50",
-  rowClassName = "transition-all duration-200 hover:bg-[var(--muted)]/50 hover:translate-x-[1px]",
-  emptyCellClassName = "px-6 py-12 text-center text-sm text-[var(--muted-foreground)] sm:py-16",
+  headClassName = "bg-muted",
+  bodyClassName = "divide-y divide-border/50",
+  rowClassName = "transition-all duration-200 hover:bg-muted/50 hover:translate-x-[1px]",
+  emptyCellClassName = "px-6 py-12 text-center text-sm text-muted-foreground sm:py-16",
   showRowActions = false,
   rowActions = [],
   actionsHeaderLabel = "Actions",
-  actionsHeaderClassName = "px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]",
+  actionsHeaderClassName = "px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground",
   actionsCellClassName = "px-6 py-4",
 }) => {
   const getRowKey = (row, index) => {
@@ -56,7 +56,7 @@ export const DataTable = ({
             {columns.map((column) => (
               <TableHead
                 key={column.key}
-                className={column.headerClassName || "px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]"}
+                className={column.headerClassName || "px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-muted-foreground"}
               >
                 {column.label}
               </TableHead>
@@ -75,7 +75,7 @@ export const DataTable = ({
             return (
               <TableRow key={getRowKey(row, index)} className={rowClassName}>
                 {columns.map((column) => (
-                  <TableCell key={column.key} className={column.cellClassName || "px-5 py-3.5 text-sm text-[var(--foreground)]/80"}>
+                  <TableCell key={column.key} className={column.cellClassName || "px-5 py-3.5 text-sm text-foreground/80"}>
                     {typeof column.render === "function" ? column.render(row, index) : row?.[column.key] ?? "-"}
                   </TableCell>
                 ))}
@@ -105,7 +105,7 @@ export const DataTable = ({
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-[var(--muted-foreground)]">No actions</span>
+                      <span className="text-xs text-muted-foreground">No actions</span>
                     )}
                   </TableCell>
                 )}
@@ -130,13 +130,13 @@ export const DataTable = ({
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
               {icon && (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--muted)] text-[var(--foreground)] shadow-sm border border-[var(--border)]/50">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground shadow-sm border border-border/50">
                   {React.cloneElement(icon, { size: 20, strokeWidth: 2.5 })}
                 </div>
               )}
               <div>
-                {title && <h3 className="text-base font-extrabold tracking-tight text-[var(--foreground)] uppercase">{title}</h3>}
-                {subtitle && <p className="mt-0.5 text-[13px] font-medium text-[var(--muted-foreground)]">{subtitle}</p>}
+                {title && <h3 className="text-base font-extrabold tracking-tight text-foreground uppercase">{title}</h3>}
+                {subtitle && <p className="mt-0.5 text-[13px] font-medium text-muted-foreground">{subtitle}</p>}
               </div>
             </div>
             {action || null}
@@ -148,3 +148,6 @@ export const DataTable = ({
     </div>
   );
 };
+
+
+

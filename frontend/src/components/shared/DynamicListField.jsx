@@ -20,8 +20,8 @@ const DynamicListField = ({
 }) => (
   <div className={cn("md:col-span-2", className)}>
     <div className="mb-2">
-      {label && <Label className="block text-[13px] font-bold tracking-tight text-[var(--foreground)]/80 uppercase mb-2">{label}</Label>}
-      {helperText ? <p className="mt-1 text-xs font-medium text-[var(--muted-foreground)]">{helperText}</p> : null}
+      {label && <Label className="block text-[13px] font-bold tracking-tight text-foreground/80 uppercase mb-2">{label}</Label>}
+      {helperText ? <p className="mt-1 text-xs font-medium text-muted-foreground">{helperText}</p> : null}
     </div>
     <div className="space-y-3">
       {items.map((item, index) => (
@@ -65,3 +65,6 @@ const DynamicListField = ({
 );
 
 export default DynamicListField;
+
+
+

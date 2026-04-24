@@ -4,19 +4,19 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/lib/cn"
 
 const alertVariants = cva(
-  "relative w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-3 [&>svg~*]:pl-7",
+  "relative w-full rounded-xl border border-border bg-card px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-3 [&>svg~*]:pl-7",
   {
     variants: {
       variant: {
-        default: "text-[var(--foreground)] [&>svg]:text-[var(--muted-foreground)]",
+        default: "text-foreground [&>svg]:text-muted-foreground",
         destructive:
-          "text-[var(--foreground)] [&>svg]:text-[var(--error)]",
+          "text-foreground [&>svg]:text-error",
         success: 
-          "text-[var(--foreground)] [&>svg]:text-[var(--success)]",
+          "text-foreground [&>svg]:text-success",
         warning:
-          "text-[var(--foreground)] [&>svg]:text-[var(--warning)]",
+          "text-foreground [&>svg]:text-warning",
         info:
-          "text-[var(--foreground)] [&>svg]:text-[var(--info)]",
+          "text-foreground [&>svg]:text-info",
       },
     },
     defaultVariants: {
@@ -38,7 +38,7 @@ Alert.displayName = "Alert"
 const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-bold uppercase tracking-tight leading-none text-[var(--foreground)]", className)}
+    className={cn("mb-1 font-bold uppercase tracking-tight leading-none text-foreground", className)}
     {...props}
   />
 ))
@@ -47,10 +47,13 @@ AlertTitle.displayName = "AlertTitle"
 const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-xs [&_p]:leading-relaxed font-medium text-[var(--muted-foreground)]", className)}
+    className={cn("text-xs [&_p]:leading-relaxed font-medium text-muted-foreground", className)}
     {...props}
   />
 ))
 AlertDescription.displayName = "AlertDescription"
 
 export { Alert, AlertTitle, AlertDescription }
+
+
+

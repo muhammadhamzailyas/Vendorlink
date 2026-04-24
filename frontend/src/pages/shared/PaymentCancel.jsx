@@ -11,7 +11,7 @@ const PaymentCancel = () => {
       <div className="mx-auto max-w-3xl space-y-8 py-10">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Payment Cancelled</h1>
-          <p className="text-[var(--muted-foreground)]">
+          <p className="text-muted-foreground">
             No funds were deducted. You can retry payment from your dashboard.
           </p>
         </div>
@@ -19,7 +19,7 @@ const PaymentCancel = () => {
         <Card>
           <Card.Content className="py-10 text-center">
             <XCircle className="mx-auto mb-4 h-16 w-16 text-danger" />
-            <p className="mx-auto max-w-lg text-sm leading-6 text-[var(--muted-foreground)]">
+            <p className="mx-auto max-w-lg text-sm leading-6 text-muted-foreground">
               This transaction was cancelled before completion. Review payment details and retry when ready.
             </p>
           </Card.Content>
@@ -35,3 +35,6 @@ const PaymentCancel = () => {
 };
 
 export default PaymentCancel;
+
+
+

@@ -114,7 +114,7 @@ const AdminDashboard = () => {
         ? "bg-success/20 text-success border-success/30" 
         : isNegative 
             ? "bg-error/20 text-error border-error/30" 
-            : "bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)]";
+            : "bg-muted text-muted-foreground border-border";
 
     return (
         <div className={cn(
@@ -151,10 +151,10 @@ const AdminDashboard = () => {
         <div className="flex items-center gap-3">
           <UserAvatar user={user} name={user.companyName || user.username || user.email} size="md" />
           <div>
-            <p className="text-sm font-semibold text-[var(--foreground)]">
+            <p className="text-sm font-semibold text-foreground">
               {user.companyName || user.username || "N/A"}
             </p>
-            <p className="text-xs text-[var(--muted-foreground)]">{user.email}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </div>
       ),
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
     {
       key: "role",
       label: "Role",
-      cellClassName: "px-6 py-4 text-sm text-[var(--foreground)]/80 capitalize",
+      cellClassName: "px-6 py-4 text-sm text-foreground/80 capitalize",
       render: (user) => user.role,
     },
     {
@@ -177,10 +177,10 @@ const AdminDashboard = () => {
       cellClassName: "px-6 py-4",
       render: (user) => (
         <>
-          <p className="text-sm text-[var(--foreground)]">
+          <p className="text-sm text-foreground">
             {dayjs(user.createdAt).format("MMM DD, YYYY")}
           </p>
-          <p className="text-xs text-[var(--muted-foreground)]">
+          <p className="text-xs text-muted-foreground">
             {dayjs(user.createdAt).fromNow()}
           </p>
         </>
@@ -233,10 +233,10 @@ const AdminDashboard = () => {
             <Card.Header className="pb-2 border-b-0">
                 <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
-                    <TrendUp className="h-5 w-5 text-[var(--success)]" />
+                    <TrendUp className="h-5 w-5 text-success" />
                     <div>
-                        <Card.Title className="text-sm uppercase tracking-tight text-[var(--foreground)]">Platform Growth</Card.Title>
-                        <Card.Description className="text-xs text-[var(--muted-foreground)]">Cumulative users and tasks over time</Card.Description>
+                        <Card.Title className="text-sm uppercase tracking-tight text-foreground">Platform Growth</Card.Title>
+                        <Card.Description className="text-xs text-muted-foreground">Cumulative users and tasks over time</Card.Description>
                     </div>
                 </div>
                 {!loading && <ChangeIndicator value={stats.changes.tasks} />}
@@ -272,10 +272,10 @@ const AdminDashboard = () => {
             <Card>
             <Card.Header className="pb-2 border-b-0">
                 <div className="flex items-center gap-2">
-                    <ChartPie className="h-5 w-5 text-[var(--info)]" />
+                    <ChartPie className="h-5 w-5 text-info" />
                     <div>
-                        <Card.Title className="text-sm uppercase tracking-tight text-[var(--foreground)]">Marketplace Balance</Card.Title>
-                        <Card.Description className="text-xs text-[var(--muted-foreground)]">Ratio of vendors to companies</Card.Description>
+                        <Card.Title className="text-sm uppercase tracking-tight text-foreground">Marketplace Balance</Card.Title>
+                        <Card.Description className="text-xs text-muted-foreground">Ratio of vendors to companies</Card.Description>
                     </div>
                 </div>
             </Card.Header>
@@ -305,7 +305,7 @@ const AdminDashboard = () => {
                         {stats.marketplaceBalance.map((entry, index) => (
                             <div key={entry.name} className="flex items-center gap-2">
                                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: index === 0 ? 'var(--foreground)' : 'var(--muted)' }} />
-                                <span className="text-[10px] font-bold uppercase tracking-tight text-[var(--muted-foreground)]">
+                                <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">
                                     {entry.name}: {entry.value}
                                 </span>
                             </div>
@@ -323,10 +323,10 @@ const AdminDashboard = () => {
             <Card.Header className="pb-2 border-b-0">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-2">
-                        <CurrencyDollar className="h-5 w-5 text-[var(--success)]" />
+                        <CurrencyDollar className="h-5 w-5 text-success" />
                         <div>
-                            <Card.Title className="text-sm uppercase tracking-tight text-[var(--foreground)]">Financial Health</Card.Title>
-                            <Card.Description className="text-xs text-[var(--muted-foreground)]">Total volume vs. platform revenue (5%)</Card.Description>
+                            <Card.Title className="text-sm uppercase tracking-tight text-foreground">Financial Health</Card.Title>
+                            <Card.Description className="text-xs text-muted-foreground">Total volume vs. platform revenue (5%)</Card.Description>
                         </div>
                     </div>
                     {!loading && <ChangeIndicator value={stats.changes.revenue} />}
@@ -356,10 +356,10 @@ const AdminDashboard = () => {
             <Card>
             <Card.Header className="pb-2 border-b-0">
                 <div className="flex items-center gap-2">
-                    <Funnel className="h-5 w-5 text-[var(--warning)]" />
+                    <Funnel className="h-5 w-5 text-warning" />
                     <div>
-                        <Card.Title className="text-sm uppercase tracking-tight text-[var(--foreground)]">Task Conversion Funnel</Card.Title>
-                        <Card.Description className="text-xs text-[var(--muted-foreground)]">Efficiency from posting to completion</Card.Description>
+                        <Card.Title className="text-sm uppercase tracking-tight text-foreground">Task Conversion Funnel</Card.Title>
+                        <Card.Description className="text-xs text-muted-foreground">Efficiency from posting to completion</Card.Description>
                     </div>
                 </div>
             </Card.Header>
@@ -386,10 +386,10 @@ const AdminDashboard = () => {
             <Card>
                 <Card.Header className="pb-2 border-b-0">
                 <div className="flex items-center gap-2">
-                    <Pulse className="h-5 w-5 text-[var(--error)]" />
+                    <Pulse className="h-5 w-5 text-error" />
                     <div>
-                        <Card.Title className="text-sm uppercase tracking-tight text-[var(--foreground)]">Withdrawal Health</Card.Title>
-                        <Card.Description className="text-xs text-[var(--muted-foreground)]">Status of pending and completed payouts</Card.Description>
+                        <Card.Title className="text-sm uppercase tracking-tight text-foreground">Withdrawal Health</Card.Title>
+                        <Card.Description className="text-xs text-muted-foreground">Status of pending and completed payouts</Card.Description>
                     </div>
                 </div>
                 </Card.Header>
@@ -416,9 +416,9 @@ const AdminDashboard = () => {
                             </div>
                             <div className="w-2/3 grid grid-cols-3 gap-4 px-12">
                                 {stats.withdrawalHealth.map((entry, index) => (
-                                    <div key={entry.name} className="p-4 rounded-2xl bg-[var(--muted)]/50 border border-[var(--border)]">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">{entry.name}</p>
-                                        <p className="text-2xl font-bold text-[var(--foreground)]">{entry.value}</p>
+                                    <div key={entry.name} className="p-4 rounded-2xl bg-muted/50 border border-border">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{entry.name}</p>
+                                        <p className="text-2xl font-bold text-foreground">{entry.value}</p>
                                     </div>
                                 ))}
                             </div>
@@ -455,3 +455,6 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
+

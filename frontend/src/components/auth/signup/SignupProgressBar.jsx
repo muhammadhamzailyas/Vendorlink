@@ -24,11 +24,11 @@ const SignupProgressBar = ({ step }) => {
       */}
       <div className="absolute top-5 left-10 right-10 h-0.5 pointer-events-none">
         {/* Background Gray Line */}
-        <div className="absolute inset-0 bg-[var(--border)]" />
+        <div className="absolute inset-0 bg-border" />
         
         {/* Active Progress Line */}
         <div 
-          className="absolute left-0 h-full bg-[var(--foreground)] transition-all duration-500 ease-in-out" 
+          className="absolute left-0 h-full bg-foreground transition-all duration-500 ease-in-out" 
           style={{ 
             width: `${(activeStepIndex / (totalSteps - 1)) * 100}%` 
           }}
@@ -47,10 +47,10 @@ const SignupProgressBar = ({ step }) => {
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center text-xs font-black transition-all duration-500 border-2",
                   isCompleted 
-                    ? "bg-[var(--foreground)] border-[var(--foreground)] text-[var(--background)] shadow-sm" 
+                    ? "bg-foreground border-foreground text-background shadow-sm" 
                     : isActive 
-                      ? "bg-[var(--card)] border-[var(--foreground)] text-[var(--foreground)] ring-4 ring-[var(--foreground)]/10 shadow-md scale-110" 
-                      : "bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)]"
+                      ? "bg-card border-foreground text-foreground ring-4 ring-foreground/10 shadow-md scale-110" 
+                      : "bg-card border-border text-muted-foreground"
                 )}
               >
                 {isCompleted ? <Check size={16} weight="bold" /> : (index + 1)}
@@ -60,7 +60,7 @@ const SignupProgressBar = ({ step }) => {
               <span 
                 className={cn(
                   "mt-3 text-[9px] font-extrabold uppercase tracking-widest transition-colors duration-300 text-center",
-                  isActive ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"
+                  isActive ? "text-foreground" : "text-muted-foreground"
                 )}
               >
                 {s.label}
@@ -74,3 +74,6 @@ const SignupProgressBar = ({ step }) => {
 };
 
 export default SignupProgressBar;
+
+
+

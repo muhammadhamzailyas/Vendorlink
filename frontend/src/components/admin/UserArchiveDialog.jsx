@@ -83,16 +83,16 @@ const UserArchiveDialog = ({
       </Dialog.Header>
 
       <Dialog.Body className="space-y-6">
-        <div className="rounded-2xl border border-[var(--border)]/60 bg-[var(--muted)]/30 p-4">
+        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
                 Target User
               </p>
-              <h3 className="mt-1 text-lg font-bold text-[var(--foreground)]">
+              <h3 className="mt-1 text-lg font-bold text-foreground">
                 {user?.companyName || user?.username || user?.email || "User"}
               </h3>
-              <p className="text-sm text-[var(--muted-foreground)]">{user?.email || "-"}</p>
+              <p className="text-sm text-muted-foreground">{user?.email || "-"}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="uppercase">
@@ -104,8 +104,8 @@ const UserArchiveDialog = ({
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-[var(--border)]/60 bg-[var(--card)] p-6">
-            <div className="flex items-center gap-3 text-sm font-semibold text-[var(--muted-foreground)]">
+          <div className="rounded-2xl border border-border/60 bg-card p-6">
+            <div className="flex items-center gap-3 text-sm font-semibold text-muted-foreground">
               <Archive className="h-4 w-4 animate-pulse" />
               Loading archive briefing...
             </div>
@@ -146,7 +146,7 @@ const UserArchiveDialog = ({
                   <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-danger">
                     Blocking Conditions
                   </h4>
-                  <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     These items must be resolved before the user can be archived.
                   </p>
                 </div>
@@ -154,9 +154,9 @@ const UserArchiveDialog = ({
                   {blockers.map((blocker) => (
                     <div
                       key={blocker.code}
-                      className="rounded-xl border border-danger/20 bg-[var(--background)]/90 p-3"
+                      className="rounded-xl border border-danger/20 bg-background/90 p-3"
                     >
-                      <p className="text-sm font-semibold text-[var(--foreground)]">{blocker.message}</p>
+                      <p className="text-sm font-semibold text-foreground">{blocker.message}</p>
                       {Array.isArray(blocker.details) && blocker.details.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                           {blocker.details.map((detail) => {
@@ -189,7 +189,7 @@ const UserArchiveDialog = ({
                   <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-warning">
                     Warnings
                   </h4>
-                  <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     These items do not block archive, but they change related contracts.
                   </p>
                 </div>
@@ -197,9 +197,9 @@ const UserArchiveDialog = ({
                   {warnings.map((warning) => (
                     <div
                       key={warning.code}
-                      className="rounded-xl border border-warning/20 bg-[var(--background)]/90 p-3"
+                      className="rounded-xl border border-warning/20 bg-background/90 p-3"
                     >
-                      <p className="text-sm font-semibold text-[var(--foreground)]">{warning.message}</p>
+                      <p className="text-sm font-semibold text-foreground">{warning.message}</p>
                       {Array.isArray(warning.details) && warning.details.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                           {warning.details.map((detail) => {
@@ -225,49 +225,49 @@ const UserArchiveDialog = ({
             )}
 
             <section className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--border)]/60 bg-[var(--card)] p-4">
+              <div className="rounded-2xl border border-border/60 bg-card p-4">
                 <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-[var(--foreground)]" />
-                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[var(--foreground)]">
+                  <Wallet className="h-4 w-4 text-foreground" />
+                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-foreground">
                     Money Summary
                   </h4>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--muted)]/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                       Wallet Balance
                     </p>
-                    <p className="mt-2 text-base font-bold text-[var(--foreground)]">
+                    <p className="mt-2 text-base font-bold text-foreground">
                       {formatMoney(impactSummary?.money?.walletBalance, currency)}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--muted)]/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                       Locked Balance
                     </p>
-                    <p className="mt-2 text-base font-bold text-[var(--foreground)]">
+                    <p className="mt-2 text-base font-bold text-foreground">
                       {formatMoney(impactSummary?.money?.lockedBalance, currency)}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--muted)]/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                       Pending Payments
                     </p>
-                    <p className="mt-2 text-base font-bold text-[var(--foreground)]">
+                    <p className="mt-2 text-base font-bold text-foreground">
                       {impactSummary?.money?.pendingPayments?.count || 0}
                     </p>
-                    <p className="text-xs text-[var(--muted-foreground)]">
+                    <p className="text-xs text-muted-foreground">
                       {formatMoney(impactSummary?.money?.pendingPayments?.totalAmount, currency)}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--muted)]/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                       Pending Transactions
                     </p>
-                    <p className="mt-2 text-base font-bold text-[var(--foreground)]">
+                    <p className="mt-2 text-base font-bold text-foreground">
                       {impactSummary?.money?.pendingTransactions?.count || 0}
                     </p>
-                    <p className="text-xs text-[var(--muted-foreground)]">
+                    <p className="text-xs text-muted-foreground">
                       {formatMoney(
                         impactSummary?.money?.pendingTransactions?.totalAmount,
                         currency
@@ -277,10 +277,10 @@ const UserArchiveDialog = ({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-[var(--border)]/60 bg-[var(--card)] p-4">
+              <div className="rounded-2xl border border-border/60 bg-card p-4">
                 <div className="flex items-center gap-2">
-                  <Stack className="h-4 w-4 text-[var(--foreground)]" />
-                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[var(--foreground)]">
+                  <Stack className="h-4 w-4 text-foreground" />
+                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-foreground">
                     Retained Records
                   </h4>
                 </div>
@@ -288,23 +288,23 @@ const UserArchiveDialog = ({
                   {Object.entries(impactSummary?.retainedRecords || {}).map(([key, value]) => (
                     <div
                       key={key}
-                      className="rounded-xl border border-[var(--border)]/50 bg-[var(--muted)]/20 p-3"
+                      className="rounded-xl border border-border/50 bg-muted/20 p-3"
                     >
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                         {recordLabels[key] || key}
                       </p>
-                      <p className="mt-2 text-base font-bold text-[var(--foreground)]">{value}</p>
+                      <p className="mt-2 text-base font-bold text-foreground">{value}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            <section className="rounded-2xl border border-[var(--border)]/60 bg-[var(--card)] p-4">
-              <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[var(--foreground)]">
+            <section className="rounded-2xl border border-border/60 bg-card p-4">
+              <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-foreground">
                 Result If Confirmed
               </h4>
-              <div className="mt-3 space-y-2 text-sm text-[var(--muted-foreground)]">
+              <div className="mt-3 space-y-2 text-sm text-muted-foreground">
                 <p>{resultIfConfirmed?.userAccess}</p>
                 <p>{resultIfConfirmed?.contractOutcome}</p>
                 <p>{resultIfConfirmed?.dataRetention}</p>
@@ -321,7 +321,7 @@ const UserArchiveDialog = ({
               />
 
               {warnings.length > 0 && (
-                <label className="flex items-start gap-3 rounded-xl border border-warning/20 bg-warning/5 p-3 text-sm text-[var(--foreground)]">
+                <label className="flex items-start gap-3 rounded-xl border border-warning/20 bg-warning/5 p-3 text-sm text-foreground">
                   <Checkbox
                     checked={acknowledgeWarnings}
                     onCheckedChange={(checked) =>
@@ -368,3 +368,6 @@ const UserArchiveDialog = ({
 };
 
 export default UserArchiveDialog;
+
+
+

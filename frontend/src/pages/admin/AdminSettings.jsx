@@ -73,8 +73,8 @@ const AdminSettings = () => {
     <PageTransition>
       <div className="space-y-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">Platform Settings</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">Global configuration and system preferences.</p>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Platform Settings</h2>
+          <p className="text-sm text-muted-foreground">Global configuration and system preferences.</p>
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
@@ -102,11 +102,11 @@ const AdminSettings = () => {
             description="Control user entry and platform availability."
           >
             <div className="space-y-4">
-              <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+              <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="flex items-center justify-between p-4">
                     <div className="space-y-0.5">
-                    <p className="text-sm font-bold uppercase tracking-tight text-[var(--foreground)]">Maintenance Mode</p>
-                    <p className="text-xs text-[var(--muted-foreground)] font-medium">Disable public access to the platform</p>
+                    <p className="text-sm font-bold uppercase tracking-tight text-foreground">Maintenance Mode</p>
+                    <p className="text-xs text-muted-foreground font-medium">Disable public access to the platform</p>
                     </div>
                     <Switch 
                     checked={settings.maintenanceMode} 
@@ -115,11 +115,11 @@ const AdminSettings = () => {
                 </Card.Content>
               </Card>
 
-              <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+              <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="flex items-center justify-between p-4">
                     <div className="space-y-0.5">
-                    <p className="text-sm font-bold uppercase tracking-tight text-[var(--foreground)]">New Registrations</p>
-                    <p className="text-xs text-[var(--muted-foreground)] font-medium">Allow new users to create accounts</p>
+                    <p className="text-sm font-bold uppercase tracking-tight text-foreground">New Registrations</p>
+                    <p className="text-xs text-muted-foreground font-medium">Allow new users to create accounts</p>
                     </div>
                     <Switch 
                     checked={settings.enableRegistration} 
@@ -128,11 +128,11 @@ const AdminSettings = () => {
                 </Card.Content>
               </Card>
 
-              <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+              <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="flex items-center justify-between p-4">
                     <div className="space-y-0.5">
-                    <p className="text-sm font-bold uppercase tracking-tight text-[var(--foreground)]">Require Admin Approval</p>
-                    <p className="text-xs text-[var(--muted-foreground)] font-medium">Manually verify all new accounts</p>
+                    <p className="text-sm font-bold uppercase tracking-tight text-foreground">Require Admin Approval</p>
+                    <p className="text-xs text-muted-foreground font-medium">Manually verify all new accounts</p>
                     </div>
                     <Switch 
                     checked={settings.requireApproval} 
@@ -156,13 +156,13 @@ const AdminSettings = () => {
             )}
           >
             <div className="space-y-4">
-              <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+              <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
-                    <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-2 text-[var(--muted-foreground)]">
+                    <div className="rounded-lg border border-border bg-card p-2 text-muted-foreground">
                         <Envelope className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-bold uppercase tracking-tight text-[var(--foreground)]">Email Notifications</p>
+                    <p className="text-sm font-bold uppercase tracking-tight text-foreground">Email Notifications</p>
                     </div>
                     <Switch 
                     checked={settings.emailNotifications} 
@@ -171,13 +171,13 @@ const AdminSettings = () => {
                 </Card.Content>
               </Card>
 
-              <Card className="bg-[var(--muted)]/30 border-none shadow-none">
+              <Card className="bg-muted/30 border-none shadow-none">
                 <Card.Content className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
-                    <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-2 text-[var(--muted-foreground)]">
+                    <div className="rounded-lg border border-border bg-card p-2 text-muted-foreground">
                         <Bell className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-bold uppercase tracking-tight text-[var(--foreground)]">System Alerts</p>
+                    <p className="text-sm font-bold uppercase tracking-tight text-foreground">System Alerts</p>
                     </div>
                     <Switch 
                     checked={settings.systemAlerts} 
@@ -194,3 +194,6 @@ const AdminSettings = () => {
 };
 
 export default AdminSettings;
+
+
+

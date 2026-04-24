@@ -232,23 +232,23 @@ const UserProfile = ({ userType = "company" }) => {
     <PageTransition>
       <div className="space-y-8">
         <div>
-           <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">{config.title}</h2>
-           <p className="text-sm text-[var(--muted-foreground)]">Review and update your public and contact information.</p>
+           <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">{config.title}</h2>
+           <p className="text-sm text-muted-foreground">Review and update your public and contact information.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <aside className="lg:col-span-4">
-            <Card className="overflow-hidden bg-[var(--card)] border-[var(--border)]">
+            <Card className="overflow-hidden bg-card border-border">
               <Card.Header className="flex flex-col items-center text-center space-y-4 pb-2 border-b-0">
                 <UserAvatar
                   user={formData}
                   name={formData.companyName || formData.username || "Profile"}
                   size="xl"
-                  className="h-32 w-32 text-5xl border-4 border-[var(--background)] shadow-soft"
+                  className="h-32 w-32 text-5xl border-4 border-background shadow-soft"
                 />
                 <div className="space-y-1">
-                  <Card.Title className="text-lg font-bold uppercase tracking-tight text-[var(--foreground)]">{formData.companyName || "Unnamed"}</Card.Title>
-                  <Card.Description className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)]">{formData[config.typeKey] || config.typeField}</Card.Description>
+                  <Card.Title className="text-lg font-bold uppercase tracking-tight text-foreground">{formData.companyName || "Unnamed"}</Card.Title>
+                  <Card.Description className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{formData[config.typeKey] || config.typeField}</Card.Description>
                 </div>
               </Card.Header>
 
@@ -285,21 +285,21 @@ const UserProfile = ({ userType = "company" }) => {
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-[var(--border)] bg-[var(--muted)] p-5">
+                <div className="rounded-2xl border border-border bg-muted p-5">
                   <div className="space-y-4 text-xs">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)]">
+                      <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                         <SealCheck className="h-3.5 w-3.5" />
                         Username
                       </span>
-                      <span className="font-bold text-[var(--foreground)] uppercase tracking-tight">{formData.username || "N/A"}</span>
+                      <span className="font-bold text-foreground uppercase tracking-tight">{formData.username || "N/A"}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)]">Role</span>
-                      <span className="font-bold capitalize text-[var(--foreground)] uppercase tracking-tight">{profileMeta.role || userType}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Role</span>
+                      <span className="font-bold capitalize text-foreground uppercase tracking-tight">{profileMeta.role || userType}</span>
                     </div>
-                    <div className="flex items-center justify-between gap-3 pt-1 border-t border-[var(--border)]/50">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)]">Status</span>
+                    <div className="flex items-center justify-between gap-3 pt-1 border-t border-border/50">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</span>
                       <StatusChip status={profileMeta.status || "pending"} />
                     </div>
                   </div>
@@ -314,7 +314,7 @@ const UserProfile = ({ userType = "company" }) => {
                 title="Profile Details"
                 description="Keep your business and contact information up to date."
                 footer={hasUnsavedChanges ? (
-                  <FormActionRow className="bg-[var(--muted)]/30 border-t border-[var(--border)] px-6 py-4">
+                  <FormActionRow className="bg-muted/30 border-t border-border px-6 py-4">
                     <Button
                       type="submit"
                       loading={isSubmitting}
@@ -399,3 +399,6 @@ const UserProfile = ({ userType = "company" }) => {
 };
 
 export default UserProfile;
+
+
+

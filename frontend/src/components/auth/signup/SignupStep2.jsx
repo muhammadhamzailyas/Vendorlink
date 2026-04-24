@@ -38,7 +38,7 @@ const SignupStep2 = ({
 }) => (
   <div className="space-y-6">
     <div className="space-y-4">
-        <p className="text-sm font-bold text-[var(--muted-foreground)] uppercase tracking-widest px-1">
+        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest px-1">
         {isCompany ? "Business Information" : "Professional Information"}
         </p>
         
@@ -56,7 +56,7 @@ const SignupStep2 = ({
                 onChange={(val) => onChange({ category: val })}
                 />
                 <Input
-                className="h-12 rounded-xl bg-[var(--input-bg)] px-4 font-medium"
+                className="h-12 rounded-xl bg-input-bg px-4 font-medium"
                 placeholder="Years of Experience"
                 type="number"
                 numericOnly
@@ -88,14 +88,14 @@ const SignupStep2 = ({
             />
 
             <Input
-                className="h-12 rounded-xl bg-[var(--input-bg)] px-4 font-medium"
+                className="h-12 rounded-xl bg-input-bg px-4 font-medium"
                 placeholder="Portfolio URL (Optional)"
                 value={data.portfolioURL}
                 onChange={(e) => onChange({ portfolioURL: e.target.value })}
             />
 
             <Textarea
-                className="min-h-24 rounded-xl bg-[var(--input-bg)] px-4 py-3 font-medium"
+                className="min-h-24 rounded-xl bg-input-bg px-4 py-3 font-medium"
                 placeholder="Brief Bio / Professional Summary..."
                 value={data.bio}
                 onChange={(e) => onChange({ bio: e.target.value })}
@@ -106,7 +106,7 @@ const SignupStep2 = ({
 
     <AddressFields data={data} onChange={onChange} />
 
-    <div className="flex gap-4 pt-4 border-t border-[var(--border)]/50">
+    <div className="flex gap-4 pt-4 border-t border-border/50">
       <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
       <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading} size="lg" className="flex-1 shadow-soft font-normal">
         Continue
@@ -116,3 +116,6 @@ const SignupStep2 = ({
 );
 
 export default SignupStep2;
+
+
+

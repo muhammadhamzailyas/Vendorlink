@@ -173,8 +173,8 @@ const CompanyTaskDetail = () => {
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)] uppercase">{task.title || "Task Detail"}</h2>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)]/60">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">{task.title || "Task Detail"}</h2>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
               <span>Created {formatDate(task.createdAt)}</span>
             </div>
           </div>
@@ -199,22 +199,22 @@ const CompanyTaskDetail = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="bg-[var(--muted)]/50 p-1 h-auto flex flex-wrap justify-start gap-1 w-fit mb-8 shadow-inner border border-[var(--border)]/50">
+            <TabsList className="bg-muted/50 p-1 h-auto flex flex-wrap justify-start gap-1 w-fit mb-8 shadow-inner border border-border/50">
                 <TabsTrigger 
                     value="overview"
-                    className="rounded-lg px-6 py-2.5 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-soft transition-all"
+                    className="rounded-lg px-6 py-2.5 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground data-[state=active]:shadow-soft transition-all"
                 >
                     <Info className="mr-2 h-3.5 w-3.5" />
                     Overview
                 </TabsTrigger>
                 <TabsTrigger 
                     value="proposals"
-                    className="rounded-lg px-6 py-2.5 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-soft transition-all"
+                    className="rounded-lg px-6 py-2.5 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground data-[state=active]:shadow-soft transition-all"
                 >
                     <ClipboardText className="mr-2 h-3.5 w-3.5" />
                     Proposals
                     {proposals.length > 0 && (
-                        <span className="ml-2 rounded-full bg-[var(--muted)]/20 px-1.5 py-0.5 text-[9px] font-extrabold">{proposals.length}</span>
+                        <span className="ml-2 rounded-full bg-muted/20 px-1.5 py-0.5 text-[9px] font-extrabold">{proposals.length}</span>
                     )}
                 </TabsTrigger>
             </TabsList>
@@ -224,8 +224,8 @@ const CompanyTaskDetail = () => {
             </TabsContent>
 
             <TabsContent value="proposals" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <Card className="shadow-soft border-[var(--border)]/50">
-                    <Card.Header className="pb-4 border-b border-[var(--border)]/50 bg-[var(--muted)]/20">
+                <Card className="shadow-soft border-border/50">
+                    <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div>
                                 <Card.Title className="text-sm font-bold uppercase tracking-tight">Bid Registry</Card.Title>
@@ -258,9 +258,9 @@ const CompanyTaskDetail = () => {
                         ) : (
                         <>
                             {rankedIds && (
-                            <div className="mb-8 p-4 rounded-xl border border-[var(--ring)]/20 bg-[var(--muted)]/30 flex items-center gap-3">
-                                <Badge className="bg-[var(--foreground)]/20 text-[var(--foreground)] border-none">AI SORTED</Badge>
-                                <p className="text-xs font-bold text-[var(--foreground)]/80 uppercase tracking-tight">
+                            <div className="mb-8 p-4 rounded-xl border border-ring/20 bg-muted/30 flex items-center gap-3">
+                                <Badge className="bg-foreground/20 text-foreground border-none">AI SORTED</Badge>
+                                <p className="text-xs font-bold text-foreground/80 uppercase tracking-tight">
                                     Proposals sorted by performance matching. Best matches are shown first.
                                 </p>
                             </div>
@@ -269,7 +269,7 @@ const CompanyTaskDetail = () => {
                             {displayedProposals.map((proposal, index) => (
                                 <div key={proposal._id} className="relative group">
                                 {rankedIds && (
-                                    <div className="absolute -top-3 -left-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--foreground)] text-[10px] font-extrabold text-white shadow-lg border-2 border-paper ring-4 ring-background">
+                                    <div className="absolute -top-3 -left-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-[10px] font-extrabold text-white shadow-lg border-2 border-paper ring-4 ring-background">
                                     #{index + 1}
                                     </div>
                                 )}
@@ -296,3 +296,6 @@ const CompanyTaskDetail = () => {
 };
 
 export default CompanyTaskDetail;
+
+
+

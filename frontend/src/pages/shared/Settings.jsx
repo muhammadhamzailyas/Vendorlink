@@ -2,15 +2,12 @@ import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignOut } from "@phosphor-icons/react";
 import { authService } from "@/services/api";
-import { PageTransition, Button, Switch } from "@/components/ui";
-import { useTheme } from "@/context/ThemeContext";
-import { Moon, Sun } from "@phosphor-icons/react";
+import { PageTransition, Button, Card } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useTheme();
   const user = useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "{}");
@@ -78,24 +75,6 @@ const Settings = () => {
                 </Card.Content>
             </Card>
           </FormFieldGrid>
-        </FormSection>
-
-        <FormSection
-          title="Appearance"
-          description="Customize how the platform looks in your session."
-        >
-          <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--muted)] p-2 text-[var(--foreground)]/80">
-                {isDarkMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-              </div>
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-tight text-[var(--foreground)]">Dark Mode</h3>
-                <p className="text-xs text-[var(--muted-foreground)] font-medium">Switch between light and dark themes</p>
-              </div>
-            </div>
-            <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
-          </div>
         </FormSection>
       </div>
     </PageTransition>

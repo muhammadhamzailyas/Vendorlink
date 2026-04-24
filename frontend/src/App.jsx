@@ -17,7 +17,6 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import { NotificationProvider } from "./context/NotificationContext";
 import { WalletProvider } from "./context/WalletContext";
-import { ThemeProvider } from "./context/ThemeContext";
 
 /**
  * Hook to manage Firebase user session and sync with MongoDB profile.
@@ -218,7 +217,6 @@ const queryClient = new QueryClient({
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
         <ToastViewport />
         <Router>
           <ScrollToTop />
@@ -340,7 +338,6 @@ const App = () => (
             </NotificationProvider>
           </UserSessionProvider>
         </Router>
-      </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

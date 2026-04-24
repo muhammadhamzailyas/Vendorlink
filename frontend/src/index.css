@@ -2,89 +2,9 @@
 
 @theme {
   /* =========================
-     CORE SEMANTIC TOKENS
+     CORE SEMANTIC TOKENS (Brand Dark Identity)
      ========================= */
 
-  --background: theme(colors.neutral.50);
-  --foreground: theme(colors.neutral.800);
-
-  --card: theme(colors.neutral.100);
-  --card-foreground: theme(colors.neutral.800);
-
-  --popover: theme(colors.neutral.100);
-  --popover-foreground: theme(colors.neutral.800);
-
-  --border: theme(colors.neutral.300);
-  --input: theme(colors.neutral.200);
-
-  --muted: theme(colors.neutral.100);
-  --muted-foreground: theme(colors.neutral.500);
-
-  --accent: theme(colors.neutral.200);
-  --accent-foreground: theme(colors.neutral.800);
-
-  --ring: theme(colors.neutral.400);
-
-  /* =========================
-     INTERACTIVE STATES
-     ========================= */
-
-  --hover: theme(colors.neutral.200);
-  --active: theme(colors.neutral.300);
-
-  /* =========================
-     INPUT SYSTEM
-     ========================= */
-
-  --input-bg: #ffffff;
-  --input-border: theme(colors.neutral.200);
-  --input-focus: theme(colors.neutral.400);
-
-  /* =========================
-     STATUS COLORS (semantic, NOT layout)
-     ========================= */
-
-  --success: #16a34a;
-  --error: #dc2626;
-  --warning: #d97706;
-  --info: #2563eb;
-
-  /* =========================
-     BADGES (structured like shadcn variants)
-     ========================= */
-
-  --badge-blue-bg: theme(colors.blue.50);
-  --badge-blue-text: theme(colors.blue.700);
-  --badge-blue-border: theme(colors.blue.200);
-
-  --badge-green-bg: theme(colors.green.50);
-  --badge-green-text: theme(colors.green.700);
-  --badge-green-border: theme(colors.green.200);
-
-  --badge-amber-bg: theme(colors.amber.50);
-  --badge-amber-text: theme(colors.amber.700);
-  --badge-amber-border: theme(colors.amber.200);
-
-  --badge-red-bg: theme(colors.red.50);
-  --badge-red-text: theme(colors.red.700);
-  --badge-red-border: theme(colors.red.200);
-
-  --badge-purple-bg: theme(colors.purple.50);
-  --badge-purple-text: theme(colors.purple.700);
-  --badge-purple-border: theme(colors.purple.200);
-
-  --badge-teal-bg: theme(colors.teal.50);
-  --badge-teal-text: theme(colors.teal.700);
-  --badge-teal-border: theme(colors.teal.200);
-}
-
-/* =========================
-   DARK MODE
-   ========================= */
-
-@variant dark (&:where(.dark, .dark *));
-
-.dark {
   --background: theme(colors.neutral.950);
   --foreground: theme(colors.neutral.200);
 
@@ -105,17 +25,33 @@
 
   --ring: theme(colors.neutral.500);
 
+  /* =========================
+     INTERACTIVE STATES
+     ========================= */
+
   --hover: theme(colors.neutral.800);
   --active: theme(colors.neutral.700);
+
+  /* =========================
+     INPUT SYSTEM
+     ========================= */
 
   --input-bg: #1a1a1a;
   --input-border: theme(colors.neutral.700);
   --input-focus: theme(colors.neutral.500);
 
+  /* =========================
+     STATUS COLORS (semantic, NOT layout)
+     ========================= */
+
   --success: #4ade80;
   --error: #f87171;
   --warning: #fbbf24;
   --info: #60a5fa;
+
+  /* =========================
+     BADGES (structured like shadcn variants)
+     ========================= */
 
   --badge-blue-bg: theme(colors.blue.900);
   --badge-blue-text: theme(colors.blue.300);
@@ -149,7 +85,7 @@
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--border) var(--background);
   }
 
   ::-webkit-scrollbar {
@@ -158,7 +94,7 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--background) !important;
   }
 
   ::-webkit-scrollbar-thumb {
@@ -169,6 +105,12 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: var(--ring);
+  }
+
+  /* Target specific containers that might have forced backgrounds */
+  .custom-scrollbar::-webkit-scrollbar-track,
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar-track {
+    background: var(--background) !important;
   }
 }
 

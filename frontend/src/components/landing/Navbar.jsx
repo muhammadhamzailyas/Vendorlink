@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { List, X as X } from "@phosphor-icons/react";
 import { Button, Sheet, SheetContent, SheetTitle, SheetDescription } from "../ui";
-import { useTheme } from "../../context/ThemeContext";
 import logoLight from "../../assets/Vendorlink Secondary Logo Light.png";
 
 const navItems = [
@@ -13,7 +12,6 @@ const navItems = [
 
 const Navbar = ({ scrollToSection }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  useTheme();
 
   const handleNavClick = (id) => {
     scrollToSection(id);

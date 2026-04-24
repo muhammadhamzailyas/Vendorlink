@@ -30,6 +30,7 @@ const VENDOR_CATEGORY_OPTIONS = [
 
 const SignupStep2 = ({
   data,
+  errors = {},
   onChange,
   isCompany,
   onSubmit,
@@ -44,10 +45,10 @@ const SignupStep2 = ({
         </p>
         
         {isCompany ? (
-        <CompanyBusinessFields data={data} onChange={onChange} />
+        <CompanyBusinessFields data={data} errors={errors} onChange={onChange} />
         ) : (
         <>
-            <VendorBusinessFields data={data} onChange={onChange} />
+            <VendorBusinessFields data={data} errors={errors} onChange={onChange} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <MagnifyingGlassableSelect
                 value={data.category}
@@ -97,6 +98,7 @@ const SignupStep2 = ({
                 className="min-h-24"
                 placeholder="Brief Bio / Professional Summary..."
                 value={data.bio}
+                error={errors.bio}
                 onChange={(e) => onChange({ bio: e.target.value })}
             />
         </>

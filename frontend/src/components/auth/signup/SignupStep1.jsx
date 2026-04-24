@@ -32,9 +32,9 @@ const SignupStep1 = ({
 
     // Phone validation - Universal for all countries using libphonenumber metadata
     if (data.phone) {
-        // isValidPhoneNumber handles trunk prefixes (like leading 0) 
-        // and checks against global mobile number plans for the specific isoCode.
-        if (!isValidPhoneNumber(data.phone, data.isoCode)) {
+        // Strip hyphens and spaces added by PhoneInputField for validation
+        const rawPhone = data.phone.replace(/\D/g, "");
+        if (!isValidPhoneNumber(rawPhone, data.isoCode)) {
             errs.phone = "Invalid format";
         }
     }
@@ -77,7 +77,7 @@ const SignupStep1 = ({
   ];
 
   const ErrorMsg = ({ children }) => (
-    <div className="mt-2 flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-[11px] font-bold uppercase tracking-tight text-error animate-in fade-in slide-in-from-top-1 border border-error/20">
+    <div className="mt-2 flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-[11px] font-bold tracking-tight text-error animate-in fade-in slide-in-from-top-1 border border-error/20">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
           <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,16,0v40A8,8,0,0,1,144,176ZM128,80a12,12,0,1,1-12,12A12,12,0,0,1,128,80Z"></path>
       </svg>

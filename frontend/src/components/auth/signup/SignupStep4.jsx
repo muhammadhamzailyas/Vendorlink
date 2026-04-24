@@ -108,7 +108,7 @@ const SignupStep4 = ({ plan, onPlanChange, onSubmit, onBack, loading: parentLoad
             size="lg"
             className="flex-1 font-normal shadow-soft"
         >
-          Continue to Payment
+          {plan === "free" ? "Continue" : "Continue to Payment"}
         </Button>
       </div>
     </div>

@@ -89,6 +89,10 @@
    ========================= */
 
 @layer base {
+  body {
+    @apply bg-background text-foreground min-h-screen;
+  }
+  
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-border) var(--color-background);

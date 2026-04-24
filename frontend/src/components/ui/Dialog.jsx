@@ -16,7 +16,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -24,11 +24,13 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
-const DialogContent = React.forwardRef(({ className, children, onX, ...props }, ref) => (
+const DialogContent = React.forwardRef(({ className, children, onX, persistent, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      onPointerDownOutside={(e) => { if (persistent) e.preventDefault(); }}
+      onEscapeKeyDown={(e) => { if (persistent) e.preventDefault(); }}
       className={cn(
         "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/50 bg-card shadow-soft sm:max-w-lg animate-in fade-in zoom-in-95 duration-200",
         className
@@ -56,7 +58,7 @@ const DialogHeader = ({
 }) => (
   <div
     className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left border-b border-border/50 px-6 py-5 bg-muted/30",
+      "flex flex-col space-y-1.5 text-center border-b border-border/50 px-6 py-5 bg-muted/30",
       className
     )}
     {...props}

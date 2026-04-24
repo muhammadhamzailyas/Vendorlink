@@ -18,6 +18,135 @@ const defaultPlans = [
  * It assumes the user has already been authenticated via Firebase.
  */
 class OnboardingController {
+  /**
+   * Saves partial onboarding progress.
+   */
+  async saveProgress(req, res) {
+    try {
+      let { account, details, step } = req.body;
+      const firebaseUid = req.firebaseUser?.uid;
+
+      if (!firebaseUid) {
+        return res.status(401).json({ message: "Unverified identity" });
+      }
+
+      const parseJson = (val, fieldName) => {
+        if (!val) return {};
+        if (typeof val === "string") {
+            try { return JSON.parse(val); } catch (e) { return val; }
+        }
+        return val;
+      };
+
+      account = parseJson(account, "account");
+      details = parseJson(details, "details");
+      step = parseInt(step) || 1;
+
+      let user = await User.findOne({ firebaseUid });
+      if (!user) {
+          const normalizedEmail = (req.firebaseUser.email || account.email || "").trim().toLowerCase();
+          let username = normalizedEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "");
+          const existingUsername = await User.findOne({ username });
+          if (existingUsername) username = `${username}_${Date.now().toString().slice(-4)}`;
+
+          user = new User({
+            firebaseUid,
+            username,
+            email: normalizedEmail,
+            authProvider: "firebase",
+          });
+      }
+
+      if (account.role) user.role = account.role;
+      if (account.fullName) user.fullName = account.fullName;
+      if (account.phone) user.phone = `${account.countryCode || ""}${account.phone}`;
+      user.onboardingStep = step;
+      await user.save();
+
+      // Handle Documents if present
+      const documents = {};
+      if (req.files) {
+        Object.keys(req.files).forEach((key) => {
+          if (req.files[key] && req.files[key][0]) {
+            const filePath = req.files[key][0].path.replace(/\\/g, "/");
+            documents[key] = filePath;
+          }
+        });
+      }
+
+      if (user.role === "company") {
+          const updateData = {
+              userId: user._id,
+              ...details
+          };
+          if (documents.registrationCertificate) updateData.registrationCertificateURL = documents.registrationCertificate;
+          if (documents.ntnCertificate) updateData.ntnCertificateURL = documents.ntnCertificate;
+          if (documents.supportingDocument) updateData.supportingDocumentURL = documents.supportingDocument;
+
+          await Company.findOneAndUpdate({ userId: user._id }, updateData, { upsert: true });
+      } else if (user.role === "vendor") {
+          const updateData = {
+              userId: user._id,
+              fullName: user.fullName,
+              ...details
+          };
+          if (documents.cnicFront) updateData.cnicFrontURL = documents.cnicFront;
+          if (documents.cnicBack) updateData.cnicBackURL = documents.cnicBack;
+          if (documents.businessLicense) updateData.businessLicenseURL = documents.businessLicense;
+          if (documents.portfolioSamples) updateData.portfolioSamplesURL = documents.portfolioSamples;
+
+          await Vendor.findOneAndUpdate({ userId: user._id }, updateData, { upsert: true });
+      }
+
+      return res.json({ message: "Progress saved", onboardingStep: step });
+    } catch (error) {
+      console.error("[Onboarding] Save progress error:", error);
+      return res.status(500).json({ message: "Failed to save progress", error: error.message });
+    }
+  }
+
+  async resetProgress(req, res) {
+    try {
+      const firebaseUid = req.firebaseUser?.uid;
+      if (!firebaseUid) return res.status(401).json({ message: "Unauthorized" });
+
+      const user = await User.findOne({ firebaseUid });
+      if (user) {
+          user.onboardingStep = 1;
+          user.role = "unassigned";
+          await user.save();
+          
+          await Company.deleteOne({ userId: user._id });
+          await Vendor.deleteOne({ userId: user._id });
+      }
+
+      return res.json({ message: "Progress reset successfully" });
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to reset progress" });
+    }
+  }
+
+  async getMyOnboarding(req, res) {
+      try {
+        const firebaseUid = req.firebaseUser?.uid;
+        if (!firebaseUid) return res.status(401).json({ message: "Unauthorized" });
+
+        const user = await User.findOne({ firebaseUid }).lean();
+        if (!user) return res.json({ user: null });
+
+        let details = null;
+        if (user.role === "company") {
+            details = await Company.findOne({ userId: user._id }).lean();
+        } else if (user.role === "vendor") {
+            details = await Vendor.findOne({ userId: user._id }).lean();
+        }
+
+        return res.json({ user, details });
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch onboarding state" });
+      }
+  }
+
   async getPlans(req, res) {
     return res.json(defaultPlans);
   }
@@ -268,11 +397,6 @@ class OnboardingController {
       } catch (error) {
           return res.status(500).json({ message: "Payment gateway error", error: error.message });
       }
-  }
-
-  async getMyOnboarding(req, res) {
-      const user = await User.findById(req.user._id).lean();
-      return res.json({ user });
   }
 }
 

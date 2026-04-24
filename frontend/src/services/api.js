@@ -44,8 +44,14 @@ api.interceptors.request.use(async (config) => {
 export const onboardingService = {
   getPlans: () => api.get("/onboarding/plans"),
   createPaymentIntent: (planId) => api.post("/onboarding/create-payment-intent", { planId }),
-  submitFinal: (formData) => api.post("/onboarding/final-submit", formData),
+  saveProgress: (data) => api.post("/onboarding/save-progress", data, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  resetProgress: () => api.post("/onboarding/reset-progress"),
   getMyOnboarding: () => api.get("/onboarding/me"),
+  submitFinal: (data) => api.post("/onboarding/final-submit", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }),
 };
 
 export const authService = {

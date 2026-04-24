@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import toastUtil from "../../lib/toast";
 import { authService, onboardingService } from "../../services/api";
@@ -14,6 +14,7 @@ import SignupStep3 from "../../components/auth/signup/SignupStep3";
 import SignupStep4 from "../../components/auth/signup/SignupStep4";
 import SignupStep5 from "../../components/auth/signup/SignupStep5";
 import SignupProgressBar from "../../components/auth/signup/SignupProgressBar";
+import { Dialog, Button } from "../../components/ui";
 
 const TOTAL_STEPS = 5;
 
@@ -40,6 +41,13 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [stepVisible, setStepVisible] = useState(false);
+
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState(null);
+  const [pendingDraftStep, setPendingDraftStep] = useState(1);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const [formData, setFormData] = useState({
     step1: { ...INITIAL_STEP1 },
@@ -83,71 +91,329 @@ const Signup = () => {
     }
   });
 
-  // Draft Persistence & Resume Detection
+  const handleResume = useCallback(() => {
+    if (pendingDraft) {
+        setFormData(prev => ({
+            ...prev,
+            ...pendingDraft,
+            step1: { ...prev.step1, ...pendingDraft.step1, password: "", confirmPassword: "" }
+        }));
+        setStep(pendingDraftStep || 2);
+    }
+    setShowResumeDialog(false);
+    setIsFormDirty(true);
+  }, [pendingDraft, pendingDraftStep]);
+
+  const handleStartOver = useCallback(async () => {
+    try {
+        await onboardingService.resetProgress();
+    } catch (e) {
+        console.warn("Failed to reset backend progress");
+    }
+    localStorage.removeItem("vendorlink_signup_draft");
+    setShowResumeDialog(false);
+    setPendingDraft(null);
+    
+    // Reset local state to initial
+    setFormData({
+        step1: { ...INITIAL_STEP1 },
+        step2: {
+          companyName: "",
+          businessType: "",
+          industry: "",
+          registrationNumber: "",
+          ntn: "",
+          yearEstablished: "",
+          website: "",
+          companySize: "",
+          description: "",
+          vendorType: "Individual",
+          cnicNumber: "",
+          businessName: "",
+          category: "",
+          skills: [],
+          skillsInput: "",
+          yearsOfExperience: "",
+          portfolioURL: "",
+          bio: "",
+          city: "",
+          province: "",
+          country: "PK",
+          countryName: "Pakistan",
+          streetAddress: "",
+          zipCode: "",
+        },
+        step3: {
+          registrationCertificate: null,
+          ntnCertificate: null,
+          supportingDocument: null,
+          cnicFront: null,
+          cnicBack: null,
+          businessLicense: null,
+          portfolioSamples: null,
+        },
+        step4: {
+          plan: "free",
+        }
+    });
+    setStep(1);
+    setIsFormDirty(false);
+  }, []);
+
+  const handleLinkClick = useCallback((e, to) => {
+    if (isFormDirty && step < TOTAL_STEPS) {
+      e.preventDefault();
+      setPendingNavigation(to);
+      setShowLeaveDialog(true);
+    }
+  }, [isFormDirty, step]);
+
+  const confirmLeave = useCallback(() => {
+    setShowLeaveDialog(false);
+    setIsFormDirty(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  }, [navigate, pendingNavigation]);
+
+  // Handle BeforeUnload (Tab close/Refresh - Browser Generic Prompt)
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isFormDirty && step < TOTAL_STEPS) {
+        e.preventDefault();
+        e.returnValue = ""; 
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isFormDirty, step]);
+
+  // Resume Detection
   useEffect(() => {
     const loadDraft = async () => {
-      // 1. Try to load from localStorage first
       const savedDraft = localStorage.getItem("vendorlink_signup_draft");
-      if (savedDraft) {
-        try {
-          const parsed = JSON.parse(savedDraft);
-          setFormData(prev => ({
-            ...prev,
-            ...parsed,
-            // Ensure step1 sensitive fields aren't stale
-            step1: { ...prev.step1, ...parsed.step1, password: "", confirmPassword: "" }
-          }));
-        } catch (e) {
-          console.warn("Failed to parse signup draft");
-        }
-      }
-
-      // 2. Handle explicit resume from Verification page
       const { auth } = await import("../../lib/firebase");
+      // Wait for auth initialization
+      await new Promise(r => setTimeout(r, 100));
       const user = auth.currentUser;
       const stateResume = location.state?.resumeStep;
       const stateVerified = location.state?.isVerified;
 
-      if (stateResume && stateVerified) {
-          setStep(stateResume);
-          // If we just verified, update local state
-          setFormData(prev => ({
-            ...prev,
-            step1: { ...prev.step1, emailVerified: true }
-          }));
-          return;
+      let backendData = null;
+      if (user) {
+          try {
+              const res = await onboardingService.getMyOnboarding();
+              if (res.data?.user) backendData = res.data;
+          } catch (e) { console.warn("Backend load failed"); }
       }
 
-      // 3. Auto-resume if already verified but didn't finish
-      if (user && user.emailVerified && step === 1) {
+      if (backendData) {
+          const { user: bUser, details: bDetails } = backendData;
+          
+          // Only show resume dialog if they are actually past step 1
+          if (bUser.onboardingStep > 1) {
+              const merged = {
+                  step1: { ...INITIAL_STEP1, role: bUser.role || "company", fullName: bUser.fullName || "", email: bUser.email || "", phone: bUser.phone || "", emailVerified: bUser.emailVerified },
+                  step2: { ...formData.step2, ...bDetails },
+                  step3: { ...formData.step3, registrationCertificate: bDetails?.registrationCertificateURL || null, ntnCertificate: bDetails?.ntnCertificateURL || null, supportingDocument: bDetails?.supportingDocumentURL || null, cnicFront: bDetails?.cnicFrontURL || null, cnicBack: bDetails?.cnicBackURL || null, businessLicense: bDetails?.businessLicenseURL || null, portfolioSamples: bDetails?.portfolioSamplesURL || null },
+                  step4: { plan: bUser.selectedPlan || "free" }
+              };
+              if (stateResume && stateVerified) {
+                  setFormData(prev => ({ ...prev, ...merged }));
+                  setStep(stateResume);
+                  return;
+              }
+              setPendingDraft(merged);
+              setPendingDraftStep(bUser.onboardingStep || 1);
+              setShowResumeDialog(true);
+              return;
+          }
+      }
+
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          // Only show if local draft is past step 1
+          if (parsed.lastStep > 1) {
+              if (stateResume && stateVerified) {
+                  setFormData(prev => ({ ...prev, ...parsed, step1: { ...prev.step1, ...parsed.step1, emailVerified: true, password: "", confirmPassword: "" } }));
+                  setStep(stateResume);
+                  return;
+              }
+              setPendingDraft(parsed);
+              setPendingDraftStep(parsed.lastStep || 1);
+              setShowResumeDialog(true);
+              return;
+          }
+        } catch (e) { console.warn("Local load failed"); }
+      } else if (user && user.emailVerified && step === 1) {
           setStep(2);
       }
     };
-    
     loadDraft();
   }, [location.state]);
 
-  // Auto-save draft on data changes
+  // Local Save
   useEffect(() => {
-    if (step > 1) {
-        const draftToSave = { ...formData };
-        delete draftToSave.step1.password;
-        delete draftToSave.step1.confirmPassword;
-        localStorage.setItem("vendorlink_signup_draft", JSON.stringify(draftToSave));
+    if (step > 1 || isFormDirty) {
+        const draft = { ...formData };
+        delete draft.step1.password;
+        delete draft.step1.confirmPassword;
+        const step3Safe = {};
+        Object.keys(draft.step3).forEach(k => {
+            if (draft.step3[k] instanceof File) step3Safe[k] = { name: draft.step3[k].name };
+            else step3Safe[k] = draft.step3[k];
+        });
+        draft.step3 = step3Safe;
+        draft.lastStep = step;
+        localStorage.setItem("vendorlink_signup_draft", JSON.stringify(draft));
     }
-  }, [formData, step]);
+  }, [formData, step, isFormDirty]);
 
-  const handleStartOver = () => {
-    localStorage.removeItem("vendorlink_signup_draft");
-    window.location.reload();
+  const saveToBackend = async (targetStep) => {
+      try {
+          const { auth } = await import("../../lib/firebase");
+          if (auth.currentUser?.emailVerified) {
+              const payload = new FormData();
+              payload.append("account", JSON.stringify(formData.step1));
+              payload.append("details", JSON.stringify(formData.step2));
+              payload.append("step", targetStep);
+              Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
+              await onboardingService.saveProgress(payload);
+          }
+      } catch (e) { console.warn("Backend save failed"); }
   };
 
-  const nextStep = () => setStep((prev) => Math.min(TOTAL_STEPS, prev + 1));
+  const step1Errors = useMemo(() => {
+    const errs = {};
+    const { step1 } = formData;
+    if (step1.fullName && step1.fullName.trim().length < 3) errs.fullName = "Name is too short (min 3 characters)";
+    if (step1.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(step1.email)) errs.email = "Invalid email format";
+    if (step1.phone) {
+        const raw = step1.phone.replace(/\D/g, "");
+        if (raw.length < 8) errs.phone = "Invalid phone format";
+    }
+    if (step1.authProvider === "local" && step1.password) {
+        if (step1.password.length < 8) errs.password = "Min 8 characters required";
+        else if (!/[A-Z]/.test(step1.password) || !/[a-z]/.test(step1.password) || !/[0-9]/.test(step1.password)) errs.password = "Complexity required";
+    }
+    if (step1.authProvider === "local" && step1.confirmPassword && step1.password !== step1.confirmPassword) errs.confirmPassword = "Passwords mismatch";
+    return errs;
+  }, [formData.step1]);
+
+  const step2Errors = useMemo(() => {
+    const errs = {};
+    const { step2, step1 } = formData;
+    if (step1.role === "company") {
+        if (step2.companyName && step2.companyName.trim().length < 3) errs.companyName = "Company name too short";
+        if (step2.registrationNumber && step2.registrationNumber.length < 5) errs.registrationNumber = "Invalid registration number";
+    } else {
+        if (step2.cnicNumber && step2.cnicNumber.replace(/\D/g, "").length < 13) errs.cnicNumber = "Full 13-digit CNIC required";
+        if (step2.bio && step2.bio.trim().length < 20) errs.bio = "Bio must be at least 20 characters";
+    }
+    return errs;
+  }, [formData.step2, formData.step1.role]);
+
+  const nextStep = async () => {
+    if (step === 1 && Object.keys(step1Errors).length > 0) return;
+    if (step === 2 && Object.keys(step2Errors).length > 0) return;
+    const next = Math.min(TOTAL_STEPS, step + 1);
+    await saveToBackend(next);
+    setStep(next);
+  };
+
   const prevStep = () => setStep((prev) => Math.max(1, prev - 1));
 
   const handleStep1Back = () => {
     setFormData(prev => ({ ...prev, step1: { ...INITIAL_STEP1 } }));
     prevStep();
+  };
+
+  const handleStep1Submit = async () => {
+    const { step1 } = formData;
+    if (Object.keys(step1Errors).length > 0) return;
+    if (!step1.fullName || !step1.email || !step1.phone || !step1.agreeToTerms) {
+      toastUtil.validationError("Required fields missing");
+      return;
+    }
+    if (step1.authProvider !== "google") {
+        if (!step1.password || step1.password.length < 8) {
+            toastUtil.validationError("Password too short");
+            return;
+        }
+        if (step1.password !== step1.confirmPassword) {
+            toastUtil.validationError("Passwords mismatch");
+            return;
+        }
+    }
+    if (step1.authProvider === "google") { nextStep(); return; }
+
+    setLoading(true);
+    try {
+      const { auth, createFirebaseUser, signInFirebase } = await import("../../lib/firebase");
+      let fUser = auth.currentUser;
+      if (!fUser || fUser.email !== step1.email) {
+        try { fUser = await createFirebaseUser(step1.email, step1.password); }
+        catch (e) {
+          if (e.code === "auth/email-already-in-use") fUser = await signInFirebase(step1.email, step1.password);
+          else throw e;
+        }
+      }
+      if (!fUser) throw new Error("Auth failed");
+      if (!fUser.emailVerified) {
+        const { sendEmailVerification } = await import("firebase/auth");
+        await sendEmailVerification(fUser);
+        toastUtil.info("Verify your email to continue.");
+        navigate("/verify-email", { state: { email: fUser.email } });
+        return;
+      }
+      toastUtil.success("Verified!");
+      setFormData(prev => ({ ...prev, step1: { ...prev.step1, emailVerified: true } }));
+      nextStep();
+    } catch (error) {
+      toastUtil.error("Signup failed.");
+    } finally { setLoading(false); }
+  };
+
+  const handleStep1Change = (fields) => {
+    setIsFormDirty(true);
+    setFormData(prev => {
+        const newData = { ...prev, step1: { ...prev.step1, ...fields } };
+        if (fields.email !== undefined && fields.email !== prev.step1.email) newData.step1.emailVerified = false;
+        return newData;
+    });
+  };
+
+  const handleFinalSubmit = async () => {
+    setLoading(true);
+    try {
+      const { auth } = await import("../../lib/firebase");
+      const user = auth.currentUser;
+      if (!user) throw new Error("No user");
+      const payload = new FormData();
+      Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
+      payload.append("account", JSON.stringify(formData.step1));
+      payload.append("details", JSON.stringify(formData.step2));
+      payload.append("plan", formData.step4.plan);
+      if (formData.step4.stripePaymentId) payload.append("stripePaymentId", formData.step4.stripePaymentId);
+      await onboardingService.submitFinal(payload);
+      toastUtil.success("Complete!");
+      setIsFormDirty(false);
+      localStorage.removeItem("vendorlink_signup_draft");
+      navigate("/login");
+    } catch (e) { toastUtil.error("Failed"); } finally { setLoading(false); }
+  };
+
+  const handleGoogleSignup = async () => {
+    if (!isFirebaseConfigured()) return;
+    setGoogleLoading(true);
+    try {
+      const { user } = await signInWithGoogle();
+      const loginRes = await authService.firebaseLogin(await user.getIdToken(true));
+      const existing = loginRes.data?.user;
+      if (existing?.role && existing.role !== "unassigned") { navigate("/login"); return; }
+      setFormData(prev => ({ ...prev, step1: { ...prev.step1, email: user.email, fullName: user.displayName, emailVerified: true, authProvider: "google" } }));
+    } catch (e) { toastUtil.error("Google failed"); } finally { setGoogleLoading(false); }
   };
 
   useEffect(() => {
@@ -156,366 +422,59 @@ const Signup = () => {
     return () => cancelAnimationFrame(id);
   }, [step]);
 
-  const handleStep1Submit = async () => {
-    const { step1 } = formData;
-    const isGoogle = step1.authProvider === "google";
-
-    if (!step1.fullName || !step1.email || !step1.phone || !step1.agreeToTerms) {
-      toastUtil.validationError("Please complete all required fields");
-      return;
-    }
-
-    if (!isGoogle) {
-        if (!step1.password || step1.password.length < 8) {
-            toastUtil.validationError("Password must be at least 8 characters");
-            return;
-        }
-        if (step1.password !== step1.confirmPassword) {
-            toastUtil.validationError("Passwords do not match");
-            return;
-        }
-    }
-    
-    if (isGoogle) {
-      nextStep();
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { auth, createFirebaseUser, signInFirebase } = await import("../../lib/firebase");
-      let firebaseUser = auth.currentUser;
-
-      // 1. Create or Identify Firebase User
-      if (!firebaseUser || firebaseUser.email !== step1.email) {
-        try {
-          firebaseUser = await createFirebaseUser(step1.email, step1.password);
-        } catch (error) {
-          if (error.code === "auth/email-already-in-use") {
-            try {
-              firebaseUser = await signInFirebase(step1.email, step1.password);
-            } catch (loginError) {
-              if (loginError.code === "auth/wrong-password" || loginError.code === "auth/invalid-credential") {
-                throw new Error("EMAIL_EXISTS_WRONG_PASSWORD");
-              } else {
-                throw loginError;
-              }
-            }
-          } else {
-            throw error;
-          }
-        }
-      }
-
-      if (!firebaseUser) throw new Error("Authentication failed");
-
-      // 2. Email Verification Enforcement
-      if (!firebaseUser.emailVerified) {
-        const { sendEmailVerification } = await import("firebase/auth");
-        await sendEmailVerification(firebaseUser);
-        toastUtil.info("Verification link sent. Please verify your email to continue.");
-        navigate("/verify-email", { state: { email: firebaseUser.email } });
-        return;
-      }
-
-      // If already verified, move to next step immediately
-      toastUtil.success("Email verified. Continuing onboarding.");
-      setFormData(prev => ({
-        ...prev,
-        step1: { ...prev.step1, emailVerified: true },
-      }));
-      nextStep();
-    } catch (error) {
-      console.error("Step 1 Error:", error);
-      let msg = error.message === "EMAIL_EXISTS_WRONG_PASSWORD" 
-        ? "This email is already registered with a different password."
-        : "Signup failed. Please check your connection.";
-      toastUtil.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStep1Change = (fields) => {
-    setFormData(prev => {
-        const newData = { ...prev, step1: { ...prev.step1, ...fields } };
-        // Reset verification if email or phone changes
-        if (fields.email !== undefined && fields.email !== prev.step1.email) {
-            newData.step1.emailVerified = false;
-        }
-        if (fields.phone !== undefined && fields.phone !== prev.step1.phone) {
-            newData.step1.emailVerified = false;
-        }
-        return newData;
-    });
-  };
-
-  const handleStep2Submit = () => {
-    const { step2, step1 } = formData;
-    const isCompany = step1.role === "company";
-    
-    if (isCompany) {
-      if (!step2.companyName || step2.companyName.length < 3) {
-        toastUtil.validationError("Company name must be at least 3 characters");
-        return;
-      }
-      if (!step2.businessType || !step2.industry) {
-        toastUtil.validationError("Please select business type and industry");
-        return;
-      }
-      if (!step2.city) {
-        toastUtil.validationError("City is required");
-        return;
-      }
-    } else {
-      if (!step2.cnicNumber || step2.cnicNumber.length < 15) {
-        toastUtil.validationError("Please enter a valid 13-digit CNIC");
-        return;
-      }
-      if (!step2.category) {
-        toastUtil.validationError("Please select a professional category");
-        return;
-      }
-      if (!step2.bio || step2.bio.length < 20) {
-        toastUtil.validationError("Bio should be at least 20 characters");
-        return;
-      }
-      if (!step2.city) {
-        toastUtil.validationError("City is required");
-        return;
-      }
-    }
-    nextStep();
-  };
-
-  const handleStep3Submit = () => {
-    const { step3, step1 } = formData;
-    const isCompany = step1.role === "company";
-    if (isCompany) {
-      if (!step3.registrationCertificate || !step3.ntnCertificate) {
-        toastUtil.validationError("Certificates are required");
-        return;
-      }
-    } else {
-      if (!step3.cnicFront || !step3.cnicBack) {
-        toastUtil.validationError("CNIC Front and Back are required");
-        return;
-      }
-    }
-    nextStep();
-  };
-
-  const handleFinalSubmit = async () => {
-    setLoading(true);
-    try {
-      const { auth } = await import("../../lib/firebase");
-      const user = auth.currentUser;
-      
-      if (!user) {
-          toastUtil.error("Authentication session lost. Please restart.");
-          return;
-      }
-
-      // Step 1: Prepare Multipart Data
-      const formDataPayload = new FormData();
-      
-      // Append files from step3
-      Object.keys(formData.step3).forEach((key) => {
-          const file = formData.step3[key];
-          if (file) {
-              formDataPayload.append(key, file);
-          }
-      });
-
-      // Append metadata as stringified JSON (Multer will parse this in req.body)
-      formDataPayload.append("account", JSON.stringify(formData.step1));
-      formDataPayload.append("details", JSON.stringify(formData.step2));
-      formDataPayload.append("plan", formData.step4.plan);
-      
-      if (formData.step4.stripePaymentId) {
-        formDataPayload.append("stripePaymentId", formData.step4.stripePaymentId);
-      }
-
-      // Step 2: Send to Backend
-      await onboardingService.submitFinal(formDataPayload);
-      
-      toastUtil.success("Registration complete! Your application is under review.");
-      
-      // Update local storage with partial info for session sync
-      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...currentUser,
-          role: formData.step1.role,
-          status: "pending",
-          profileCompleted: true,
-        })
-      );
-      
-      navigate("/login");
-    } catch (error) {
-      console.error("Submission error:", error);
-      toastUtil.handleApiError(error, { defaultMessage: "Submission failed" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignup = async () => {
-    if (!isFirebaseConfigured()) {
-      toastUtil.error("Firebase is not configured.");
-      return;
-    }
-
-    setGoogleLoading(true);
-
-    const focusHandler = () => {
-      setTimeout(() => {
-        setGoogleLoading(false);
-        window.removeEventListener("focus", focusHandler);
-      }, 300);
-    };
-    window.addEventListener("focus", focusHandler);
-
-    try {
-      const { user } = await signInWithGoogle();
-      const idToken = await user.getIdToken(true);
-      const loginRes = await authService.firebaseLogin(idToken);
-      const existingUser = loginRes.data?.user;
-      localStorage.setItem("user", JSON.stringify(existingUser || {}));
-      window.removeEventListener("focus", focusHandler);
-
-      if (existingUser?.role && existingUser.role !== "unassigned") {
-        navigate("/login");
-        return;
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        step1: {
-          ...prev.step1,
-          email: user.email || prev.step1.email,
-          fullName: user.displayName || prev.step1.fullName,
-          emailVerified: true,
-          authProvider: "google",
-        },
-      }));
-      toastUtil.info("Account connected. Please select your role to continue.");
-    } catch (error) {
-      window.removeEventListener("focus", focusHandler);
-      console.error("Google signup error:", error);
-      if (error.code !== "auth/popup-closed-by-user") {
-          toastUtil.handleApiError(error, {
-            default: "Google signup failed. Please try again.",
-          });
-      }
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   const renderStep = () => {
-    const isStep2Disabled = formData.step1.role === "company" 
-        ? (!formData.step2.companyName || !formData.step2.businessType || !formData.step2.industry || !formData.step2.city)
-        : (!formData.step2.cnicNumber || !formData.step2.category || !formData.step2.bio || !formData.step2.city);
+    const { step1, step2, step3, step4 } = formData;
 
-    const isStep3Disabled = formData.step1.role === "company"
-        ? (!formData.step3.registrationCertificate || !formData.step3.ntnCertificate)
-        : (!formData.step3.cnicFront || !formData.step3.cnicBack);
+    const isS1Disabled = loading || Object.keys(step1Errors).length > 0 || !step1.fullName || !step1.email || !step1.phone || (step1.authProvider === "local" && (!step1.password || !step1.confirmPassword)) || !step1.agreeToTerms;
+
+    const isS2Disabled = loading || Object.keys(step2Errors).length > 0 || (step1.role === "company" 
+        ? (!step2.companyName || !step2.businessType || !step2.industry || !step2.city) 
+        : (!step2.cnicNumber || !step2.category || !step2.bio || !step2.city));
+
+    const isS3Disabled = loading || (step1.role === "company" 
+        ? (!step3.registrationCertificate || !step3.ntnCertificate) 
+        : (!step3.cnicFront || !step3.cnicBack));
 
     switch (step) {
-      case 1:
-        return (
-          <SignupStep1
-            data={formData.step1}
-            onChange={handleStep1Change}
-            showPassword={showPassword}
-            onTogglePassword={() => setShowPassword(!showPassword)}
-            showConfirmPassword={showConfirmPassword}
-            onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)}
-            onSubmit={handleStep1Submit}
-            loading={loading}
-          />
-        );
-      case 2:
-        return (
-          <SignupStep2
-            data={formData.step2}
-            onChange={(fields) => setFormData(prev => ({ ...prev, step2: { ...prev.step2, ...fields } }))}
-            isCompany={formData.step1.role === "company"}
-            onSubmit={handleStep2Submit}
-            onBack={handleStep1Back}
-            loading={loading}
-            isSubmitDisabled={isStep2Disabled}
-          />
-        );
-      case 3:
-        return (
-          <SignupStep3
-            data={formData.step3}
-            onFileChange={(field, file) => setFormData(prev => ({ ...prev, step3: { ...prev.step3, [field]: file } }))}
-            onRemoveFile={(field) => setFormData(prev => ({ ...prev, step3: { ...prev.step3, [field]: null } }))}
-            isCompany={formData.step1.role === "company"}
-            onSubmit={handleStep3Submit}
-            onBack={prevStep}
-            loading={loading}
-            isSubmitDisabled={isStep3Disabled}
-          />
-        );
-      case 4:
-        return (
-          <SignupStep4
-            plan={formData.step4.plan}
-            onPlanChange={(plan) => setFormData(prev => ({ ...prev, step4: { ...prev.step4, plan } }))}
-            onSubmit={(paymentId) => {
-                if (paymentId) {
-                    setFormData(prev => ({ ...prev, step4: { ...prev.step4, stripePaymentId: paymentId } }));
-                }
-                nextStep();
-            }}
-            onBack={prevStep}
-            loading={loading}
-          />
-        );
-      case 5:
-        return (
-          <SignupStep5
-            data={formData}
-            onSubmit={handleFinalSubmit}
-            onBack={prevStep}
-            loading={loading}
-          />
-        );
-      default:
-        return null;
+      case 1: return <SignupStep1 data={step1} onChange={handleStep1Change} showPassword={showPassword} onTogglePassword={() => setShowPassword(!showPassword)} showConfirmPassword={showConfirmPassword} onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)} onSubmit={handleStep1Submit} loading={loading} />;
+      case 2: return <SignupStep2 data={step2} errors={step2Errors} onChange={(f) => { setIsFormDirty(true); setFormData(p => ({ ...p, step2: { ...p.step2, ...f } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={handleStep1Back} loading={loading} isSubmitDisabled={isS2Disabled} />;
+      case 3: return <SignupStep3 data={step3} onFileChange={(k, f) => { setIsFormDirty(true); setFormData(p => ({ ...p, step3: { ...p.step3, [k]: f } })); }} onRemoveFile={(k) => { setIsFormDirty(true); setFormData(p => ({ ...p, step3: { ...p.step3, [k]: null } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={prevStep} loading={loading} isSubmitDisabled={isS3Disabled} />;
+      case 4: return <SignupStep4 plan={step4.plan} onPlanChange={(p) => { setIsFormDirty(true); setFormData(prevData => ({ ...prevData, step4: { ...prevData.step4, plan: p } })); }} onSubmit={(pid) => { if (pid) setFormData(p => ({ ...p, step4: { ...p.step4, stripePaymentId: pid } })); nextStep(); }} onBack={prevStep} loading={loading} />;
+      case 5: return <SignupStep5 data={formData} onSubmit={handleFinalSubmit} onBack={prevStep} loading={loading} />;
+      default: return null;
     }
   };
 
   return (
-    <AuthLayout
-      title="Create Account"
-      subtitle={`Complete your registration in ${TOTAL_STEPS} simple steps`}
-      onGoogleLogin={handleGoogleSignup}
-      googleDisabled={loading || googleLoading}
-      googleLoading={googleLoading}
-      footerText="Already have an account?"
-      footerLinkText="Login"
-      footerLinkTo="/login"
-      extraFooterLink={{ to: "/", text: "Learn more" }}
-      maxWidth="max-w-2xl"
-    >
-      <div className="mb-8">
-        <SignupProgressBar step={step} />
-      </div>
-      <div key={step} className={cn("transition-all duration-300 ease-out", stepVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
-        {renderStep()}
-      </div>
+    <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading || googleLoading} googleLoading={googleLoading} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} onLinkClick={handleLinkClick} maxWidth="max-w-2xl" >
+      <div className="mb-8"> <SignupProgressBar step={step} /> </div>
+      <div key={step} className={cn("transition-all duration-300", stepVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}> {renderStep()} </div>
+      <Dialog open={showResumeDialog} persistent>
+        <Dialog.Header>
+          <Dialog.Title>Resume Registration?</Dialog.Title>
+          <Dialog.Description>
+            You have an incomplete registration. Continue?
+          </Dialog.Description>
+        </Dialog.Header>
+        <Dialog.Footer className="gap-4 sm:gap-4">
+          <Button variant="secondary" onClick={handleStartOver} className="flex-1 font-normal">Start Over</Button>
+          <Button variant="primary" onClick={handleResume} className="flex-1 font-normal shadow-soft">Continue</Button>
+        </Dialog.Footer>
+      </Dialog>
+      <Dialog open={showLeaveDialog} persistent>
+        <Dialog.Header>
+          <Dialog.Title>Leave Signup?</Dialog.Title>
+          <Dialog.Description>
+            Are you sure you want to leave? Your signup is not complete.
+          </Dialog.Description>
+        </Dialog.Header>
+        <Dialog.Footer className="gap-4 sm:gap-4">
+          <Button variant="secondary" onClick={() => setShowLeaveDialog(false)} className="flex-1 font-normal">Stay</Button>
+          <Button variant="primary" onClick={confirmLeave} className="flex-1 font-normal shadow-soft">Leave anyway</Button>
+        </Dialog.Footer>
+      </Dialog>
     </AuthLayout>
   );
 };
 
 export default Signup;
-
-
-

@@ -16,31 +16,25 @@ const AuthLayout = ({
   footerLinkText,
   footerLinkTo,
   extraFooterLink,
+  onLinkClick,
   maxWidth = "max-w-md",
 }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
+  const handleLinkClick = (e, to) => {
+    if (onLinkClick) {
+      onLinkClick(e, to);
+    }
+  };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6 overflow-hidden bg-muted">
+    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6 overflow-hidden bg-background">
       <div className={`w-full ${maxWidth} relative z-10`}>
         <Card
           className={cn(
-            "overflow-hidden transition-all duration-500 ease-out motion-reduce:transition-none shadow-sm border-border bg-card",
-            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+            "overflow-hidden shadow-sm border-border bg-card"
           )}
         >
           <Card.Header className="text-center pt-8 pb-0 border-b-0">
-            <div
-              className={cn(
-                "transition-all duration-500 delay-75 ease-out motion-reduce:transition-none",
-                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-              )}
-            >
+            <div>
               <Card.Title className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
                 {title}
               </Card.Title>
@@ -54,12 +48,7 @@ const AuthLayout = ({
             {/* Google Login */}
             {!hideGoogle && (
               <>
-                <div
-                  className={cn(
-                    "flex items-center gap-3 mb-6 transition-all duration-500 delay-100 ease-out motion-reduce:transition-none",
-                    mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                  )}
-                >
+                <div className="flex items-center gap-3 mb-6">
                   <GoogleAuthButton 
                     onClick={onGoogleLogin} 
                     disabled={googleDisabled} 
@@ -69,12 +58,7 @@ const AuthLayout = ({
                 </div>
 
                 {/* Divider */}
-                <div
-                  className={cn(
-                    "flex items-center gap-3 mb-6 transition-all duration-500 delay-150 ease-out motion-reduce:transition-none",
-                    mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                  )}
-                >
+                <div className="flex items-center gap-3 mb-6">
                   <div className="flex-1 h-px bg-border" />
                   <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Or</span>
                   <div className="flex-1 h-px bg-border" />
@@ -83,26 +67,29 @@ const AuthLayout = ({
             )}
 
             {/* Content */}
-            <div
-              className={cn(
-                "transition-all duration-500 delay-200 ease-out motion-reduce:transition-none",
-                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-              )}
-            >
+            <div className="animate-in fade-in duration-500">
               {children}
             </div>
           </Card.Content>
 
-          <Card.Footer className="justify-center pt-5 pb-6 bg-muted border-t border-border">
+          <Card.Footer className="justify-center pt-5 pb-6 bg-muted/30 border-t border-border">
             <p className="text-center text-sm text-muted-foreground">
               {footerText}{" "}
-              <Link to={footerLinkTo} className="font-bold transition text-foreground hover:opacity-80">
+              <Link 
+                to={footerLinkTo} 
+                className="font-bold transition text-foreground hover:opacity-80"
+                onClick={(e) => handleLinkClick(e, footerLinkTo)}
+              >
                 {footerLinkText}
               </Link>
               {extraFooterLink && (
                 <>
                   {" "}or{" "}
-                  <Link to={extraFooterLink.to} className="font-bold transition text-foreground hover:opacity-80">
+                  <Link 
+                    to={extraFooterLink.to} 
+                    className="font-bold transition text-foreground hover:opacity-80"
+                    onClick={(e) => handleLinkClick(e, extraFooterLink.to)}
+                  >
                     {extraFooterLink.text}
                   </Link>
                 </>
@@ -116,6 +103,3 @@ const AuthLayout = ({
 };
 
 export default AuthLayout;
-
-
-

@@ -60,11 +60,12 @@ const YEAR_OPTIONS = Array.from(
   })
 );
 
-const CompanyBusinessFields = ({ data, onChange }) => (
+const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
   <>
     <Input
       placeholder="Company/Business Name"
       value={data.companyName}
+      error={errors.companyName}
       onChange={(e) => onChange({ companyName: e.target.value })}
     />
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -88,6 +89,7 @@ const CompanyBusinessFields = ({ data, onChange }) => (
           placeholder="Registration Number / License No."
           type="text"
           value={data.registrationNumber}
+          error={errors.registrationNumber}
           onChange={(e) => {
             const val = e.target.value.replace(/\D/g, "");
             onChange({ registrationNumber: val });

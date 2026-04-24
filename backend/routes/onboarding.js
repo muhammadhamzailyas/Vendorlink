@@ -6,6 +6,11 @@ const { authAllowUnprovisioned } = require("../middleware/authmiddle");
 
 router.get("/plans", onboardingController.getPlans.bind(onboardingController));
 
+// Track progress
+router.get("/me", authAllowUnprovisioned, onboardingController.getMyOnboarding.bind(onboardingController));
+router.post("/save-progress", authAllowUnprovisioned, onboardingDocumentUpload, onboardingController.saveProgress.bind(onboardingController));
+router.post("/reset-progress", authAllowUnprovisioned, onboardingController.resetProgress.bind(onboardingController));
+
 // Route to initiate real Stripe payment
 router.post("/create-payment-intent", onboardingController.createPaymentIntent.bind(onboardingController));
 

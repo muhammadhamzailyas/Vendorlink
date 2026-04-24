@@ -6,7 +6,7 @@ const VENDOR_TYPE_OPTIONS = [
   { label: "Registered Business", value: "Registered Business" },
 ];
 
-const VendorBusinessFields = ({ data, onChange }) => (
+const VendorBusinessFields = ({ data, errors = {}, onChange }) => (
   <>
     <div className="mb-4">
       <Label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground/60">
@@ -23,6 +23,7 @@ const VendorBusinessFields = ({ data, onChange }) => (
       placeholder="National ID / Passport / CNIC Number"
       type="text"
       value={data.cnicNumber}
+      error={errors.cnicNumber}
       onChange={(e) => {
         let val = e.target.value.replace(/\D/g, ""); // Digits only
         if (val.length > 5 && val.length <= 12) {

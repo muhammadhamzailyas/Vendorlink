@@ -32,8 +32,8 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
     <div className="w-full">
       <div 
         className={cn(
-          "flex h-12 w-full items-stretch overflow-hidden rounded-xl bg-muted transition-all focus-within:ring-2 focus-within:ring-primary/20",
-          "border border-transparent focus-within:border-ring/30"
+          "flex h-12 w-full items-stretch overflow-hidden rounded-xl bg-input-bg transition-all",
+          "border border-input-border focus-within:ring-2 focus-within:ring-input-focus/15 focus-within:border-input-focus focus-within:shadow-soft"
         )}
       >
           {/* Custom Popover Country Selector (themed) */}
@@ -41,7 +41,7 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
             <PopoverTrigger asChild>
               <button 
                 type="button"
-                className="flex items-center gap-2 border-r border-border/20 bg-muted/30 px-3 transition-colors hover:bg-muted/50"
+                className="flex items-center gap-2 border-r border-input-border/50 bg-muted/20 px-3 transition-colors hover:bg-muted/40"
               >
                 <div className="flex h-3.5 w-5 overflow-hidden rounded-sm border border-border/10 bg-muted shrink-0">
                     {SelectedFlag ? <SelectedFlag /> : <span className="text-[8px]">{isoCode}</span>}

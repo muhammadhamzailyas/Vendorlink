@@ -15,7 +15,6 @@ const AddressFields = ({ data, onChange }) => (
     <p className="text-sm font-medium text-muted-foreground">Address Information</p>
     
     <Input
-      className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
       placeholder="Street Address (e.g., 123 Main St, Apt 4B)"
       value={data.streetAddress || ""}
       onChange={(e) => onChange({ streetAddress: e.target.value })}
@@ -34,7 +33,6 @@ const AddressFields = ({ data, onChange }) => (
           }}
         />
         <Input
-          className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
           placeholder="Province / State / Region"
           value={data.province}
           onChange={(e) => onChange({ province: e.target.value })}
@@ -43,13 +41,11 @@ const AddressFields = ({ data, onChange }) => (
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
           placeholder="City"
           value={data.city}
           onChange={(e) => onChange({ city: e.target.value })}
         />
         <Input
-          className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
           placeholder="Postal / Zip Code"
           type="number"
           numericOnly

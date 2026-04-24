@@ -149,7 +149,6 @@ const Login = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          className="h-12 rounded-xl bg-input-bg px-4"
           placeholder="Email"
           type="email"
           name="email"
@@ -161,7 +160,7 @@ const Login = () => {
 
         <div className="relative">
           <Input
-            className="h-12 rounded-xl bg-input-bg px-4 pr-11"
+            className="pr-11"
             placeholder="Password"
             type={showPassword ? "text" : "password"}
             name="password"

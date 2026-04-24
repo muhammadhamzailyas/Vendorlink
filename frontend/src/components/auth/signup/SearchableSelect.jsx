@@ -28,7 +28,7 @@ const MagnifyingGlassableSelect = ({
         <button
           type="button"
           className={cn(
-            "flex h-12 w-full items-center justify-between rounded-xl bg-muted px-4 text-sm transition-all focus:ring-2 focus:ring-primary/20",
+            "flex h-12 w-full items-center justify-between rounded-xl border border-input-border bg-input-bg px-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-input-focus/15 focus:border-input-focus",
             !value && "text-muted-foreground/60",
             value && "text-foreground font-medium",
             className

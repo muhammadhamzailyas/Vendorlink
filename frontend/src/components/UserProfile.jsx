@@ -54,10 +54,11 @@ const UserProfile = ({ userType = "company" }) => {
     watch,
     setValue,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(userType),
+    mode: "onChange"
   });
 
   const formData = watch();
@@ -318,6 +319,7 @@ const UserProfile = ({ userType = "company" }) => {
                     <Button
                       type="submit"
                       loading={isSubmitting}
+                      disabled={isSubmitting || !isValid}
                       className="w-full sm:w-auto font-black uppercase tracking-widest text-xs px-8 h-12 rounded-xl shadow-soft"
                     >
                       <FloppyDisk className="h-4 w-4 mr-2" />
@@ -332,14 +334,12 @@ const UserProfile = ({ userType = "company" }) => {
                       label="Display Name"
                       error={errors.companyName?.message}
                       {...register("companyName")}
-                      className="h-12 rounded-xl"
                     />
 
                     <Input
                       label="Username"
                       error={errors.username?.message}
                       {...register("username")}
-                      className="h-12 rounded-xl"
                     />
 
                     <Input
@@ -347,28 +347,24 @@ const UserProfile = ({ userType = "company" }) => {
                       type="email"
                       error={errors.email?.message}
                       {...register("email")}
-                      className="h-12 rounded-xl"
                     />
 
                     <Input
                       label={config.typeField}
                       error={errors[config.typeKey]?.message}
                       {...register(config.typeKey)}
-                      className="h-12 rounded-xl"
                     />
 
                     <Input
                       label="Phone"
                       error={errors.phone?.message}
                       {...register("phone")}
-                      className="h-12 rounded-xl"
                     />
 
                     <Input
                       label="Location"
                       error={errors.location?.message}
                       {...register("location")}
-                      className="h-12 rounded-xl"
                     />
                   </FormFieldGrid>
 
@@ -377,7 +373,6 @@ const UserProfile = ({ userType = "company" }) => {
                     rows={4}
                     error={errors.description?.message}
                     {...register("description")}
-                    className="rounded-xl"
                   />
 
                   {userType === "vendor" && (
@@ -385,7 +380,6 @@ const UserProfile = ({ userType = "company" }) => {
                       label="Skills (comma separated)"
                       error={errors.skills?.message}
                       {...register("skills")}
-                      className="h-12 rounded-xl"
                     />
                   )}
                 </div>
@@ -399,6 +393,3 @@ const UserProfile = ({ userType = "company" }) => {
 };
 
 export default UserProfile;
-
-
-

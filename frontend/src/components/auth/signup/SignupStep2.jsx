@@ -35,6 +35,7 @@ const SignupStep2 = ({
   onSubmit,
   onBack,
   loading,
+  isSubmitDisabled,
 }) => (
   <div className="space-y-6">
     <div className="space-y-4">
@@ -56,7 +57,6 @@ const SignupStep2 = ({
                 onChange={(val) => onChange({ category: val })}
                 />
                 <Input
-                className="h-12 rounded-xl bg-input-bg px-4 font-medium"
                 placeholder="Years of Experience"
                 type="number"
                 numericOnly
@@ -88,14 +88,13 @@ const SignupStep2 = ({
             />
 
             <Input
-                className="h-12 rounded-xl bg-input-bg px-4 font-medium"
                 placeholder="Portfolio URL (Optional)"
                 value={data.portfolioURL}
                 onChange={(e) => onChange({ portfolioURL: e.target.value })}
             />
 
             <Textarea
-                className="min-h-24 rounded-xl bg-input-bg px-4 py-3 font-medium"
+                className="min-h-24"
                 placeholder="Brief Bio / Professional Summary..."
                 value={data.bio}
                 onChange={(e) => onChange({ bio: e.target.value })}
@@ -108,7 +107,7 @@ const SignupStep2 = ({
 
     <div className="flex gap-4 pt-4 border-t border-border/50">
       <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
-      <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading} size="lg" className="flex-1 shadow-soft font-normal">
+      <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading || isSubmitDisabled} size="lg" className="flex-1 shadow-soft font-normal">
         Continue
       </Button>
     </div>
@@ -116,6 +115,3 @@ const SignupStep2 = ({
 );
 
 export default SignupStep2;
-
-
-

@@ -20,7 +20,6 @@ const VendorBusinessFields = ({ data, onChange }) => (
       />
     </div>
     <Input
-      className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
       placeholder="National ID / Passport / CNIC Number"
       type="text"
       value={data.cnicNumber}
@@ -37,14 +36,12 @@ const VendorBusinessFields = ({ data, onChange }) => (
     {data.vendorType === "Registered Business" && (
         <>
             <Input
-              className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
               placeholder="Business Name"
               value={data.businessName}
               onChange={(e) => onChange({ businessName: e.target.value })}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
                   placeholder="Reg Number (optional)"
                   type="text"
                   value={data.registrationNumber}
@@ -54,7 +51,6 @@ const VendorBusinessFields = ({ data, onChange }) => (
                   }}
                 />
                 <Input
-                  className="h-12 rounded-xl border-0 bg-muted px-4 font-medium"
                   placeholder="Tax ID / VAT / NTN (optional)"
                   type="text"
                   value={data.ntn}

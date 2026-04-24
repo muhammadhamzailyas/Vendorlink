@@ -101,6 +101,9 @@ const CreateContract = () => {
     name: "milestones",
   });
 
+  const formValues = watch();
+  const isFormFilled = formValues.title && formValues.description && formValues.scope && formValues.deliverables && formValues.projectStartDate && formValues.milestones?.length > 0;
+
   const milestonesWatch = watch("milestones");
   const totalBudget = useMemo(
     () => milestonesWatch.reduce((sum, m) => sum + (Number(m.amount) || 0), 0),
@@ -628,7 +631,7 @@ const CreateContract = () => {
                   <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="w-full sm:w-auto font-bold uppercase tracking-tight" disabled={isSubmitting}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isSubmitting} className="w-full sm:w-auto font-bold uppercase tracking-tight" disabled={isSubmitting}>
+                  <Button type="submit" loading={isSubmitting} className="w-full sm:w-auto font-bold uppercase tracking-tight" disabled={isSubmitting || !isFormFilled}>
                     Create Contract
                   </Button>
                 </FormActionRow>
@@ -646,6 +649,3 @@ const CreateContract = () => {
 };
 
 export default CreateContract;
-
-
-

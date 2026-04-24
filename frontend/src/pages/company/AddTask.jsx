@@ -38,6 +38,7 @@ const AddTask = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
@@ -50,6 +51,9 @@ const AddTask = () => {
       category: "",
     },
   });
+
+  const formValues = watch();
+  const isFormFilled = formValues.title && formValues.description && formValues.requirements && formValues.budget && formValues.deadline && formValues.category;
 
   const onSubmit = async (data) => {
     try {
@@ -120,7 +124,7 @@ const AddTask = () => {
                 <Button
                   type="submit"
                   loading={isSubmitting}
-                  disabled={!isApproved}
+                  disabled={!isApproved || !isFormFilled}
                   className="w-full sm:w-auto font-bold uppercase tracking-tight"
                   title={!isApproved ? "Please wait for admin approval to post tasks" : undefined}
                 >
@@ -165,6 +169,3 @@ const AddTask = () => {
 };
 
 export default AddTask;
-
-
-

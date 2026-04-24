@@ -416,6 +416,14 @@ const Signup = () => {
   };
 
   const renderStep = () => {
+    const isStep2Disabled = formData.step1.role === "company" 
+        ? (!formData.step2.companyName || !formData.step2.businessType || !formData.step2.industry || !formData.step2.city)
+        : (!formData.step2.cnicNumber || !formData.step2.category || !formData.step2.bio || !formData.step2.city);
+
+    const isStep3Disabled = formData.step1.role === "company"
+        ? (!formData.step3.registrationCertificate || !formData.step3.ntnCertificate)
+        : (!formData.step3.cnicFront || !formData.step3.cnicBack);
+
     switch (step) {
       case 1:
         return (
@@ -439,6 +447,7 @@ const Signup = () => {
             onSubmit={handleStep2Submit}
             onBack={handleStep1Back}
             loading={loading}
+            isSubmitDisabled={isStep2Disabled}
           />
         );
       case 3:
@@ -451,6 +460,7 @@ const Signup = () => {
             onSubmit={handleStep3Submit}
             onBack={prevStep}
             loading={loading}
+            isSubmitDisabled={isStep3Disabled}
           />
         );
       case 4:

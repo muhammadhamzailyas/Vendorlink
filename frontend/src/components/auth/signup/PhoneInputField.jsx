@@ -3,7 +3,7 @@ import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react";
 import { Popover, PopoverTrigger, PopoverContent, ScrollArea } from "../../ui";
 import { cn } from "@/lib/cn";
 import { getCountries } from "react-phone-number-input";
-import { AsYouType, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
+import { AsYouType, getCountryCallingCode } from "libphonenumber-js";
 import en from "react-phone-number-input/locale/en";
 import Flags from "react-phone-number-input/flags";
 
@@ -16,7 +16,7 @@ const FINAL_COUNTRIES = getCountries().map((country) => ({
 
 const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
   const [open, setOpen] = useState(false);
-  const [search, setMagnifyingGlass] = useState("");
+  const [search, setSearchQuery] = useState("");
 
   const filteredCountries = useMemo(() => {
     return FINAL_COUNTRIES.filter(c => 
@@ -60,7 +60,7 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
                         placeholder="Search country..."
                         className="w-full bg-transparent pl-9 pr-3 py-2.5 text-xs focus:outline-none text-[#e5e5e5] font-semibold placeholder:text-neutral-500"
                         value={search}
-                        onChange={(e) => setMagnifyingGlass(e.target.value)}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                   </div>
               </div>
@@ -76,7 +76,7 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
                                 onClick={() => {
                                   onChange({ countryCode: c.dial, isoCode: c.code, phone: "" });
                                   setOpen(false);
-                                  setMagnifyingGlass("");
+                                  setSearchQuery("");
                                 }}
                                 className={cn(
                                   "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all",
@@ -113,18 +113,15 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
             value={phone}
             onChange={(e) => {
               const inputVal = e.target.value;
-              const digits = inputVal.replace(/\D/g, ""); // Keep only digits
               
-              // Use AsYouType to format based on the selected country standards
-              const asYouType = new AsYouType(isoCode);
-              const formatted = asYouType.input(digits);
+              // Use AsYouType with the raw input to track state and handle deletion correctly
+              // We pass inputVal directly to let libphonenumber-js handle the sequence of characters
+              const formatter = new AsYouType(isoCode);
+              const formatted = formatter.input(inputVal);
               
-              // Use parsePhoneNumberFromString to enforce strict length limits
-              // if it exists, it provides metadata about the number
-              const phoneNumber = parsePhoneNumberFromString(digits, isoCode);
+              // Extract digits for length limit checking (max 15 per E.164)
+              const digits = inputVal.replace(/\D/g, "");
               
-              // Only allow typing if the number isn't already "too long" 
-              // (libphonenumber is better at this than a hard 15-digit limit)
               if (digits.length <= 15) {
                   onChange({ phone: formatted });
               }

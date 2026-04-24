@@ -85,7 +85,7 @@ const userSchema = new mongoose.Schema(
     },
     selectedPlan: {
       type: String,
-      enum: ["free", "premium"],
+      enum: ["free", "premium", "enterprise"],
       default: "free",
     },
     profileImage: {
@@ -95,7 +95,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: { createdAt: true, updatedAt: false },
+    timestamps: { createdAt: true, updatedAt: true },
   }
 );
 

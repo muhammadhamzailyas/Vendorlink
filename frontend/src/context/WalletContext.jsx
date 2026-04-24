@@ -7,11 +7,12 @@ import React, {
   useRef,
 } from "react";
 import { paymentAPI } from "../services/paymentAPI";
-import { getUserData } from "../lib/localStorage";
+import { useUser } from "./UserContext";
 
 const WalletContext = createContext();
 
 const WalletProvider = ({ children }) => {
+  const { user } = useUser();
   const [wallet, setWallet] = useState({
     balance: 0,
     lockedBalance: 0,
@@ -26,10 +27,9 @@ const WalletProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const checkAuth = useCallback(() => {
-    const user = getUserData();
     // Only fetch if authenticated, approved, and has a role
-    return !!(user && user.id && user.role && user.status === "approved");
-  }, []);
+    return !!(user && (user.id || user._id) && user.role && user.status === "approved");
+  }, [user]);
 
   const abortControllerRef = useRef(null);
   const mountedRef = useRef(true);

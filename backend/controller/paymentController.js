@@ -39,15 +39,23 @@ class PaymentController {
   async getWallet(req, res) {
     try {
       const userId = req.user.id;
+      const { page = 1, limit = 20 } = req.query;
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+
       const wallet = await this.getOrCreateWallet(userId);
 
       const transactions = await Transaction.find({
         $or: [{ fromUserId: userId }, { toUserId: userId }],
       })
         .sort({ createdAt: -1 })
-        .limit(20)
+        .skip(skip)
+        .limit(parseInt(limit))
         .populate("fromUserId", "username companyName")
         .populate("toUserId", "username companyName");
+
+      const totalTransactions = await Transaction.countDocuments({
+        $or: [{ fromUserId: userId }, { toUserId: userId }],
+      });
 
       res.json({
         success: true,
@@ -57,6 +65,12 @@ class PaymentController {
           availableBalance: wallet.balance,
           lockedBalance: wallet.lockedBalance,
           totalBalance: wallet.balance + wallet.lockedBalance,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: totalTransactions,
+            pages: Math.ceil(totalTransactions / parseInt(limit)),
+          },
         },
       });
     } catch (error) {
@@ -75,7 +89,11 @@ class PaymentController {
         return res.status(400).json({ error: "Minimum deposit is PKR 100" });
       }
 
-      const wallet = await this.getOrCreateWallet(companyId);
+      const stripeService = require("../services/stripeService");
+      const paymentIntent = await stripeService.createPaymentIntent(amount, "pkr", {
+        companyId,
+        type: "wallet_deposit",
+      });
 
       const transaction = new Transaction({
         fromUserId: companyId,
@@ -83,37 +101,22 @@ class PaymentController {
         amount,
         type: "deposit",
         status: "pending",
-        paymentMethod,
+        paymentMethod: paymentMethod || "stripe",
         description: `Wallet deposit of PKR ${amount}`,
+        gateway: {
+          name: "stripe",
+          paymentIntentId: paymentIntent.id,
+        },
       });
       await transaction.save();
-
-      // Mock deposit for development
-      if (process.env.NODE_ENV !== "production") {
-        wallet.balance += amount;
-        wallet.totalDeposited += amount;
-        wallet.lastTransactionAt = new Date();
-        await wallet.save();
-
-        transaction.status = "completed";
-        transaction.completedAt = new Date();
-        transaction.gateway = {
-          name: "mock",
-          transactionId: `MOCK_${Date.now()}`,
-        };
-        await transaction.save();
-
-        return res.json({
-          success: true,
-          message: "Deposit successful (TEST MODE)",
-          data: { wallet, transaction, newBalance: wallet.balance },
-        });
-      }
 
       res.json({
         success: true,
         message: "Deposit initiated",
-        data: { transaction },
+        data: {
+          clientSecret: paymentIntent.clientSecret,
+          transactionId: transaction._id,
+        },
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -143,12 +146,19 @@ class PaymentController {
         });
       }
 
-      const companyWallet = await this.getOrCreateWallet(companyId);
-      if (companyWallet.balance < amount) {
+      // ATOMIC CHECK AND UPDATE
+      const companyWallet = await Wallet.findOneAndUpdate(
+        { userId: companyId, balance: { $gte: amount } },
+        {
+          $inc: { balance: -amount, lockedBalance: amount },
+          $set: { lastTransactionAt: new Date() },
+        },
+        { new: true }
+      );
+
+      if (!companyWallet) {
         return res.status(400).json({
-          error: "Insufficient wallet balance",
-          required: amount,
-          available: companyWallet.balance,
+          error: "Insufficient wallet balance or wallet not found",
         });
       }
 
@@ -173,16 +183,15 @@ class PaymentController {
       });
       await payment.save();
 
-      // Update wallets
-      companyWallet.balance -= amount;
-      companyWallet.lockedBalance += amount;
-      companyWallet.lastTransactionAt = new Date();
-      await companyWallet.save();
-
-      const vendorWallet = await this.getOrCreateWallet(contract.vendorId._id);
-      vendorWallet.lockedBalance += vendorAmount;
-      vendorWallet.lastTransactionAt = new Date();
-      await vendorWallet.save();
+      // Update vendor wallet atomically
+      const vendorWallet = await Wallet.findOneAndUpdate(
+        { userId: contract.vendorId._id },
+        {
+          $inc: { lockedBalance: vendorAmount },
+          $set: { lastTransactionAt: new Date() },
+        },
+        { new: true, upsert: true }
+      );
 
       // Create transaction
       const transaction = new Transaction({
@@ -255,16 +264,28 @@ class PaymentController {
       if (payment.vendorId.toString() !== vendorId) {
         return res.status(403).json({ error: "Not authorized" });
       }
+      if (payment.vendorConfirmed) {
+        return res.status(400).json({ error: "Payment already confirmed" });
+      }
 
-      const vendorWallet = await this.getOrCreateWallet(vendorId);
-      vendorWallet.lockedBalance -= payment.vendorAmount;
-      vendorWallet.balance += payment.vendorAmount;
-      vendorWallet.totalReceived += payment.vendorAmount;
-      await vendorWallet.save();
+      // ATOMIC WALLET UPDATES
+      const vendorWallet = await Wallet.findOneAndUpdate(
+        { userId: vendorId, lockedBalance: { $gte: payment.vendorAmount } },
+        {
+          $inc: { lockedBalance: -payment.vendorAmount, balance: payment.vendorAmount, totalReceived: payment.vendorAmount },
+          $set: { lastTransactionAt: new Date() }
+        },
+        { new: true }
+      );
 
-      const companyWallet = await this.getOrCreateWallet(payment.companyId);
-      companyWallet.lockedBalance -= payment.amount;
-      await companyWallet.save();
+      if (!vendorWallet) {
+        return res.status(400).json({ error: "Insufficient locked balance in vendor wallet" });
+      }
+
+      await Wallet.findOneAndUpdate(
+        { userId: payment.companyId, lockedBalance: { $gte: payment.amount } },
+        { $inc: { lockedBalance: -payment.amount } }
+      );
 
       payment.vendorConfirmed = true;
       payment.vendorConfirmedAt = new Date();
@@ -291,11 +312,16 @@ class PaymentController {
         return res.status(400).json({ error: "Minimum withdrawal is PKR 500" });
       }
 
-      const wallet = await this.getOrCreateWallet(vendorId);
-      if (wallet.balance < amount) {
+      // ATOMIC WALLET UPDATE
+      const wallet = await Wallet.findOneAndUpdate(
+        { userId: vendorId, balance: { $gte: amount } },
+        { $inc: { balance: -amount, lockedBalance: amount } },
+        { new: true }
+      );
+
+      if (!wallet) {
         return res.status(400).json({
           error: "Insufficient balance",
-          available: wallet.balance,
         });
       }
 
@@ -310,27 +336,6 @@ class PaymentController {
         withdrawalDetails: accountDetails,
       });
       await transaction.save();
-
-      wallet.balance -= amount;
-      wallet.lockedBalance += amount;
-      await wallet.save();
-
-      // Auto-complete in development
-      if (process.env.NODE_ENV !== "production") {
-        setTimeout(async () => {
-          try {
-            wallet.lockedBalance -= amount;
-            wallet.totalWithdrawn += amount;
-            await wallet.save();
-
-            transaction.status = "completed";
-            transaction.completedAt = new Date();
-            await transaction.save();
-          } catch (e) {
-            console.error("Auto-complete withdrawal error:", e);
-          }
-        }, 3000);
-      }
 
       res.json({
         success: true,
@@ -467,7 +472,7 @@ class PaymentController {
         })
       );
 
-      const activeTasks = tasksWithPayments.filter(task => task.pendingAmount > 0);
+      const activeTasks = tasksWithPayments; // Removed filter (pendingAmount > 0)
 
       res.json({ success: true, data: activeTasks });
     } catch (error) {
@@ -570,6 +575,16 @@ class PaymentController {
   async getContractPayments(req, res) {
     try {
       const { contractId } = req.params;
+      const userId = req.user.id;
+      const userRole = req.user.role;
+
+      const contract = await Contract.findById(contractId);
+      if (!contract) return res.status(404).json({ error: "Contract not found" });
+
+      // Ownership check
+      if (userRole !== "admin" && contract.companyId.toString() !== userId && contract.vendorId.toString() !== userId) {
+        return res.status(403).json({ error: "Not authorized to view these payments" });
+      }
 
       const payments = await Payment.find({ contractId })
         .populate("taskId", "title")
@@ -588,6 +603,8 @@ class PaymentController {
   async getPaymentById(req, res) {
     try {
       const { id } = req.params;
+      const userId = req.user.id;
+      const userRole = req.user.role;
 
       const payment = await Payment.findById(id)
         .populate("taskId", "title description")
@@ -596,6 +613,11 @@ class PaymentController {
         .populate("contractId");
 
       if (!payment) return res.status(404).json({ error: "Payment not found" });
+
+      // Ownership check
+      if (userRole !== "admin" && payment.companyId._id.toString() !== userId && payment.vendorId._id.toString() !== userId) {
+        return res.status(403).json({ error: "Not authorized to view this payment" });
+      }
 
       const transaction = await Transaction.findOne({ paymentId: id });
 

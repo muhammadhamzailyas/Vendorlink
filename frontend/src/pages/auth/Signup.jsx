@@ -256,15 +256,27 @@ const Signup = () => {
   // Local Save
   useEffect(() => {
     if (step > 1 || isFormDirty) {
-        const draft = { ...formData };
-        delete draft.step1.password;
-        delete draft.step1.confirmPassword;
-        const step3Safe = {};
-        Object.keys(draft.step3).forEach(k => {
-            if (draft.step3[k] instanceof File) step3Safe[k] = { name: draft.step3[k].name };
-            else step3Safe[k] = draft.step3[k];
-        });
-        draft.step3 = step3Safe;
+        // Deep copy to avoid mutating state
+        const draft = JSON.parse(JSON.stringify(formData));
+        
+        // Strip PII and sensitive data
+        if (draft.step1) {
+            delete draft.step1.email;
+            delete draft.step1.phone;
+            delete draft.step1.password;
+            delete draft.step1.confirmPassword;
+            delete draft.step1.agreeToTerms;
+        }
+
+        // Strip actual File objects in step3 (keep names for UI hints if needed)
+        if (draft.step3) {
+            Object.keys(formData.step3).forEach(k => {
+                if (formData.step3[k] instanceof File) {
+                    draft.step3[k] = { name: formData.step3[k].name, size: formData.step3[k].size, type: formData.step3[k].type };
+                }
+            });
+        }
+
         draft.lastStep = step;
         localStorage.setItem("vendorlink_signup_draft", JSON.stringify(draft));
     }
@@ -275,9 +287,11 @@ const Signup = () => {
           const { auth } = await import("../../lib/firebase");
           if (auth.currentUser?.emailVerified) {
               const payload = new FormData();
+              // Text fields first for Multer parsing
               payload.append("account", JSON.stringify(formData.step1));
               payload.append("details", JSON.stringify(formData.step2));
               payload.append("step", targetStep);
+              // Files after
               Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
               await onboardingService.saveProgress(payload);
           }
@@ -390,12 +404,17 @@ const Signup = () => {
       const { auth } = await import("../../lib/firebase");
       const user = auth.currentUser;
       if (!user) throw new Error("No user");
+      
       const payload = new FormData();
-      Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
+      // Text fields first for Multer
       payload.append("account", JSON.stringify(formData.step1));
       payload.append("details", JSON.stringify(formData.step2));
       payload.append("plan", formData.step4.plan);
       if (formData.step4.stripePaymentId) payload.append("stripePaymentId", formData.step4.stripePaymentId);
+
+      // Files last
+      Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
+
       await onboardingService.submitFinal(payload);
       toastUtil.success("Complete!");
       setIsFormDirty(false);
@@ -428,7 +447,7 @@ const Signup = () => {
     const isS1Disabled = loading || Object.keys(step1Errors).length > 0 || !step1.fullName || !step1.email || !step1.phone || (step1.authProvider === "local" && (!step1.password || !step1.confirmPassword)) || !step1.agreeToTerms;
 
     const isS2Disabled = loading || Object.keys(step2Errors).length > 0 || (step1.role === "company" 
-        ? (!step2.companyName || !step2.businessType || !step2.industry || !step2.city) 
+        ? (!step2.companyName || !step2.businessType || !step2.industry || !step2.city || !step2.description) 
         : (!step2.cnicNumber || !step2.category || !step2.bio || !step2.city));
 
     const isS3Disabled = loading || (step1.role === "company" 

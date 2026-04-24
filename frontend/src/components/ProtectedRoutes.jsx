@@ -1,20 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate, useLocation, Outlet } from "react-router-dom";
 import { Skeleton, Loader } from "./ui";
 import { auth } from "../lib/firebase";
-import { getUserData } from "../lib/localStorage";
+import { useUser } from "../context/UserContext";
 
 const ProtectedRoutes = ({ role, children }) => {
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { user, loading } = useUser();
   const location = useLocation();
 
-  useEffect(() => {
-    // Small delay to allow Firebase Auth to stabilize
-    const timeout = setTimeout(() => setIsInitializing(false), 200);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  if (isInitializing) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader />
@@ -28,10 +22,8 @@ const ProtectedRoutes = ({ role, children }) => {
   }
 
   // 2. Profile Sync Check
-  const user = getUserData();
-  
   if (!user || !user.id) {
-    // If authenticated via Firebase but profile not in local storage yet, 
+    // If authenticated via Firebase but profile not in context yet, 
     // something went wrong or sync is pending.
     return <Navigate to="/login" replace />;
   }

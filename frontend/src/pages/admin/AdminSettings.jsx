@@ -26,7 +26,7 @@ const AdminSettings = () => {
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
     siteName: "VendorLink",
-    contactEmail: "admin@vendorlink.com",
+    contactEmail: "support.vendorlink@gmail.com",
     maintenanceMode: false,
     enableRegistration: true,
     requireApproval: true,

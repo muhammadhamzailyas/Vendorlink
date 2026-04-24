@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { notificationAPI } from "../services/api";
 import wsClient from "../services/wsClient";
 import { showToast } from "../lib/toast";
-import { getUserData } from "../lib/localStorage";
+import { useUser } from "./UserContext";
 
 const NotificationContext = createContext(null);
 
@@ -15,6 +15,7 @@ const useNotification = () => {
 const useNotifications = useNotification;
 
 const NotificationProvider = ({ children }) => {
+  const { user } = useUser();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -23,10 +24,9 @@ const NotificationProvider = ({ children }) => {
   const pollRef = useRef(null);
 
   const checkAuth = useCallback(() => {
-    const user = getUserData();
     // Only fetch if authenticated and has a role
-    return !!(user && user.id && user.role && user.status === "approved");
-  }, []);
+    return !!(user && (user.id || user._id) && user.role && user.status === "approved");
+  }, [user]);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!checkAuth()) return;

@@ -17,59 +17,11 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import { NotificationProvider } from "./context/NotificationContext";
 import { WalletProvider } from "./context/WalletContext";
-
-/**
- * Hook to manage Firebase user session and sync with MongoDB profile.
- */
-const useUserSession = () => {
-  const [isInitializing, setIsInitializing] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Small delay to allow Firebase to settle
-          await new Promise(r => setTimeout(r, 200));
-          
-          // Get fresh token
-          await firebaseUser.getIdToken(true);
-          
-          const response = await authService.sessionBootstrap();
-          const { user, needsOnboarding } = response.data;
-          
-          if (needsOnboarding) {
-            const idToken = await firebaseUser.getIdToken();
-            const syncRes = await authService.firebaseLogin(idToken);
-            const syncedUser = syncRes.data?.user || syncRes.user;
-            localStorage.setItem("user", JSON.stringify(syncedUser));
-          } else if (user) {
-            localStorage.setItem("user", JSON.stringify(user));
-          }
-          
-          window.dispatchEvent(new CustomEvent("userStatusUpdated", { detail: user || {} }));
-        } catch (error) {
-          if (error.response?.status === 401) {
-            console.warn("Unauthorized session, clearing local storage");
-            localStorage.removeItem("user");
-          } else {
-            console.error("Session sync error:", error.message);
-          }
-        }
-      } else {
-        localStorage.removeItem("user");
-      }
-      setIsInitializing(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  return { isInitializing };
-};
+import { UserProvider, useUser } from "./context/UserContext";
 
 const UserSessionProvider = ({ children }) => {
-  const { isInitializing } = useUserSession();
-  if (isInitializing) return <Loader />;
+  const { loading } = useUser();
+  if (loading) return <Loader />;
   return children;
 };
 
@@ -220,9 +172,10 @@ const App = () => (
         <ToastViewport />
         <Router>
           <ScrollToTop />
-          <UserSessionProvider>
-            <NotificationProvider>
-              <WalletProvider>
+          <UserProvider>
+            <UserSessionProvider>
+              <NotificationProvider>
+                <WalletProvider>
                 <Suspense fallback={<Loader />}>
                   <Routes>
                     <Route path="/" element={<LandingPage />} />
@@ -337,7 +290,8 @@ const App = () => (
               </WalletProvider>
             </NotificationProvider>
           </UserSessionProvider>
-        </Router>
+        </UserProvider>
+      </Router>
     </QueryClientProvider>
   </ErrorBoundary>
 );

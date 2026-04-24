@@ -1,4 +1,9 @@
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+let stripe;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+} else {
+  console.warn("WARNING: STRIPE_SECRET_KEY is missing. Stripe functionality will be disabled.");
+}
 
 class StripeService {
   /**
@@ -6,8 +11,8 @@ class StripeService {
    */
   async createPaymentIntent(amount, currency = "usd", metadata = {}) {
     try {
-      if (!process.env.STRIPE_SECRET_KEY) {
-        throw new Error("Stripe secret key not configured");
+      if (!stripe) {
+        throw new Error("Stripe is not configured. Please check STRIPE_SECRET_KEY.");
       }
 
       const paymentIntent = await stripe.paymentIntents.create({

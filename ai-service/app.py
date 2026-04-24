@@ -12,7 +12,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:8002", "http://localhost:5173", "http://127.0.0.1:8002", "http://127.0.0.1:5173"])
+
+allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:8002,http://localhost:5173,http://127.0.0.1:8002,http://127.0.0.1:5173').split(',')
+CORS(app, origins=allowed_origins)
 
 # Configure Gemini API
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
@@ -341,4 +343,4 @@ def test():
 if __name__ == '__main__':
     print("Starting AI Ranking Service...")
     print("Server will run on http://0.0.0.0:5001")
-    app.run(host='0.0.0.0', port=5001, debug=True, threaded=True)
+    app.run(host='0.0.0.0', port=5001, debug=False, threaded=True)

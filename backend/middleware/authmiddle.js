@@ -41,9 +41,6 @@ class AuthMiddleware {
         phoneNumber: decoded.phone_number || "",
       };
 
-      // Debug log
-      console.log(`[Auth] Verifying session for UID: ${decoded.uid} on path: ${req.originalUrl}`);
-
       // Retry logic for MongoDB sync (handles race conditions during first login)
       let user = null;
       let retries = 3;

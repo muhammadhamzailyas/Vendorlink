@@ -17,7 +17,7 @@ const Footer = () => {
             <Link to="/terms" className="hover:text-foreground transition-all">
               Terms of Services
             </Link>
-            <a href="mailto:contact@vendorlink.com" className="hover:text-foreground transition-all">
+            <a href="mailto:support.vendorlink@gmail.com" className="hover:text-foreground transition-all">
               Contact Us
             </a>
           </nav>

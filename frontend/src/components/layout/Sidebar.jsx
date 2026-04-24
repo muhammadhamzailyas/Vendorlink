@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 import { ScrollArea, Button } from "../ui";
 import { SidebarSimple } from "@phosphor-icons/react";
 import logo from "../../assets/Vendorlink Logo.png";
-import secondaryLogo from "../../assets/Vendorlink Secondary Logo Light.png";
+import secondaryLogo from "../../assets/Vendorlink Secondary Logo.png";
 
 const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
   const location = useLocation();

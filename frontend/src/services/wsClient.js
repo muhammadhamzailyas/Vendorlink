@@ -13,10 +13,15 @@ class WebSocketClient {
     this.userId = null;
     this.userRole = null;
     this.isConnecting = false;
+    this.currentUser = null;
   }
 
-  async connect() {
+  async connect(user) {
     if (this.isConnecting || this.ws?.readyState === WebSocket.OPEN) return;
+    
+    if (user) {
+      this.currentUser = user;
+    }
     
     this.isConnecting = true;
     try {
@@ -26,12 +31,9 @@ class WebSocketClient {
         return;
       }
 
-      try {
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        this.userId = user.id || user._id;
-        this.userRole = user.role;
-      } catch {
-        // ignore
+      if (this.currentUser) {
+        this.userId = this.currentUser.id || this.currentUser._id;
+        this.userRole = this.currentUser.role;
       }
 
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";

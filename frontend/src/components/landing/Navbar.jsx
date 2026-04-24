@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { List, X as X } from "@phosphor-icons/react";
 import { Button, Sheet, SheetContent, SheetTitle, SheetDescription } from "../ui";
-import logoLight from "../../assets/Vendorlink Secondary Logo Light.png";
+import logoLight from "../../assets/Vendorlink Secondary Logo.png";
 
 const navItems = [
   { id: "how-it-works-section", label: "How it Works" },

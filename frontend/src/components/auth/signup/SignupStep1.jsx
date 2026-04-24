@@ -32,9 +32,9 @@ const SignupStep1 = ({
 
     // Phone validation - Universal for all countries using libphonenumber metadata
     if (data.phone) {
-        // Strip hyphens and spaces added by PhoneInputField for validation
-        const rawPhone = data.phone.replace(/\D/g, "");
-        if (!isValidPhoneNumber(rawPhone, data.isoCode)) {
+        // Validate the full international number (including country code)
+        const fullPhone = `${data.countryCode}${data.phone}`;
+        if (!isValidPhoneNumber(fullPhone)) {
             errs.phone = "Invalid format";
         }
     }

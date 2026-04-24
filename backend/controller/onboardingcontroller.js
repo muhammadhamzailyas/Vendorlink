@@ -59,7 +59,7 @@ class OnboardingController {
 
       if (account.role) user.role = account.role;
       if (account.fullName) user.fullName = account.fullName;
-      if (account.phone) user.phone = `${account.countryCode || ""}${account.phone}`;
+      if (account.phone) user.phone = account.phone;
       user.onboardingStep = step;
       await user.save();
 
@@ -172,18 +172,14 @@ class OnboardingController {
       // 2. Body Parsing (Resilient to Multer/Multipart differences)
       let { account, details, plan: planId, stripePaymentId } = req.body;
       
-      console.log("[Onboarding] Incoming Body Keys:", Object.keys(req.body));
-      console.log("[Onboarding] Incoming Files Keys:", req.files ? Object.keys(req.files) : "None");
-
       const parseJson = (val, fieldName) => {
         if (!val) {
-            console.warn(`[Onboarding] Field ${fieldName} is empty/null`);
-            return {};
+            return null;
         }
         if (typeof val === "string") {
             try { return JSON.parse(val); } catch (e) { 
                 console.error(`[Onboarding] Failed to parse JSON for ${fieldName}:`, val);
-                return val; 
+                return null; 
             }
         }
         return val;
@@ -196,15 +192,25 @@ class OnboardingController {
       const firebaseUid = req.firebaseUser?.uid;
 
       if (!firebaseUid) {
-        console.error("[Onboarding] No firebaseUid found in request. Identity verification failed.");
         if (isTransactionStarted) await session.abortTransaction();
         return res.status(401).json({ message: "Unverified identity" });
       }
 
-      if (!account.role || !planId) {
-        console.error("[Onboarding] Missing critical fields:", { role: account.role, planId });
+      if (!account || !account.role || !planId) {
+        console.error("[Onboarding] Missing critical fields:", { 
+            hasAccount: !!account, 
+            role: account?.role, 
+            planId 
+        });
         if (isTransactionStarted) await session.abortTransaction();
-        return res.status(400).json({ message: "Missing required registration data (Role or Plan)" });
+        return res.status(400).json({ 
+            message: "Missing required registration data",
+            details: {
+                account: !account ? "missing" : "ok",
+                role: !account?.role ? "missing" : "ok",
+                plan: !planId ? "missing" : "ok"
+            }
+        });
       }
 
       // Map uploaded files to path strings
@@ -255,7 +261,7 @@ class OnboardingController {
 
       user.fullName = account.fullName;
       user.role = account.role;
-      user.phone = `${account.countryCode || ""}${account.phone || ""}`;
+      user.phone = account.phone || "";
       user.status = "pending"; 
       user.profileCompleted = true;
       user.onboardingStep = 5;

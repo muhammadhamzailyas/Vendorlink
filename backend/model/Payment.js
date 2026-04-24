@@ -47,7 +47,7 @@ const paymentSchema = new mongoose.Schema({
   paymentMethod: { type: String, default: "wallet" },
   paymentGateway: { type: String, default: "internal" },
 
-  transactionId: { type: String, unique: true, sparse: true },
+  transactionId: { type: mongoose.Schema.Types.ObjectId, ref: "Transaction", unique: true, sparse: true },
   invoiceNumber: { type: String, unique: true },
 
   advanceAmount: { type: Number, default: 0 },

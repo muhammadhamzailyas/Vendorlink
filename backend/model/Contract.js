@@ -34,7 +34,7 @@ const contractSchema = new mongoose.Schema({
   vendorApproach: String,
 
   totalBudget: { type: Number, required: true },
-  currency: { type: String, default: "INR" },
+  currency: { type: String, default: "PKR" },
 
   projectStartDate: { type: Date, required: true },
   projectEndDate: { type: Date, required: true },
@@ -110,7 +110,7 @@ const contractSchema = new mongoose.Schema({
     default: "negotiation",
   },
   disputeResolutionDetails: String,
-  governingLaw: { type: String, default: "India" },
+  governingLaw: { type: String, default: "Pakistan" },
 
   warrantyPeriod: { type: Number, default: 30 },
   warrantyDetails: String,

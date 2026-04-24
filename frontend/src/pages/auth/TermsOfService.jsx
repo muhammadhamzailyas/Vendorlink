@@ -224,7 +224,7 @@ const TermsOfService = () => {
                         </div>
                         <div className="space-y-1">
                             <span className="text-[9px] font-black uppercase text-muted-foreground">Customer Support</span>
-                            <a href="mailto:support@vendorlink.com" className="block text-xl font-black hover:opacity-70 transition-opacity uppercase tracking-tight leading-none">support@vendorlink.com</a>
+                            <a href="mailto:support.vendorlink@gmail.com" className="block text-xl font-black hover:opacity-70 transition-opacity uppercase tracking-tight leading-none">support.vendorlink@gmail.com</a>
                         </div>
                         <div className="space-y-1">
                             <span className="text-[9px] font-black uppercase text-muted-foreground">Official Website</span>

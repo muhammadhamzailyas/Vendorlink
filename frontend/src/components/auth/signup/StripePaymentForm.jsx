@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "../../ui";
 import { Lock } from "@phosphor-icons/react";
 import toastUtil from "../../../lib/toast";
 
-const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) => {
+const StripePaymentForm = ({ onPaymentSuccess, onBack, planPrice }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -33,44 +33,73 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planName, planPrice }) =>
     }
   };
 
+  const elementOptions = {
+    style: {
+      base: {
+        fontSize: '14px',
+        color: '#e5e7eb',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        '::placeholder': {
+          color: '#9ca3af',
+        },
+      },
+      invalid: {
+        color: '#f87171',
+      },
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="bg-muted/50 border border-border/50 p-5 rounded-2xl">
           <div className="flex justify-between items-center mb-4">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Order Summary</h3>
               <span className="px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded uppercase tracking-tighter">
-                One-time activation
+                Monthly Subscription
               </span>
           </div>
-          <div className="flex justify-between items-baseline">
-              <span className="text-foreground text-sm font-medium">Professional Profile Activation</span>
+          <div className="flex justify-between items-baseline mb-2">
+              <span className="text-foreground text-sm font-medium">Professional Profile Access</span>
               <div className="flex items-baseline gap-0.5">
                 <span className="text-3xl font-black tracking-tighter text-foreground">${planPrice}</span>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">USD</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase">/mo</span>
               </div>
           </div>
+          <p className="text-[11px] text-muted-foreground font-medium italic border-t border-border/50 pt-3">
+            Note: Payment will only be deducted once your account has been reviewed and approved by our admin team.
+          </p>
       </div>
 
       <div className="space-y-4">
-        <div className="payment-element-wrapper">
-            <PaymentElement options={{ 
-              layout: 'tabs', // Changed to tabs with defaultCollapsed: false to strictly show Card fields
-              paymentMethodOrder: ['card'],
-              business: { name: 'VendorLink' },
-              fields: {
-                billingDetails: {
-                  address: {
-                    country: 'never', // Hide country to keep it clean, as we already have address
-                  }
-                }
-              }
-            }} />
+        {/* Separated Card Elements */}
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <label className="mb-1.5 block text-[13px] font-bold tracking-tight text-foreground/80 uppercase">Card Number</label>
+                <div className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-[15px]">
+                    <CardNumberElement options={{ ...elementOptions, showIcon: true, iconStyle: 'solid' }} />
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="mb-1.5 block text-[13px] font-bold tracking-tight text-foreground/80 uppercase">Expiration</label>
+                    <div className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-[15px]">
+                        <CardExpiryElement options={elementOptions} />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <label className="mb-1.5 block text-[13px] font-bold tracking-tight text-foreground/80 uppercase">CVC</label>
+                    <div className="w-full rounded-xl border border-input-border bg-input-bg px-4 py-[15px]">
+                        <CardCvcElement options={elementOptions} />
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground bg-foreground/5 p-4 rounded-xl border border-foreground/10">
+        <div className="flex items-center justify-center gap-2.5 text-[10px] text-muted-foreground bg-foreground/5 p-4 rounded-xl border border-foreground/10">
             <Lock size={14} weight="bold" className="shrink-0 text-foreground/40" />
-            <span className="font-bold uppercase tracking-tight leading-tight">
-                Secure 256-bit encryption. Payment processed by Stripe.
+            <span className="font-bold tracking-tight leading-tight">
+                Powered by Stripe
             </span>
         </div>
       </div>

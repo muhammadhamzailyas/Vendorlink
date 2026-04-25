@@ -20,8 +20,7 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
       try {
         setLoading(true);
         setInitError(null);
-        // Fixed $30 activation fee
-        const res = await onboardingService.createPaymentIntent("activation_fee");
+        const res = await onboardingService.createPaymentIntent();
         if (mounted) {
             setClientSecret(res.data.clientSecret);
         }
@@ -55,19 +54,12 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
   if (clientSecret) {
     return (
       <div className="space-y-6">
-        <div className="bg-muted border border-ring/20 p-4 rounded-xl flex items-start gap-3">
-            <Info className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
-            <p className="text-sm text-foreground font-medium leading-relaxed">
-                Complete your one-time activation fee to finalize your professional profile. Payment is securely processed via Stripe.
-            </p>
-        </div>
-
         <Elements 
           stripe={stripePromise} 
           options={{ 
             clientSecret, 
             appearance: { 
-              theme: 'none',
+              theme: 'stripe',
               variables: {
                 fontFamily: 'Inter, system-ui, sans-serif',
                 colorBackground: '#ffffff',
@@ -78,16 +70,13 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
                 colorWarning: '#e69e2c',
                 colorTextSecondary: '#4d4d4d',
                 colorTextPlaceholder: '#757575',
-                // Component specific
                 buttonColorBackground: '#0570de',
                 buttonColorText: '#ffffff',
-                // Accessible colors
                 accessibleColorOnColorPrimary: '#ffffff',
                 accessibleColorOnColorBackground: '#000000',
                 accessibleColorOnColorSuccess: '#fff',
                 accessibleColorOnColorDanger: '#000000',
                 accessibleColorOnColorWarning: '#000000',
-                // Icon colors
                 iconColor: '#4d4d4d',
                 iconHoverColor: '#000000',
                 iconCardErrorColor: '#ef4444',
@@ -99,11 +88,12 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
                 '.Input': {
                   border: '1px solid #e2e8f0',
                   padding: '12px',
-                  backgroundColor: '#f8fafc', // Matching website bg-muted style as requested
+                  backgroundColor: '#f8fafc', 
                   transition: 'all 0.2s ease',
+                  boxShadow: 'none',
                 },
                 '.Input:focus': {
-                  border: '1px solid #000000',
+                  border: '1px solid #0570de',
                   boxShadow: '0 0 0 3px rgba(5, 112, 222, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.08)',
                   backgroundColor: '#ffffff',
                 },
@@ -112,7 +102,7 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
                   fontWeight: '600',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
-                  marginBottom: '6px',
+                  marginBottom: '8px',
                   color: '#4d4d4d',
                 }
               }
@@ -120,7 +110,6 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
           }}
         >
           <StripePaymentForm 
-            planName="Professional Activation"
             planPrice="30"
             onPaymentSuccess={onPaymentSuccess}
             onBack={onBack}

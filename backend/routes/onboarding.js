@@ -4,8 +4,6 @@ const onboardingController = require("../controller/onboardingcontroller");
 const { onboardingDocumentUpload } = require("../middleware/onboardingUpload");
 const { authAllowUnprovisioned } = require("../middleware/authmiddle");
 
-router.get("/plans", onboardingController.getPlans.bind(onboardingController));
-
 // Track progress
 router.get("/me", authAllowUnprovisioned, onboardingController.getMyOnboarding.bind(onboardingController));
 router.post("/save-progress", authAllowUnprovisioned, onboardingDocumentUpload, onboardingController.saveProgress.bind(onboardingController));

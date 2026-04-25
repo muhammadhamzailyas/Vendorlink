@@ -143,11 +143,6 @@ class OnboardingController {
       }
   }
 
-  async getPlans(req, res) {
-    // Return empty array or single plan as we removed selection
-    return res.json([{ id: "activation_fee", name: "Professional Activation", price: ONBOARDING_FEE }]);
-  }
-
   /**
    * Finalizes user profile and creates role-specific entries.
    */

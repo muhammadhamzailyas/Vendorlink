@@ -196,7 +196,7 @@ const SignupStep1 = ({
       loading={loading}
       className="w-full h-12 rounded-xl shadow-soft font-normal text-base"
     >
-      Save & Continue
+      {loading ? "Saving..." : "Save & Continue"}
     </Button>
   </form>
   );

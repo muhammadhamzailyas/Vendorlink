@@ -261,7 +261,7 @@ const Signup = () => {
       if (savedDraft) {
         try {
           const parsed = JSON.parse(savedDraft);
-          const hasData = parsed.step1?.fullName || parsed.step2?.companyName || parsed.step2?.bio;
+          const hasData = parsed.step1?.fullName || parsed.step2?.companyName || parsed.step2?.bio || parsed.step2?.streetAddress || parsed.step4?.stripePaymentId;
           if (hasData || parsed.lastStep > 1) {
               if (stateResume && stateVerified) {
                   setFormData(prev => ({ ...prev, ...parsed, step1: { ...prev.step1, ...parsed.step1, emailVerified: true, password: "", confirmPassword: "" } }));
@@ -291,10 +291,13 @@ const Signup = () => {
             delete draft.step1.password;
             delete draft.step1.confirmPassword;
         }
+        // Do not save File objects to localStorage, as they cannot be serialized.
+        // The backend URL or a temporary session storage is the correct way to handle this,
+        // but for a simple local draft, we just avoid saving them.
         if (draft.step3) {
             Object.keys(formData.step3).forEach(k => {
                 if (formData.step3[k] instanceof File) {
-                    draft.step3[k] = { name: formData.step3[k].name, size: formData.step3[k].size, type: formData.step3[k].type };
+                    draft.step3[k] = null;
                 }
             });
         }
@@ -373,11 +376,6 @@ const Signup = () => {
   };
 
   const prevStep = () => setStep((prev) => Math.max(1, prev - 1));
-
-  const handleStep1Back = () => {
-    setFormData(prev => ({ ...prev, step1: { ...INITIAL_STEP1 } }));
-    prevStep();
-  };
 
   const handleStep1Submit = async () => {
     const { step1 } = formData;
@@ -479,9 +477,9 @@ const Signup = () => {
 
     switch (step) {
       case 1: return <SignupStep1 data={step1} onChange={handleStep1Change} showPassword={showPassword} onTogglePassword={() => setShowPassword(!showPassword)} showConfirmPassword={showConfirmPassword} onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)} onSubmit={handleStep1Submit} loading={loading} />;
-      case 2: return <SignupStep2 data={step2} errors={step2Errors} onChange={(f) => { setIsFormDirty(true); setFormData(p => ({ ...p, step2: { ...p.step2, ...f } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={handleStep1Back} loading={loading} isSubmitDisabled={isS2Disabled} />;
+      case 2: return <SignupStep2 data={step2} errors={step2Errors} onChange={(f) => { setIsFormDirty(true); setFormData(p => ({ ...p, step2: { ...p.step2, ...f } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={prevStep} loading={loading} isSubmitDisabled={isS2Disabled} />;
       case 3: return <SignupStep3 data={step3} onFileChange={(k, f) => { setIsFormDirty(true); setFormData(p => ({ ...p, step3: { ...p.step3, [k]: f } })); }} onRemoveFile={(k) => { setIsFormDirty(true); setFormData(p => ({ ...p, step3: { ...p.step3, [k]: null } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={prevStep} loading={loading} isSubmitDisabled={isS3Disabled} />;
-      case 4: return <SignupStep4 onSubmit={(pid) => { if (pid) setFormData(p => ({ ...p, step4: { ...p.step4, stripePaymentId: pid } })); nextStep(); }} onBack={prevStep} loading={loading} />;
+      case 4: return <SignupStep4 stripePaymentId={step4.stripePaymentId} onSubmit={(pid) => { if (pid) setFormData(p => ({ ...p, step4: { ...p.step4, stripePaymentId: pid } })); nextStep(); }} onBack={prevStep} loading={loading} />;
       case 5: return <SignupStep5 data={formData} onSubmit={handleFinalSubmit} onBack={prevStep} loading={loading} />;
       default: return null;
     }
@@ -490,7 +488,7 @@ const Signup = () => {
   return (
     <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading || googleLoading} googleLoading={googleLoading} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} onLinkClick={handleLinkClick} maxWidth="max-w-2xl" >
       <div className="mb-8"> <SignupProgressBar step={step} /> </div>
-      <div key={step} className={cn("transition-all duration-300", stepVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}> {renderStep()} </div>
+      <div className={cn("transition-all duration-300", stepVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}> {renderStep()} </div>
       <Dialog open={showResumeDialog} persistent>
         <Dialog.Header>
           <Dialog.Title>Resume Registration?</Dialog.Title>

@@ -80,7 +80,7 @@ const SignupStep3 = ({ data, onFileChange, onRemoveFile, isCompany, onSubmit, on
             size="lg"
             className="flex-1 font-normal shadow-soft"
         >
-          Continue
+          {loading ? "Saving..." : "Continue"}
         </Button>
       </div>
     </div>

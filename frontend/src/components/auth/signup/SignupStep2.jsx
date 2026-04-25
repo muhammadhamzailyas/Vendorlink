@@ -112,7 +112,7 @@ const SignupStep2 = ({
     <div className="flex gap-4 pt-4 border-t border-border/50">
       <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
       <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading || isSubmitDisabled} size="lg" className="flex-1 shadow-soft font-normal">
-        Continue
+        {loading ? "Saving..." : "Continue"}
       </Button>
     </div>
   </div>

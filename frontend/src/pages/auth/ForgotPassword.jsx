@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import toastUtil from "../../lib/toast";
 import { Button, Input } from "../../components/ui";
 import AuthLayout from "../../components/auth/AuthLayout";
 import { sendPasswordReset } from "../../lib/firebase";
+import { LockKey } from "@phosphor-icons/react";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,64 +21,54 @@ const ForgotPassword = () => {
     setLoading(true);
     try {
       await sendPasswordReset(email);
-      setSuccess(true);
-      toastUtil.success("Password reset link sent");
+      toastUtil.success("Password reset link sent! Redirecting to login...");
+      // Redirect to login after a short delay to allow user to read the toast
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       console.error("Forgot password error:", error);
       toastUtil.error("Failed to send reset link. Please try again.");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only stop loading on error, success will navigate away
     }
   };
 
   return (
     <AuthLayout
-      title={success ? "Check your inbox" : "Forgot Password?"}
-      subtitle={
-        success
-          ? "We sent a reset link to your email address."
-          : "Enter your email and we'll send you a reset link."
-      }
-      hideOAuth
+      title="Forgot Password?"
+      subtitle="No problem. Enter your email and we'll send you a reset link."
+      hideGoogle
+      headerIcon={(
+        <div className="h-20 w-20 bg-muted text-foreground rounded-full flex items-center justify-center">
+            <LockKey size={40} />
+        </div>
+      )}
       footerText="Remember your password?"
       footerLinkText="Sign In"
       footerLinkTo="/login"
     >
-      {success ? (
-        <Button asChild className="h-12 w-full rounded-xl text-base font-bold" aria-label="Back to login">
-          <Link to="/login">Back to Login</Link>
-        </Button>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-            autoComplete="email"
-            placeholder="Enter your email"
-            aria-label="Email input for password reset"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              autoComplete="email"
+              placeholder="Enter your email"
+              aria-label="Email input for password reset"
           />
 
           <Button
-            type="submit"
-            disabled={loading || !email}
-            loading={loading}
-            className="h-12 w-full rounded-xl text-base font-bold"
-            aria-label="Send password reset link"
+              type="submit"
+              disabled={loading || !email}
+              loading={loading}
+              size="lg"
+              className="w-full shadow-soft font-normal"
+              aria-label="Send password reset link"
           >
-            Send Reset Link
+              {loading ? "Sending..." : "Send Reset Link"}
           </Button>
-        </form>
-      )}
+      </form>
     </AuthLayout>
   );
 };
 
 export default ForgotPassword;
-
-
-
-
-
-

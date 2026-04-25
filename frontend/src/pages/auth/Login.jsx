@@ -196,7 +196,7 @@ const Login = () => {
           size="lg"
           className="w-full shadow-soft font-normal"
         >
-          Sign In
+          {loading ? "Signing In..." : "Sign In"}
         </Button>
       </form>
     </AuthLayout>

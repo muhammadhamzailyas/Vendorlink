@@ -8,6 +8,7 @@ const AuthLayout = ({
   children,
   title,
   subtitle,
+  headerIcon,
   onGoogleLogin,
   googleDisabled = false,
   googleLoading = false,
@@ -34,6 +35,11 @@ const AuthLayout = ({
           )}
         >
           <Card.Header className="text-center pt-8 pb-0 border-b-0">
+            {headerIcon && (
+                <div className="flex justify-center mb-6">
+                    {headerIcon}
+                </div>
+            )}
             <div>
               <Card.Title className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
                 {title}

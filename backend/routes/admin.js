@@ -9,6 +9,7 @@ router.use(adminmiddleware);
 
 // Define routes
 router.get("/stats", adminController.getStats);
+router.get("/monitoring/tasks", adminController.getTaskMonitoring);
 router.get("/pending", adminController.getPendingUsers);
 router.get("/pending-verifications", adminController.getPendingVerifications);
 router.get("/users", adminController.getAllUsers);

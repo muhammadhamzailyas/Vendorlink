@@ -34,6 +34,7 @@ class AdminController {
     this.approveVerification = this.approveVerification.bind(this);
     this.rejectVerification = this.rejectVerification.bind(this);
     this.getStats = this.getStats.bind(this);
+    this.getTaskMonitoring = this.getTaskMonitoring.bind(this);
     this.softDeleteUser = this.softDeleteUser.bind(this);
     this.checkUserDeletion = this.checkUserDeletion.bind(this);
     this.reactivateUser = this.reactivateUser.bind(this);
@@ -459,6 +460,103 @@ class AdminController {
     }
 
     return notificationCount;
+  }
+
+  async getTaskMonitoring(req, res) {
+    try {
+      const now = new Date();
+      
+      const [
+        totalTasks,
+        statusDist,
+        categoryDist,
+        creationTrend,
+        budgetDist,
+        overdueCount
+      ] = await Promise.all([
+        Task.countDocuments(),
+        Task.aggregate([
+          { $group: { _id: "$status", value: { $sum: 1 } } }
+        ]),
+        Task.aggregate([
+          { $group: { _id: "$category", value: { $sum: 1 } } },
+          { $sort: { value: -1 } }
+        ]),
+        Task.aggregate([
+          {
+            $group: {
+              _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } },
+          { $limit: 12 }
+        ]),
+        Task.aggregate([
+          {
+            $bucket: {
+              groupBy: "$budget",
+              boundaries: [0, 5000, 10000, 50000, 100000, 500000],
+              default: "500000+",
+              output: { count: { $sum: 1 } }
+            }
+          }
+        ]),
+        Task.countDocuments({
+          deadline: { $lt: now },
+          status: { $ne: "completed" }
+        })
+      ]);
+
+      // Format trends for area chart
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const formattedTrend = creationTrend.map(item => ({
+        name: months[item._id.month - 1],
+        tasks: item.count
+      }));
+
+      // Format budget distribution for bar chart
+      const budgetLabels = {
+        0: "0-5k",
+        5000: "5k-10k",
+        10000: "10k-50k",
+        50000: "50k-100k",
+        100000: "100k-500k",
+        "500000+": "500k+"
+      };
+      const formattedBudget = budgetDist.map(item => ({
+        range: budgetLabels[item._id] || item._id,
+        count: item.count
+      }));
+
+      // Active vs Completed changes (simulated for now based on total)
+      const prevTotal = totalTasks > 0 ? totalTasks - 1 : 0; // Simple fallback
+      const calculateChange = (curr, prev) => {
+        if (!prev) return 0;
+        return (((curr - prev) / prev) * 100).toFixed(1);
+      };
+
+      res.json({
+        stats: {
+          total: totalTasks,
+          active: statusDist.find(s => s._id === "in-progress")?.value || 0,
+          completed: statusDist.find(s => s._id === "completed")?.value || 0,
+          overdue: overdueCount,
+          changes: {
+            total: calculateChange(totalTasks, prevTotal),
+            overdue: 0 // Placeholder
+          }
+        },
+        charts: {
+          statusDistribution: statusDist.map(s => ({ name: s._id, value: s.value })),
+          categoryDistribution: categoryDist.map(c => ({ name: c._id, value: c.value })),
+          creationTrend: formattedTrend,
+          budgetDistribution: formattedBudget
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
   }
 
   async softDeleteUser(req, res) {

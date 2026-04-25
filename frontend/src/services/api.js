@@ -165,6 +165,7 @@ export const chatAPI = {
 
 export const adminService = {
   getAllUsers: () => api.get("/admin/users"),
+  getAllTasks: () => api.get("/tasks"),
   getPendingUsers: () => api.get("/admin/pending"),
   getPendingVerifications: () => api.get("/admin/pending-verifications"),
   approveUser: (id) => api.put(`/admin/approve/${id}`),

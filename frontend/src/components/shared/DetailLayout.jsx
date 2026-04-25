@@ -35,7 +35,7 @@ export const DetailMetaGrid = ({ className, children }) => (
 export const DetailMetaItem = ({ label, value, className }) => (
   <div className={cn("rounded-xl border border-border/50 bg-muted/30 px-4 py-3.5 shadow-xs", className)}>
     <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-    <p className="mt-1.5 text-sm font-extrabold tracking-tight text-foreground">{value}</p>
+    <div className="mt-1.5 text-sm font-extrabold tracking-tight text-foreground">{value}</div>
   </div>
 );
 

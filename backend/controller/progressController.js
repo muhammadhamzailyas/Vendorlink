@@ -1,6 +1,10 @@
 const Task = require("../model/task");
 const Contract = require("../model/Contract");
 const ProgressUpdate = require("../model/ProgressUpdate");
+const Wallet = require("../model/Wallet");
+const Transaction = require("../model/Transaction");
+const Payment = require("../model/Payment");
+const User = require("../model/user");
 const mongoose = require("mongoose");
 
 const getNotificationService = (req) => {
@@ -18,7 +22,7 @@ exports.getVendorActiveTasks = async (req, res) => {
 
     const activeContracts = await Contract.find({
       vendorId,
-      status: "active",
+      status: { $in: ["active", "pending-completion"] },
       companyApproved: true,
       vendorApproved: true,
     })
@@ -208,7 +212,7 @@ exports.getCompanyActiveTasks = async (req, res) => {
 
     const activeContracts = await Contract.find({
       companyId,
-      status: "active",
+      status: { $in: ["active", "pending-completion"] },
       companyApproved: true,
       vendorApproved: true,
     })
@@ -281,12 +285,16 @@ exports.getCompanyTaskProgress = async (req, res) => {
       return res.status(400).json({ success: false, error: "Invalid task ID format" });
     }
 
-    const contract = await Contract.findOne({ taskId, companyId, status: "active" })
+    const contract = await Contract.findOne({ 
+      taskId, 
+      companyId, 
+      status: { $in: ["active", "pending-completion", "completed"] } 
+    })
       .populate("vendorId", "username email profileImage")
       .populate("taskId");
 
     if (!contract) {
-      return res.status(403).json({ success: false, error: "Access denied - No active contract found" });
+      return res.status(403).json({ success: false, error: "Access denied - No relevant contract found" });
     }
 
     const progressUpdates = await ProgressUpdate.find({
@@ -316,13 +324,7 @@ exports.getCompanyTaskProgress = async (req, res) => {
       success: true,
       data: {
         task: contract.taskId,
-        contract: {
-          _id: contract._id,
-          totalBudget: contract.totalBudget,
-          activatedAt: contract.activatedAt,
-          projectEndDate: contract.projectEndDate,
-          paymentTerms: contract.paymentTerms,
-        },
+        contract: contract, // Return full contract object to include status
         vendor: contract.vendorId,
         progressUpdates,
         stats,
@@ -382,6 +384,183 @@ exports.exportProgressReport = async (req, res) => {
     });
   } catch (error) {
     console.error("Error exporting progress report:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Request project completion (Vendor)
+exports.requestProjectCompletion = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const vendorId = req.user._id.toString();
+
+    const contract = await Contract.findOne({ taskId, vendorId, status: "active" });
+    if (!contract) {
+      return res.status(403).json({ success: false, error: "Active contract not found" });
+    }
+
+    contract.status = "pending-completion";
+    await contract.save();
+
+    // Also add a 100% progress update if not exists
+    const latestUpdate = await ProgressUpdate.findOne({ taskId, vendorId }).sort({ updateDate: -1 });
+    if (!latestUpdate || latestUpdate.percentage < 100) {
+      const completionUpdate = new ProgressUpdate({
+        taskId,
+        vendorId,
+        companyId: contract.companyId,
+        updateDate: new Date(),
+        comment: "Project completed and submitted for review.",
+        status: "completed",
+        percentage: 100,
+      });
+      await completionUpdate.save();
+    }
+
+    const notificationService = getNotificationService(req);
+    if (notificationService) {
+      try {
+        await notificationService.createNotification({
+          recipientId: contract.companyId,
+          senderId: vendorId,
+          type: "completion_requested",
+          title: "Project Completion Request",
+          message: `${req.user.username} has marked the project "${contract.title}" as completed. Please review and approve.`,
+          data: { taskId, contractId: contract._id, role: "company" },
+          relatedId: taskId,
+          relatedModel: "Task",
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    res.json({ success: true, message: "Completion request submitted" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Approve project completion (Company)
+exports.approveProjectCompletion = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { taskId } = req.params;
+    const companyId = req.user._id.toString();
+
+    const contract = await Contract.findOne({ taskId, companyId, status: "pending-completion" })
+      .populate("vendorId");
+    if (!contract) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, error: "Pending completion contract not found" });
+    }
+
+    const totalAmount = contract.totalBudget;
+    const totalPaid = contract.totalPaid || 0;
+    const remainingAmount = totalAmount - totalPaid;
+
+    if (remainingAmount > 0) {
+      // Check company wallet
+      const companyWallet = await Wallet.findOne({ userId: companyId }).session(session);
+      if (!companyWallet || companyWallet.balance < remainingAmount) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({ success: false, error: `Insufficient wallet balance. You need $${remainingAmount} to complete this project.` });
+      }
+
+      // Perform automatic payment
+      const platformFee = (remainingAmount * 5) / 100; // 5% fee
+      const vendorAmount = remainingAmount - platformFee;
+
+      // Deduct from company
+      companyWallet.balance -= remainingAmount;
+      companyWallet.lastTransactionAt = new Date();
+      await companyWallet.save();
+
+      // Add to vendor
+      const vendorWallet = await Wallet.findOneAndUpdate(
+        { userId: contract.vendorId._id },
+        { 
+          $inc: { balance: vendorAmount, totalReceived: vendorAmount },
+          $set: { lastTransactionAt: new Date() }
+        },
+        { upsert: true, new: true, session }
+      );
+
+      // Create Payment record
+      const payment = new Payment({
+        taskId: contract.taskId,
+        contractId: contract._id,
+        companyId,
+        vendorId: contract.vendorId._id,
+        amount: remainingAmount,
+        originalAmount: totalAmount,
+        platformFee,
+        vendorAmount,
+        paymentType: "full",
+        status: "completed",
+        notes: "Automatic payment upon project completion approval.",
+        createdBy: companyId,
+        paymentDate: new Date(),
+        vendorConfirmed: true,
+        vendorConfirmedAt: new Date(),
+      });
+      await payment.save({ session });
+
+      // Create Transaction record
+      const transaction = new Transaction({
+        fromUserId: companyId,
+        toUserId: contract.vendorId._id,
+        amount: remainingAmount,
+        platformFee,
+        netAmount: vendorAmount,
+        type: "payment",
+        status: "completed",
+        paymentMethod: "wallet_balance",
+        taskId: contract.taskId,
+        contractId: contract._id,
+        paymentId: payment._id,
+        description: `Final payment for ${contract.title}`,
+        completedAt: new Date(),
+        fromBalanceAfter: companyWallet.balance,
+        toBalanceAfter: vendorWallet.balance,
+      });
+      await transaction.save({ session });
+
+      contract.totalPaid = totalAmount;
+    }
+
+    contract.status = "completed";
+    contract.updatedAt = new Date();
+    await contract.save({ session });
+
+    // Update Task status
+    await Task.findByIdAndUpdate(taskId, { status: "completed" }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    const notificationService = getNotificationService(req);
+    if (notificationService) {
+      try {
+        await notificationService.createNotification({
+          recipientId: contract.vendorId._id,
+          senderId: companyId,
+          type: "completion_approved",
+          title: "Project Completed",
+          message: `Company has approved completion of "${contract.title}". Final payment has been credited to your wallet.`,
+          data: { taskId, contractId: contract._id, role: "vendor" },
+          relatedId: taskId,
+          relatedModel: "Task",
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    res.json({ success: true, message: "Project completion approved and payment processed." });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error approving completion:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

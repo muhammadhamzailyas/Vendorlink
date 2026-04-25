@@ -1,10 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { progressAPI } from "@/services/api";
 import { formatDate } from "@/lib/dateUtils";
 import { showToast } from "@/lib/toast";
-import { ArrowLeft, CircleNotch, Plus, ChartBar } from "@phosphor-icons/react";
-import { Button, PageTransition, Input, Label, Select, Textarea, Card, Slider, Progress } from "@/components/ui";
+import { 
+  CircleNotch, 
+  Plus, 
+  ChartBar, 
+  CheckCircle, 
+  SealCheck,
+  X
+} from "@phosphor-icons/react";
+import { 
+  Button, 
+  PageTransition, 
+  Input, 
+  Label, 
+  Select, 
+  Textarea, 
+  Card, 
+  Slider, 
+  Progress,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import { DetailMetaGrid, DetailMetaItem, DetailSection } from "@/components/shared/DetailLayout";
 
@@ -15,6 +38,7 @@ const TaskProgressDetail = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [form, setForm] = useState({
     updateDate: new Date().toISOString().split("T")[0],
     comment: "",
@@ -22,18 +46,23 @@ const TaskProgressDetail = () => {
     percentage: 0,
   });
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await progressAPI.getTaskProgress(taskId);
-        setData(res.data?.data || res.data);
-      } catch {
-        showToast("Failed to load progress", "error");
-      } finally {
-        setLoading(false);
+  const loadProgress = async () => {
+    try {
+      const res = await progressAPI.getTaskProgress(taskId);
+      const resData = res.data?.data || res.data;
+      setData(resData);
+      if (resData?.currentProgress) {
+        setForm(prev => ({ ...prev, percentage: resData.currentProgress }));
       }
-    };
-    load();
+    } catch {
+      showToast("Failed to load progress", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProgress();
   }, [taskId]);
 
   const handleSubmit = async (e) => {
@@ -43,14 +72,26 @@ const TaskProgressDetail = () => {
       await progressAPI.addProgressUpdate(taskId, form);
       showToast("Progress updated!", "success");
       setShowForm(false);
-      setForm({ updateDate: new Date().toISOString().split("T")[0], comment: "", status: "in-progress", percentage: form.percentage });
-      // Reload
-      const res = await progressAPI.getTaskProgress(taskId);
-      setData(res.data?.data || res.data);
+      loadProgress();
     } catch (err) {
       showToast(err.response?.data?.error || "Failed to save", "error");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleCompleteProject = async () => {
+    if (!window.confirm("Are you sure you want to mark this project as completed? This will notify the company for final review and payment.")) return;
+    
+    setCompleting(true);
+    try {
+      await progressAPI.requestCompletion(taskId);
+      showToast("Project completion requested!", "success");
+      loadProgress();
+    } catch (err) {
+      showToast(err.response?.data?.error || "Failed to submit request", "error");
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -72,42 +113,92 @@ const TaskProgressDetail = () => {
     { value: "on-hold", label: "On Hold" },
   ];
 
+  const contractStatus = data?.contract?.status;
+  const isPendingCompletion = contractStatus === "pending-completion";
+  const isCompleted = contractStatus === "completed";
+  const canUpdate = contractStatus === "active";
+
   return (
     <PageTransition>
-      <div className="space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/vendor/progress" className="uppercase font-bold tracking-widest text-[10px]">Progress</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="uppercase font-bold tracking-widest text-[10px]">{data?.task?.title || "Details"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-border/50">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight uppercase">{data?.task?.title || "Task Progress"}</h1>
-            <p className="text-sm text-muted-foreground">
-              Track delivery progression and submit milestone updates for company visibility.
+            <h1 className="text-2xl font-black tracking-tight uppercase text-foreground">{data?.task?.title || "Task Progress"}</h1>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+              Active Project Ledger & Milestone Reporting
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="xs"
-              onClick={() => navigate(-1)}
-              className="font-bold uppercase tracking-tight"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1.5" />
-              Back
-            </Button>
-            <Button 
-                onClick={() => setShowForm(!showForm)} 
-                variant={showForm ? "secondary" : "primary"}
-                size="xs"
-                className="font-bold uppercase tracking-tight"
-            >
-              {showForm ? <><ArrowLeft className="w-4 h-4 mr-1.5" /> Hide Form</> : <><Plus className="w-4 h-4 mr-1.5" /> Add Update</>}
-            </Button>
+            {canUpdate && (
+              <>
+                <Button 
+                    onClick={() => setShowForm(!showForm)} 
+                    variant={showForm ? "secondary" : "primary"}
+                    size="xs"
+                    className="font-bold uppercase tracking-tight"
+                >
+                  {showForm ? <><X className="w-4 h-4 mr-1.5" /> Close</> : <><Plus className="w-4 h-4 mr-1.5" /> Add Update</>}
+                </Button>
+                <Button 
+                    onClick={handleCompleteProject} 
+                    variant="success"
+                    size="xs"
+                    className="font-bold uppercase tracking-tight shadow-soft"
+                    loading={completing}
+                >
+                  <SealCheck className="w-4 h-4 mr-1.5" /> Project Completed
+                </Button>
+              </>
+            )}
           </div>
         </div>
+
+        {isPendingCompletion && (
+          <Card className="bg-warning/5 border-warning/20 shadow-none">
+            <Card.Content className="p-4 flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                <CircleNotch className="h-5 w-5 text-warning animate-spin" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-foreground">Completion Under Review</p>
+                <p className="text-xs text-muted-foreground">You've marked this project as completed. Waiting for company approval and final payment release.</p>
+              </div>
+            </Card.Content>
+          </Card>
+        )}
+
+        {isCompleted && (
+          <Card className="bg-jade-500/5 border-jade-500/20 shadow-none">
+            <Card.Content className="p-4 flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-jade-500/10 flex items-center justify-center shrink-0">
+                <CheckCircle className="h-5 w-5 text-jade-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-foreground">Project Completed</p>
+                <p className="text-xs text-muted-foreground">This project has been finalized and payment has been processed to your wallet.</p>
+              </div>
+            </Card.Content>
+          </Card>
+        )}
 
         <DetailSection title="Progress Overview" description="Current completion and execution status for this task.">
           <DetailMetaGrid className="lg:grid-cols-3">
             <DetailMetaItem label="Current Progress" value={`${data?.currentProgress || 0}%`} />
-            <DetailMetaItem label="Current Status" value={<StatusChip status={data?.currentStatus || "in-progress"} />} />
+            <DetailMetaItem label="Contract Status" value={<StatusChip status={contractStatus || "active"} />} />
             <DetailMetaItem label="Total Updates" value={String(data?.progressUpdates?.length || 0)} />
           </DetailMetaGrid>
 
@@ -211,6 +302,3 @@ const TaskProgressDetail = () => {
 };
 
 export default TaskProgressDetail;
-
-
-

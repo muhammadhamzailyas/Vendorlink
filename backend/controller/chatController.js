@@ -1,12 +1,71 @@
 const { Message, Conversation } = require("../model/Chat");
 const Task = require("../model/task");
 const User = require("../model/user");
+const Contract = require("../model/Contract");
 
 const getNotificationService = (req) => {
   try {
     return req.app?.get("notificationService");
   } catch {
     return null;
+  }
+};
+
+exports.getChatPartners = async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    const role = req.user.role;
+
+    // Find all active or pending-completion contracts
+    const contracts = await Contract.find({
+      [role === "company" ? "companyId" : "vendorId"]: userId,
+      status: { $in: ["active", "pending-completion", "completed"] },
+      companyApproved: true,
+      vendorApproved: true,
+    })
+      .populate("taskId", "title category status")
+      .populate(role === "company" ? "vendorId" : "companyId", "username email profileImage");
+
+    const partners = await Promise.all(contracts.map(async (contract) => {
+      const partner = role === "company" ? contract.vendorId : contract.companyId;
+      if (!partner || !contract.taskId) return null;
+
+      // Ensure a conversation exists for this task
+      let conversation = await Conversation.findOne({ taskId: contract.taskId._id });
+      if (!conversation) {
+        conversation = await Conversation.create({
+          taskId: contract.taskId._id,
+          companyId: contract.companyId,
+          vendorId: contract.vendorId,
+          lastMessage: "System: Tap to start chatting",
+          lastMessageAt: contract.createdAt,
+          lastMessageSender: "system",
+        });
+      }
+
+      return {
+        conversationId: conversation._id,
+        taskId: contract.taskId._id,
+        taskTitle: contract.taskId.title,
+        partnerId: partner._id,
+        partnerName: partner.username,
+        partnerImage: partner.profileImage,
+        lastMessage: conversation.lastMessage,
+        lastMessageAt: conversation.lastMessageAt,
+        unreadCount: role === "company" ? conversation.unreadCount.company : conversation.unreadCount.vendor,
+        contractStatus: contract.status
+      };
+    }));
+
+    // Filter out nulls and sort by last message
+    const filteredPartners = partners
+      .filter(p => p !== null)
+      .sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+
+    res.json({ success: true, data: filteredPartners });
+  } catch (error) {
+    console.error("Error in getChatPartners:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -254,21 +313,8 @@ exports.sendMessage = async (req, res) => {
       await conversation.save();
     }
 
-    const notificationService = getNotificationService(req);
-    if (notificationService) {
-      await notificationService.createNotification({
-        recipientId: receiverId,
-        senderId,
-        type: "message_received",
-        title: "New Message",
-        message: `You have a new message from ${req.user.username}`,
-        data: { taskId, messageId: newMessage._id, conversationId: conversation._id },
-        relatedId: newMessage._id,
-        relatedModel: "Message",
-        priority: "medium",
-      });
-    }
-
+    // The wsService will handle real-time delivery
+    // The client will poll for unread counts for the badge
     res.json({ success: true, data: newMessage });
   } catch (error) {
     console.error("Error sending message:", error);

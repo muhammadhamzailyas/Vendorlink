@@ -6,6 +6,7 @@ const { authmiddleware } = require("../middleware/authmiddle");
 router.use(authmiddleware);
 
 router.get("/conversations", chatController.getConversations);
+router.get("/partners", chatController.getChatPartners);
 router.get("/messages/:taskId", chatController.getTaskMessages);
 router.post("/conversation", chatController.startConversation);
 router.get("/unread", chatController.getUnreadCount);

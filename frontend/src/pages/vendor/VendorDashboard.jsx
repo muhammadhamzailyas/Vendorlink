@@ -48,12 +48,14 @@ import {
   StatCard,
   Card,
 } from "@/components/ui";
+import { useWallet } from "@/context/WalletContext";
 import { cn } from "@/lib/cn";
 
 dayjs.extend(relativeTime);
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
+  const { wallet, formatCurrency } = useWallet();
   const [proposals, setProposals] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [stats, setStats] = useState({
@@ -245,11 +247,10 @@ const VendorDashboard = () => {
               link="/vendor/contracts" 
             />
             <StatCard 
-              title="Total Bids" 
-              value={stats.submittedProposals} 
-              icon={<CheckCircle />} 
-              trend={<ChangeIndicator value={stats.changes.proposals} />}
-              link="/vendor/my-proposals" 
+              title="Wallet Balance" 
+              value={formatCurrency(wallet?.balance)} 
+              icon={<AttachMoney />} 
+              link="/vendor/payments" 
             />
             <StatCard 
               title="Active Work" 
@@ -259,9 +260,9 @@ const VendorDashboard = () => {
               link="/vendor/contracts" 
             />
             <StatCard 
-              title="Total Earnings" 
+              title="Gross Earnings" 
               value={`$${stats.weeklyEarnings.toLocaleString()}`} 
-              icon={<AttachMoney />} 
+              icon={<TrendUp />} 
               trend={<ChangeIndicator value={stats.changes.earnings} />}
             />
           </div>

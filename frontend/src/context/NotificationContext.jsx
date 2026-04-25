@@ -18,6 +18,7 @@ const NotificationProvider = ({ children }) => {
   const { user } = useUser();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -34,18 +35,22 @@ const NotificationProvider = ({ children }) => {
     return user.status === "approved" || user.status === "pending" || user.status === "rejected";
   }, [user]);
 
-  const fetchUnreadCount = useCallback(async () => {
+  const fetchUnreadCounts = useCallback(async () => {
     if (!checkAuth()) return;
 
     try {
-      const res = await notificationAPI.getUnreadCount();
-      setUnreadCount(res.data?.count ?? 0);
+       const [notifRes, chatRes] = await Promise.all([
+        notificationAPI.getUnreadCount(),
+        chatAPI.getUnreadCount()
+      ]);
+      setUnreadCount(notifRes.data?.count ?? 0);
+      setUnreadChatCount(chatRes.data?.data?.unreadCount || 0);
     } catch (error) {
       if (error.response?.status === 403 || error.response?.status === 401) return;
-      console.debug("Fetch unread count failed", error);
+      console.debug("Fetch unread counts failed", error);
     }
   }, [checkAuth]);
-
+  
   const fetchNotifications = useCallback(async (page = 1, filter = {}) => {
     if (!checkAuth()) return;
 
@@ -122,12 +127,12 @@ const NotificationProvider = ({ children }) => {
 
   const refreshNotifications = useCallback(() => {
     fetchNotifications(1);
-    fetchUnreadCount();
-  }, [fetchNotifications, fetchUnreadCount]);
+    fetchUnreadCounts();
+  }, [fetchNotifications, fetchUnreadCounts]);
 
   // WebSocket listener for real-time notifications
   useEffect(() => {
-    const handler = (data) => {
+    const notifHandler = (data) => {
       if (data.notification) {
         const newNotif = data.notification;
         setNotifications((prev) => {
@@ -149,9 +154,20 @@ const NotificationProvider = ({ children }) => {
         }
       }
     };
-    wsClient.on("notification", handler);
-    return () => wsClient.off("notification", handler);
-  }, []);
+    
+    const chatHandler = () => {
+        // When a message comes in via WS, refetch the chat count
+        fetchUnreadCounts();
+    };
+    
+    wsClient.on("notification", notifHandler);
+    wsClient.on("new-message", chatHandler);
+
+    return () => {
+        wsClient.off("notification", notifHandler);
+        wsClient.off("new-message", chatHandler);
+    }
+  }, [fetchUnreadCounts]);
 
   // Initial fetch + polling
   useEffect(() => {
@@ -159,33 +175,35 @@ const NotificationProvider = ({ children }) => {
       setInitialized(false);
       setNotifications([]);
       setUnreadCount(0);
+      setUnreadChatCount(0);
       return;
     }
 
     fetchNotifications(1).catch(() => {});
-    fetchUnreadCount().catch(() => {});
+    fetchUnreadCounts().catch(() => {});
 
     pollRef.current = setInterval(() => {
       if (checkAuth()) {
-        fetchUnreadCount().catch(() => {});
+        fetchUnreadCounts().catch(() => {});
       }
     }, 30000);
 
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [fetchNotifications, fetchUnreadCount, checkAuth]);
+  }, [fetchNotifications, fetchUnreadCounts, checkAuth]);
 
   return (
     <NotificationContext.Provider
       value={{
         notifications,
         unreadCount,
+        unreadChatCount,
         loading,
         initialized,
         pagination,
         fetchNotifications,
-        fetchUnreadCount,
+        fetchUnreadCounts,
         markAsRead,
         markAllAsRead,
         deleteNotification,

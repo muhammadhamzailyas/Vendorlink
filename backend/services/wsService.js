@@ -210,8 +210,9 @@ class WebSocketService {
         await conversation.save();
       }
 
+      // Send to both receiver and sender for real-time UI updates
       this.sendToUser(receiverId.toString(), { type: "new-message", message: newMessage });
-      this.sendToUser(senderId.toString(), { type: "message-sent", message: newMessage });
+      this.sendToUser(senderId.toString(), { type: "new-message", message: newMessage });
     } catch (error) {
       console.error("Error sending message:", error);
       this.sendToUser(senderId.toString(), {

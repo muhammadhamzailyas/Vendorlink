@@ -56,7 +56,8 @@ const MENU_CONFIG = {
       { text: "My Task Page", icon: Task, path: "/company/my-tasks" },
       { text: "Contracts", icon: Description, path: "/company/contracts" },
       { text: "Progress", icon: ChartBar, path: "/company/progress" },
-      { text: "Payments", icon: Wallet, path: "/company/payments" },
+      { text: "Wallet", icon: Wallet, path: "/company/payments" },
+      { text: "Messages", icon: ChatCircleText, path: "/company/messages" },
       { text: "Feedback", icon: Feedback, path: "/company/feedback" },
     ],
   },
@@ -67,7 +68,8 @@ const MENU_CONFIG = {
       { text: "My Proposals", icon: CheckCircle, path: "/vendor/my-proposals" },
       { text: "Contracts", icon: Receipt, path: "/vendor/contracts" },
       { text: "Progress", icon: ChartBar, path: "/vendor/progress" },
-      { text: "Payments", icon: Wallet, path: "/vendor/payments" },
+      { text: "Wallet", icon: Wallet, path: "/vendor/payments" },
+      { text: "Messages", icon: ChatCircleText, path: "/vendor/messages" },
       { text: "Feedback", icon: Feedback, path: "/vendor/feedback" },
     ],
   },
@@ -77,6 +79,8 @@ const PAGE_TITLES = {
   "/company/contract/create": "Create Contract",
   "/company/proposals": "Proposal Registry",
   "/company/task": "Task Detail",
+  "/company/task-progress": "Progress",
+  "/vendor/task-progress": "Progress",
 };
 
 const PAGE_SUBTITLES = {
@@ -95,6 +99,9 @@ const PAGE_SUBTITLES = {
   "/company/vendor-marketplace": "Review vendors who have submitted proposals to your tasks",
   "/company/my-tasks": "Manage and track all active and completed tasks",
   "/company/contracts": "Track accepted proposals and ongoing contracts with vendors",
+  "/company/progress": "Monitor real-time execution and delivery milestones",
+  "/company/task-progress": "Monitor real-time execution and delivery milestones",
+  "/company/payments": "Manage your primary capital and project funding source",
   "/company/contract/create": "Define scope, milestones, and payment terms before issuing.",
   "/company/proposals": "Review vendor submissions and decide next actions",
   "/company/feedback": "Share your experience and suggestions",
@@ -102,6 +109,9 @@ const PAGE_SUBTITLES = {
   "/vendor/available-tasks": "Browse and apply for tasks that match your skills",
   "/vendor/my-proposals": "Track your submitted proposals and outcomes",
   "/vendor/contracts": "Track accepted proposals and active work commitments",
+  "/vendor/progress": "Submit delivery updates and track project milestones",
+  "/vendor/task-progress": "Submit delivery updates and track project milestones",
+  "/vendor/payments": "Monitor your earnings and manage wallet withdrawals",
   "/vendor/feedback": "Share your experience and suggestions",
 };
 
@@ -154,24 +164,29 @@ const DashboardLayout = () => {
   const { main = [] } = MENU_CONFIG[role] || {};
 
   const pageTitle = useMemo(() => {
-    // 1. Check for explicit overrides first
-    if (PAGE_TITLES[location.pathname]) return PAGE_TITLES[location.pathname];
-
-    // 2. Check for exact menu matches
+    // 1. Check for exact menu matches
     const exactMatch = main.find((item) => item.path === location.pathname);
     if (exactMatch) return exactMatch.text;
 
-    // 3. Check for sub-route matches (prefix)
-    const prefixMatch = main.find(
-      (item) => item.path !== `/${role}` && location.pathname.startsWith(`${item.path}/`)
-    );
-    if (prefixMatch) return prefixMatch.text;
+    // 2. Special case for progress detail routes (must come before general task matching)
+    if (location.pathname.includes("/progress") || location.pathname.endsWith("/progress")) {
+      return "Progress";
+    }
 
-    // 4. Check prefixes in PAGE_TITLES (e.g. for /task/:id)
-    const pageTitlePrefixMatch = Object.keys(PAGE_TITLES).find(path => 
+    // 3. Check for explicit overrides (exact or prefix)
+    const exactTitleMatch = PAGE_TITLES[location.pathname];
+    if (exactTitleMatch) return exactTitleMatch;
+
+    const prefixTitleMatch = Object.keys(PAGE_TITLES).find(path => 
         location.pathname.startsWith(path) && path !== `/${role}`
     );
-    if (pageTitlePrefixMatch) return PAGE_TITLES[pageTitlePrefixMatch];
+    if (prefixTitleMatch) return PAGE_TITLES[prefixTitleMatch];
+
+    // 4. Check for menu path prefixes
+    const menuPrefixMatch = main.find(
+      (item) => item.path !== `/${role}` && location.pathname.startsWith(`${item.path}`)
+    );
+    if (menuPrefixMatch) return menuPrefixMatch.text;
 
     // 5. Fallback to formatting the last URL segment
     const lastSegment = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
@@ -181,7 +196,24 @@ const DashboardLayout = () => {
   const pageSubtitle = useMemo(() => {
     const settingsPath = `/${role}/settings`;
     if (location.pathname === settingsPath) return "Manage your account preferences";
-    return PAGE_SUBTITLES[location.pathname] || "";
+    
+    // Special case for progress detail routes
+    if (location.pathname.includes("/progress") || location.pathname.endsWith("/progress")) {
+      return role === "company" 
+        ? "Monitor real-time execution and delivery milestones"
+        : "Submit delivery updates and track project milestones";
+    }
+
+    // Check exact match
+    if (PAGE_SUBTITLES[location.pathname]) return PAGE_SUBTITLES[location.pathname];
+
+    // Check prefix match
+    const prefixSubtitleMatch = Object.keys(PAGE_SUBTITLES).find(path => 
+        location.pathname.startsWith(path) && path !== `/${role}`
+    );
+    if (prefixSubtitleMatch) return PAGE_SUBTITLES[prefixSubtitleMatch];
+
+    return "";
   }, [location.pathname, role]);
 
   if (!user || !role) {

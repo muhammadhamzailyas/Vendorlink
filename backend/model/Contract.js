@@ -139,6 +139,7 @@ const contractSchema = new mongoose.Schema({
       "pending-company",
       "pending-vendor",
       "active",
+      "pending-completion",
       "completed",
       "cancelled",
       "disputed",

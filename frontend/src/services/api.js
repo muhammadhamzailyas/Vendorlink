@@ -139,6 +139,8 @@ export const progressAPI = {
   getTaskProgress: (taskId, isCompany = false) => 
     api.get(isCompany ? `/progress/company/task/${taskId}` : `/progress/task/${taskId}`),
   addProgressUpdate: (taskId, data) => api.post(`/progress/task/${taskId}/update`, data),
+  requestCompletion: (taskId) => api.post(`/progress/task/${taskId}/complete`),
+  approveCompletion: (taskId) => api.post(`/progress/company/task/${taskId}/approve-completion`),
   getProgressHistory: (taskId, isCompany = false) => 
     api.get(isCompany ? `/progress/company/task/${taskId}/history` : `/progress/task/${taskId}/history`),
   exportReport: (taskId) => api.get(`/progress/company/task/${taskId}/export`, { responseType: 'blob' }),
@@ -155,18 +157,12 @@ export const notificationAPI = {
 };
 
 export const chatAPI = {
-  getChats: () => api.get("/chat"),
-  getMessages: (chatId) => api.get(`/chat/${chatId}/messages`),
-  getTaskMessages: (taskId) => api.get(`/chat/task/${taskId}`), // Added for useChat
-  sendMessage: function(arg1, arg2) {
-    // If arg1 is a string, it's chatId, arg2 is text
-    if (typeof arg1 === 'string') {
-        return api.post(`/chat/${arg1}/messages`, { text: arg2 });
-    }
-    // Otherwise arg1 is the complex payload {receiverId, message, taskId}
-    return api.post("/chat/send", arg1);
-  },
-  startChat: (vendorId, taskId) => api.post("/chat/start", { vendorId, taskId }),
+  getConversations: () => api.get("/chat/conversations"),
+  getPartners: () => api.get("/chat/partners"),
+  getTaskMessages: (taskId) => api.get(`/chat/messages/${taskId}`),
+  sendMessage: (data) => api.post("/chat/message", data),
+  startConversation: (taskId) => api.post("/chat/conversation", { taskId }),
+  getUnreadCount: () => api.get("/chat/unread"),
 };
 
 export const adminService = {

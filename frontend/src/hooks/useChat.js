@@ -12,7 +12,11 @@ export const useChat = (taskId, otherUserId) => {
 
   // Load messages via REST
   useEffect(() => {
-    if (!taskId) return;
+    if (!taskId) {
+      setMessages([]);
+      setLoading(false);
+      return;
+    };
     let cancelled = false;
 
     const load = async () => {
@@ -20,10 +24,12 @@ export const useChat = (taskId, otherUserId) => {
       try {
         const res = await chatAPI.getTaskMessages(taskId);
         if (!cancelled) {
-          setMessages(res.data?.messages || res.data || []);
+          // The backend returns { success: true, data: messages.reverse(), ... }
+          setMessages(Array.isArray(res.data?.data) ? res.data.data : []);
         }
-      } catch {
-        // ignore
+      } catch (err) {
+        console.error("Failed to load messages:", err);
+        if (!cancelled) setMessages([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -88,7 +94,8 @@ export const useChat = (taskId, otherUserId) => {
         message: text.trim(),
         taskId,
       });
-      const msg = res.data?.message || res.data;
+      // The backend now returns { success: true, data: newMessage }
+      const msg = res.data?.data;
       if (msg) {
         setMessages((prev) => {
           if (prev.find((m) => m._id === msg._id)) return prev;

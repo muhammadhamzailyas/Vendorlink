@@ -1,257 +1,314 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { chatAPI } from "@/services/api";
 import { useChat } from "@/hooks/useChat";
 import { useUser } from "@/context/UserContext";
 import { formatDate } from "@/lib/dateUtils";
-import {
-  ChatCircleText, PaperPlaneTilt as Send, ArrowLeft, Trash, CircleNotch,
+import { 
+  PaperPlaneTilt, 
+  CircleNotch, 
+  User as UserIcon, 
+  ArrowLeft,
+  MagnifyingGlass,
+  Check,
+  Checks
 } from "@phosphor-icons/react";
-import { Button, Card, EmptyState, Input, PageTransition, ScrollArea, Separator } from "@/components/ui";
-import StatusChip from "@/components/shared/StatusChip";
-import UserAvatar from "@/components/shared/UserAvatar";
+import { 
+  Button, 
+  PageTransition, 
+  Card, 
+  Input, 
+  Avatar, 
+  AvatarImage, 
+  AvatarFallback,
+  Badge,
+  ScrollArea
+} from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 const ChatPage = () => {
-  const { conversationId } = useParams();
-  const navigate = useNavigate();
-  const { user: currentUser } = useUser();
-  const [conversations, setConversations] = useState([]);
-  const [selectedConversation, setSelectedConversation] = useState(null);
-  const [loadingConversations, setLoadingConversations] = useState(true);
-  const [messageText, setMessageText] = useState("");
-  const messagesEndRef = useRef(null);
+  const { user } = useUser();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTaskId = searchParams.get("taskId");
+  
+  const [partners, setPartners] = useState([]);
+  const [loadingPartners, setLoadingPartners] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activePartner, setActivePartner] = useState(null);
+  
+  const [newMessage, setNewMessage] = useState("");
+  const scrollRef = useRef(null);
 
-  const otherUserId = selectedConversation
-    ? currentUser?.id === selectedConversation.companyId?._id
-      ? selectedConversation.vendorId?._id
-      : selectedConversation.companyId?._id
-    : null;
-  const taskId = selectedConversation?.taskId?._id || selectedConversation?.taskId;
+  const { 
+    messages, 
+    sendMessage, 
+    sendTyping, 
+    loading: loadingMessages, 
+    isConnected,
+    otherUserTyping 
+  } = useChat(activeTaskId, activePartner?.partnerId);
 
-  const {
-    messages, isConnected, otherUserTyping, loading: messagesLoading,
-    sendMessage, sendTyping, markAsRead,
-  } = useChat(taskId, otherUserId);
+  const loadPartners = async () => {
+    try {
+      const res = await chatAPI.getPartners();
+      const partnersData = res.data?.data || [];
+      setPartners(partnersData);
+      
+      if (activeTaskId && !activePartner) {
+        const current = partnersData.find(p => p.taskId === activeTaskId);
+        if (current) setActivePartner(current);
+      }
+    } catch (err) {
+      console.error("Failed to load partners", err);
+    } finally {
+      setLoadingPartners(false);
+    }
+  };
 
   useEffect(() => {
-    const loadConversations = async () => {
-      try {
-        const res = await chatAPI.getConversations();
-        const data = res.data?.conversations || res.data;
-        setConversations(Array.isArray(data) ? data : []);
-      } catch {
-        // ignore
-      } finally {
-        setLoadingConversations(false);
-      }
-    };
-    loadConversations();
+    loadPartners();
   }, []);
 
+  // Effect to reset chat when URL param is removed
   useEffect(() => {
-    if (conversationId && conversations.length > 0) {
-      const conv = conversations.find((c) => c._id === conversationId);
-      if (conv) setSelectedConversation(conv);
+    if (!activeTaskId) {
+      setActivePartner(null);
     }
-  }, [conversationId, conversations]);
+  }, [activeTaskId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
-  useEffect(() => {
-    if (selectedConversation && otherUserId) markAsRead();
-  }, [selectedConversation, otherUserId, markAsRead]);
-
-  const handleSend = async () => {
-    if (!messageText.trim()) return;
-    await sendMessage(messageText);
-    setMessageText("");
+  const handlePartnerSelect = (partner) => {
+    setActivePartner(partner);
+    setSearchParams({ taskId: partner.taskId });
   };
 
-  const handleDeleteConversation = async (convId, e) => {
-    e.stopPropagation();
-    try {
-      await chatAPI.deleteConversation(convId);
-      setConversations((prev) => prev.filter((c) => c._id !== convId));
-      if (selectedConversation?._id === convId) setSelectedConversation(null);
-    } catch {
-      // ignore
-    }
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+    sendMessage(newMessage.trim());
+    setNewMessage("");
   };
 
-  const handleSelectConversation = (conv) => {
-    setSelectedConversation(conv);
-    const basePath = `/${currentUser?.role}`;
-    navigate(`${basePath}/messages/${conv._id}`);
-  };
-
-  const getOtherUser = (conv) => {
-    if (!conv) return { username: "Unknown" };
-    const isCompany = currentUser?.id === (conv.companyId?._id || conv.companyId);
-    return isCompany
-      ? conv.vendorId || { username: "Vendor" }
-      : conv.companyId || { username: "Company" };
-  };
+  const filteredPartners = partners.filter(p => 
+    (p.partnerName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (p.taskTitle?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+  );
 
   return (
     <PageTransition>
-    <div className="space-y-8 h-full">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Messages</h2>
-        <p className="text-sm text-muted-foreground">Collaborate with stakeholders in real-time on task delivery and contract context.</p>
-      </div>
-
-      <div className="grid h-[calc(100vh-16rem)] grid-cols-1 gap-4 md:grid-cols-[20rem_minmax(0,1fr)]">
-        <Card className={`${selectedConversation ? "hidden md:flex" : "flex"} flex-col overflow-hidden`}>
-          <Card.Header className="pb-3 border-b border-border/50">
-            <Card.Title className="text-sm font-bold uppercase tracking-tight">Conversations</Card.Title>
-            <Card.Description className="text-xs">All active task and contract threads.</Card.Description>
-          </Card.Header>
+      <div className="h-[calc(100vh-180px)] flex gap-4 overflow-hidden">
+        {/* Partners List */}
+        <div className={cn(
+          "w-full md:w-80 flex flex-col bg-card border border-border rounded-2xl overflow-hidden shrink-0",
+          activePartner ? "hidden md:flex" : "flex"
+        )}>
+          <div className="p-4 border-b border-border bg-muted/20">
+            <h2 className="text-sm font-black uppercase tracking-widest mb-4">Messages</h2>
+            <div className="relative">
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search partners or tasks..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-background border border-border rounded-full py-2 pl-9 pr-4 text-xs focus:outline-none focus:ring-1 focus:ring-ring transition-all"
+              />
+            </div>
+          </div>
+          
           <ScrollArea className="flex-1">
-            <Card.Content className="px-0 py-0">
-                {loadingConversations ? (
-                <div className="flex justify-center py-8"><CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" /></div>
-                ) : conversations.length === 0 ? (
-                <EmptyState icon={ChatCircleText} title="No conversations yet" className="border-0 bg-transparent py-8 shadow-none" />
-                ) : (
-                conversations.map((conv) => {
-                    const other = getOtherUser(conv);
-                    const isSelected = selectedConversation?._id === conv._id;
-                    return (
-                    <div key={conv._id}>
-                        <div
-                            onClick={() => handleSelectConversation(conv)}
-                            className={`flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-muted/50 ${isSelected ? "bg-muted" : ""}`}
-                        >
-                            <UserAvatar user={other} size="md" />
-                            <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-foreground">{other.username}</p>
-                            <p className="truncate text-xs text-muted-foreground font-medium">{conv.lastMessage || "No messages"}</p>
-                            </div>
-                            <Button
-                            type="button"
-                            variant="ghost"
-                            size="xs"
-                            onClick={(e) => handleDeleteConversation(conv._id, e)}
-                            className="h-8 w-8 p-0 text-muted-foreground/40 hover:text-danger hover:bg-danger-surface"
-                            >
-                            <Trash className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        <Separator className="opacity-50" />
+            <div className="p-2 space-y-1">
+              {loadingPartners ? (
+                <div className="flex justify-center py-8">
+                  <CircleNotch className="h-5 w-5 animate-spin text-muted-foreground/50" />
+                </div>
+              ) : filteredPartners.length === 0 ? (
+                <div className="text-center py-12 px-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 leading-relaxed">No active chat partners found</p>
+                </div>
+              ) : (
+                filteredPartners.map((partner) => (
+                  <button
+                    key={partner.taskId}
+                    onClick={() => handlePartnerSelect(partner)}
+                    className={cn(
+                      "w-full flex items-start gap-3 p-3 rounded-xl transition-all text-left group",
+                      activePartner?.taskId === partner.taskId 
+                        ? "bg-primary text-primary-foreground shadow-soft" 
+                        : "hover:bg-muted/50"
+                    )}
+                  >
+                    <Avatar className="h-10 w-10 border-2 border-background shrink-0">
+                      <AvatarImage src={partner.partnerImage} />
+                      <AvatarFallback><UserIcon /></AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-0.5">
+                        <p className={cn(
+                          "text-[11px] font-black uppercase tracking-tight truncate",
+                          activePartner?.taskId === partner.taskId ? "text-primary-foreground" : "text-foreground"
+                        )}>{partner.partnerName}</p>
+                        <span className={cn(
+                          "text-[9px] font-bold opacity-60",
+                          activePartner?.taskId === partner.taskId ? "text-primary-foreground" : "text-muted-foreground"
+                        )}>{partner.lastMessageAt ? formatDate(partner.lastMessageAt) : ""}</span>
+                      </div>
+                      <p className={cn(
+                        "text-[9px] font-bold uppercase tracking-widest truncate mb-1 opacity-80",
+                        activePartner?.taskId === partner.taskId ? "text-primary-foreground/90" : "text-primary"
+                      )}>{partner.taskTitle}</p>
+                      <p className={cn(
+                        "text-[11px] truncate leading-tight opacity-70",
+                        activePartner?.taskId === partner.taskId ? "text-primary-foreground/80" : "text-muted-foreground"
+                      )}>{partner.lastMessage || "No messages yet"}</p>
                     </div>
-                    );
-                })
-                )}
-            </Card.Content>
+                    {partner.unreadCount > 0 && activePartner?.taskId !== partner.taskId && (
+                      <Badge variant="primary" className="ml-2 px-1.5 py-0 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[9px] font-black animate-pulse">
+                        {partner.unreadCount}
+                      </Badge>
+                    )}
+                  </button>
+                ))
+              )}
+            </div>
           </ScrollArea>
-        </Card>
+        </div>
 
-        <Card className={`${selectedConversation ? "flex" : "hidden md:flex"} flex-col overflow-hidden shadow-soft`}>
-          {selectedConversation ? (
+        {/* Chat Area */}
+        <div className={cn(
+          "flex-1 flex flex-col bg-card border border-border rounded-2xl overflow-hidden",
+          !activePartner ? "hidden md:flex items-center justify-center bg-muted/5" : "flex"
+        )}>
+          {!activePartner ? (
+            <div className="text-center p-8">
+              <div className="h-20 w-20 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-6">
+                <PaperPlaneTilt className="h-10 w-10 text-muted-foreground/30" />
+              </div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Your Conversations</h3>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mt-2 max-w-[200px] mx-auto leading-relaxed">
+                Select a partner from the left to start coordinating on your active projects.
+              </p>
+            </div>
+          ) : (
             <>
-              <Card.Header className="gap-3 border-b border-border/50 sm:flex-row sm:items-center sm:justify-between py-3 px-5">
+              {/* Chat Header */}
+              <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20">
                 <div className="flex items-center gap-3">
                   <Button
-                    type="button"
                     variant="ghost"
-                    size="xs"
-                    onClick={() => setSelectedConversation(null)}
-                    className="h-8 w-8 p-0 text-muted-foreground md:hidden"
+                    size="icon"
+                    className="md:hidden h-8 w-8 mr-1"
+                    onClick={() => setActivePartner(null)}
                   >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <UserAvatar user={getOtherUser(selectedConversation)} size="sm" />
+                  <Avatar className="h-10 w-10 border-2 border-background">
+                    <AvatarImage src={activePartner.partnerImage} />
+                    <AvatarFallback><UserIcon /></AvatarFallback>
+                  </Avatar>
                   <div>
-                    <p className="text-sm font-bold text-foreground uppercase tracking-tight">{getOtherUser(selectedConversation).username}</p>
-                    {otherUserTyping ? <p className="text-[10px] font-bold text-success animate-pulse uppercase tracking-widest">typing...</p> : null}
+                    <p className="text-[11px] font-black uppercase tracking-tight text-foreground leading-none">{activePartner.partnerName}</p>
+                    <p className="text-[9px] font-bold text-primary uppercase tracking-widest mt-1.5">{activePartner.taskTitle}</p>
+                    {otherUserTyping && (
+                      <p className="text-[10px] text-primary animate-pulse font-bold mt-1 tracking-tighter uppercase italic">typing...</p>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className={`h-2 w-2 rounded-full ${isConnected ? "bg-success" : "bg-danger"}`} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{isConnected ? "Connected" : "Offline"}</span>
+                <div className="hidden sm:block">
+                  <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest bg-background shadow-xs">
+                    {activePartner.contractStatus}
+                  </Badge>
                 </div>
-              </Card.Header>
+              </div>
 
-              <ScrollArea className="flex-1 bg-muted/20 px-5">
-                <Card.Content className="space-y-4 py-6 px-0 border-none shadow-none bg-transparent">
-                    {messagesLoading ? (
-                    <div className="flex justify-center py-8"><CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" /></div>
-                    ) : messages.length === 0 ? (
-                    <EmptyState
-                        icon={ChatCircleText}
-                        title="No messages yet"
-                        description="Send the first message to begin this conversation."
-                        className="border-0 bg-transparent py-8 shadow-none"
-                    />
-                    ) : (
+              {/* Messages Area */}
+              <ScrollArea className="flex-1 bg-muted/5 p-4 sm:p-6">
+                <div className="space-y-6 max-w-4xl mx-auto">
+                  {loadingMessages ? (
+                    <div className="flex justify-center py-12">
+                      <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground/50" />
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Encryption Secured • Conversation Start</p>
+                    </div>
+                  ) : (
                     messages.map((msg, i) => {
-                        const isMine = (msg.senderId?._id || msg.senderId) === currentUser?.id;
-                        return (
-                        <div key={msg._id || i} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                            <div className={`max-w-[85%] rounded-2xl border px-4 py-2.5 shadow-soft ${
-                                isMine
-                                ? "bg-foreground text-background border-transparent rounded-tr-none"
-                                : "border-border/50 bg-card text-foreground rounded-tl-none"
-                            }`}>
-                            <p className="whitespace-pre-wrap text-[13px] font-medium leading-relaxed">{msg.message}</p>
-                            <p className={`mt-1 text-[9px] font-bold uppercase tracking-tight text-right ${isMine ? "text-white/60" : "text-muted-foreground/60"}`}>
-                                {msg.createdAt ? formatDate(msg.createdAt) : ""}
-                            </p>
-                            </div>
+                      const isMe = msg.senderId?._id === user?._id || msg.senderId === user?._id;
+                      return (
+                        <div
+                          key={msg._id || i}
+                          className={cn(
+                            "flex flex-col max-w-[85%] sm:max-w-[70%]",
+                            isMe ? "items-start" : "ml-auto items-end"
+                          )}
+                        >
+                          <div className={cn(
+                            "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-xs",
+                            isMe 
+                              ? "bg-background border border-border rounded-tl-none"
+                              : "bg-primary text-primary-foreground rounded-tr-none" 
+                          )}>
+                            {msg.message}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1.5 px-1">
+                            <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
+                              {formatDate(msg.createdAt)}
+                            </span>
+                            {isMe && (
+                              msg.read ? (
+                                <Checks className="h-3 w-3 text-primary" />
+                              ) : (
+                                <Check className="h-3 w-3 text-muted-foreground/40" />
+                              )
+                            )}
+                          </div>
                         </div>
-                        );
+                      );
                     })
-                    )}
-                    <div ref={messagesEndRef} />
-                </Card.Content>
+                  )}
+                  <div ref={scrollRef} />
+                </div>
               </ScrollArea>
 
-              <Separator />
-              <Card.Footer className="p-4 bg-muted/30">
-                <form 
-                    onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                    className="flex w-full items-center gap-3"
-                >
+              {/* Message Input */}
+              <div className="p-4 border-t border-border bg-background">
+                <form onSubmit={handleSend} className="flex gap-2 max-w-4xl mx-auto relative">
+                  {!isConnected && (
+                    <div className="absolute -top-10 left-0 right-0 text-center">
+                       <Badge variant="destructive" className="text-[8px] uppercase tracking-widest px-2 py-0.5 animate-pulse shadow-soft">Reconnecting to session...</Badge>
+                    </div>
+                  )}
                   <Input
-                    type="text"
-                    value={messageText}
+                    value={newMessage}
                     onChange={(e) => {
-                      setMessageText(e.target.value);
+                      setNewMessage(e.target.value);
                       sendTyping();
                     }}
-                    placeholder="Type your message..."
-                    className="flex-1 rounded-xl bg-card border-border/50 h-11"
+                    placeholder="Coordinate and discuss project milestones..."
+                    className="flex-1 rounded-full px-6 py-6 text-sm bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20 transition-all placeholder:text-muted-foreground/40 placeholder:uppercase placeholder:text-[10px] placeholder:font-bold placeholder:tracking-widest"
                   />
-                  <Button
-                    type="submit"
-                    disabled={!messageText.trim()}
-                    className="h-11 w-11 rounded-xl px-0 shrink-0 shadow-soft active:scale-95 transition-all"
+                  <Button 
+                    type="submit" 
+                    size="icon" 
+                    className="h-12 w-12 rounded-full shrink-0 shadow-soft"
+                    disabled={!newMessage.trim() || !isConnected}
                   >
-                    <Send className="w-5 h-5" />
+                    <PaperPlaneTilt className="h-5 w-5" weight="fill" />
                   </Button>
                 </form>
-              </Card.Footer>
+              </div>
             </>
-          ) : (
-            <Card.Content className="flex flex-1 items-center justify-center bg-muted/10 px-0">
-              <EmptyState
-                icon={ChatCircleText}
-                title="Select a conversation"
-                description="Choose a conversation from the left to start chatting."
-                className="border-0 bg-transparent py-8 shadow-none"
-              />
-            </Card.Content>
           )}
-        </Card>
+        </div>
       </div>
-    </div>
     </PageTransition>
   );
 };
 
 export default ChatPage;
-
-
-

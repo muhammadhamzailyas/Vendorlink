@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { ScrollArea, Button } from "../ui";
 import { SidebarSimple } from "@phosphor-icons/react";
+import { useNotifications } from "@/context/NotificationContext";
 import logo from "../../assets/Vendorlink Logo.png";
 import secondaryLogo from "../../assets/Vendorlink Secondary Logo.png";
 
 const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
   const location = useLocation();
   const isAdmin = role === "admin";
+  const { unreadChatCount } = useNotifications();
 
   const isActive = (path) => {
     if (path === `/${role}`) {
@@ -17,6 +19,14 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
     }
     return location.pathname.startsWith(path);
   };
+  
+  const getUnreadCountForItem = (item) => {
+    if (item.path.includes("chat") || item.text.toLowerCase().includes("message")) {
+      return unreadChatCount;
+    }
+    // Can add other counts here later
+    return 0;
+  }
 
   const filteredListItems = isAdmin 
     ? menuItems.filter(item => 
@@ -183,13 +193,19 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                       <Button
                         variant="ghost"
                         className={cn(
-                          "w-full justify-start gap-3 h-10 transition-colors duration-200",
+                          "w-full justify-start gap-3 h-10 transition-colors duration-200 relative",
                           collapsed ? "px-0 justify-center" : "px-3",
                           active 
                             ? "bg-muted text-foreground shadow-xs" 
                             : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                         )}
                       >
+                        {getUnreadCountForItem(item) > 0 && (
+                            <div className={cn(
+                                "absolute h-2 w-2 rounded-full bg-red-500",
+                                collapsed ? "top-2 right-2" : "top-2.5 left-2.5"
+                            )} />
+                        )}
                         <Icon className={cn("h-5 w-5 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
                         <AnimatePresence mode="popLayout">
                           {!collapsed && (

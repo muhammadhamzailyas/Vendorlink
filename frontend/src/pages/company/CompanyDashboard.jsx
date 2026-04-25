@@ -44,6 +44,7 @@ import {
   StatCard,
   Card
 } from "@/components/ui";
+import { useWallet } from "@/context/WalletContext";
 import StatusChip from "@/components/shared/StatusChip";
 import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
 import { cn } from "@/lib/cn";
@@ -52,6 +53,7 @@ dayjs.extend(relativeTime);
 
 const CompanyDashboard = () => {
   const navigate = useNavigate();
+  const { wallet, formatCurrency } = useWallet();
   const [tasks, setTasks] = useState([]);
   const [proposals, setProposals] = useState([]);
   const [stats, setStats] = useState({
@@ -300,24 +302,24 @@ const CompanyDashboard = () => {
               trend={<ChangeIndicator value={stats.changes.tasks} />}
             />
             <StatCard 
-              title="Pending Proposals" 
+              title="Pending Bids" 
               value={stats.pendingProposals} 
               icon={<Pending />} 
               link="/company/proposals" 
               trend={<ChangeIndicator value={stats.changes.proposals} />}
             />
             <StatCard 
-              title="Active Tasks" 
+              title="Active Work" 
               value={stats.activeTasks} 
               icon={<CheckCircle />} 
               link="/company/my-tasks?status=in-progress" 
               trend={<ChangeIndicator value={stats.changes.active} />}
             />
             <StatCard 
-              title="Completed" 
-              value={stats.completedTasks} 
-              icon={<TrendUp />} 
-              trend={<ChangeIndicator value={stats.changes.completed} />}
+              title="Wallet Balance" 
+              value={formatCurrency(wallet?.balance)} 
+              icon={<CurrencyDollar />} 
+              link="/company/payments" 
             />
           </div>
 

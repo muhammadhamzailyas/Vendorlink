@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft as ArrowBack, ClipboardText, Info } from "@phosphor-icons/react";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
+import { ArrowLeft as ArrowBack, ClipboardText, Info, Calendar, CheckCircle } from "@phosphor-icons/react";
 import toastUtil from "@/lib/toast";
 import { formatDate } from "@/lib/dateUtils";
 
@@ -34,12 +34,18 @@ import RankProposalsButton from "./RankProposalsButton";
 const CompanyTaskDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [task, setTask] = useState(null);
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [rankedIds, setRankedIds] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -139,8 +145,8 @@ const CompanyTaskDetail = () => {
 
   const displayedProposals = rankedIds
     ? [...proposals].sort((a, b) => {
-        const aIdx = rankedIds.indexOf(a.vendor?._id || a.vendor);
-        const bIdx = rankedIds.indexOf(b.vendor?._id || b.vendor);
+        const aIdx = rankedIds.indexOf(a.vendorId?._id || a.vendorId);
+        const bIdx = rankedIds.indexOf(b.vendorId?._id || b.vendorId);
         if (aIdx === -1 && bIdx === -1) return 0;
         if (aIdx === -1) return 1;
         if (bIdx === -1) return -1;
@@ -166,36 +172,51 @@ const CompanyTaskDetail = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{task?.title || "Task Detail"}</BreadcrumbPage>
+              <BreadcrumbPage className="max-w-[200px] truncate">{task?.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-border/40 pb-6">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">{task.title || "Task Detail"}</h2>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-              <span>Created {formatDate(task.createdAt)}</span>
+            <h2 className="text-2xl font-black tracking-tight text-foreground uppercase leading-tight">{task.title || "Task Detail"}</h2>
+            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+              <span className="flex items-center gap-1.5"><Calendar size={14} /> {formatDate(task.createdAt)}</span>
+              <span className="h-1 w-1 rounded-full bg-border" />
+              <span>{task.category?.replace(/-/g, ' ')}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight">
-              <ArrowBack className="mr-2 h-4 w-4" />
+          <div className="flex items-center gap-3 shrink-0 pt-1">
+            <StatusChip status={task.status || "open"} />
+            <Button variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight h-8 px-4">
+              <ArrowBack className="mr-2 h-4 w-4" weight="bold" />
               Back
             </Button>
-            <StatusChip status={task.status || "open"} />
           </div>
         </div>
 
         {task.selectedVendor && (
-          <Card className="border-jade-600/20 bg-jade-400/10 shadow-none">
-            <Card.Content className="flex items-center gap-3 p-4">
-                <Badge variant="success" className="font-bold uppercase tracking-widest px-3 py-1">Assigned</Badge>
-                <p className="text-sm font-bold text-jade-600">
-                Task assigned to <span className="underline decoration-jade-600/30">{task.selectedVendor?.username || "Verified Vendor"}</span>
-                </p>
-            </Card.Content>
-          </Card>
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <CheckCircle size={28} weight="bold" />
+                </div>
+                <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-0.5">Assigned Partner</p>
+                    <p className="text-sm font-black text-foreground uppercase tracking-tight">
+                        {task.selectedVendor?.companyName || task.selectedVendor?.username}
+                    </p>
+                </div>
+            </div>
+            <Button 
+                variant="ghost" 
+                size="sm"
+                className="font-black uppercase tracking-widest text-[10px] h-10 px-6 text-primary hover:bg-primary/10 border border-primary/10"
+                onClick={() => setActiveTab("proposals")}
+            >
+                View Agreement
+            </Button>
+          </div>
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

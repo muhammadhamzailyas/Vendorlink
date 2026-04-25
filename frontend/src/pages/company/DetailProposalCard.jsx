@@ -2,20 +2,24 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   User as Person, 
-  Clock as Clock, 
+  Clock, 
   CurrencyDollar, 
   Lightning as Bolt, 
   Percent, 
-  CaretDown as CaretDown, 
-  CaretUp as CaretUp, 
+  CaretDown, 
+  CaretUp, 
   Check, 
-  X as X, 
+  X, 
   ChatCircleText as Chat,
-  Signature as Contract
+  Signature as ContractIcon,
+  Tag,
+  Link as LinkIcon,
+  Briefcase
 } from "@phosphor-icons/react";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, Badge } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
+import { cn } from "@/lib/cn";
 
 const DetailProposalCard = ({
   proposal,
@@ -30,76 +34,165 @@ const DetailProposalCard = ({
 
   const budgetUsage = ((proposal.bidAmount / task.budget) * 100).toFixed(1);
 
+  const Label = ({ children, className }) => (
+    <span className={cn("text-[10px] font-black uppercase tracking-widest text-muted-foreground", className)}>
+        {children}
+    </span>
+  );
+
   return (
     <Card
-      className={`h-full ${proposal.status === "accepted" ? "border-ring/50 bg-muted/20" : "border-border"}`}
+      className={cn(
+        "group relative overflow-hidden transition-all duration-300",
+        proposal.status === "accepted" 
+            ? "border-primary/50 bg-primary/5 shadow-md ring-1 ring-primary/20" 
+            : "border-border hover:border-border-hover hover:shadow-soft"
+      )}
     >
-      <Card.Header>
+      <Card.Header className="pb-4 border-b border-border/40">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            <h3 className="flex items-center text-base font-bold text-foreground">
-              <Person className="mr-2 text-foreground" />
-              {proposal.vendorId?.username}
-            </h3>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-tight text-muted-foreground/60">
-              Submitted {formatDate(proposal.submittedAt)}
-            </p>
+            <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-muted/50 flex items-center justify-center text-foreground font-black text-xs">
+                    {proposal.vendorId?.username?.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                    <h3 className="text-base font-black tracking-tight text-foreground uppercase">
+                    {proposal.vendorId?.username || "Verified Vendor"}
+                    </h3>
+                    <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/70">
+                    Submitted {formatDate(proposal.submittedAt)}
+                    </p>
+                </div>
+            </div>
           </div>
           <StatusChip status={proposal.status || "submitted"} size="medium" />
         </div>
       </Card.Header>
 
-      <Card.Content>
-        <div className="grid grid-cols-1 gap-3 text-sm text-foreground/80 sm:grid-cols-2">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Bid Amount</span>
-            <p className="flex items-center text-sm font-bold text-foreground">
-              <CurrencyDollar className="h-4 w-4 mr-1.5 text-success" />
+      <Card.Content className="pt-6">
+        <div className="grid grid-cols-1 gap-6 text-sm text-foreground/80 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label className="flex items-center gap-1.5">
+                <CurrencyDollar size={12} weight="bold" className="text-success" />
+                Bid Amount
+            </Label>
+            <p className="text-sm font-black text-foreground">
               ${proposal.bidAmount?.toLocaleString()}
             </p>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Proposed Deadline</span>
-            <p className="flex items-center text-sm font-bold text-foreground">
-              <Clock className="mr-1.5 h-4 w-4 text-foreground" />
+
+          <div className="space-y-1">
+            <Label className="flex items-center gap-1.5">
+                <Clock size={12} weight="bold" />
+                Proposed Deadline
+            </Label>
+            <p className="text-sm font-bold text-foreground">
               {formatDate(proposal.proposedDeadline)}
             </p>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Availability</span>
-            <p className="flex items-center text-sm font-bold text-foreground">
-              <Bolt className="mr-1.5 h-4 w-4 text-warning" />
-              {proposal.availability}
+
+          <div className="space-y-1">
+            <Label className="flex items-center gap-1.5">
+                <Bolt size={12} weight="bold" className="text-warning" />
+                Earliest Availability
+            </Label>
+            <p className="text-sm font-bold text-foreground uppercase tracking-tight">
+              {proposal.availability?.replace(/-/g, ' ')}
             </p>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Budget Utilization</span>
-            <p className="flex items-center text-sm font-bold text-foreground">
-              <Percent className="mr-1.5 h-4 w-4 text-info" />
-              {budgetUsage}%
-            </p>
+
+          <div className="space-y-1">
+            <Label className="flex items-center gap-1.5">
+                <Percent size={12} weight="bold" className="text-info" />
+                Budget Fit
+            </Label>
+            <div className="flex items-center gap-2">
+                <p className="text-sm font-black text-foreground">{budgetUsage}%</p>
+                <div className="h-1 flex-1 rounded-full bg-muted overflow-hidden">
+                    <div 
+                        className={cn(
+                            "h-full rounded-full transition-all",
+                            parseFloat(budgetUsage) <= 100 ? "bg-success" : "bg-error"
+                        )} 
+                        style={{ width: `${Math.min(parseFloat(budgetUsage), 100)}%` }}
+                    />
+                </div>
+            </div>
           </div>
         </div>
 
         {expanded && (
-          <div className="mt-4 rounded-xl border border-border bg-muted/70 p-4 shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
-            <h4 className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-2">Proposal Narrative</h4>
-            <p className="text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
-              {proposal.proposalText}
-            </p>
+          <div className="mt-8 space-y-8 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                    <Briefcase size={12} weight="bold" />
+                    Strategic Approach
+                </Label>
+                <div className="rounded-2xl border border-border/60 bg-card p-5 text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                {proposal.proposalText}
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                    <Tag size={12} weight="bold" />
+                    Relevant Experience
+                </Label>
+                <div className="rounded-2xl border border-border/60 bg-card p-5 text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                {proposal.experience || "No specific experience provided."}
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                    <Tag size={12} weight="bold" />
+                    Technical Stack
+                </Label>
+                <div className="flex flex-wrap gap-2 pt-1">
+                    {proposal.skills?.map((skill, i) => (
+                        <Badge key={i} variant="secondary" className="font-black text-[9px] py-1.5 px-4 rounded-lg bg-foreground text-background border-none uppercase tracking-widest">
+                            {skill}
+                        </Badge>
+                    ))}
+                </div>
+            </div>
+
+            {proposal.portfolioLinks?.filter(l => l)?.length > 0 && (
+                <div className="space-y-3">
+                    <Label className="flex items-center gap-2">
+                        <LinkIcon size={12} weight="bold" />
+                        Portfolio References
+                    </Label>
+                    <div className="grid grid-cols-1 gap-2">
+                        {proposal.portfolioLinks.filter(l => l).map((link, i) => (
+                            <a 
+                                key={i} 
+                                href={link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors flex items-center gap-3 group text-xs font-bold text-foreground/70"
+                            >
+                                <LinkIcon size={14} className="text-muted-foreground group-hover:text-primary" />
+                                <span className="truncate flex-1">{link.replace(/^https?:\/\//, '')}</span>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
           </div>
         )}
 
-        <div className="mt-6 flex items-center gap-3">
+        <div className="mt-8 flex items-center gap-3">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => setExpanded(!expanded)}
-            className="h-9 font-bold uppercase tracking-tight text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="h-10 px-5 font-black uppercase tracking-widest text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted"
           >
-            {expanded ? <CaretUp className="mr-1.5 h-4 w-4" /> : <CaretDown className="mr-1.5 h-4 w-4" />}
-            {expanded ? "Show Less" : "Show More"}
+            {expanded ? <CaretUp className="mr-2 h-4 w-4" weight="bold" /> : <CaretDown className="mr-2 h-4 w-4" weight="bold" />}
+            {expanded ? "Minimize Brief" : "Read Full Proposal"}
           </Button>
 
           <div className="grow" />
@@ -107,48 +200,44 @@ const DetailProposalCard = ({
           {proposal.status === "submitted" && (
             <div className="flex gap-2">
               <Button
-                variant="danger"
+                variant="ghost"
                 size="sm"
                 onClick={() => onReject(proposal._id)}
                 disabled={!isApproved}
-                className="font-bold uppercase tracking-tight"
-                title={!isApproved ? "Please wait for admin approval to reject proposals" : ""}
+                className="h-10 px-5 font-black uppercase tracking-widest text-[10px] text-error hover:bg-error/10"
               >
-                <X className="mr-1.5 h-4 w-4" />
+                <X className="mr-2 h-4 w-4" weight="bold" />
                 Reject
               </Button>
               <Button
-                variant="primary"
                 size="sm"
                 onClick={() => onAccept(proposal._id)}
                 disabled={!isApproved}
-                className="font-bold uppercase tracking-tight"
-                title={!isApproved ? "Please wait for admin approval to accept proposals" : ""}
+                className="h-10 px-8 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20"
               >
-                <Check className="mr-1.5 h-4 w-4" />
-                Accept
+                <Check className="mr-2 h-4 w-4" weight="bold" />
+                Accept Bid
               </Button>
             </div>
           )}
 
           {proposal.status === "accepted" && (
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button 
-                variant="ghost"
+                variant="secondary"
                 size="sm" 
-                className="font-bold uppercase tracking-tight"
-                onClick={() => navigate(`/company/chat?taskId=${task._id}`)}
+                className="h-10 px-6 font-black uppercase tracking-widest text-[10px]"
+                onClick={() => navigate(`/company/messages?userId=${proposal.vendorId?._id}`)}
               >
-                <Chat className="mr-1.5 h-4 w-4" />
+                <Chat className="mr-2 h-4 w-4" weight="bold" />
                 Chat
               </Button>
               <Button 
-                variant="primary"
                 size="sm" 
-                className="font-bold uppercase tracking-tight"
-                onClick={() => navigate(`/company/contracts/create?proposalId=${proposal._id}`)}
+                className="h-10 px-8 font-black uppercase tracking-widest text-[10px] shadow-lg"
+                onClick={() => navigate(`/company/contract/create?proposalId=${proposal._id}`)}
               >
-                <Contract className="mr-1.5 h-4 w-4" />
+                <ContractIcon className="mr-2 h-4 w-4" weight="bold" />
                 Create Contract
               </Button>
             </div>
@@ -156,9 +245,10 @@ const DetailProposalCard = ({
         </div>
 
         {proposal.status === "accepted" && (
-          <div className="mt-4 flex items-center justify-center rounded-lg bg-muted/40 py-2 border border-ring/10">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-foreground">
-              Accepted on {formatDate(proposal.acceptedAt)}
+          <div className="mt-6 flex items-center justify-center rounded-xl bg-primary/10 py-3 border border-primary/20">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+              <Check size={14} weight="bold" />
+              Officially Accepted on {formatDate(proposal.acceptedAt)}
             </span>
           </div>
         )}

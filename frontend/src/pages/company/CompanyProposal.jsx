@@ -1,49 +1,99 @@
 import React, { useMemo, useState, useEffect } from "react";
 import {
-  ArrowLeft as ArrowBack,
   ClipboardText as Assignment,
   CheckCircle,
   XCircle,
   Clock,
-  ChatCircleText as Chat,
-  Signature as Contract
+  Signature as Contract,
+  CaretUp,
+  CaretDown,
+  Eye as Visibility,
+  Briefcase,
+  Calendar,
+  DotsThreeVertical
 } from "@phosphor-icons/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { proposalAPI } from "@/services/api";
-import { Button, Dialog, EmptyState, PageTransition, Skeleton, DataTable, StatCard, Loader } from "@/components/ui";
+import { 
+  Button, 
+  EmptyState, 
+  PageTransition, 
+  DataTable, 
+  Loader,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator
+} from "@/components/ui";
 import FilterSearchBar from "@/components/shared/FilterSearchBar";
 import StatusChip from "@/components/shared/StatusChip";
 import UserAvatar from "@/components/shared/UserAvatar";
+import { cn } from "@/lib/cn";
+import toastUtil from "@/lib/toast";
+import { useApprovalStatus } from "@/lib/useApprovalStatus";
+import CompanyProposalDetailsModal from "./CompanyProposalDetailsModal";
+import RankProposalsButton from "./RankProposalsButton";
+import AIRankingExplanationModal from "./AIRankingExplanationModal";
 
 dayjs.extend(relativeTime);
 
-const FILTER_TABS = ["All", "Submitted", "Accepted", "Rejected"];
 const FILTER_VALUES = ["all", "submitted", "accepted", "rejected"];
 
 const CompanyProposals = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const taskIdParam = searchParams.get("taskId");
+  
+  const { isApproved } = useApprovalStatus();
   const [proposals, setProposals] = useState([]);
   const [filterTab, setFilterTab] = useState(0);
-  const [search, setMagnifyingGlass] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showActionButtons, setShowActionButtons] = useState(true);
-  const [decisionDialog, setDecisionDialog] = useState({
-    open: false,
-    proposal: null,
-    action: null,
-  });
+  const [rankedIds, setRankedIds] = useState(null);
+  const [rankedData, setRankedData] = useState([]);
+
+  // Modal states
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [aiExplanationOpen, setAiExplanationOpen] = useState(false);
+  
+  // Decision Alert states
+  const [decisionAlertOpen, setDecisionAlertOpen] = useState(false);
+  const [selectedProposal, setSelectedProposal] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     loadProposals();
-  }, []);
+  }, [taskIdParam]);
 
   const loadProposals = async () => {
     try {
       setLoading(true);
-      const res = await proposalAPI.getCompanyProposals();
+      let res;
+      if (taskIdParam) {
+          res = await proposalAPI.getTaskProposals(taskIdParam);
+      } else {
+          res = await proposalAPI.getCompanyProposals();
+      }
       setProposals(res.data || []);
+      setRankedIds(null); // Reset ranking when data changes
+      setRankedData([]);
     } finally {
       setLoading(false);
     }
@@ -51,252 +101,315 @@ const CompanyProposals = () => {
 
   const activeFilter = FILTER_VALUES[filterTab] || "all";
 
-  const handleAccept = async (id) => {
-    await proposalAPI.accept(id);
-    await loadProposals();
+  const handleActionClick = (proposal, action) => {
+    setSelectedProposal(proposal);
+    setPendingAction(action);
+    setDecisionAlertOpen(true);
   };
 
-  const handleReject = async (id) => {
-    await proposalAPI.reject(id);
-    await loadProposals();
+  const handleRankingComplete = (ranked) => {
+    if (ranked && ranked.length > 0) {
+      const idOrder = ranked.map((r) => r._id);
+      setRankedIds(idOrder);
+      setRankedData(ranked);
+      setAiExplanationOpen(true);
+    }
   };
 
-  const filtered = useMemo(() => {
-    return proposals.filter((proposal) => {
+  const handleConfirmAction = async () => {
+    if (!selectedProposal || !pendingAction) return;
+    
+    setIsProcessing(true);
+    try {
+        if (pendingAction === "accept") {
+            await proposalAPI.accept(selectedProposal._id);
+            toastUtil.success("Proposal accepted successfully. Others for this task have been rejected.");
+        } else {
+            await proposalAPI.reject(selectedProposal._id);
+            toastUtil.success("Proposal rejected");
+        }
+        await loadProposals();
+        setDecisionAlertOpen(false);
+        setDetailsModalOpen(false);
+    } catch (error) {
+        toastUtil.handleApiError(error);
+    } finally {
+        setIsProcessing(false);
+    }
+  };
+
+  const filteredAndSorted = useMemo(() => {
+    let result = proposals.filter((proposal) => {
       const matchesFilter = activeFilter === "all" || proposal.status === activeFilter;
       const taskTitle = proposal.taskId?.title || proposal.task?.title || "";
       const vendorName = proposal.vendorId?.username || proposal.vendorId?.companyName || "";
-      const query = search.toLowerCase();
+      const query = searchTerm.toLowerCase();
       const matchesSearch =
         taskTitle.toLowerCase().includes(query) ||
         vendorName.toLowerCase().includes(query);
 
       return matchesFilter && matchesSearch;
     });
-  }, [proposals, activeFilter, search]);
+
+    if (rankedIds) {
+        result = [...result].sort((a, b) => {
+            const aIdx = rankedIds.indexOf(a._id);
+            const bIdx = rankedIds.indexOf(b._id);
+            if (aIdx === -1 && bIdx === -1) return 0;
+            if (aIdx === -1) return 1;
+            if (bIdx === -1) return -1;
+            return aIdx - bIdx;
+        });
+    }
+
+    return result;
+  }, [proposals, activeFilter, searchTerm, rankedIds]);
 
   const stats = useMemo(() => ({
     total: proposals.length,
-    submitted: proposals.filter((proposal) => proposal.status === "submitted").length,
-    accepted: proposals.filter((proposal) => proposal.status === "accepted").length,
-    rejected: proposals.filter((proposal) => proposal.status === "rejected").length,
+    submitted: proposals.filter((p) => p.status === "submitted").length,
+    accepted: proposals.filter((p) => p.status === "accepted").length,
+    rejected: proposals.filter((p) => p.status === "rejected").length,
   }), [proposals]);
 
   const proposalColumns = [
     {
       key: "task",
-      label: "Task",
-      cellClassName: "px-6 py-4",
+      label: "Project Assignment",
       render: (proposal) => {
         const taskTitle = proposal.taskId?.title || proposal.task?.title || "Untitled task";
-        return <p className="text-sm font-semibold text-foreground">{taskTitle}</p>;
+        return (
+            <div>
+                <p className="text-sm font-semibold text-foreground line-clamp-1">{taskTitle}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
+                    Category: {proposal.taskId?.category?.replace(/-/g, ' ') || "General"}
+                </p>
+            </div>
+        );
       },
     },
     {
       key: "vendor",
-      label: "Vendor",
-      cellClassName: "px-6 py-4",
+      label: "Expert Vendor",
       render: (proposal) => {
         const vendor = proposal.vendorId || {};
-        const vendorName = vendor.username || vendor.companyName || vendor.email || "Vendor";
+        const vendorName = vendor.companyName || vendor.username || "Vendor";
         return (
-          <div className="flex items-center gap-2">
-            <UserAvatar user={vendor} name={vendorName} size="md" />
-            <span className="text-sm text-foreground/80">{vendorName}</span>
+          <div className="flex items-center gap-3">
+            <UserAvatar user={vendor} name={vendorName} size="xs" />
+            <span className="text-sm font-medium text-foreground/80">{vendorName}</span>
           </div>
         );
       },
     },
     {
       key: "bid",
-      label: "Bid",
-      cellClassName: "px-6 py-4 text-sm text-foreground",
-      render: (proposal) => `$${(proposal.bidAmount || 0).toLocaleString()}`,
+      label: "Bid Amount",
+      render: (proposal) => (
+          <span className="text-sm font-black text-foreground">
+              ${(proposal.bidAmount || 0).toLocaleString()}
+          </span>
+      ),
     },
     {
       key: "status",
       label: "Status",
-      cellClassName: "px-6 py-4",
       render: (proposal) => <StatusChip status={proposal.status || "submitted"} />,
     },
     {
       key: "submitted",
-      label: "Submitted",
-      cellClassName: "px-6 py-4",
+      label: "Timeline",
       render: (proposal) => {
         const createdAt = proposal.submittedAt || proposal.createdAt;
         return (
           <>
-            <p className="text-sm text-foreground">{createdAt ? dayjs(createdAt).format("MMM DD, YYYY") : "-"}</p>
-            <p className="text-xs text-muted-foreground">{createdAt ? dayjs(createdAt).fromNow() : ""}</p>
+            <p className="text-sm text-foreground">{dayjs(createdAt).format("MMM DD, YYYY")}</p>
+            <p className="text-xs text-muted-foreground">{dayjs(createdAt).fromNow()}</p>
           </>
         );
       },
     },
+    {
+      key: "actions",
+      label: "Actions",
+      cellClassName: "px-6 py-4 text-right",
+      render: (proposal) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+              <DotsThreeVertical size={20} weight="bold" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => {
+              setSelectedProposal(proposal);
+              setDetailsModalOpen(true);
+            }}>
+              <Visibility className="mr-2 h-4 w-4" />
+              Review Proposal
+            </DropdownMenuItem>
+            
+            {proposal.status === "submitted" && (
+                <DropdownMenuItem 
+                    onClick={() => handleActionClick(proposal, "accept")}
+                    disabled={!isApproved}
+                >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Hire Vendor
+                </DropdownMenuItem>
+            )}
+
+            {proposal.status === "accepted" && (
+                <DropdownMenuItem onClick={() => navigate(`/company/contract/create?proposalId=${proposal._id}`)}>
+                    <Contract className="mr-2 h-4 w-4" />
+                    Create Contract
+                </DropdownMenuItem>
+            )}
+
+            {proposal.status === "submitted" && (
+                <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                        onClick={() => handleActionClick(proposal, "reject")}
+                        className="text-error focus:text-error"
+                    >
+                        <XCircle className="mr-2 h-4 w-4" />
+                        Reject Bid
+                    </DropdownMenuItem>
+                </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
   ];
 
-  const handleOpenDialog = (proposal, action) => {
-    setDecisionDialog({ open: true, proposal, action });
-  };
+  const tabOptions = [
+    { label: "All", count: stats.total },
+    { label: "Pending", count: stats.submitted },
+    { label: "Accepted", count: stats.accepted },
+    { label: "Rejected", count: stats.rejected },
+  ];
 
-  const handleXDialog = () => {
-    setDecisionDialog({ open: false, proposal: null, action: null });
-  };
-
-  const handleConfirmDialog = async () => {
-    if (!decisionDialog.proposal) {
-      return;
-    }
-
-    if (decisionDialog.action === "accept") {
-      await handleAccept(decisionDialog.proposal._id);
-    } else {
-      await handleReject(decisionDialog.proposal._id);
-    }
-
-    handleXDialog();
-  };
-
-  const emptyTitle = activeFilter === "all" ? "No proposals received yet" : `No ${activeFilter} proposals`;
-  const emptyDescription = activeFilter === "all"
-    ? "Proposal submissions from vendors will appear here once tasks start attracting bids."
-    : "Try switching filters or reviewing another proposal status.";
+  const currentTaskTitle = proposals[0]?.taskId?.title || "Project";
 
   return (
     <PageTransition>
       <div className="space-y-8">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/company">Dashboard</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/company/my-tasks">My Tasks</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{taskIdParam ? "Task Proposals" : "Proposal Registry"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-black uppercase tracking-tight text-foreground">
+                {taskIdParam ? `Proposals for: ${currentTaskTitle}` : "Proposal Registry"}
+            </h1>
+            <p className="text-sm text-muted-foreground font-medium">
+                {taskIdParam ? "Managing submissions for this specific task" : "Manage and evaluate incoming bids from expert vendors across all your postings."}
+            </p>
+        </div>
+
         {loading ? (
           <Loader />
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard title="Total" value={stats.total} icon={<Assignment />} />
-              <StatCard title="Submitted" value={stats.submitted} icon={<Clock />} />
-              <StatCard title="Accepted" value={stats.accepted} icon={<CheckCircle />} />
-              <StatCard title="Rejected" value={stats.rejected} icon={<XCircle />} />
-            </div>
-
             <FilterSearchBar
-              searchValue={search}
-              onSearchChange={setMagnifyingGlass}
-              searchPlaceholder="MagnifyingGlass by task or vendor..."
-              activeTab={filterTab}
-              onTabChange={setFilterTab}
-              tabs={FILTER_TABS}
-              actions={(
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowActionButtons((value) => !value)}
-                >
-                  {showActionButtons ? "Hide Actions" : "Show Actions"}
-                </Button>
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="search by task or vendor..."
+              className="mb-0"
+              showToggle={false}
+              actions={taskIdParam && (
+                  <RankProposalsButton 
+                    taskId={taskIdParam} 
+                    onRankingComplete={handleRankingComplete}
+                    disabled={proposals.length < 2}
+                  />
               )}
             />
 
-            <DataTable
-              columns={proposalColumns}
-              data={filtered}
-              rowKey="_id"
-              showSectionHeader
-              icon={<Assignment className="h-5 w-5" />}
-              title="Proposal Queue"
-              subtitle="Incoming bids across current company task postings"
-              emptyState={(
-                <EmptyState
-                  icon={activeFilter === "accepted" ? CheckCircle : activeFilter === "rejected" ? XCircle : activeFilter === "submitted" ? Clock : Assignment}
-                  title={emptyTitle}
-                  description={emptyDescription}
-                  className="border-0 bg-transparent py-6 shadow-none"
+            <div className="pt-6">
+                <DataTable
+                    columns={proposalColumns}
+                    data={filteredAndSorted}
+                    rowKey="_id"
+                    showSectionHeader={false}
+                    showTableHeader={true}
+                    emptyState={(
+                        <EmptyState
+                        icon={Assignment}
+                        title="No proposals found"
+                        description={taskIdParam ? "No one has bid on this task yet." : "Incoming bids from vendors will appear here once your tasks attract interest."}
+                        className="border-0 bg-transparent py-12"
+                        />
+                    )}
                 />
-              )}
-              emptyCellClassName="px-6 py-14 text-center"
-              showRowActions={showActionButtons}
-              rowActions={(proposal) => {
-                if (proposal.status === "submitted") {
-                  return [
-                    {
-                      key: "accept",
-                      label: "Accept",
-                      icon: <CheckCircle className="h-3.5 w-3.5" />,
-                      onClick: (row) => handleOpenDialog(row, "accept"),
-                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background hover:opacity-90",
-                    },
-                    {
-                      key: "reject",
-                      label: "Reject",
-                      icon: <XCircle className="h-3.5 w-3.5" />,
-                      onClick: (row) => handleOpenDialog(row, "reject"),
-                      className: "inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 hover:bg-muted",
-                    },
-                  ];
-                }
-                
-                if (proposal.status === "accepted") {
-                  return [
-                    {
-                      key: "contract",
-                      label: "Contract",
-                      icon: <Contract className="h-3.5 w-3.5" />,
-                      onClick: (row) => navigate(`/company/contracts/create?proposalId=${row._id}`),
-                      className: "inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background hover:opacity-90",
-                    },
-                    {
-                      key: "chat",
-                      label: "Chat",
-                      icon: <Chat className="h-3.5 w-3.5" />,
-                      onClick: (row) => navigate(`/company/chat?taskId=${row.taskId?._id || row.task?._id}`),
-                      className: "inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground/80 hover:bg-muted",
-                    },
-                  ];
-                }
-
-                return [];
-              }}
-            />
+            </div>
           </>
         )}
 
-        <Dialog open={decisionDialog.open} onX={handleXDialog}>
-          <Dialog.Header onX={handleXDialog}>
-            <Dialog.Title>
-              {decisionDialog.action === "accept" ? "Accept Proposal" : "Reject Proposal"}
-            </Dialog.Title>
-            <Dialog.Description>
-              {decisionDialog.action === "accept"
-                ? "The selected vendor proposal will be accepted and removed from the pending review queue."
-                : "This proposal will be marked as rejected and moved out of the submitted queue."}
-            </Dialog.Description>
-          </Dialog.Header>
-          <Dialog.Body>
-            <div className="rounded-2xl border border-border bg-muted p-4 text-sm text-foreground/80">
-              <p className="font-semibold text-foreground">
-                {decisionDialog.proposal?.taskId?.title || decisionDialog.proposal?.task?.title || "Untitled task"}
-              </p>
-              <p className="mt-1 text-muted-foreground">
-                Vendor: {decisionDialog.proposal?.vendorId?.username || decisionDialog.proposal?.vendorId?.companyName || decisionDialog.proposal?.vendorId?.email || "Vendor"}
-              </p>
-              <p className="mt-1 text-muted-foreground">
-                Bid: ${Number(decisionDialog.proposal?.bidAmount || 0).toLocaleString()}
-              </p>
-            </div>
-          </Dialog.Body>
-          <Dialog.Footer>
-            <Button type="button" variant="secondary" onClick={handleXDialog}>Cancel</Button>
-            <Button
-              type="button"
-              variant={decisionDialog.action === "accept" ? "success" : "danger"}
-              onClick={handleConfirmDialog}
-            >
-              {decisionDialog.action === "accept" ? "Accept Proposal" : "Reject Proposal"}
-            </Button>
-          </Dialog.Footer>
-        </Dialog>
+        <CompanyProposalDetailsModal
+            open={detailsModalOpen}
+            proposal={selectedProposal}
+            isApproved={isApproved}
+            onX={() => setDetailsModalOpen(false)}
+            onAccept={(p) => handleActionClick(p, "accept")}
+            onReject={(p) => handleActionClick(p, "reject")}
+        />
+
+        <AIRankingExplanationModal
+            open={aiExplanationOpen}
+            onX={() => setAiExplanationOpen(false)}
+            rankedData={rankedData}
+        />
+
+        <AlertDialog open={decisionAlertOpen} onOpenChange={setDecisionAlertOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {pendingAction === "accept" ? "Accept Expert Proposal?" : "Reject Proposal?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {pendingAction === "accept"
+                  ? "This will officially hire the vendor for this task. All other pending proposals for this task will be automatically rejected."
+                  : "Are you sure you want to reject this bid? This action cannot be undone."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            {selectedProposal && (
+                <div className="my-4 rounded-xl border border-border bg-muted/30 p-4 text-xs font-bold text-foreground/80 uppercase tracking-tight">
+                    <p>Task: {selectedProposal?.taskId?.title || selectedProposal?.task?.title || "Untitled Task"}</p>
+                    <p className="mt-1">Vendor: {selectedProposal?.vendorId?.companyName || selectedProposal?.vendorId?.username}</p>
+                    <p className="mt-1 text-primary font-black">Bid: ${selectedProposal?.bidAmount?.toLocaleString()}</p>
+                </div>
+            )}
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+              <Button
+                onClick={handleConfirmAction}
+                loading={isProcessing}
+                variant={pendingAction === "accept" ? "default" : "destructive"}
+                className="font-bold uppercase tracking-tight text-[11px]"
+              >
+                {pendingAction === "accept" ? "Confirm Hire" : "Reject Bid"}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </PageTransition>
   );
 };
 
 export default CompanyProposals;
-
-
-

@@ -14,17 +14,22 @@ const FilterSearchBar = ({
   onTabChange,
   tabs = [],
   actions,
+  leftAction,
+  showToggle = true,
   filters,
   className,
 }) => {
   const [showFilters, setShowFilters] = useState(false);
   const hasTabs = tabs.length > 0;
+  const shouldShowContent = !showToggle || showFilters;
 
   return (
     <Card className={cn("mb-8 overflow-hidden shadow-soft border-border bg-card", className)}>
       <div className="flex flex-col gap-5 p-5 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-          {hasTabs || filters ? (
+          {leftAction && <div className="shrink-0">{leftAction}</div>}
+          
+          {showToggle && (hasTabs || filters) ? (
             <Button
               type="button"
               variant={showFilters ? "secondary" : "ghost"}
@@ -53,8 +58,11 @@ const FilterSearchBar = ({
           {actions ? <div className="flex flex-wrap items-center gap-3 lg:justify-end">{actions}</div> : null}
         </div>
 
-        {(hasTabs || filters) && showFilters ? (
-        <div className="border-t border-border pt-5 animate-in fade-in slide-in-from-top-2 duration-200 space-y-4">
+        {(hasTabs || filters) && shouldShowContent ? (
+        <div className={cn(
+            "animate-in fade-in slide-in-from-top-2 duration-200 space-y-4",
+            showToggle && "border-t border-border pt-5"
+        )}>
           {filters && (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filters}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Eye as Visibility,
+  ClipboardText,
   ClipboardText as Assignment,
   CheckCircle as CheckCircle,
   Clock as Pending,
@@ -205,6 +206,10 @@ const MyTaskPage = () => {
             }}>
               <Visibility className="mr-2 h-4 w-4" />
               Show Details
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate(`/company/proposals?taskId=${task._id}`)}>
+              <ClipboardText className="mr-2 h-4 w-4" />
+              View Proposals
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => {
               setSelectedTask(task);

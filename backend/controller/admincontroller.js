@@ -36,6 +36,7 @@ class AdminController {
     this.getStats = this.getStats.bind(this);
     this.getTaskMonitoring = this.getTaskMonitoring.bind(this);
     this.getContractMonitoring = this.getContractMonitoring.bind(this);
+    this.getGlobalActivity = this.getGlobalActivity.bind(this);
     this.softDeleteUser = this.softDeleteUser.bind(this);
     this.checkUserDeletion = this.checkUserDeletion.bind(this);
     this.reactivateUser = this.reactivateUser.bind(this);
@@ -622,6 +623,56 @@ class AdminController {
           creationTrend: formattedTrend
         }
       });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  }
+
+  async getGlobalActivity(req, res) {
+    try {
+      const [users, tasks, contracts, payments] = await Promise.all([
+        User.find().sort({ createdAt: -1 }).limit(20).lean(),
+        Task.find().sort({ updatedAt: -1 }).limit(20).populate("companyId", "companyName username").lean(),
+        Contract.find().sort({ updatedAt: -1 }).limit(20).lean(),
+        Payment.find().sort({ updatedAt: -1 }).limit(20).lean()
+      ]);
+
+      const activities = [
+        ...users.map(u => ({
+          id: u._id,
+          action: u.status === 'approved' ? `User "${u.username || u.email}" verified` : `New user "${u.username || u.email}" registered`,
+          user: u.username || u.email,
+          type: "USER",
+          status: u.status,
+          timestamp: u.createdAt
+        })),
+        ...tasks.map(t => ({
+          id: t._id,
+          action: `Task "${t.title}" ${t.status}`,
+          user: t.companyId?.companyName || t.companyId?.username || "System",
+          type: "TASK",
+          status: t.status,
+          timestamp: t.updatedAt || t.createdAt
+        })),
+        ...contracts.map(c => ({
+          id: c._id,
+          action: `Contract "${c.title}" ${c.status}`,
+          user: "System",
+          type: "CONTRACT",
+          status: c.status,
+          timestamp: c.updatedAt || c.createdAt
+        })),
+        ...payments.map(p => ({
+          id: p._id,
+          action: `Payment of $${p.amount} ${p.status}`,
+          user: "Finance",
+          type: "PAYMENT",
+          status: p.status,
+          timestamp: p.updatedAt || p.createdAt
+        }))
+      ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 50);
+
+      res.json({ success: true, data: activities });
     } catch (error) {
       res.status(500).json({ message: "Server error", error: error.message });
     }

@@ -183,6 +183,7 @@ export const adminService = {
   getFinanceReport: (format = "json") => api.get(`/admin/reports/finance?format=${format}`, { responseType: format === "pdf" ? "blob" : "json" }),
   getTaskMonitoring: () => api.get("/admin/monitoring/tasks"),
   getContractMonitoring: () => api.get("/admin/monitoring/contracts"),
+  getGlobalActivity: () => api.get("/admin/activity"),
   getSystemHealth: () => api.get("/admin/monitoring/health"),
   getAllContracts: () => api.get("/admin/contracts"),
   getSupportTickets: () => api.get("/admin/support/tickets"),

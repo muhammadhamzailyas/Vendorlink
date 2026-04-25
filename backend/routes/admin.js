@@ -13,6 +13,7 @@ const contractController = require("../controller/contractController");
 router.get("/stats", adminController.getStats);
 router.get("/monitoring/tasks", adminController.getTaskMonitoring);
 router.get("/monitoring/contracts", adminController.getContractMonitoring);
+router.get("/activity", adminController.getGlobalActivity);
 router.get("/contracts", contractController.getAllContracts);
 router.get("/pending", adminController.getPendingUsers);
 router.get("/pending-verifications", adminController.getPendingVerifications);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -6,23 +6,19 @@ import {
   TrendUp,
   Clock,
   WarningCircle,
-  Eye,
-  Download,
-  MagnifyingGlass,
+  CurrencyDollar,
+  CaretUp,
+  CaretDown,
 } from "@phosphor-icons/react";
 import { paymentAPI } from "@/services/paymentAPI";
-import { showToast } from "@/lib/toast";
+import { adminService } from "@/services/api";
+import toastUtil from "@/lib/toast";
 import { 
-  Button, 
-  Input, 
-  Select, 
-  Card, 
   PageTransition, 
   Skeleton, 
   EmptyState, 
   DataTable, 
   StatCard, 
-  Badge,
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -32,7 +28,41 @@ import {
   PaginationEllipsis,
 } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
+import FilterSearchBar from "@/components/shared/FilterSearchBar";
+import UserAvatar from "@/components/shared/UserAvatar";
+import PaymentActionMenu from "@/components/admin/PaymentActionMenu";
 import dayjs from "dayjs";
+import { cn } from "@/lib/cn";
+
+const ChangeIndicator = ({ value }) => {
+  const val = parseFloat(value || 0);
+  const isPositive = val > 0;
+  const isNegative = val < 0;
+  
+  const colorClass = isPositive 
+      ? "bg-success/20 text-success border-success/30" 
+      : isNegative 
+          ? "bg-error/20 text-error border-error/30" 
+          : "bg-muted text-muted-foreground border-border";
+
+  return (
+      <div className={cn(
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+          colorClass
+      )}>
+          <div className="flex items-center gap-0.5">
+              {isPositive && <CaretUp size={10} weight="bold" />}
+              {isNegative && <CaretDown size={10} weight="bold" />}
+              <span className="text-[10px] font-black uppercase tracking-tight">
+                  {Math.abs(val)}%
+              </span>
+          </div>
+          <span className="text-[9px] font-bold uppercase tracking-tight opacity-90 ml-1">
+              vs last month
+          </span>
+      </div>
+  );
+};
 
 const toArray = (value) => {
   if (Array.isArray(value)) return value;
@@ -43,182 +73,188 @@ const toArray = (value) => {
 };
 
 const AdminPayments = () => {
-  const [filters, setFilters] = useState({ status: "", search: "" });
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["admin", "payments", page, filters.status],
+  const { data: statsData } = useQuery({
+    queryKey: ["admin", "stats"],
+    queryFn: () => adminService.getStats(),
+  });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "payments", page, activeTab],
     queryFn: async () => {
+      const statusMap = ["all", "pending", "processing", "completed", "failed", "refunded"];
+      const status = statusMap[activeTab];
       const params = { page, limit: 20 };
-      if (filters.status) params.status = filters.status;
+      if (status !== "all") params.status = status;
+      
       const res = await paymentAPI.getAllPayments(params);
       const d = res?.data;
       const payments = toArray(d?.data ?? d);
       return {
         payments,
-        totalPages: d?.totalPages || 1,
-        stats: d?.stats || null,
+        totalPages: d?.pagination?.pages || 1,
+        totalCount: d?.pagination?.total || 0
       };
     },
-    onError: () => showToast("error", "Failed to load payments"),
+    onError: () => toastUtil.error("Failed to load payments"),
   });
 
-  const payments = Array.isArray(data?.payments) ? data.payments : [];
+  const payments = data?.payments || [];
   const totalPages = data?.totalPages || 1;
-  const stats = data?.stats;
+  const changes = statsData?.data?.changes || {};
 
   const handleDownloadInvoice = async (paymentId) => {
+    const toastId = toastUtil.loading("Preparing invoice...");
     try {
       await paymentAPI.downloadInvoice(paymentId);
+      toastUtil.success("Invoice downloaded", { id: toastId });
     } catch {
-      showToast("error", "Failed to download invoice");
+      toastUtil.error("Failed to download invoice", { id: toastId });
     }
   };
 
-  const filteredPayments = payments.filter((p) => {
-    if (!filters.search) return true;
-    const q = filters.search.toLowerCase();
-    return (
-      p.invoiceNumber?.toLowerCase().includes(q) ||
-      p.company?.companyName?.toLowerCase().includes(q) ||
-      p.vendor?.businessName?.toLowerCase().includes(q)
-    );
-  });
+  const filteredPayments = useMemo(() => {
+    const q = search.toLowerCase();
+    return payments.filter((p) => {
+      if (!q) return true;
+      return (
+        p.invoiceNumber?.toLowerCase().includes(q) ||
+        p.companyId?.companyName?.toLowerCase().includes(q) ||
+        p.companyId?.username?.toLowerCase().includes(q) ||
+        p.vendorId?.username?.toLowerCase().includes(q)
+      );
+    });
+  }, [payments, search]);
 
-  const statCards = stats
-    ? [
-        { label: "Gross Volume", value: stats.total || 0, icon: <CreditCard /> },
-        { label: "Finalized", value: stats.completed || 0, icon: <TrendUp /> },
-        { label: "In Pipeline", value: stats.pending || 0, icon: <Clock /> },
-        { label: "Failed/Alert", value: stats.failed || 0, icon: <WarningCircle /> },
-      ]
-    : [];
+  const paymentColumns = [
+    {
+      key: "invoice",
+      label: "Invoice",
+      cellClassName: "px-6 py-4",
+      render: (p) => <span className="font-bold text-[10px] uppercase text-muted-foreground tracking-widest">{p.invoiceNumber || p._id.slice(-8)}</span>,
+    },
+    {
+      key: "company",
+      label: "Company",
+      cellClassName: "px-6 py-4",
+      render: (p) => (
+        <div className="flex items-center gap-2">
+          <UserAvatar user={p.companyId} name={p.companyId?.companyName || p.companyId?.username} size="sm" />
+          <span className="text-sm font-bold text-foreground">{p.companyId?.companyName || p.companyId?.username || "—"}</span>
+        </div>
+      ),
+    },
+    {
+      key: "vendor",
+      label: "Vendor",
+      cellClassName: "px-6 py-4",
+      render: (p) => (
+        <div className="flex items-center gap-2">
+          <UserAvatar user={p.vendorId} name={p.vendorId?.username} size="sm" />
+          <span className="text-sm font-medium text-foreground/80">{p.vendorId?.username || "—"}</span>
+        </div>
+      ),
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      cellClassName: "px-6 py-4 text-sm font-black text-foreground",
+      render: (p) => `$${(p.amount || 0).toLocaleString()}`,
+    },
+    {
+      key: "status",
+      label: "Status",
+      cellClassName: "px-6 py-4",
+      render: (p) => <StatusChip status={p.status} />,
+    },
+    {
+      key: "date",
+      label: "Date",
+      cellClassName: "px-6 py-4 text-sm text-muted-foreground",
+      render: (p) => dayjs(p.createdAt).format("MMM DD, YYYY"),
+    },
+    {
+        key: "actions",
+        label: "",
+        headerClassName: "relative px-6 py-3",
+        cellClassName: "px-6 py-4 whitespace-nowrap text-right text-sm font-medium",
+        render: (p) => (
+          <PaymentActionMenu
+            onView={() => navigate(`/admin/payments/${p._id}`)}
+            onDownload={() => handleDownloadInvoice(p._id)}
+            hasInvoice={!!p.invoiceNumber}
+          />
+        ),
+    },
+  ];
 
-  const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "pending", label: "Pending" },
-    { value: "processing", label: "Processing" },
-    { value: "completed", label: "Completed" },
-    { value: "failed", label: "Failed" },
-    { value: "refunded", label: "Refunded" },
+  const tabOptions = [
+    { label: "All Payments", value: "all" },
+    { label: "Pending", value: "pending" },
+    { label: "Processing", value: "processing" },
+    { label: "Completed", value: "completed" },
+    { label: "Failed", value: "failed" },
   ];
 
   return (
     <PageTransition>
     <div className="space-y-8">
       {/* Stats */}
-      {statCards.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {statCards.map((s) => (
-            <StatCard key={s.label} {...s} />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Volume"
+          value={`$${statsData?.data?.growthData?.reduce((sum, d) => sum + (d.totalVolume || 0), 0).toLocaleString() || 0}`}
+          icon={<CurrencyDollar className="text-success" />}
+          trend={<ChangeIndicator value={changes.revenue} />}
+        />
+        <StatCard
+          title="Platform Revenue"
+          value={`$${statsData?.data?.growthData?.[5]?.revenue?.toLocaleString() || 0}`}
+          icon={<TrendUp className="text-success" />}
+          trend={<ChangeIndicator value={changes.revenue} />}
+        />
+        <StatCard
+          title="Active Settlements"
+          value={payments.filter(p => p.status === 'processing').length}
+          icon={<Clock />}
+        />
+        <StatCard
+          title="Failed/Refunded"
+          value={payments.filter(p => ['failed', 'refunded'].includes(p.status)).length}
+          icon={<WarningCircle className="text-danger" />}
+        />
+      </div>
 
-      {/* Filters */}
-      <Card className="p-4 shadow-soft border-border/50">
-        <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-                <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 z-10" />
-                <Input
-                    type="text"
-                    placeholder="MagnifyingGlass by invoice, company, vendor..."
-                    value={filters.search}
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="pl-9 bg-muted/20"
-                />
-            </div>
-            <Select
-                value={filters.status}
-                onChange={(val) => { setFilters({ ...filters, status: val }); setPage(1); }}
-                options={statusOptions}
-                className="w-full sm:w-48 bg-muted/20"
+      <FilterSearchBar
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="search by invoice or name"
+        activeTab={activeTab}
+        onTabChange={(idx) => { setActiveTab(idx); setPage(1); }}
+        tabs={tabOptions.map(t => t.label)}
+      />
+
+      {isLoading ? (
+        <Skeleton className="h-96 w-full rounded-2xl bg-muted" />
+      ) : (
+        <DataTable
+          columns={paymentColumns}
+          data={filteredPayments}
+          rowKey="_id"
+          emptyState={
+            <EmptyState
+              icon={CreditCard}
+              title="No transactions found"
+              description={search ? "Try adjusting your search criteria" : "All platform financial activity will appear here."}
+              className="border-0 bg-transparent py-16 shadow-none"
             />
-        </div>
-      </Card>
-
-      {/* Table */}
-      <Card className="shadow-soft border-border/50 overflow-hidden">
-        <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
-            <Card.Title className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Transaction Log</Card.Title>
-        </Card.Header>
-        <Card.Content className="p-0">
-            {isLoading ? (
-                <div className="p-8 space-y-4">
-                    <Skeleton className="h-10 w-full rounded-lg" />
-                    <Skeleton className="h-10 w-full rounded-lg" />
-                    <Skeleton className="h-10 w-full rounded-lg" />
-                </div>
-            ) : filteredPayments.length === 0 ? (
-                <EmptyState icon={CreditCard} title="No payments found" description="No transaction records match your current filter criteria." className="border-0 bg-transparent py-16 shadow-none" />
-            ) : (
-                <DataTable
-                data={filteredPayments}
-                sectionClassName="border-0 bg-transparent shadow-none"
-                columns={[
-                    {
-                    key: "invoiceNumber",
-                    label: "Invoice",
-                    cellClassName: "px-6 py-4",
-                    render: (p) => <span className="font-bold text-[11px] uppercase text-muted-foreground">{p.invoiceNumber || "-"}</span>,
-                    },
-                    {
-                    key: "company",
-                    label: "Origin (Company)",
-                    cellClassName: "px-6 py-4",
-                    render: (p) => <span className="text-sm font-bold text-foreground truncate block w-40">{p.company?.companyName || p.company?.username || "-"}</span>,
-                    },
-                    {
-                    key: "vendor",
-                    label: "Destination (Vendor)",
-                    cellClassName: "px-6 py-4",
-                    render: (p) => <span className="text-sm font-bold text-foreground truncate block w-40">{p.vendor?.businessName || p.vendor?.username || "-"}</span>,
-                    },
-                    {
-                    key: "amount",
-                    label: "Amount",
-                    cellClassName: "px-6 py-4",
-                    render: (p) => <span className="font-extrabold text-sm text-foreground uppercase tracking-tight">PKR {p.amount?.toLocaleString()}</span>,
-                    },
-                    {
-                    key: "status",
-                    label: "Status",
-                    cellClassName: "px-6 py-4",
-                    render: (p) => <StatusChip status={p.status} />,
-                    },
-                    {
-                    key: "createdAt",
-                    label: "Date",
-                    cellClassName: "px-6 py-4",
-                    render: (p) => <span className="text-muted-foreground font-bold text-[11px] uppercase">{dayjs(p.createdAt).format("MMM D, YYYY")}</span>,
-                    },
-                ]}
-                showRowActions
-                actionsHeaderLabel=""
-                rowActions={(p) => ([
-                    {
-                    key: "view",
-                    label: "Details",
-                    title: "View Details",
-                    icon: <Eye className="h-3.5 w-3.5" />,
-                    onClick: () => navigate(`/admin/payments/${p._id}`),
-                    className: "inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight text-foreground/80 hover:bg-muted transition-all",
-                    },
-                    {
-                    key: "invoice",
-                    label: "PDF",
-                    title: "Download Invoice",
-                    icon: <Download className="h-3.5 w-3.5" />,
-                    onClick: () => handleDownloadInvoice(p._id),
-                    hidden: !p.invoiceNumber,
-                    className: "inline-flex items-center gap-1 rounded-lg bg-muted/30 px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight text-foreground hover:bg-muted/50 transition-all",
-                    },
-                ])}
-                />
-            )}
-        </Card.Content>
-      </Card>
+          }
+        />
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

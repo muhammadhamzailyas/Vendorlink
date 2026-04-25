@@ -314,7 +314,12 @@ exports.sendMessage = async (req, res) => {
     }
 
     // The wsService will handle real-time delivery
-    // The client will poll for unread counts for the badge
+    const wsService = req.app.get("wsService");
+    if (wsService) {
+      wsService.sendToUser(receiverId.toString(), { type: "new-message", message: newMessage });
+      wsService.sendToUser(senderId.toString(), { type: "new-message", message: newMessage });
+    }
+
     res.json({ success: true, data: newMessage });
   } catch (error) {
     console.error("Error sending message:", error);

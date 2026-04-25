@@ -245,14 +245,14 @@ const ChatPage = () => {
                           key={msg._id || i}
                           className={cn(
                             "flex flex-col max-w-[85%] sm:max-w-[70%]",
-                            isMe ? "items-start" : "ml-auto items-end"
+                            isMe ? "ml-auto items-end" : "items-start"
                           )}
                         >
                           <div className={cn(
                             "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-xs",
                             isMe 
-                              ? "bg-background border border-border rounded-tl-none"
-                              : "bg-primary text-primary-foreground rounded-tr-none" 
+                              ? "bg-primary text-primary-foreground rounded-br-none" 
+                              : "bg-background border border-border rounded-bl-none"
                           )}>
                             {msg.message}
                           </div>

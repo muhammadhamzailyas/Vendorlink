@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { chatAPI } from "../services/api";
 import wsClient from "../services/wsClient";
+import { useUser } from "@/context/UserContext";
 
 export const useChat = (taskId, otherUserId) => {
+  const { user } = useUser();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(wsClient.isConnected());
@@ -42,7 +44,8 @@ export const useChat = (taskId, otherUserId) => {
   // WebSocket listeners
   useEffect(() => {
     const onNewMessage = (data) => {
-      if (data.message?.taskId === taskId || data.taskId === taskId) {
+      const msgTaskId = (data.message?.taskId || data.taskId)?.toString();
+      if (msgTaskId === taskId?.toString()) {
         const msg = data.message || data;
         setMessages((prev) => {
           if (prev.find((m) => m._id === msg._id)) return prev;
@@ -71,14 +74,12 @@ export const useChat = (taskId, otherUserId) => {
     };
 
     wsClient.on("new-message", onNewMessage);
-    wsClient.on("message-sent", onNewMessage);
     wsClient.on("user-typing", onTyping);
     wsClient.on("user-stop-typing", onStopTyping);
     const unsub = wsClient.onConnection(onConnection);
 
     return () => {
       wsClient.off("new-message", onNewMessage);
-      wsClient.off("message-sent", onNewMessage);
       wsClient.off("user-typing", onTyping);
       wsClient.off("user-stop-typing", onStopTyping);
       unsub();
@@ -89,19 +90,12 @@ export const useChat = (taskId, otherUserId) => {
   const sendMessage = useCallback(async (text) => {
     if (!taskId || !otherUserId || !text.trim()) return;
     try {
-      const res = await chatAPI.sendMessage({
+      // The backend will now push the message back via WebSocket to both parties
+      await chatAPI.sendMessage({
         receiverId: otherUserId,
         message: text.trim(),
         taskId,
       });
-      // The backend now returns { success: true, data: newMessage }
-      const msg = res.data?.data;
-      if (msg) {
-        setMessages((prev) => {
-          if (prev.find((m) => m._id === msg._id)) return prev;
-          return [...prev, msg];
-        });
-      }
     } catch (err) {
       console.error("Failed to send message:", err);
     }
@@ -117,8 +111,8 @@ export const useChat = (taskId, otherUserId) => {
 
   const reconnect = useCallback(() => {
     wsClient.disconnect();
-    wsClient.connect();
-  }, []);
+    wsClient.connect(user);
+  }, [user]);
 
   return {
     messages,

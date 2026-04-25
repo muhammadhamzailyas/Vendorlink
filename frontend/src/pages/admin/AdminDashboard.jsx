@@ -80,7 +80,7 @@ const AdminDashboard = () => {
       setLoading(true);
       const [usersRes, pendingRes, statsRes] = await Promise.all([
         adminService.getAllUsers(),
-        adminService.getPendingUsers(),
+        adminService.getPendingVerifications(),
         adminService.getStats(),
       ]);
 
@@ -88,15 +88,22 @@ const AdminDashboard = () => {
       const pending = pendingRes.data || [];
       const statsData = statsRes.data || {};
 
+      const validUsers = users.filter(user => user.role !== 'unassigned');
+      validUsers.sort((a, b) => {
+        const dateA = a.lastLogin ? new Date(a.lastLogin) : new Date(a.createdAt);
+        const dateB = b.lastLogin ? new Date(b.lastLogin) : new Date(b.createdAt);
+        return dateB - dateA;
+      });
+
       setStats({
-        totalUsers: users.length,
-        totalCompanies: users.filter((u) => u.role === "company").length,
-        totalVendors: users.filter((u) => u.role === "vendor").length,
+        totalUsers: validUsers.length,
+        totalCompanies: validUsers.filter((u) => u.role === "company").length,
+        totalVendors: validUsers.filter((u) => u.role === "vendor").length,
         pendingApprovals: pending.length,
         ...statsData
       });
 
-      setRecentUsers(users.slice(0, 5));
+      setRecentUsers(validUsers.slice(0, 5));
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) return;
       console.error("Error fetching dashboard data:", error);
@@ -172,23 +179,23 @@ const AdminDashboard = () => {
       render: (user) => <StatusChip status={user.status || "pending"} />, 
     },
     {
-      key: "registered",
-      label: "Registered",
+      key: "lastLogin",
+      label: "Last Login",
       cellClassName: "px-6 py-4",
       render: (user) => (
         <>
           <p className="text-sm text-foreground">
-            {dayjs(user.createdAt).format("MMM DD, YYYY")}
+            {user.lastLogin ? dayjs(user.lastLogin).format("MMM DD, YYYY hh:mm A") : "Never"}
           </p>
           <p className="text-xs text-muted-foreground">
-            {dayjs(user.createdAt).fromNow()}
+            {user.lastLogin ? dayjs(user.lastLogin).fromNow() : "-"}
           </p>
         </>
       ),
     },
   ];
 
-  return (
+    return (
     <PageTransition>
     <div className="space-y-8">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -249,13 +256,13 @@ const AdminDashboard = () => {
                     <AreaChart data={stats.growthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                         <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.1}/>
+                            <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.8}/>
                             <stop offset="95%" stopColor="var(--foreground)" stopOpacity={0}/>
                         </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
-                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
+                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Area type="monotone" dataKey="users" stroke="var(--foreground)" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={2} />
                         <Area type="monotone" dataKey="tasks" stroke="var(--muted-foreground)" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
@@ -295,7 +302,7 @@ const AdminDashboard = () => {
                                 dataKey="value"
                             >
                                 <Cell fill="var(--foreground)" />
-                                <Cell fill="var(--muted)" />
+                                <Cell fill="var(--muted-foreground)" />
                             </Pie>
                             <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                         </PieChart>
@@ -304,7 +311,7 @@ const AdminDashboard = () => {
                     <div className="mt-4 flex flex-wrap justify-center gap-6">
                         {stats.marketplaceBalance.map((entry, index) => (
                             <div key={entry.name} className="flex items-center gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: index === 0 ? 'var(--foreground)' : 'var(--muted)' }} />
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: index === 0 ? 'var(--foreground)' : 'var(--muted-foreground)' }} />
                                 <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">
                                     {entry.name}: {entry.value}
                                 </span>
@@ -338,10 +345,10 @@ const AdminDashboard = () => {
                     <ResponsiveContainer width="100%" height={260} minWidth={0}>
                     <BarChart data={stats.growthData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
-                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
+                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="totalVolume" stackId="a" fill="var(--muted)" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="totalVolume" stackId="a" fill="var(--muted-foreground)" radius={[0, 0, 0, 0]} />
                         <Bar dataKey="revenue" stackId="a" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                     </ResponsiveContainer>
@@ -369,7 +376,7 @@ const AdminDashboard = () => {
                     <ResponsiveContainer width="100%" height={260} minWidth={0}>
                     <BarChart layout="vertical" data={stats.taskFunnel} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
-                        <XAxis type="number" axisLine={false} tickLine={false} tick={{fill: 'var(--muted-foreground)', fontSize: 10}} />
+                        <XAxis type="number" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
                         <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground)', fontSize: 10, fontWeight: 'bold'}} />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Bar dataKey="value" fill="var(--foreground)" radius={[0, 4, 4, 0]} barSize={20} />
@@ -407,7 +414,7 @@ const AdminDashboard = () => {
                                             dataKey="value"
                                         >
                                             {stats.withdrawalHealth.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.name === 'Completed' ? 'var(--success)' : entry.name === 'Pending' ? 'var(--warning)' : 'var(--error)'} />
+                                                <Cell key={`cell-${index}`} fill={entry.name === 'Completed' ? 'var(--color-success)' : entry.name === 'Pending' ? '#ffc658' : '#f87171'} />
                                             ))}
                                         </Pie>
                                         <Tooltip />

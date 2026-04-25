@@ -284,7 +284,7 @@ const UserManagement = () => {
         user.role === currentFilter ||
         user.status === currentFilter;
 
-      return matchesSearch && matchesTab;
+      return matchesSearch && matchesTab && user.role !== 'unassigned';
     });
   }, [users, searchTerm, tabOptions, activeTab]);
 
@@ -368,7 +368,7 @@ const UserManagement = () => {
         <FilterSearchBar
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          searchPlaceholder="MagnifyingGlass by company, username, or email..."
+          searchPlaceholder="Search by name, or email..."
           activeTab={activeTab}
           onTabChange={setActiveTab}
           tabs={tabOptions.map((tab) => `${tab.label} (${tab.count})`)}

@@ -55,8 +55,9 @@ const Login = () => {
       toastUtil.success("Login successful");
 
       if (backendUser.role === "unassigned") {
-        navigate("/signup", { replace: true });
-        return;
+        toastUtil.error("Your role is not assigned. Please contact support.");
+        // Prevent further navigation by not proceeding
+        return; 
       }
 
       // Check for selected plan from pricing section
@@ -72,21 +73,21 @@ const Login = () => {
       }
 
       if (backendUser.role === "admin" || !selectedPlan || selectedPlan.isFree) {
-        const roleRoutes = {
-          admin: "/admin",
-          company: "/company",
-          vendor: "/vendor",
-        };
+        const roleRoutes = { admin: "/admin", company: "/company", vendor: "/vendor" };
         navigate(roleRoutes[backendUser.role] || "/", { replace: true });
       } else {
         navigate("/payment", { replace: true });
       }
-    } catch (err) {
+      } catch (err) {
       console.error("Login Error:", err);
       toastUtil.handleApiError(err, {
         unauthorized: "Invalid username or password",
         default: "Login failed. Please try again.",
       });
+      } finally {
+      setLoading(false);
+      }
+      };
     } finally {
       setLoading(false);
     }
@@ -117,22 +118,24 @@ const Login = () => {
       if (backendUser) {
         setUser(backendUser);
         if (backendUser.role === "unassigned") {
-          navigate("/signup", { replace: true });
+          toastUtil.error("Your role is not assigned. Please contact support.");
+          // Prevent further navigation by not proceeding
+          return;
         } else {
           const roleRoutes = { admin: "/admin", company: "/company", vendor: "/vendor" };
           navigate(roleRoutes[backendUser.role] || "/", { replace: true });
         }
-      }
-    } catch (err) {
-      console.error("Google login error:", err);
-      if (err.code !== "auth/popup-closed-by-user") {
-        toastUtil.handleApiError(err, {
-          default: "Google login failed.",
-        });
-      }
-    } finally {
-      setGoogleLoading(false);
-    }
+        } catch (err) {
+        console.error("Google login error:", err);
+        if (err.code !== "auth/popup-closed-by-user") {
+          toastUtil.handleApiError(err, {
+            default: "Google login failed.",
+          });
+        }
+        } finally {
+        setGoogleLoading(false);
+        }
+        };
   };
 
   return (

@@ -77,6 +77,9 @@ class AuthController {
         }
         await user.save();
       } else {
+        // Update last login unconditionally for existing user
+        user.lastLogin = Date.now();
+
         // Ensure admin status is synchronized if email matches
         if (isAdminByEmail && user.role !== "admin") {
           console.log(`[Auth] Promoting user ${normalizedEmail} to Admin based on env configuration.`);
@@ -85,16 +88,13 @@ class AuthController {
           await user.save();
         } else {
           // Update basic info if changed in Firebase
-          let modified = false;
           if (normalizedEmail && user.email !== normalizedEmail) {
             user.email = normalizedEmail;
-            modified = true;
           }
           if (phoneNumber && user.phone !== phoneNumber) {
             user.phone = phoneNumber;
-            modified = true;
           }
-          if (modified) await user.save();
+          await user.save();
         }
       }
 

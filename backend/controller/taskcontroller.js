@@ -44,10 +44,11 @@ class TaskController {
 
       res.status(201).json("Task added successfully");
 
-      // Notify all vendors about new task
+      // Notify admins and all vendors about new task
       try {
         const notificationService = getNotificationService(req);
         if (notificationService) {
+          // Notify Vendors
           const vendors = await User.find({ role: "vendor", status: "approved" }).select("_id");
           for (const vendor of vendors) {
             await notificationService.createNotification({
@@ -60,6 +61,22 @@ class TaskController {
               relatedId: task._id,
               relatedModel: "Task",
               priority: "medium",
+            });
+          }
+
+          // Notify Admins
+          const admins = await User.find({ role: "admin" }).select("_id");
+          for (const admin of admins) {
+            await notificationService.createNotification({
+              recipientId: admin._id,
+              senderId: req.user._id,
+              type: "task_created_admin",
+              title: "Task Posted",
+              message: `A new task "${title}" has been posted by ${req.user.username || 'a company'}.`,
+              data: { taskId: task._id, taskTitle: title },
+              relatedId: task._id,
+              relatedModel: "Task",
+              priority: "low",
             });
           }
         }

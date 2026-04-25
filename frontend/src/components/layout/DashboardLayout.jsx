@@ -85,6 +85,7 @@ const PAGE_SUBTITLES = {
   "/admin/task-monitoring": "Monitor and track all platform tasks",
   "/admin/contract": "Monitor active and completed task agreements across the platform",
   "/admin/reports": "Platform performance snapshot for users and tasks",
+  "/admin/notifications": "Chronological audit of platform events and administrative alerts",
   "/admin/payments": "Monitor task-related payments and platform fee distributions",
   "/admin/transactions": "Complete chronological record of all platform monetary movements",
   "/admin/settings": "Manage access preferences and account-level notifications",

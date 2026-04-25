@@ -86,6 +86,26 @@ class AuthController {
             emailVerified: Boolean(normalizedEmail),
           });
           isNewUser = true;
+
+          // Notify Admins about new registration
+          try {
+            const notificationService = req.app?.get("notificationService");
+            if (notificationService) {
+              const admins = await User.find({ role: "admin" }).select("_id");
+              for (const admin of admins) {
+                await notificationService.createNotification({
+                  recipientId: admin._id,
+                  type: "new_user_registered",
+                  title: "New User Registration",
+                  message: `A new user "${normalizedEmail}" has registered on the platform.`,
+                  data: { userId: user._id, email: normalizedEmail },
+                  priority: "low",
+                });
+              }
+            }
+          } catch (notifErr) {
+            console.error("[Auth] Admin notification failed:", notifErr);
+          }
         }
         await user.save();
       } else {

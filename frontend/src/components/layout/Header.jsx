@@ -100,13 +100,13 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
 
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Requirement: Header should contain the notification icon for all roles including admin */}
-        <div className="relative mr-2">
-          <NotificationBadge className="h-9 w-9" />
+        <div className="relative">
+          <NotificationBadge className="h-10 w-10 rounded-xl border border-border bg-card shadow-sm hover:bg-muted" />
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-10 gap-2 rounded-xl px-2 hover:bg-muted border border-transparent hover:border-border">
+            <Button variant="ghost" className="h-10 gap-2 rounded-xl px-2 hover:bg-muted border border-border shadow-sm">
               <UserAvatar user={user} size="sm" />
               <div className="hidden flex-col items-start text-left sm:flex min-w-[80px]">
                 <span className="text-xs font-bold leading-none truncate w-24 text-foreground">{user?.username}</span>

@@ -113,6 +113,7 @@ exports.createCompleteContract = async (req, res) => {
     const notificationService = getNotificationService(req);
     if (notificationService) {
       try {
+        // Notify Vendor
         await notificationService.createNotification({
           recipientId: proposal.vendorId._id,
           senderId: userId,
@@ -129,8 +130,24 @@ exports.createCompleteContract = async (req, res) => {
           relatedModel: "Contract",
           priority: "high",
         });
+
+        // Notify Admins
+        const admins = await User.find({ role: "admin" }).select("_id");
+        for (const admin of admins) {
+          await notificationService.createNotification({
+            recipientId: admin._id,
+            senderId: userId,
+            type: "contract_created_admin",
+            title: "Contract Agreement Initiated",
+            message: `A new contract agreement has been initiated between ${proposal.companyId.companyName || 'Company'} and ${proposal.vendorId.username || 'Vendor'}.`,
+            data: { contractId: contract._id, taskId: proposal.taskId._id },
+            relatedId: contract._id,
+            relatedModel: "Contract",
+            priority: "low",
+          });
+        }
       } catch (notifError) {
-        console.error("Failed to send contract notification:", notifError);
+        console.error("Failed to send contract notifications:", notifError);
       }
     }
 

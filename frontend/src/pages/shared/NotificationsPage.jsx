@@ -1,185 +1,180 @@
-import React, { useEffect, useState } from "react";
-import { useNotifications } from "@/context/NotificationContext";
-import { getRelativeTime } from "@/lib/dateUtils";
-import {
-  Bell, Check, Checks, Trash, CircleNotch,
+import React, { useEffect, useMemo, useState } from "react";
+import { 
+  Bell, 
+  Checks, 
+  Trash, 
+  Clock, 
+  ArrowRight
 } from "@phosphor-icons/react";
-import { PageTransition, Button, Card, EmptyState, Tabs, TabsList, TabsTrigger, Separator } from "@/components/ui";
+import { useNotifications } from "../../context/NotificationContext";
+import { formatDate } from "../../lib/dateUtils";
+import { 
+  Button, 
+  Card, 
+  EmptyState, 
+  PageTransition, 
+  Skeleton, 
+  Badge
+} from "@/components/ui";
+import FilterSearchBar from "@/components/shared/FilterSearchBar";
+import { cn } from "@/lib/cn";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../../context/UserContext";
+import dayjs from "dayjs";
+
+const priorityConfig = {
+  urgent: { dot: "bg-error", label: "Urgent", badge: "bg-error/10 text-error border-error/20" },
+  high: { dot: "bg-warning", label: "High", badge: "bg-warning/10 text-warning border-warning/20" },
+  medium: { dot: "bg-foreground", label: "Normal", badge: "bg-muted text-foreground border-border" },
+  low: { dot: "bg-border", label: "Low", badge: "bg-muted/50 text-muted-foreground border-border/50" },
+};
 
 const NotificationsPage = () => {
-  const {
-    notifications, unreadCount, loading, markAsRead, markAllAsRead,
-    deleteNotification, deleteReadNotifications, loadMore, pagination,
-    refreshNotifications,
+  const navigate = useNavigate();
+  const { user } = useUser();
+  const { 
+    notifications, 
+    unreadCount, 
+    loading, 
+    markAsRead, 
+    deleteNotification,
+    fetchNotifications
   } = useNotifications();
 
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(0);
+  const [search, setSearch] = useState("");
 
+  // Ensure we have a good set of notifications by refreshing on mount
   useEffect(() => {
-    refreshNotifications();
-  }, [refreshNotifications]);
+    fetchNotifications(1);
+  }, []);
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "high": return "border-l-danger";
-      case "medium": return "border-l-warning";
-      default: return "border-l-border";
-    }
+  const tabOptions = [
+    { label: "All Activity", value: "all", count: notifications.length },
+    { label: "Unread", value: "unread", count: unreadCount },
+    { label: "Important", value: "high", count: notifications.filter(n => n.priority === 'high' || n.priority === 'urgent').length }
+  ];
+
+  const filtered = useMemo(() => {
+    return notifications.filter(n => {
+        const matchesSearch = n.title.toLowerCase().includes(search.toLowerCase()) || 
+                            n.message.toLowerCase().includes(search.toLowerCase());
+        
+        const currentTab = tabOptions[activeTab].value;
+        const matchesTab = currentTab === 'all' || 
+                         (currentTab === 'unread' && !n.read) ||
+                         (currentTab === 'high' && (n.priority === 'high' || n.priority === 'urgent'));
+        
+        return matchesSearch && matchesTab;
+    });
+  }, [notifications, search, activeTab]);
+
+  const handleAction = (n) => {
+    if (!n.read) markAsRead(n._id);
+    const role = user?.role || "";
+    
+    if (n.data?.contractId) navigate(`/${role}/contract/${n.data.contractId}`);
+    else if (n.data?.taskId) navigate(`/${role}/task/${n.data.taskId}`);
+    else if (n.type === 'new_user' || n.type === 'new_user_registered') navigate(`/admin/pending`);
   };
-
-  const filteredNotifications = notifications.filter(n => {
-    if (activeTab === "all") return true;
-    if (activeTab === "unread") return !n.read;
-    return n.read;
-  });
 
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Notifications</h2>
-            <p className="text-sm text-muted-foreground">Track system events, status updates, and activity alerts.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-            {unreadCount > 0 && (
-              <span className="inline-flex items-center rounded-full bg-warning/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-warning">
-                {unreadCount} unread
-              </span>
-            )}
-            {unreadCount > 0 && (
-              <Button
-                onClick={markAllAsRead}
-                variant="secondary"
-                size="xs"
-                className="font-bold uppercase tracking-tight"
-              >
-                <Checks className="w-3.5 h-3.5 mr-1.5" />
-                Mark all read
-              </Button>
-            )}
-            <Button
-              onClick={deleteReadNotifications}
-              variant="secondary"
-              size="xs"
-              className="font-bold uppercase tracking-tight"
-            >
-              <Trash className="w-3.5 h-3.5 mr-1.5" />
-              Clear read
-            </Button>
-          </div>
-        </div>
+        <FilterSearchBar
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search notifications..."
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
+        />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="bg-muted/50 p-1 h-auto flex flex-wrap justify-start gap-1 w-fit mb-6">
-                <TabsTrigger 
-                    value="all"
-                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground transition-all"
-                >
-                    All
-                </TabsTrigger>
-                <TabsTrigger 
-                    value="unread"
-                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground transition-all"
-                >
-                    Unread
-                </TabsTrigger>
-                <TabsTrigger 
-                    value="read"
-                    className="rounded-lg px-4 py-2 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-foreground transition-all"
-                >
-                    Read
-                </TabsTrigger>
-            </TabsList>
-
-            {loading && notifications.length === 0 ? (
-                <Card>
-                    <div className="flex justify-center py-12">
-                    <CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" />
-                    </div>
-                </Card>
-            ) : filteredNotifications.length === 0 ? (
-            <EmptyState
-                icon={Bell}
-                title="No notifications"
-                description={activeTab === "unread" ? "You have no unread notifications." : "You are all caught up."}
-            />
-            ) : (
-            <Card className="overflow-hidden shadow-soft border-border/50">
-                <Card.Header className="pb-3 border-b border-border/50">
-                    <Card.Title className="text-sm font-bold uppercase tracking-tight">Notification Feed</Card.Title>
-                    <Card.Description className="text-xs">Latest updates from tasks, contracts, and account activity.</Card.Description>
-                </Card.Header>
-                <Card.Content className="p-4 space-y-3">
-                    {filteredNotifications.map((notif) => (
-                        <div
-                        key={notif._id}
-                        className={`flex items-start gap-3 p-4 rounded-xl border-l-4 ${getPriorityColor(notif.priority)} ${
-                            notif.read ? "bg-card/50" : "bg-muted/30"
-                        } border border-border/50 transition-colors hover:shadow-sm`}
-                        >
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                            <p className={`text-sm ${notif.read ? "text-foreground/80 font-medium" : "font-extrabold text-foreground"}`}>
-                                {notif.title}
-                            </p>
-                            {!notif.read && <div className="w-2 h-2 rounded-full bg-foreground shrink-0" />}
-                            </div>
-                            <p className="text-sm text-muted-foreground font-medium mt-0.5">{notif.message}</p>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-2.5">
-                            {notif.createdAt ? getRelativeTime(notif.createdAt) : ""}
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                            {!notif.read && (
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="xs"
-                                onClick={() => markAsRead(notif._id)}
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
-                                title="Mark as read"
-                            >
-                                <Check className="w-4 h-4" />
-                            </Button>
-                            )}
-                            <Button
-                            type="button"
-                            variant="ghost"
-                            size="xs"
-                            onClick={() => deleteNotification(notif._id)}
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-danger hover:bg-danger-surface"
-                            title="Delete"
-                            >
-                            <Trash className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        </div>
-                    ))}
-
-                    {pagination.page < pagination.totalPages && activeTab === "all" && (
-                        <div className="text-center pt-4">
-                        <Button
-                            onClick={loadMore}
-                            disabled={loading}
-                            variant="secondary"
-                            size="sm"
-                            className="font-bold uppercase tracking-tight"
-                        >
-                            {loading ? "Loading..." : "Load more"}
-                        </Button>
-                        </div>
+        {loading && notifications.length === 0 ? (
+          <Skeleton.Page rows={5} />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={Bell}
+            title="Notification center is clear"
+            description={search ? "Try adjusting your filters" : "You're all caught up! No new alerts at the moment."}
+            className="border-none bg-transparent py-16 shadow-none"
+          />
+        ) : (
+          <div className="space-y-4">
+            {filtered.map((n) => {
+              const priority = priorityConfig[n.priority] || priorityConfig.medium;
+              const isToday = dayjs(n.createdAt).isSame(dayjs(), 'day');
+              
+              return (
+                <Card 
+                    key={n._id} 
+                    className={cn(
+                        "group transition-all duration-300 border-border/40 hover:border-foreground/20",
+                        !n.read ? "bg-muted/10 border-l-4 border-l-foreground" : "bg-card opacity-80"
                     )}
-                </Card.Content>
-            </Card>
-            )}
-        </Tabs>
+                >
+                    <Card.Content className="p-0">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 gap-6">
+                            <div className="flex items-start gap-5 flex-1 min-w-0">
+                                <div className={cn(
+                                    "p-3 rounded-xl shrink-0 transition-colors",
+                                    !n.read ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+                                )}>
+                                    <Bell size={24} weight={n.read ? "regular" : "fill"} />
+                                </div>
+                                <div className="min-w-0 space-y-1">
+                                    <div className="flex items-center gap-3">
+                                        <h3 className={cn(
+                                            "text-sm font-bold uppercase tracking-tight",
+                                            !n.read ? "text-foreground" : "text-muted-foreground"
+                                        )}>
+                                            {n.title}
+                                        </h3>
+                                        {!isToday && (
+                                            <Badge variant="secondary" className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0 bg-muted/50">
+                                                Archive
+                                            </Badge>
+                                        )}
+                                        <Badge variant="outline" className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0", priority.badge)}>
+                                            {priority.label}
+                                        </Badge>
+                                    </div>
+                                    <p className="text-sm font-medium text-muted-foreground leading-relaxed line-clamp-2">{n.message}</p>
+                                    <p className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-tighter pt-1 flex items-center gap-2">
+                                        <Clock size={12} weight="bold" />
+                                        {formatDate(n.createdAt)} • {dayjs(n.createdAt).fromNow()}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleAction(n)}
+                                    className="flex-1 sm:flex-none rounded-xl font-black uppercase tracking-tighter text-[10px] h-10 gap-2 border-border/50 hover:bg-foreground hover:text-background"
+                                >
+                                    Take Action <ArrowRight size={14} weight="bold" />
+                                </Button>
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={() => deleteNotification(n._id)}
+                                    className="h-10 w-10 p-0 rounded-xl text-muted-foreground hover:text-error hover:bg-error/5"
+                                >
+                                    <Trash size={18} weight="bold" />
+                                </Button>
+                            </div>
+                        </div>
+                    </Card.Content>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </PageTransition>
   );
 };
 
 export default NotificationsPage;
-
-
-

@@ -35,6 +35,7 @@ class AdminController {
     this.rejectVerification = this.rejectVerification.bind(this);
     this.getStats = this.getStats.bind(this);
     this.getTaskMonitoring = this.getTaskMonitoring.bind(this);
+    this.getContractMonitoring = this.getContractMonitoring.bind(this);
     this.softDeleteUser = this.softDeleteUser.bind(this);
     this.checkUserDeletion = this.checkUserDeletion.bind(this);
     this.reactivateUser = this.reactivateUser.bind(this);
@@ -552,6 +553,73 @@ class AdminController {
           categoryDistribution: categoryDist.map(c => ({ name: c._id, value: c.value })),
           creationTrend: formattedTrend,
           budgetDistribution: formattedBudget
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  }
+
+  async getContractMonitoring(req, res) {
+    try {
+      const now = new Date();
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      const [
+        totalContracts,
+        activeContracts,
+        completedContracts,
+        totalValue,
+        statusDist,
+        creationTrend
+      ] = await Promise.all([
+        Contract.countDocuments(),
+        Contract.countDocuments({ status: "active" }),
+        Contract.countDocuments({ status: "completed" }),
+        Contract.aggregate([
+          { $group: { _id: null, total: { $sum: "$totalBudget" } } }
+        ]),
+        Contract.aggregate([
+          { $group: { _id: "$status", value: { $sum: 1 } } }
+        ]),
+        Contract.aggregate([
+          { $match: { createdAt: { $gte: sixMonthsAgo } } },
+          {
+            $group: {
+              _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ])
+      ]);
+
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const formattedTrend = creationTrend.map(item => ({
+        name: months[item._id.month - 1],
+        contracts: item.count
+      }));
+
+      // Simulate changes for now
+      const calculateChange = (curr, prev) => {
+        if (!prev) return 0;
+        return (((curr - prev) / prev) * 100).toFixed(1);
+      };
+
+      res.json({
+        stats: {
+          total: totalContracts,
+          active: activeContracts,
+          completed: completedContracts,
+          totalValue: totalValue[0]?.total || 0,
+          changes: {
+            total: calculateChange(totalContracts, totalContracts - 1),
+            value: 0
+          }
+        },
+        charts: {
+          statusDistribution: statusDist.map(s => ({ name: s._id, value: s.value })),
+          creationTrend: formattedTrend
         }
       });
     } catch (error) {

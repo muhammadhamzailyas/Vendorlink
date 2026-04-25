@@ -498,6 +498,26 @@ exports.getVendorContracts = async (req, res) => {
   }
 };
 
+exports.getAllContracts = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied. Admin only." });
+    }
+
+    const contracts = await Contract.find()
+      .populate("taskId", "title description category")
+      .populate("companyId", "username email companyName")
+      .populate("vendorId", "username email")
+      .populate("proposalId")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: contracts });
+  } catch (error) {
+    console.error("Error in getAllContracts:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.getContractById = async (req, res) => {
   try {
     const { id } = req.params;

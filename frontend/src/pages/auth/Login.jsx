@@ -78,16 +78,12 @@ const Login = () => {
       } else {
         navigate("/payment", { replace: true });
       }
-      } catch (err) {
+    } catch (err) {
       console.error("Login Error:", err);
       toastUtil.handleApiError(err, {
         unauthorized: "Invalid username or password",
         default: "Login failed. Please try again.",
       });
-      } finally {
-      setLoading(false);
-      }
-      };
     } finally {
       setLoading(false);
     }
@@ -119,23 +115,22 @@ const Login = () => {
         setUser(backendUser);
         if (backendUser.role === "unassigned") {
           toastUtil.error("Your role is not assigned. Please contact support.");
-          // Prevent further navigation by not proceeding
           return;
         } else {
           const roleRoutes = { admin: "/admin", company: "/company", vendor: "/vendor" };
           navigate(roleRoutes[backendUser.role] || "/", { replace: true });
         }
-        } catch (err) {
-        console.error("Google login error:", err);
-        if (err.code !== "auth/popup-closed-by-user") {
-          toastUtil.handleApiError(err, {
-            default: "Google login failed.",
-          });
-        }
-        } finally {
-        setGoogleLoading(false);
-        }
-        };
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      if (err.code !== "auth/popup-closed-by-user") {
+        toastUtil.handleApiError(err, {
+          default: "Google login failed.",
+        });
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (

@@ -7,9 +7,13 @@ const { authmiddleware, adminmiddleware } = require("../middleware/authmiddle");
 router.use(authmiddleware);
 router.use(adminmiddleware);
 
+const contractController = require("../controller/contractController");
+
 // Define routes
 router.get("/stats", adminController.getStats);
 router.get("/monitoring/tasks", adminController.getTaskMonitoring);
+router.get("/monitoring/contracts", adminController.getContractMonitoring);
+router.get("/contracts", contractController.getAllContracts);
 router.get("/pending", adminController.getPendingUsers);
 router.get("/pending-verifications", adminController.getPendingVerifications);
 router.get("/users", adminController.getAllUsers);

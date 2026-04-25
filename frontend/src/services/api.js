@@ -97,6 +97,7 @@ export const taskAPI = {
   getAllTasks: (params) => api.get("/tasks", { params }),
   getTask: (id) => api.get(`/tasks/${id}`),
   getCompanyTasks: () => api.get("/tasks/company/my-tasks"),
+  getVendorTasks: () => api.get("/tasks/vendor/my-tasks"),
   updateTask: (id, data) => api.put(`/tasks/${id}`, data),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
   checkDeletability: (id) => api.get(`/tasks/${id}/check-deletability`),
@@ -111,6 +112,9 @@ export const proposalAPI = {
   getProposal: (id) => api.get(`/proposals/${id}`),
   accept: (id) => api.put(`/proposals/${id}/accept`),
   reject: (id) => api.put(`/proposals/${id}/reject`),
+  updateProposal: (id, data) => api.put(`/proposals/${id}`, data),
+  deleteProposal: (id) => api.delete(`/proposals/${id}`),
+  checkDeletability: (id) => api.get(`/proposals/${id}/check-deletability`),
 };
 
 export const contractAPI = {

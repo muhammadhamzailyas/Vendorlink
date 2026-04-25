@@ -11,6 +11,7 @@ router.post("/", proposalController.createProposal);
 router.get("/vendor/my-proposals", proposalController.getVendorProposals);
 router.get("/company/received", proposalController.getCompanyProposals);
 router.get("/task/:taskId", proposalController.getTaskProposals);
+router.get("/:id/check-deletability", proposalController.checkDeletability);
 router.put("/:id/status", proposalController.updateStatus.bind(proposalController));
 router.put("/:id/accept", proposalController.acceptProposal);
 router.put("/:id/reject", proposalController.rejectProposal);

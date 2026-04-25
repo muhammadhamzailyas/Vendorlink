@@ -315,7 +315,60 @@ class ProposalController {
     }
   }
 
-  // Delete Proposal (Vendor - only if still submitted)
+  // Check deletability
+  async checkDeletability(req, res) {
+    try {
+      if (req.user.role !== "vendor") return res.status(403).json({ error: "Vendor only" });
+
+      const proposal = await Proposal.findById(req.params.id);
+      if (!proposal) return res.status(404).json({ error: "Proposal not found" });
+
+      if (proposal.vendorId.toString() !== req.user._id.toString())
+        return res.status(403).json({ error: "Not authorized" });
+
+      // Level 1: Simple confirmation (Still submitted, not accepted)
+      if (proposal.status === "submitted" || proposal.status === "rejected") {
+        return res.json({
+          canDelete: true,
+          level: 1,
+          message: "Are you sure you want to withdraw this proposal?",
+          warning: "This action will remove your bid from the task. You can always submit a new one later if the task is still open."
+        });
+      }
+
+      // If accepted, check for Level 3: Transaction phase
+      const Payment = require("../model/Payment");
+      const payments = await Payment.countDocuments({ 
+          $or: [
+              { proposalId: proposal._id },
+              { taskId: proposal.taskId }
+          ],
+          vendorId: req.user._id 
+      });
+
+      if (payments > 0) {
+        return res.json({
+          canDelete: false,
+          level: 3,
+          message: "This proposal is in the transaction phase and cannot be withdrawn.",
+          warning: "Payments have already been processed for this engagement. Please complete the work or contact support if there is an issue."
+        });
+      }
+
+      // Level 2: Warning (Accepted/In-progress but no payments)
+      return res.json({
+        canDelete: true,
+        level: 2,
+        message: "Warning: This proposal has already been accepted.",
+        warning: "You have an active engagement for this task. Withdrawing now will cancel the project and may impact your vendor rating. Are you sure you want to proceed?"
+      });
+
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  // Delete Proposal (Vendor)
   async deleteProposal(req, res) {
     try {
       if (req.user.role !== "vendor")
@@ -325,12 +378,36 @@ class ProposalController {
       if (!proposal) return res.status(404).json({ error: "Not found" });
       if (proposal.vendorId.toString() !== req.user._id.toString())
         return res.status(403).json({ error: "Not authorized" });
-      if (proposal.status !== "submitted")
-        return res.status(400).json({ error: "Can only delete submitted proposals" });
+
+      // Block if in transaction phase
+      const Payment = require("../model/Payment");
+      const payments = await Payment.countDocuments({ taskId: proposal.taskId?._id, vendorId: req.user._id });
+      if (payments > 0) {
+        return res.status(400).json({ error: "Cannot delete proposal in transaction phase" });
+      }
+
+      // If accepted, handle contract cancellation
+      if (proposal.status === "accepted") {
+          const Contract = require("../model/Contract");
+          const contract = await Contract.findOne({ taskId: proposal.taskId?._id, vendorId: req.user._id });
+          if (contract) {
+              contract.status = "cancelled";
+              contract.cancelledAt = new Date();
+              contract.cancellationReason = "Vendor withdrew proposal";
+              await contract.save();
+          }
+          
+          // Re-open the task if no other active vendor
+          const Task = require("../model/task");
+          await Task.findByIdAndUpdate(proposal.taskId?._id, {
+              status: "open",
+              selectedVendor: null
+          });
+      }
 
       await Proposal.findByIdAndDelete(req.params.id);
 
-      res.json({ message: "Proposal deleted" });
+      res.json({ message: "Proposal deleted successfully" });
 
       // Notify company
       try {
@@ -342,8 +419,8 @@ class ProposalController {
             type: "proposal_withdrawn",
             title: "Proposal Withdrawn",
             message: `${req.user.username} withdrew their proposal for "${proposal.taskId.title}"`,
-            data: { taskId: proposal.taskId._id, taskTitle: proposal.taskId.title },
-            relatedId: proposal.taskId._id,
+            data: { taskId: proposal.taskId?._id, taskTitle: proposal.taskId.title },
+            relatedId: proposal.taskId?._id,
             relatedModel: "Task",
             priority: "low",
           });

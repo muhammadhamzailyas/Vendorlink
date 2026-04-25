@@ -423,7 +423,6 @@ const UserProfile = ({ userType: propUserType }) => {
                         <Button
                         type="submit"
                         loading={isSubmitting}
-                        disabled={isSubmitting || !isValid}
                         className="w-full sm:w-auto font-black uppercase tracking-widest text-xs px-10 h-12 rounded-xl shadow-soft bg-foreground text-background hover:opacity-90 transition-all"
                         >
                         <FloppyDisk className="h-4 w-4 mr-2" />

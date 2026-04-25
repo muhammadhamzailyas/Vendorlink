@@ -439,6 +439,61 @@ exports.requestProjectCompletion = async (req, res) => {
   }
 };
 
+// Get project payment readiness summary (Company)
+exports.getPaymentReadiness = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const companyId = req.user._id.toString();
+
+    const contract = await Contract.findOne({ taskId, companyId });
+    if (!contract) return res.status(404).json({ success: false, error: "Contract not found" });
+
+    const wallet = await Wallet.findOne({ userId: companyId });
+    const totalPaid = contract.totalPaid || 0;
+    const remainingAmount = contract.totalBudget - totalPaid;
+    const companyBalance = wallet?.balance || 0;
+
+    res.json({
+      success: true,
+      data: {
+        totalBudget: contract.totalBudget,
+        totalPaid,
+        remainingAmount,
+        companyBalance,
+        isReady: companyBalance >= remainingAmount,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Get project payment summary (Role aware)
+exports.getPaymentSummary = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const userId = req.user._id.toString();
+
+    const contract = await Contract.findOne({ taskId, $or: [{ companyId: userId }, { vendorId: userId }] });
+    if (!contract) return res.status(404).json({ success: false, error: "Contract not found" });
+
+    const payment = await Payment.findOne({ contractId: contract._id, status: "completed" }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: {
+        amount: payment?.amount || 0,
+        vendorAmount: payment?.vendorAmount || 0,
+        platformFee: payment?.platformFee || 0,
+        paymentDate: payment?.paymentDate,
+        invoiceNumber: payment?.invoiceNumber,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // Approve project completion (Company)
 exports.approveProjectCompletion = async (req, res) => {
   const session = await mongoose.startSession();
@@ -458,6 +513,11 @@ exports.approveProjectCompletion = async (req, res) => {
     const totalAmount = contract.totalBudget;
     const totalPaid = contract.totalPaid || 0;
     const remainingAmount = totalAmount - totalPaid;
+
+    // Create unique invoice number: VL-YYMMDD-XXXX
+    const date = new Date();
+    const dateStr = date.toISOString().slice(2, 10).replace(/-/g, "");
+    const invoiceNumber = `VL-${dateStr}-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`;
 
     if (remainingAmount > 0) {
       // Check company wallet
@@ -499,6 +559,7 @@ exports.approveProjectCompletion = async (req, res) => {
         vendorAmount,
         paymentType: "full",
         status: "completed",
+        invoiceNumber,
         notes: "Automatic payment upon project completion approval.",
         createdBy: companyId,
         paymentDate: new Date(),
@@ -556,7 +617,7 @@ exports.approveProjectCompletion = async (req, res) => {
       } catch (e) { console.error(e); }
     }
 
-    res.json({ success: true, message: "Project completion approved and payment processed." });
+    res.json({ success: true, message: "Project completion approved and payment processed.", data: { invoiceNumber } });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();

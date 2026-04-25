@@ -120,6 +120,7 @@ const contractSchema = new mongoose.Schema({
 
   companyApproved: { type: Boolean, default: false },
   vendorApproved: { type: Boolean, default: false },
+  totalPaid: { type: Number, default: 0 },
   companyApprovedAt: Date,
   vendorApprovedAt: Date,
 

@@ -93,7 +93,8 @@ const MyProposals = lazy(() => import("./pages/vendor/MyProposals"));
 const VendorContracts = lazy(() => import("./pages/vendor/Contracts"));
 const VendorProfile = lazy(() => import("./pages/vendor/Profile"));
 const SharedSettings = lazy(() => import("./pages/shared/Settings"));
-const SharedFeedback = lazy(() => import("./pages/shared/Feedback"));
+const SharedFeedback = lazy(() => import("./pages/shared/FeedbackPage"));
+const AdminFeedback = lazy(() => import("./pages/admin/FeedbackPage"));
 const ChatPage = lazy(() => import("./pages/shared/ChatPage"));
 const NotificationsPage = lazy(() => import("./pages/shared/NotificationsPage"));
 const ContractDetail = lazy(() => import("./pages/shared/ContractDetail"));
@@ -191,6 +192,7 @@ const router = createBrowserRouter([
           { path: "payments", element: <AdminPayments /> },
           { path: "payments/:id", element: <AdminPaymentDetail /> },
           { path: "transactions", element: <AdminTransactions /> },
+          { path: "feedback", element: <AdminFeedback /> },
         ],
       },
       {

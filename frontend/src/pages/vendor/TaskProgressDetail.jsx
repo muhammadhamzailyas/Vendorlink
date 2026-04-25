@@ -39,6 +39,7 @@ const TaskProgressDetail = () => {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const [paymentSummary, setPaymentSummary] = useState(null);
   const [form, setForm] = useState({
     updateDate: new Date().toISOString().split("T")[0],
     comment: "",
@@ -53,6 +54,9 @@ const TaskProgressDetail = () => {
       setData(resData);
       if (resData?.currentProgress) {
         setForm(prev => ({ ...prev, percentage: resData.currentProgress }));
+      }
+      if (resData?.contract?.status === "completed") {
+        progressAPI.getPaymentSummary(taskId).then(res => setPaymentSummary(res.data?.data));
       }
     } catch {
       showToast("Failed to load progress", "error");
@@ -210,6 +214,19 @@ const TaskProgressDetail = () => {
             <Progress value={data?.currentProgress || 0} className="h-2.5" />
           </div>
         </DetailSection>
+
+        {isCompleted && paymentSummary && (
+            <DetailSection title="Final Payment Summary" description="Details of the finalized payment for this project.">
+                <Card className="bg-jade-500/5 border-jade-500/20 shadow-none p-5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <DetailMetaItem label="Amount Received" value={`$${paymentSummary.vendorAmount.toFixed(2)}`} />
+                        <DetailMetaItem label="Platform Fee" value={`$${paymentSummary.platformFee.toFixed(2)}`} />
+                        <DetailMetaItem label="Invoice" value={paymentSummary.invoiceNumber || "N/A"} />
+                        <DetailMetaItem label="Date Credited" value={formatDate(paymentSummary.paymentDate)} />
+                    </div>
+                </Card>
+            </DetailSection>
+        )}
 
         {showForm && (
           <DetailSection title="Add Progress Update" description="Submit a new progress checkpoint for this task.">

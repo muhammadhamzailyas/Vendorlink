@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,7 +15,7 @@ import {
 import { paymentAPI } from "@/services/paymentAPI";
 import { useWallet } from "@/context/WalletContext";
 import { showToast } from "@/lib/toast";
-import { Button, Input, Card, EmptyState, DataTable, StatCard, Badge, Separator } from "@/components/ui";
+import { Button, Input, Card, EmptyState, DataTable, StatCard, Badge, Dialog } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import dayjs from "dayjs";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -27,6 +27,9 @@ const depositSchema = z.object({
 const withdrawSchema = z.object({
   amount: z.coerce.number().min(5, "Minimum withdrawal is $5"),
   accountNumber: z.string().min(5, "Account number required"),
+  expiryMonth: z.string().min(2, "MM"),
+  expiryYear: z.string().min(2, "YY"),
+  cvc: z.string().min(3, "CVC required"),
 });
 
 const WalletDashboard = () => {
@@ -45,7 +48,7 @@ const WalletDashboard = () => {
 
   const withdrawForm = useForm({
     resolver: zodResolver(withdrawSchema),
-    defaultValues: { amount: "", accountNumber: "" },
+    defaultValues: { amount: "", accountNumber: "", expiryMonth: "", expiryYear: "", cvc: "" },
   });
 
   const depositMutation = useMutation({
@@ -127,190 +130,110 @@ const WalletDashboard = () => {
         <StatCard title="Gross Outflow" value={formatCurrency(wallet?.totalWithdrawn)} icon={<ArrowCircleDown />} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-2 space-y-8">
-            <Card className="shadow-soft border-border/50">
-                <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <Card.Title className="text-sm font-bold uppercase tracking-tight">Ledger & Pulse</Card.Title>
-                            <Card.Description className="text-xs">Latest wallet activity and transfer records.</Card.Description>
-                        </div>
-                        <Button variant="outline" size="xs" onClick={refreshWallet} className="font-bold uppercase tracking-tight bg-card">
-                            <ArrowsClockwise className="h-3.5 w-3.5 mr-1.5" />
-                            Sync Wallet
-                        </Button>
-                    </div>
-                </Card.Header>
-                <Card.Content className="p-0">
-                    {transactions.length === 0 ? (
-                        <EmptyState
-                        icon={Receipt}
-                        title="No transactions recorded"
-                        description="Your financial activity will appear here as you interact with the platform."
-                        className="border-0 bg-transparent py-16"
-                        />
-                    ) : (
-                        <>
-                            <DataTable
-                                data={transactions}
-                                sectionClassName="border-0 bg-transparent shadow-none"
-                                contentWrapperClassName="overflow-x-auto"
-                                tableClassName="w-full"
-                                showTableHeader
-                                columns={[
-                                    {
-                                    key: "type",
-                                    label: "Type",
-                                    cellClassName: "px-6 py-4",
-                                    render: (txn) => (
-                                        <Badge variant={typeColors[txn.type] || "outline"} className="font-bold uppercase tracking-widest text-[9px] px-2">
-                                        {txn.type}
-                                        </Badge>
-                                    ),
-                                    },
-                                    {
-                                    key: "amount",
-                                    label: "Amount",
-                                    cellClassName: "px-6 py-4",
-                                    render: (txn) => <span className="font-extrabold tracking-tighter text-foreground uppercase">${txn.amount?.toLocaleString()}</span>,
-                                    },
-                                    {
-                                    key: "status",
-                                    label: "Status",
-                                    cellClassName: "px-6 py-4",
-                                    render: (txn) => <StatusChip status={txn.status} />,
-                                    },
-                                    {
-                                    key: "createdAt",
-                                    label: "Timestamp",
-                                    cellClassName: "px-6 py-4",
-                                    render: (txn) => <span className="text-muted-foreground font-bold text-[11px] uppercase">{dayjs(txn.createdAt).format("MMM D, YYYY")}</span>,
-                                    },
-                                ]}
-                            />
-                            {pagination.pages > 1 && (
-                                <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-muted/10">
-                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                        Page {pagination.currentPage} of {pagination.pages}
-                                    </span>
-                                    <div className="flex gap-2">
-                                        <Button 
-                                            variant="outline" 
-                                            size="xs" 
-                                            disabled={pagination.currentPage <= 1}
-                                            onClick={() => loadWallet(pagination.currentPage - 1)}
-                                            className="h-8 px-3 font-bold uppercase tracking-tight text-[10px]"
-                                        >
-                                            Prev
-                                        </Button>
-                                        <Button 
-                                            variant="outline" 
-                                            size="xs" 
-                                            disabled={pagination.currentPage >= pagination.pages}
-                                            onClick={() => loadWallet(pagination.currentPage + 1)}
-                                            className="h-8 px-3 font-bold uppercase tracking-tight text-[10px]"
-                                        >
-                                            Next
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </Card.Content>
-            </Card>
-        </div>
-
-        <div className="space-y-6">
-            <Card className="shadow-soft border-border/50">
-                <Card.Header className="pb-3 border-b border-border/50 bg-muted/20 px-5 py-4">
-                    <Card.Title className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        <ShieldCheck className="h-3.5 w-3.5 text-foreground" />
-                        Treasury Actions
-                    </Card.Title>
-                </Card.Header>
-                <Card.Content className="p-5 space-y-6">
-                    <div className="flex flex-col gap-3">
-                        <Button
-                            variant={showDeposit ? "primary" : "secondary"}
-                            className="w-full justify-start h-12 rounded-xl font-bold uppercase tracking-tight shadow-xs px-4"
-                            onClick={() => { setShowDeposit(!showDeposit); setShowWithdraw(false); }}
-                        >
-                            <ArrowCircleUp className="h-5 w-5 mr-3 text-success" />
-                            Load Wallet (Stripe)
-                        </Button>
-                        <Button
-                            variant={showWithdraw ? "primary" : "secondary"}
-                            className="w-full justify-start h-12 rounded-xl font-bold uppercase tracking-tight shadow-xs px-4"
-                            onClick={() => { setShowWithdraw(!showWithdraw); setShowDeposit(false); }}
-                        >
-                            <ArrowCircleDown className="h-5 w-5 mr-3 text-warning" />
-                            Request Payout
-                        </Button>
-                    </div>
-
-                    {(showDeposit || showWithdraw) && <Separator className="opacity-50" />}
-
-                    {showDeposit && (
-                        <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
-                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Load Capital via Stripe</p>
-                            <form onSubmit={depositForm.handleSubmit(onDeposit)} className="space-y-4">
-                                <Input
-                                    label="USD Amount"
-                                    type="number"
-                                    placeholder="Min 10"
-                                    error={depositForm.formState.errors.amount?.message}
-                                    {...depositForm.register("amount")}
-                                    className="h-11 bg-muted/20"
-                                />
-                                <div className="p-3 border border-border/50 rounded-lg bg-card">
-                                    <CardElement />
-                                </div>
-                                <Button type="submit" loading={processing} className="w-full font-bold uppercase tracking-tight h-11">
-                                    Finalize Deposit
-                                </Button>
-                            </form>
-                        </div>
-                    )}
-
-                    {showWithdraw && (
-                        <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
-                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Asset Liquidation</p>
-                            <form onSubmit={withdrawForm.handleSubmit(onWithdraw)} className="space-y-4">
-                                <Input
-                                    label="USD Amount"
-                                    type="number"
-                                    placeholder="Min 5"
-                                    error={withdrawForm.formState.errors.amount?.message}
-                                    {...withdrawForm.register("amount")}
-                                    className="h-11 bg-muted/20"
-                                />
-                                <Input
-                                    label="Bank/Stripe Account Number"
-                                    placeholder="e.g., 1234567890"
-                                    error={withdrawForm.formState.errors.accountNumber?.message}
-                                    {...withdrawForm.register("accountNumber")}
-                                    className="h-11 bg-muted/20"
-                                />
-                                <Button type="submit" loading={withdrawMutation.isPending} variant="primary" className="w-full font-bold uppercase tracking-tight h-11 bg-warning hover:bg-warning-dark border-none">
-                                    Initiate Payout
-                                </Button>
-                            </form>
-                        </div>
-                    )}
-                </Card.Content>
-            </Card>
-
-            <Card className="border-ring/10 bg-muted/10 shadow-none">
-                <Card.Content className="p-4">
-                    <p className="text-[10px] font-bold leading-relaxed text-muted-foreground uppercase tracking-tight italic">
-                        All transactions are processed through encrypted channels and verified by the treasury audit team before settlement.
-                    </p>
-                </Card.Content>
-            </Card>
-        </div>
+      <div className="flex gap-4">
+        <Button onClick={() => setShowDeposit(true)} className="h-12 px-6 font-bold uppercase tracking-tight">
+          <ArrowCircleUp className="h-5 w-5 mr-2" /> Load Wallet
+        </Button>
+        <Button onClick={() => setShowWithdraw(true)} variant="secondary" className="h-12 px-6 font-bold uppercase tracking-tight">
+          <ArrowCircleDown className="h-5 w-5 mr-2" /> Request Payout
+        </Button>
       </div>
+
+      <Card className="shadow-soft border-border/50">
+          <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                      <Card.Title className="text-sm font-bold uppercase tracking-tight">Ledger & Pulse</Card.Title>
+                      <Card.Description className="text-xs">Latest wallet activity and transfer records.</Card.Description>
+                  </div>
+                  <Button variant="outline" size="xs" onClick={refreshWallet} className="font-bold uppercase tracking-tight bg-card">
+                      <ArrowsClockwise className="h-3.5 w-3.5 mr-1.5" />
+                      Sync Wallet
+                  </Button>
+              </div>
+          </Card.Header>
+          <Card.Content className="p-0">
+              {transactions.length === 0 ? (
+                  <EmptyState
+                  icon={Receipt}
+                  title="No transactions recorded"
+                  description="Your financial activity will appear here as you interact with the platform."
+                  className="border-0 bg-transparent py-16"
+                  />
+              ) : (
+                  <>
+                      <DataTable
+                          data={transactions}
+                          sectionClassName="border-0 bg-transparent shadow-none"
+                          contentWrapperClassName="overflow-x-auto"
+                          tableClassName="w-full"
+                          showTableHeader
+                          columns={[
+                              {
+                              key: "type",
+                              label: "Type",
+                              cellClassName: "px-6 py-4",
+                              render: (txn) => (
+                                  <Badge variant={typeColors[txn.type] || "outline"} className="font-bold uppercase tracking-widest text-[9px] px-2">
+                                  {txn.type}
+                                  </Badge>
+                              ),
+                              },
+                              {
+                              key: "amount",
+                              label: "Amount",
+                              cellClassName: "px-6 py-4",
+                              render: (txn) => <span className="font-extrabold tracking-tighter text-foreground uppercase">${txn.amount?.toLocaleString()}</span>,
+                              },
+                              {
+                              key: "status",
+                              label: "Status",
+                              cellClassName: "px-6 py-4",
+                              render: (txn) => <StatusChip status={txn.status} />,
+                              },
+                              {
+                              key: "createdAt",
+                              label: "Timestamp",
+                              cellClassName: "px-6 py-4",
+                              render: (txn) => <span className="text-muted-foreground font-bold text-[11px] uppercase">{dayjs(txn.createdAt).format("MMM D, YYYY")}</span>,
+                              },
+                          ]}
+                      />
+                  </>
+              )}
+          </Card.Content>
+      </Card>
+
+      {/* Deposit Dialog */}
+      <Dialog open={showDeposit} onX={() => setShowDeposit(false)} className="max-w-md">
+        <Dialog.Header onX={() => setShowDeposit(false)}>
+            <Dialog.Title>Load Wallet</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Body>
+            <form onSubmit={depositForm.handleSubmit(onDeposit)} className="space-y-4">
+                <Input label="Amount ($)" type="number" {...depositForm.register("amount")} />
+                <div className="p-3 border border-border/50 rounded-lg bg-card"><CardElement /></div>
+                <Button type="submit" loading={processing} className="w-full">Finalize Deposit</Button>
+            </form>
+        </Dialog.Body>
+      </Dialog>
+
+      {/* Withdraw Dialog */}
+      <Dialog open={showWithdraw} onX={() => setShowWithdraw(false)} className="max-w-md">
+        <Dialog.Header onX={() => setShowWithdraw(false)}>
+            <Dialog.Title>Request Payout</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Body>
+            <form onSubmit={withdrawForm.handleSubmit(onWithdraw)} className="space-y-4">
+                <Input label="Amount ($)" type="number" {...withdrawForm.register("amount")} />
+                <Input label="Card Number" {...withdrawForm.register("accountNumber")} />
+                <Input label="MM" {...withdrawForm.register("expiryMonth")} />
+                <Input label="YY" {...withdrawForm.register("expiryYear")} />
+                <Input label="CVC" {...withdrawForm.register("cvc")} />
+                <Button type="submit" loading={withdrawMutation.isPending} className="w-full">Initiate Payout</Button>
+            </form>
+        </Dialog.Body>
+      </Dialog>
     </div>
   );
 };

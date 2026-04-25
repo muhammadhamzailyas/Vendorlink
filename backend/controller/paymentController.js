@@ -92,8 +92,7 @@ class PaymentController {
       const stripeService = require("../services/stripeService");
       // Use paymentMethodId to confirm the payment
       const paymentIntent = await stripeService.createPaymentIntent(amount, "usd", {
-        companyId,
-        type: "wallet_deposit",
+        metadata: { companyId, type: "wallet_deposit" },
         payment_method: paymentMethodId,
         confirm: true,
         automatic_payment_methods: { enabled: true, allow_redirects: 'never' },

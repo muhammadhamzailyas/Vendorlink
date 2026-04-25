@@ -21,7 +21,8 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbPage,
-  BreadcrumbSeparator
+  BreadcrumbSeparator,
+  Dialog,
 } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import { DetailMetaGrid, DetailMetaItem, DetailSection } from "@/components/shared/DetailLayout";
@@ -32,11 +33,18 @@ const CompanyTaskProgressDetail = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);
+  const [readiness, setReadiness] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [paymentResult, setPaymentResult] = useState(null);
 
   const loadProgress = async () => {
     try {
-      const res = await progressAPI.getTaskProgress(taskId, true);
+      const [res, readinessRes] = await Promise.all([
+        progressAPI.getTaskProgress(taskId, true),
+        progressAPI.getPaymentReadiness(taskId)
+      ]);
       setData(res.data?.data || res.data);
+      setReadiness(readinessRes.data?.data || null);
     } catch {
       showToast("Failed to load progress", "error");
     } finally {
@@ -48,13 +56,13 @@ const CompanyTaskProgressDetail = () => {
     loadProgress();
   }, [taskId]);
 
-  const handleApproveCompletion = async () => {
-    if (!window.confirm("Are you sure you want to approve this project as completed? This will release the final payment from your wallet.")) return;
-    
+  const handleApprove = async () => {
     setApproving(true);
     try {
       const res = await progressAPI.approveCompletion(taskId);
+      setPaymentResult(res.data.data);
       showToast(res.data?.message || "Project completion approved!", "success");
+      setShowConfirmModal(false);
       loadProgress();
     } catch (err) {
       showToast(err.response?.data?.error || "Failed to approve completion", "error");
@@ -90,6 +98,7 @@ const CompanyTaskProgressDetail = () => {
   const { task, contract, vendor, progressUpdates, stats } = data;
   const isPendingCompletion = contract?.status === "pending-completion";
   const isCompleted = contract?.status === "completed";
+  const canApprove = isPendingCompletion && readiness?.isReady;
 
   return (
     <PageTransition>
@@ -116,9 +125,14 @@ const CompanyTaskProgressDetail = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {isPendingCompletion && (
+            {isPendingCompletion && !readiness?.isReady && (
+                <Link to="/company/payments">
+                    <Button variant="warning" size="xs" className="uppercase font-bold tracking-tight">Top Up Wallet</Button>
+                </Link>
+            )}
+            {canApprove && (
               <Button 
-                onClick={handleApproveCompletion} 
+                onClick={() => setShowConfirmModal(true)} 
                 variant="primary"
                 size="xs"
                 className="font-bold uppercase tracking-tight shadow-soft"
@@ -129,6 +143,33 @@ const CompanyTaskProgressDetail = () => {
             )}
           </div>
         </div>
+
+        {isPendingCompletion && readiness && (
+            <Card className={readiness.isReady ? "bg-jade-50/50 border-jade-200" : "bg-warning/5 border-warning/20"}>
+               <Card.Content className="p-4 space-y-3">
+                 <div className="flex justify-between items-center">
+                     <p className="font-bold text-sm">Payment Readiness Summary</p>
+                     <StatusChip status={readiness.isReady ? "paid" : "unpaid"} label={readiness.isReady ? "Ready to Pay" : "Insufficient Balance"} />
+                 </div>
+                 <div className="grid grid-cols-3 gap-2 text-xs">
+                    <p>Remaining: ${readiness.remainingAmount}</p>
+                    <p>Wallet: ${readiness.companyBalance}</p>
+                    <p className={readiness.isReady ? "text-jade-600 font-bold" : "text-warning font-bold"}>
+                        {readiness.isReady ? "Sufficient" : `Need $${readiness.remainingAmount - readiness.companyBalance}`}
+                    </p>
+                 </div>
+               </Card.Content>
+            </Card>
+        )}
+        
+        {paymentResult && (
+             <Card className="bg-jade-500/5 border-jade-500/20">
+                <Card.Content className="p-4">
+                    <p className="text-sm font-bold text-jade-700">Payment Processed Successfully</p>
+                    <p className="text-xs">Invoice: {paymentResult.invoiceNumber}</p>
+                </Card.Content>
+             </Card>
+        )}
 
         {isPendingCompletion && (
           <Card className="bg-warning/5 border-warning/20 shadow-none">
@@ -204,6 +245,26 @@ const CompanyTaskProgressDetail = () => {
             </div>
           )}
         </DetailSection>
+
+        {/* Confirmation Modal */}
+        <Dialog open={showConfirmModal} onX={() => setShowConfirmModal(false)}>
+            <Dialog.Header>
+                <Dialog.Title>Confirm & Release Payment</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+                <div className="space-y-4">
+                    <p className="text-sm">You are about to release final payment of <strong>${readiness?.remainingAmount}</strong> to {vendor?.username}.</p>
+                    <div className="bg-muted p-3 rounded-lg text-xs space-y-1">
+                        <div className="flex justify-between"><span>Vendor Receives</span><span>${(readiness?.remainingAmount * 0.95).toFixed(2)}</span></div>
+                        <div className="flex justify-between"><span>Platform Fee (5%)</span><span>${(readiness?.remainingAmount * 0.05).toFixed(2)}</span></div>
+                    </div>
+                </div>
+                <Dialog.Footer>
+                    <Button variant="ghost" onClick={() => setShowConfirmModal(false)}>Cancel</Button>
+                    <Button onClick={handleApprove} loading={approving}>Confirm & Release</Button>
+                </Dialog.Footer>
+            </Dialog.Body>
+        </Dialog>
       </div>
     </PageTransition>
   );

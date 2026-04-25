@@ -46,6 +46,7 @@ const MENU_CONFIG = {
       { text: "Reports", icon: Assessment, path: "/admin/reports" },
       { text: "Payments", icon: Wallet, path: "/admin/payments" },
       { text: "Transactions", icon: ArrowsLeftRight, path: "/admin/transactions" },
+      { text: "Feedback", icon: Feedback, path: "/admin/feedback" },
     ],
   },
   company: {

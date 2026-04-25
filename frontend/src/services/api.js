@@ -137,10 +137,12 @@ export const progressAPI = {
   getVendorActiveTasks: () => api.get("/progress/vendor/active-contracts"),
   getCompanyActiveTasks: () => api.get("/progress/company/active-contracts"),
   getTaskProgress: (taskId, isCompany = false) => 
-    api.get(isCompany ? `/progress/company/task/${taskId}` : `/progress/task/${taskId}`),
+    api.get(isCompany ? `/progress/company/task/${taskId}/progress` : `/progress/task/${taskId}`),
   addProgressUpdate: (taskId, data) => api.post(`/progress/task/${taskId}/update`, data),
   requestCompletion: (taskId) => api.post(`/progress/task/${taskId}/complete`),
   approveCompletion: (taskId) => api.post(`/progress/company/task/${taskId}/approve-completion`),
+  getPaymentReadiness: (taskId) => api.get(`/progress/task/${taskId}/payment-readiness`),
+  getPaymentSummary: (taskId) => api.get(`/progress/task/${taskId}/payment-summary`),
   getProgressHistory: (taskId, isCompany = false) => 
     api.get(isCompany ? `/progress/company/task/${taskId}/history` : `/progress/task/${taskId}/history`),
   exportReport: (taskId) => api.get(`/progress/company/task/${taskId}/export`, { responseType: 'blob' }),

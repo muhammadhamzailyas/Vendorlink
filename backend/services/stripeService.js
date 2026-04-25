@@ -9,22 +9,31 @@ class StripeService {
   /**
    * Create a PaymentIntent for a specific amount and currency
    */
-  async createPaymentIntent(amount, currency = "usd", metadata = {}) {
+  async createPaymentIntent(amount, currency = "usd", options = {}) {
     try {
       if (!stripe) {
         throw new Error("Stripe is not configured. Please check STRIPE_SECRET_KEY.");
       }
 
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Stripe expects cents
+      const { metadata = {}, automatic_payment_methods, ...rest } = options;
+
+      const params = {
+        amount: Math.round(amount * 100),
         currency,
         metadata,
-        payment_method_types: ["card"], // Specifically target cards only
-      });
+        ...rest,
+      };
+
+      if (automatic_payment_methods) {
+        params.automatic_payment_methods = automatic_payment_methods;
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create(params);
 
       return {
         clientSecret: paymentIntent.client_secret,
         id: paymentIntent.id,
+        status: paymentIntent.status,
       };
     } catch (error) {
       console.error("Stripe error:", error.message);

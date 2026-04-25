@@ -34,7 +34,7 @@ const contractSchema = new mongoose.Schema({
   vendorApproach: String,
 
   totalBudget: { type: Number, required: true },
-  currency: { type: String, default: "PKR" },
+  currency: { type: String, default: "USD" },
 
   projectStartDate: { type: Date, required: true },
   projectEndDate: { type: Date, required: true },

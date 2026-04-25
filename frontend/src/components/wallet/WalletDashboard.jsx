@@ -21,12 +21,12 @@ import FormSection, { FormFieldGrid } from "@/components/shared/FormSection";
 import dayjs from "dayjs";
 
 const depositSchema = z.object({
-  amount: z.coerce.number().min(100, "Minimum deposit is PKR 100"),
+  amount: z.coerce.number().min(10, "Minimum deposit is $10"),
   paymentMethod: z.enum(["bank_transfer", "jazzcash", "easypaisa"]),
 });
 
 const withdrawSchema = z.object({
-  amount: z.coerce.number().min(500, "Minimum withdrawal is PKR 500"),
+  amount: z.coerce.number().min(5, "Minimum withdrawal is $5"),
   paymentMethod: z.enum(["bank_transfer", "jazzcash", "easypaisa"]),
 });
 
@@ -48,7 +48,7 @@ const WalletDashboard = () => {
   const depositMutation = useMutation({
     mutationFn: (data) => paymentAPI.depositMoney(data),
     onSuccess: (_, data) => {
-      showToast("success", `PKR ${data.amount.toLocaleString()} deposited successfully`);
+      showToast("success", `$${data.amount.toLocaleString()} deposited successfully`);
       depositForm.reset();
       setShowDeposit(false);
       refreshWallet();
@@ -155,7 +155,7 @@ const WalletDashboard = () => {
                                     key: "amount",
                                     label: "Amount",
                                     cellClassName: "px-6 py-4",
-                                    render: (txn) => <span className="font-extrabold tracking-tighter text-foreground uppercase">PKR {txn.amount?.toLocaleString()}</span>,
+                                    render: (txn) => <span className="font-extrabold tracking-tighter text-foreground uppercase">${txn.amount?.toLocaleString()}</span>,
                                     },
                                     {
                                     key: "status",
@@ -239,9 +239,9 @@ const WalletDashboard = () => {
                             <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Load Capital</p>
                             <form onSubmit={depositForm.handleSubmit(onDeposit)} className="space-y-4">
                                 <Input
-                                    label="PKR Amount"
+                                    label="USD Amount"
                                     type="number"
-                                    placeholder="Min 100"
+                                    placeholder="Min 10"
                                     error={depositForm.formState.errors.amount?.message}
                                     {...depositForm.register("amount")}
                                     className="h-11 bg-muted/20"
@@ -264,9 +264,9 @@ const WalletDashboard = () => {
                             <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Asset Liquidation</p>
                             <form onSubmit={withdrawForm.handleSubmit(onWithdraw)} className="space-y-4">
                                 <Input
-                                    label="PKR Amount"
+                                    label="USD Amount"
                                     type="number"
-                                    placeholder="Min 500"
+                                    placeholder="Min 5"
                                     error={withdrawForm.formState.errors.amount?.message}
                                     {...withdrawForm.register("amount")}
                                     className="h-11 bg-muted/20"

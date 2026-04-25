@@ -19,7 +19,7 @@ const WalletProvider = ({ children }) => {
     totalDeposited: 0,
     totalWithdrawn: 0,
     totalReceived: 0,
-    currency: "PKR",
+    currency: "USD",
   });
   const [transactions, setTransactions] = useState([]);
   const [pagination, setPagination] = useState({
@@ -106,7 +106,7 @@ const WalletProvider = ({ children }) => {
         totalDeposited: 0,
         totalWithdrawn: 0,
         totalReceived: 0,
-        currency: "PKR",
+        currency: "USD",
       });
       setTransactions([]);
     }
@@ -119,8 +119,8 @@ const WalletProvider = ({ children }) => {
   }, [checkAuth, loadWallet]);
 
   const formatCurrency = useCallback((amount) => {
-    if (amount === undefined || amount === null) return "PKR 0";
-    return `PKR ${amount.toLocaleString()}`;
+    if (amount === undefined || amount === null) return "$0";
+    return `$${amount.toLocaleString()}`;
   }, []);
 
   const value = {

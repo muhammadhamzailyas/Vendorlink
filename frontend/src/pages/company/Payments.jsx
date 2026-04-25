@@ -71,7 +71,7 @@ const CompanyPayments = () => {
 
   const handleMakePayment = (task) => {
     if ((wallet?.balance || 0) < task.pendingAmount) {
-      showToast("error", `Insufficient balance. Please deposit PKR ${task.pendingAmount - (wallet?.balance || 0)} more.`);
+      showToast("error", `Insufficient balance. Please deposit $${task.pendingAmount - (wallet?.balance || 0)} more.`);
       setTabValue(1);
       return;
     }
@@ -211,7 +211,7 @@ const CompanyPayments = () => {
           <Dialog.Body>
             <form onSubmit={form.handleSubmit(onPaymentSubmit)} className="space-y-4">
             <Input
-              label="Amount (PKR)"
+              label="Amount ($)"
               type="number"
               placeholder={`Max: ${selectedTask?.pendingAmount}`}
               error={form.formState.errors.amount?.message}
@@ -238,15 +238,15 @@ const CompanyPayments = () => {
             <div className="rounded-lg bg-muted p-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Amount</span>
-                <span>PKR {parseFloat(watchAmount || 0).toLocaleString()}</span>
+                <span>${parseFloat(watchAmount || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Platform Fee (5%)</span>
-                <span>PKR {(parseFloat(watchAmount || 0) * 0.05).toLocaleString()}</span>
+                <span>${(parseFloat(watchAmount || 0) * 0.05).toLocaleString()}</span>
               </div>
               <div className="mt-1 flex justify-between border-t border-border pt-1 font-semibold">
                 <span>Vendor Receives</span>
-                <span>PKR {(parseFloat(watchAmount || 0) * 0.95).toLocaleString()}</span>
+                <span>${(parseFloat(watchAmount || 0) * 0.95).toLocaleString()}</span>
               </div>
             </div>
 
@@ -267,6 +267,7 @@ const CompanyPayments = () => {
 };
 
 export default CompanyPayments;
+
 
 
 

@@ -41,6 +41,20 @@ const taskSchema = new mongoose.Schema({
     ref: "User",
     default: null,
   },
+  skills: [{
+    type: String,
+    trim: true
+  }],
+  priority: {
+    type: String,
+    enum: ["low", "medium", "high", "urgent"],
+    default: "medium"
+  },
+  taskType: {
+    type: String,
+    enum: ["fixed-price", "hourly", "milestone-based"],
+    default: "fixed-price"
+  },
   createdAt: {
     type: Date,
     default: Date.now,

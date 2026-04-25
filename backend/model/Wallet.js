@@ -31,7 +31,7 @@ const walletSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: "PKR",
+      default: "USD",
     },
     status: {
       type: String,

@@ -230,7 +230,7 @@ const VendorPayments = () => {
             </div>
             <form onSubmit={form.handleSubmit(onRequestSubmit)} className="space-y-6">
               <Input
-                label="Requested PKR Amount"
+                label="Requested $Amount"
                 type="number"
                 error={form.formState.errors.amount?.message}
                 {...form.register("amount")}
@@ -262,6 +262,7 @@ const VendorPayments = () => {
 };
 
 export default VendorPayments;
+
 
 
 

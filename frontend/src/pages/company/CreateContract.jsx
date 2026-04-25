@@ -331,7 +331,7 @@ const CreateContract = () => {
             <FormSection
               title="Milestones & Budget"
               description="Break work into milestones with amount and deadline expectations."
-              actions={<span className="text-xs font-bold uppercase tracking-tight text-muted-foreground">Total: PKR {totalBudget.toLocaleString()}</span>}
+              actions={<span className="text-xs font-bold uppercase tracking-tight text-muted-foreground">Total: ${totalBudget.toLocaleString()}</span>}
             >
               {fields.map((field, index) => (
                 <Card key={field.id} className="border-dashed shadow-none bg-card/50">
@@ -370,7 +370,7 @@ const CreateContract = () => {
                         name={`milestones.${index}.amount`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Amount (PKR)</FormLabel>
+                            <FormLabel>Amount ($)</FormLabel>
                             <FormControl>
                               <Input type="number" {...field} />
                             </FormControl>
@@ -649,3 +649,4 @@ const CreateContract = () => {
 };
 
 export default CreateContract;
+

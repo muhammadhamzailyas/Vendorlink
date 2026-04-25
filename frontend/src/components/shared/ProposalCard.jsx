@@ -56,7 +56,7 @@ const ProposalCard = ({
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Bid Amount</span>
                 <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
                   <CurrencyDollar className="h-4 w-4 text-success" />
-                  <span>PKR {proposal.bidAmount?.toLocaleString()}</span>
+                  <span>${proposal.bidAmount?.toLocaleString()}</span>
                 </div>
               </div>
             )}
@@ -131,6 +131,7 @@ const ProposalCard = ({
   );
 };
 export default ProposalCard;
+
 
 
 

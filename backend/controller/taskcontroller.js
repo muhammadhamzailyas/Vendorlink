@@ -10,7 +10,7 @@ class TaskController {
   // Create Task
   async createTask(req, res) {
     try {
-      const { title, description, requirements, budget, deadline, category } =
+      const { title, description, requirements, budget, deadline, category, skills, priority, taskType } =
         req.body;
 
       if (
@@ -21,7 +21,7 @@ class TaskController {
         !deadline ||
         !category
       ) {
-        return res.status(400).json({ error: "All fields are required" });
+        return res.status(400).json({ error: "Required fields are missing (Title, Description, Requirements, Budget, Deadline, Category)" });
       }
 
       if (new Date(deadline) <= new Date()) {
@@ -37,12 +37,15 @@ class TaskController {
         budget,
         deadline,
         category,
+        skills: Array.isArray(skills) ? skills : [],
+        priority: priority || "medium",
+        taskType: taskType || "fixed-price",
         companyId: req.user._id,
       });
 
       await task.save();
 
-      res.status(201).json("Task added successfully");
+      res.status(201).json({ message: "Task added successfully", taskId: task._id });
 
       // Notify admins and all vendors about new task
       try {

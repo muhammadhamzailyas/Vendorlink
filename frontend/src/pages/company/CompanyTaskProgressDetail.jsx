@@ -70,7 +70,7 @@ const CompanyTaskProgressDetail = () => {
       <DetailSection title={task?.title || "Task"} description={task?.description || "Task progress detail summary."}>
         <DetailMetaGrid>
           <DetailMetaItem label="Vendor" value={task?.vendorName || "N/A"} />
-          <DetailMetaItem label="Budget" value={`PKR ${(task?.budget || 0).toLocaleString()}`} />
+          <DetailMetaItem label="Budget" value={`$${(task?.budget || 0).toLocaleString()}`} />
           <DetailMetaItem label="Deadline" value={task?.deadline ? formatDate(task.deadline) : "N/A"} />
           <DetailMetaItem label="Current Status" value={<StatusChip status={stats?.currentStatus?.replace("_", "-") || "in-progress"} />} />
         </DetailMetaGrid>
@@ -128,6 +128,7 @@ const CompanyTaskProgressDetail = () => {
 };
 
 export default CompanyTaskProgressDetail;
+
 
 
 

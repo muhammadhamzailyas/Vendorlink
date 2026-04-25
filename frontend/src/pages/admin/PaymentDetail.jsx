@@ -145,15 +145,15 @@ const PaymentDetail = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
                 <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Gross Amount</p>
-                    <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">PKR {payment.amount?.toLocaleString()}</p>
+                    <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">${payment.amount?.toLocaleString()}</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Platform Revenue</p>
-                    <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">PKR {payment.platformFee?.toLocaleString()}</p>
+                    <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">${payment.platformFee?.toLocaleString()}</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-jade-400/10 border border-jade-600/20">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-jade-600/60 mb-1.5">Net Payout</p>
-                    <p className="text-2xl font-extrabold text-jade-600 tracking-tighter uppercase">PKR {payment.vendorAmount?.toLocaleString()}</p>
+                    <p className="text-2xl font-extrabold text-jade-600 tracking-tighter uppercase">${payment.vendorAmount?.toLocaleString()}</p>
                 </div>
             </div>
 
@@ -262,6 +262,7 @@ const PaymentDetail = () => {
 };
 
 export default PaymentDetail;
+
 
 
 

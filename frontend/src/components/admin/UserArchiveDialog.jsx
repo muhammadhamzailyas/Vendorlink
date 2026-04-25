@@ -21,7 +21,7 @@ import {
 import StatusChip from "@/components/shared/StatusChip";
 import UserAvatar from "@/components/shared/UserAvatar";
 
-const formatMoney = (value, currency = "PKR") => {
+const formatMoney = (value, currency = "$") => {
   const amount = Number(value || 0);
 
   try {
@@ -65,7 +65,7 @@ const UserArchiveDialog = ({
   const warnings = briefing?.warnings || [];
   const impactSummary = briefing?.impactSummary;
   const resultIfConfirmed = briefing?.resultIfConfirmed;
-  const currency = impactSummary?.money?.currency || "PKR";
+  const currency = impactSummary?.money?.currency || "$";
   const isDeactivate = mode === "deactivate";
   
   const canConfirm =
@@ -275,3 +275,4 @@ const UserArchiveDialog = ({
 };
 
 export default UserArchiveDialog;
+

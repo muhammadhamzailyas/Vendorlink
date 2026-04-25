@@ -55,7 +55,7 @@ const DetailProposalCard = ({
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Bid Amount</span>
             <p className="flex items-center text-sm font-bold text-foreground">
               <CurrencyDollar className="h-4 w-4 mr-1.5 text-success" />
-              PKR {proposal.bidAmount?.toLocaleString()}
+              ${proposal.bidAmount?.toLocaleString()}
             </p>
           </div>
           <div className="flex flex-col gap-0.5">
@@ -168,6 +168,7 @@ const DetailProposalCard = ({
 };
 
 export default DetailProposalCard;
+
 
 
 

@@ -14,7 +14,7 @@ const DetailTask = ({ task, proposals, formatDate }) => {
           <p className="text-sm leading-6 text-foreground/80">{task.description || "No task description provided."}</p>
 
           <DetailMetaGrid>
-            <DetailMetaItem label="Budget" value={`PKR ${(task.budget || 0).toLocaleString()}`} />
+            <DetailMetaItem label="Budget" value={`$${(task.budget || 0).toLocaleString()}`} />
             <DetailMetaItem label="Deadline" value={task.deadline ? formatDate(task.deadline) : "N/A"} />
             <DetailMetaItem label="Category" value={task.category || "N/A"} />
             <DetailMetaItem label="Proposals" value={String(proposals.length)} />
@@ -32,6 +32,7 @@ const DetailTask = ({ task, proposals, formatDate }) => {
 };
 
 export default DetailTask;
+
 
 
 

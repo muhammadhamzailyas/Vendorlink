@@ -202,7 +202,6 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <CompanyDashboard /> },
           { path: "add-task", element: <AddTaskForm /> },
-          { path: "vendor-marketplace", element: <VendorMarketplace /> },
           { path: "my-tasks", element: <MyTaskPage /> },
           { path: "contract", element: <SharedContract /> },
           { path: "contracts", element: <CompanyContracts /> },

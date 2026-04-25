@@ -957,7 +957,7 @@ class AdminController {
       warnings,
       impactSummary: {
         money: {
-          currency: wallet?.currency || "PKR",
+          currency: wallet?.currency || "USD",
           walletBalance,
           lockedBalance,
           pendingPayments: {

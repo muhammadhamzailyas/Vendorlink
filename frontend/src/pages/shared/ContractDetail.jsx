@@ -251,7 +251,7 @@ const ContractDetail = () => {
                                             {m.deadline ? formatDate(m.deadline) : "N/A"}
                                         </TableCell>
                                         <TableCell className="text-sm font-bold text-foreground">
-                                            PKR {m.amount?.toLocaleString()}
+                                            ${m.amount?.toLocaleString()}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <StatusChip status={m.status || "pending"} />
@@ -444,6 +444,7 @@ const ContractDetail = () => {
 };
 
 export default ContractDetail;
+
 
 
 

@@ -704,8 +704,8 @@ exports.downloadContract = async (req, res) => {
     }
 
     const esc = (str) => String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    const formatDate = (date) => date ? new Date(date).toLocaleDateString("en-PK", { year: "numeric", month: "long", day: "numeric" }) : "Not set";
-    const formatCurrency = (amount) => `Rs. ${(amount || 0).toLocaleString("en-PK")}`;
+    const formatDate = (date) => date ? new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "Not set";
+    const formatCurrency = (amount) => `$${(amount || 0).toLocaleString("en-US")}`;
 
     const html = `<!DOCTYPE html><html><head><title>Contract - ${esc(contract.title)}</title>
 <style>body{font-family:'Times New Roman',serif;margin:40px;line-height:1.6}h1{text-align:center;border-bottom:2px solid #333;padding-bottom:10px}h2{color:#444;margin-top:30px;font-size:18px}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #ddd;padding:10px;text-align:left}th{background:#f5f5f5}</style></head>

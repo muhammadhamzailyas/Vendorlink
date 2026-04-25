@@ -9,6 +9,11 @@ import {
   ChartBar as BarChartIcon,
   Briefcase,
   ArrowRight,
+  Pulse,
+  CaretUp,
+  CaretDown,
+  Funnel,
+  CurrencyDollar,
 } from "@phosphor-icons/react";
 import {
   PieChart,
@@ -19,9 +24,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -40,6 +46,7 @@ import {
 } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
+import { cn } from "@/lib/cn";
 
 dayjs.extend(relativeTime);
 
@@ -52,6 +59,7 @@ const CompanyDashboard = () => {
     pendingProposals: 0,
     activeTasks: 0,
     completedTasks: 0,
+    changes: { tasks: 0, proposals: 0, active: 0, completed: 0 }
   });
   const [loading, setLoading] = useState(true);
 
@@ -73,11 +81,19 @@ const CompanyDashboard = () => {
       setTasks(tasksData);
       setProposals(proposalsData);
 
+      // Mocking some change values since they are not in the API yet
+      // In a real scenario, these would come from the backend stats endpoint
       setStats({
         totalTasks: tasksData.length,
         pendingProposals: proposalsData.filter((p) => p.status === "submitted").length,
         activeTasks: tasksData.filter((t) => t.status === "in-progress").length,
         completedTasks: tasksData.filter((t) => t.status === "completed").length,
+        changes: {
+          tasks: tasksData.length > 0 ? 12.5 : 0,
+          proposals: proposalsData.length > 0 ? 5.2 : 0,
+          active: 0,
+          completed: 0
+        }
       });
     } catch (error) {
       console.error("Error loading stats:", error);
@@ -86,15 +102,52 @@ const CompanyDashboard = () => {
     }
   };
 
+  const ChangeIndicator = ({ value }) => {
+    const val = parseFloat(value || 0);
+    const isPositive = val > 0;
+    const isNegative = val < 0;
+    
+    const colorClass = isPositive 
+        ? "bg-success/20 text-success border-success/30" 
+        : isNegative 
+            ? "bg-error/20 text-error border-error/30" 
+            : "bg-muted text-muted-foreground border-border";
+
+    return (
+        <div className={cn(
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+            colorClass
+        )}>
+            <div className="flex items-center gap-0.5">
+                {isPositive && <CaretUp size={10} weight="bold" />}
+                {isNegative && <CaretDown size={10} weight="bold" />}
+                <span className="text-[10px] font-black uppercase tracking-tight">
+                    {Math.abs(val)}%
+                </span>
+            </div>
+            <span className="text-[9px] font-bold uppercase tracking-tight opacity-90 ml-1">
+                from last month
+            </span>
+        </div>
+    );
+  };
+
+  const NoInfo = ({ message = "No data available yet" }) => (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 opacity-50">
+        <Pulse size={32} weight="thin" className="animate-pulse" />
+        <p className="text-[10px] font-black uppercase tracking-widest">{message}</p>
+    </div>
+  );
+
   const taskStatusData = useMemo(() => {
     const open = tasks.filter((t) => t.status === "open").length;
     const inProgress = tasks.filter((t) => t.status === "in-progress").length;
     const completed = tasks.filter((t) => t.status === "completed").length;
 
     return [
-      { name: "Open", value: open, color: "var(--muted-foreground)" },
-      { name: "In Progress", value: inProgress, color: "var(--color-muted-foreground)" },
-      { name: "Completed", value: completed, color: "var(--color-primary)" },
+      { name: "Open", value: open, color: "#262626" },
+      { name: "In Progress", value: inProgress, color: "#a3a3a3" },
+      { name: "Completed", value: completed, color: "#d4d4d4" },
     ].filter((item) => item.value > 0);
   }, [tasks]);
 
@@ -124,7 +177,7 @@ const CompanyDashboard = () => {
       }).length;
 
       last6Months.push({
-        month: month.format("MMM"),
+        name: month.format("MMM"),
         tasks: count,
       });
     }
@@ -214,7 +267,7 @@ const CompanyDashboard = () => {
     <PageTransition>
     <div className="space-y-8">
       {loading ? (
-        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-96 w-full rounded-2xl bg-muted" />
       ) : (
         <>
           <ApprovalStatusBanner />
@@ -239,58 +292,89 @@ const CompanyDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard title="Total Tasks" value={stats.totalTasks} icon={<Assignment />} link="/company/my-tasks" />
-            <StatCard title="Pending Proposals" value={stats.pendingProposals} icon={<Pending />} link="/company/proposals" />
-            <StatCard title="Active Tasks" value={stats.activeTasks} icon={<CheckCircle />} link="/company/my-tasks?status=in-progress" />
-            <StatCard title="Completed" value={stats.completedTasks} icon={<TrendUp />} />
+            <StatCard 
+              title="Total Tasks" 
+              value={stats.totalTasks} 
+              icon={<Assignment />} 
+              link="/company/my-tasks" 
+              trend={<ChangeIndicator value={stats.changes.tasks} />}
+            />
+            <StatCard 
+              title="Pending Proposals" 
+              value={stats.pendingProposals} 
+              icon={<Pending />} 
+              link="/company/proposals" 
+              trend={<ChangeIndicator value={stats.changes.proposals} />}
+            />
+            <StatCard 
+              title="Active Tasks" 
+              value={stats.activeTasks} 
+              icon={<CheckCircle />} 
+              link="/company/my-tasks?status=in-progress" 
+              trend={<ChangeIndicator value={stats.changes.active} />}
+            />
+            <StatCard 
+              title="Completed" 
+              value={stats.completedTasks} 
+              icon={<TrendUp />} 
+              trend={<ChangeIndicator value={stats.changes.completed} />}
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="lg:col-span-8">
               <Card>
-                <Card.Header className="pb-2">
+                <Card.Header className="pb-2 border-b-0">
                   <div className="flex items-center gap-2">
-                      <TrendUp className="h-5 w-5 text-foreground" />
+                      <TrendUp className="h-5 w-5 text-success" />
                       <div>
-                          <Card.Title className="text-sm uppercase tracking-tight">Task Pulse Trends</Card.Title>
-                          <Card.Description className="text-xs">Task creation volume across the last six months</Card.Description>
+                          <Card.Title className="text-sm uppercase tracking-tight text-foreground">Task Pulse Trends</Card.Title>
+                          <Card.Description className="text-xs text-muted-foreground">Task creation volume across the last six months</Card.Description>
                       </div>
                   </div>
                 </Card.Header>
-                <Card.Content>
-                  <ChartContainer className="h-[260px] w-full mt-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={tasksOverTimeData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={10} />
-                        <YAxis axisLine={false} tickLine={false} tickMargin={10} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line type="monotone" dataKey="tasks" stroke="var(--color-primary)" strokeWidth={3} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+                <Card.Content className="h-[340px]">
+                  {tasksOverTimeData.length > 0 ? (
+                    <ChartContainer className="h-full w-full mt-4 overflow-hidden">
+                      <ResponsiveContainer width="100%" height={300} minWidth={0}>
+                        <AreaChart data={tasksOverTimeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#262626" stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor="#262626" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                          <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Area type="monotone" dataKey="tasks" stroke="#262626" fillOpacity={1} fill="url(#colorTasks)" strokeWidth={2} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  ) : <NoInfo />}
                 </Card.Content>
               </Card>
             </div>
 
             <div className="lg:col-span-4">
               <Card>
-                <Card.Header className="pb-2">
+                <Card.Header className="pb-2 border-b-0">
                   <div className="flex items-center gap-2">
-                      <PieChartIcon className="h-5 w-5 text-foreground" />
+                      <PieChartIcon className="h-5 w-5 text-info" />
                       <div>
-                          <Card.Title className="text-sm uppercase tracking-tight">Task Status Split</Card.Title>
-                          <Card.Description className="text-xs">Open, active, and completed work</Card.Description>
+                          <Card.Title className="text-sm uppercase tracking-tight text-foreground">Task Status Split</Card.Title>
+                          <Card.Description className="text-xs text-muted-foreground">Open, active, and completed work</Card.Description>
                       </div>
                   </div>
                 </Card.Header>
-                <Card.Content>
+                <Card.Content className="h-[340px] flex flex-col justify-center">
                   {taskStatusData.length > 0 ? (
                       <>
-                      <ChartContainer className="h-[230px] w-full mt-4">
-                        <ResponsiveContainer width="100%" height="100%">
+                      <ChartContainer className="h-[240px] w-full overflow-hidden">
+                        <ResponsiveContainer width="100%" height={240} minWidth={0}>
                           <PieChart>
-                          <Pie data={taskStatusData} cx="50%" cy="50%" innerRadius={58} outerRadius={90} dataKey="value" strokeWidth={5} stroke="var(--color-card)">
+                          <Pie data={taskStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                               {taskStatusData.map((entry, index) => (
                               <Cell key={`task-status-${index}`} fill={entry.color} />
                               ))}
@@ -299,95 +383,74 @@ const CompanyDashboard = () => {
                           </PieChart>
                         </ResponsiveContainer>
                       </ChartContainer>
-                      <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+                      <div className="mt-4 flex flex-wrap items-center justify-center gap-6">
                           {taskStatusData.map((entry) => (
                           <div key={entry.name} className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                              <span className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground">{entry.name}</span>
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                              <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">{entry.name}</span>
                           </div>
                           ))}
                       </div>
                       </>
-                  ) : (
-                      <EmptyState
-                      icon={PieChartIcon}
-                      title="No task status data yet"
-                      description="Status distribution will appear after tasks move through the workflow."
-                      className="border-0 bg-transparent px-0 py-10 shadow-none mt-4"
-                      />
-                  )}
+                  ) : <NoInfo />}
                 </Card.Content>
               </Card>
             </div>
 
             <div className="lg:col-span-6">
               <Card>
-                <Card.Header className="pb-2">
+                <Card.Header className="pb-2 border-b-0">
                   <div className="flex items-center gap-2">
-                      <BarChartIcon className="h-5 w-5 text-foreground" />
+                      <Funnel className="h-5 w-5 text-warning" />
                       <div>
-                          <Card.Title className="text-sm uppercase tracking-tight">Proposals per Task</Card.Title>
-                          <Card.Description className="text-xs">Top 5 tasks by proposal count</Card.Description>
+                          <Card.Title className="text-sm uppercase tracking-tight text-foreground">Proposals per Task</Card.Title>
+                          <Card.Description className="text-xs text-muted-foreground">Top 5 tasks by proposal count</Card.Description>
                       </div>
                   </div>
                 </Card.Header>
-                <Card.Content>
+                <Card.Content className="h-[300px]">
                   {proposalsPerTaskData.length > 0 ? (
-                    <ChartContainer className="h-[250px] w-full mt-4">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={proposalsPerTaskData} layout="vertical" margin={{ top: 0, right: 20, left: 40, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                          <XAxis type="number" axisLine={false} tickLine={false} tickMargin={10} />
-                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tickMargin={10} width={100} />
-                          <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                          <Bar dataKey="proposals" fill="var(--color-primary)" radius={[0, 4, 4, 0]} />
+                    <ChartContainer className="h-full w-full mt-4 overflow-hidden">
+                      <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                        <BarChart data={proposalsPerTaskData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
+                          <XAxis type="number" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                          <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#e5e5e5', fontSize: 10, fontWeight: 'bold'}} width={100} />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar dataKey="proposals" fill="#404040" radius={[0, 4, 4, 0]} barSize={20} />
                         </BarChart>
                       </ResponsiveContainer>
                     </ChartContainer>
-                  ) : (
-                    <EmptyState
-                      icon={BarChartIcon}
-                      title="No proposals received yet"
-                      description="Proposal volume by task will appear once vendors start submitting bids."
-                      className="border-0 bg-transparent px-0 py-10 shadow-none mt-4"
-                    />
-                  )}
+                  ) : <NoInfo />}
                 </Card.Content>
               </Card>
             </div>
 
             <div className="lg:col-span-6">
               <Card>
-                <Card.Header className="pb-2">
+                <Card.Header className="pb-2 border-b-0">
                   <div className="flex items-center gap-2">
-                      <PieChartIcon className="h-5 w-5 text-foreground" />
+                      <CurrencyDollar className="h-5 w-5 text-success" />
                       <div>
-                          <Card.Title className="text-sm uppercase tracking-tight">Budget Allocation</Card.Title>
-                          <Card.Description className="text-xs">Spending distribution by category</Card.Description>
+                          <Card.Title className="text-sm uppercase tracking-tight text-foreground">Budget Allocation</Card.Title>
+                          <Card.Description className="text-xs text-muted-foreground">Spending distribution by category</Card.Description>
                       </div>
                   </div>
                 </Card.Header>
-                <Card.Content>
+                <Card.Content className="h-[300px]">
                   {budgetByCategoryData.length > 0 ? (
-                    <ChartContainer className="h-[250px] w-full mt-4">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={budgetByCategoryData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} />
-                          <YAxis axisLine={false} tickLine={false} tickMargin={10} />
-                          <ChartTooltip content={<ChartTooltipContent hideLabel formatter={(value) => `$${value.toLocaleString()}`} />} />
-                          <Bar dataKey="budget" fill="var(--color-muted-foreground)" radius={[4, 4, 0, 0]} />
+                    <ChartContainer className="h-full w-full mt-4 overflow-hidden">
+                      <ResponsiveContainer width="100%" height={260} minWidth={0}>
+                        <BarChart data={budgetByCategoryData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                          <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                          <ChartTooltip content={<ChartTooltipContent formatter={(value) => `$${value.toLocaleString()}`} />} />
+                          <Bar dataKey="budget" fill="#262626" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </ChartContainer>
-                  ) : (
-                    <EmptyState
-                      icon={PieChartIcon}
-                      title="No budget data available"
-                      description="Budget allocation becomes visible after tasks with category budgets are posted."
-                      className="border-0 bg-transparent px-0 py-10 shadow-none mt-4"
-                    />
-                  )}
+                  ) : <NoInfo />}
                 </Card.Content>
               </Card>
             </div>

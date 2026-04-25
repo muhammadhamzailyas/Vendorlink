@@ -80,7 +80,7 @@ const CompanyProgress = () => {
               </div>
               <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                 <span>Status: {task.currentStatus}</span>
-                <span>Budget: PKR {(task.budget || 0).toLocaleString()}</span>
+                <span>Budget: ${(task.budget || 0).toLocaleString()}</span>
                 {task.deadline && <span>Due: {formatDate(task.deadline)}</span>}
               </div>
             </Card>
@@ -93,6 +93,7 @@ const CompanyProgress = () => {
 };
 
 export default CompanyProgress;
+
 
 
 

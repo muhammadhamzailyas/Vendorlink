@@ -161,7 +161,7 @@ const VendorTaskDetail = () => {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                 { label: "Company", value: task.companyId?.companyName || "N/A", icon: <Briefcase className="text-foreground" /> },
-                { label: "Budget", value: `PKR ${task.budget?.toLocaleString()}`, icon: <CurrencyDollar className="text-jade-600" /> },
+                { label: "Budget", value: `$${task.budget?.toLocaleString()}`, icon: <CurrencyDollar className="text-jade-600" /> },
                 { label: "Deadline", value: formatDate(task.deadline), icon: <Clock className="text-warning" /> },
                 { label: "Posted On", value: formatDate(task.createdAt), icon: <Calendar className="text-sky-600" /> },
                 ].map((item, index) => (
@@ -207,7 +207,7 @@ const VendorTaskDetail = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="p-5 rounded-2xl bg-muted/20 border border-border/20 shadow-xs">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Your Bid Price</p>
-                    <p className="text-2xl font-extrabold text-foreground uppercase tracking-tighter">PKR {myProposal.bidAmount?.toLocaleString()}</p>
+                    <p className="text-2xl font-extrabold text-foreground uppercase tracking-tighter">${myProposal.bidAmount?.toLocaleString()}</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-muted/20 border border-border/20 shadow-xs">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Proposed Deadline</p>
@@ -256,6 +256,7 @@ const VendorTaskDetail = () => {
 };
 
 export default VendorTaskDetail;
+
 
 
 

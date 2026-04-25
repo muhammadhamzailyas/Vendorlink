@@ -82,7 +82,7 @@ const VendorCard = ({ vendor, onOpenProposals }) => {
                     <AttachMoney size={12} />
                     Avg. Bid Value
                 </span>
-                <span className="font-extrabold text-foreground">PKR {avgBid.toLocaleString()}</span>
+                <span className="font-extrabold text-foreground">${avgBid.toLocaleString()}</span>
             </div>
             <Separator className="opacity-30" />
             <div className="flex items-center justify-between text-xs">
@@ -218,7 +218,7 @@ const VendorMarketplace = () => {
           />
           <StatCard
             title="Avg Bid Value"
-            value={`PKR ${stats.avgBid.toLocaleString()}`}
+            value={`$${stats.avgBid.toLocaleString()}`}
             icon={<AttachMoney />}
           />
         </div>
@@ -324,6 +324,7 @@ const VendorMarketplace = () => {
 };
 
 export default VendorMarketplace;
+
 
 
 

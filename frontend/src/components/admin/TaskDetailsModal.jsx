@@ -57,8 +57,7 @@ const TaskDetailsModal = ({ open, task, onX }) => {
             >
               <div className="flex items-center gap-1">
                 <CurrencyDollar size={14} weight="bold" className="text-success" />
-                {task.budget?.toLocaleString()} PKR
-              </div>
+                {task.budget?.toLocaleString()} $</div>
             </DetailField>
             <DetailField 
               label="Deadline" 
@@ -151,3 +150,4 @@ const TaskDetailsModal = ({ open, task, onX }) => {
 };
 
 export default TaskDetailsModal;
+

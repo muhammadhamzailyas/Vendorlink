@@ -262,7 +262,7 @@ TASK DETAILS:
 - Title: {task.get('title', 'N/A')}
 - Description: {task.get('description', 'N/A')}
 - Requirements: {task.get('requirements', 'N/A')}
-- Budget: Rs. {task.get('budget', 0):,}
+- Budget: $ {task.get('budget', 0):,}
 - Deadline: {task.get('deadline', 'N/A')}
 - Category: {task.get('category', 'N/A')}
     """
@@ -297,7 +297,7 @@ VENDOR HISTORY:
 - Average Rating: {avg_rating}/5
 - Relevant Experience (same category): {relevant_exp} projects
 PROPOSAL DETAILS:
-- Bid: Rs. {p.get('bidAmount', 0):,}
+- Bid: $ {p.get('bidAmount', 0):,}
 - Deadline: {p.get('proposedDeadline', 'N/A')}
 - Skills: {skills_text}
 - Proposal Text: {p.get('proposalText', '')[:300]}...

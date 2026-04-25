@@ -93,7 +93,7 @@ const CompanyContracts = () => {
       key: "budget",
       label: "Budget",
       cellClassName: "px-6 py-4 text-sm text-foreground/80",
-      render: (contract) => (contract.totalBudget ? `PKR ${contract.totalBudget.toLocaleString()}` : "-"),
+      render: (contract) => (contract.totalBudget ? `$${contract.totalBudget.toLocaleString()}` : "-"),
     },
     {
       key: "created",
@@ -126,7 +126,7 @@ const CompanyContracts = () => {
           <StatCard title="Total Contracts" value={stats.total} icon={<FileText />} loading={loading} />
           <StatCard title="Active" value={stats.active} icon={<Assignment />} loading={loading} />
           <StatCard title="Completed" value={stats.completed} icon={<CheckCircle />} loading={loading} />
-          <StatCard title="Total Budget" value={`PKR ${stats.totalBudget.toLocaleString()}`} icon={<AttachMoney />} loading={loading} />
+          <StatCard title="Total Budget" value={`$${stats.totalBudget.toLocaleString()}`} icon={<AttachMoney />} loading={loading} />
         </div>
 
         <FilterSearchBar
@@ -165,6 +165,7 @@ const CompanyContracts = () => {
 
 
 export default CompanyContracts;
+
 
 
 

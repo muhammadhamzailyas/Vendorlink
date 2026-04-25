@@ -82,38 +82,32 @@ class PaymentController {
 
   async depositMoney(req, res) {
     try {
-      const { amount, paymentMethod } = req.body; // Amount in PKR
+      const { amount, paymentMethod } = req.body; // Amount in USD
       const companyId = req.user.id;
 
-      if (amount < 1000) {
-        return res.status(400).json({ error: "Minimum deposit is PKR 1,000" });
+      if (amount < 10) {
+        return res.status(400).json({ error: "Minimum deposit is $10" });
       }
 
-      // Stripe doesn't support PKR for PaymentIntents in many regions.
-      // Convert PKR to USD for Stripe. Fixed rate for prototype: 1 USD = 280 PKR
-      const conversionRate = 280;
-      const amountUSD = Math.round((amount / conversionRate) * 100) / 100;
-
       const stripeService = require("../services/stripeService");
-      const paymentIntent = await stripeService.createPaymentIntent(amountUSD, "usd", {
+      const paymentIntent = await stripeService.createPaymentIntent(amount, "usd", {
         companyId,
         type: "wallet_deposit",
-        amountPKR: amount.toString(),
       });
 
       const transaction = new Transaction({
         fromUserId: companyId,
         toUserId: companyId,
-        amount, // Store original PKR amount
+        amount,
         type: "deposit",
         status: "pending",
         paymentMethod: paymentMethod || "stripe",
-        description: `Wallet deposit of PKR ${amount.toLocaleString()} (approx. $${amountUSD})`,
+        description: `Wallet deposit of $${amount.toLocaleString()}`,
         gateway: {
           name: "stripe",
           paymentIntentId: paymentIntent.id,
           currency: "USD",
-          gatewayAmount: amountUSD,
+          gatewayAmount: amount,
         },
       });
       await transaction.save();
@@ -124,7 +118,6 @@ class PaymentController {
         data: {
           clientSecret: paymentIntent.clientSecret,
           transactionId: transaction._id,
-          amountUSD,
         },
       });
     } catch (error) {
@@ -148,18 +141,16 @@ class PaymentController {
 
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object;
-      const { companyId, type, amountPKR } = paymentIntent.metadata;
+      const { companyId, type } = paymentIntent.metadata;
 
       if (type === "wallet_deposit") {
-        // Use the PKR amount from metadata if available, otherwise convert back
-        const conversionRate = 280;
-        const depositAmountPKR = amountPKR ? parseFloat(amountPKR) : (paymentIntent.amount / 100) * conversionRate;
+        const depositAmount = paymentIntent.amount / 100;
 
         try {
           // Update transaction
           const transaction = await Transaction.findOneAndUpdate(
             { "gateway.paymentIntentId": paymentIntent.id },
-            { status: "completed", completedAt: new Date(), amount: depositAmountPKR },
+            { status: "completed", completedAt: new Date(), amount: depositAmount },
             { new: true }
           );
 
@@ -168,12 +159,12 @@ class PaymentController {
             await Wallet.findOneAndUpdate(
               { userId: companyId },
               { 
-                $inc: { balance: depositAmountPKR, totalDeposited: depositAmountPKR },
+                $inc: { balance: depositAmount, totalDeposited: depositAmount },
                 $set: { lastTransactionAt: new Date() }
               },
               { upsert: true }
             );
-            console.log(`Successfully deposited PKR ${depositAmountPKR} to wallet ${companyId}`);
+            console.log(`Successfully deposited $${depositAmount} to wallet ${companyId}`);
           }
         } catch (error) {
           console.error("Error processing deposit webhook:", error);
@@ -295,7 +286,7 @@ class PaymentController {
             recipientId: contract.vendorId._id,
             type: "payment_received",
             title: "Payment Received",
-            message: `You received PKR ${vendorAmount} for ${contract.title}`,
+            message: `You received $${vendorAmount} for ${contract.title}`,
             data: { paymentId: payment._id, amount: vendorAmount },
             relatedId: payment._id,
             relatedModel: "Payment",
@@ -401,8 +392,8 @@ class PaymentController {
       const { amount, paymentMethod, accountDetails } = req.body;
       const vendorId = req.user.id;
 
-      if (amount < 500) {
-        return res.status(400).json({ error: "Minimum withdrawal is PKR 500" });
+      if (amount < 5) {
+        return res.status(400).json({ error: "Minimum withdrawal is $5" });
       }
 
       // ATOMIC WALLET UPDATE
@@ -425,7 +416,7 @@ class PaymentController {
         type: "withdrawal",
         status: "pending",
         paymentMethod,
-        description: `Withdrawal of PKR ${amount}`,
+        description: `Withdrawal of $${amount}`,
         withdrawalDetails: accountDetails,
       });
       await transaction.save();
@@ -645,7 +636,7 @@ class PaymentController {
             senderId: vendorId,
             type: "payment_request",
             title: "Payment Request",
-            message: `Vendor requested payment of PKR ${amount} for ${contract.title}`,
+            message: `Vendor requested payment of $${amount} for ${contract.title}`,
             data: { contractId, amount, paymentId: paymentRequest._id },
             relatedId: contract._id,
             relatedModel: "Contract",
@@ -879,14 +870,14 @@ class PaymentController {
   generateInvoiceHTML(payment) {
     const formatDate = (date) => {
       if (!date) return "N/A";
-      return new Date(date).toLocaleDateString("en-PK", {
+      return new Date(date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
       });
     };
 
-    const formatCurrency = (amount) => `PKR ${(amount || 0).toLocaleString("en-PK")}`;
+    const formatCurrency = (amount) => `$${(amount || 0).toLocaleString("en-US")}`;
 
     return `<!DOCTYPE html>
     <html>

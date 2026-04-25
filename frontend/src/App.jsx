@@ -15,7 +15,6 @@ import { NotificationProvider } from "./context/NotificationContext";
 import { WalletProvider } from "./context/WalletContext";
 import { UserProvider, useUser } from "./context/UserContext";
 import { Button, Loader } from "./components/ui";
-import FloatingChatButton from "./components/FloatingChatButton";
 import ScrollToTop from "./components/ScrollToTop";
 
 const UserSessionProvider = ({ children }) => {
@@ -141,7 +140,6 @@ const CompanyLayout = () => (
   <ProtectedRoutes role="company">
     <ErrorBoundary>
       <DashboardLayout />
-      <FloatingChatButton />
     </ErrorBoundary>
   </ProtectedRoutes>
 );
@@ -150,7 +148,6 @@ const VendorLayout = () => (
   <ProtectedRoutes role="vendor">
     <ErrorBoundary>
       <DashboardLayout />
-      <FloatingChatButton />
     </ErrorBoundary>
   </ProtectedRoutes>
 );

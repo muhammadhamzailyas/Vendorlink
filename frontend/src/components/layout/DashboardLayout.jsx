@@ -30,7 +30,6 @@ import {
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import ApprovalStatusBanner from "../ApprovalStatusBanner";
-import FloatingChatButton from "../FloatingChatButton";
 import { Skeleton } from "../ui";
 import { cn } from "@/lib/cn";
 import { useUser } from "../../context/UserContext";
@@ -267,7 +266,7 @@ const DashboardLayout = () => {
         </div>
       </motion.main>
 
-      {role !== "admin" && <FloatingChatButton />}
+      
     </div>
   );
 };

@@ -1,5 +1,5 @@
 export { default as ApprovalStatusBanner } from "./ApprovalStatusBanner";
-export { default as FloatingChatButton } from "./FloatingChatButton";
+
 export { default as ProtectedRoutes } from "./ProtectedRoutes";
 export { default as UserProfile } from "./UserProfile";
 

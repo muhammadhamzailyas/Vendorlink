@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/services/api";
+import api from "@/services/api";
 import { PageTransition, Card, DataTable, Loader, EmptyState } from "@/components/ui";
 import { ChatTeardropText } from "@phosphor-icons/react";
 
@@ -26,7 +26,7 @@ const FeedbackPage = () => {
             <DataTable
               data={feedback}
               columns={[
-                { key: "userId.username", label: "User" },
+                { key: "userId.username", label: "Name" },
                 { key: "userId.email", label: "Email" },
                 { key: "message", label: "Feedback" },
                 { key: "createdAt", label: "Date", render: (f) => new Date(f.createdAt).toLocaleDateString() },

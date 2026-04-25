@@ -4,21 +4,25 @@ import { Button } from "../../ui";
 import { Lock } from "@phosphor-icons/react";
 import toastUtil from "../../../lib/toast";
 
-const StripePaymentForm = ({ onPaymentSuccess, onBack, planPrice }) => {
+const StripePaymentForm = ({ onPaymentSuccess, onBack, planPrice, clientSecret }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || !clientSecret) {
+      // Stripe.js has not yet loaded.
+      // Make sure to disable form submission until Stripe.js has loaded.
+      return;
+    }
 
     setIsProcessing(true);
 
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      redirect: "if_required",
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+            card: elements.getElement(CardNumberElement),
+        },
     });
 
     if (error) {

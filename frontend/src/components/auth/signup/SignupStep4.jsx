@@ -56,60 +56,10 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading }) => {
       <div className="space-y-6">
         <Elements 
           stripe={stripePromise} 
-          options={{ 
-            clientSecret, 
-            appearance: { 
-              theme: 'stripe',
-              variables: {
-                fontFamily: 'Inter, system-ui, sans-serif',
-                colorBackground: '#ffffff',
-                colorText: '#000000',
-                colorPrimary: '#0570de',
-                colorDanger: '#ef4444',
-                colorSuccess: '#30b130',
-                colorWarning: '#e69e2c',
-                colorTextSecondary: '#4d4d4d',
-                colorTextPlaceholder: '#757575',
-                buttonColorBackground: '#0570de',
-                buttonColorText: '#ffffff',
-                accessibleColorOnColorPrimary: '#ffffff',
-                accessibleColorOnColorBackground: '#000000',
-                accessibleColorOnColorSuccess: '#fff',
-                accessibleColorOnColorDanger: '#000000',
-                accessibleColorOnColorWarning: '#000000',
-                iconColor: '#4d4d4d',
-                iconHoverColor: '#000000',
-                iconCardErrorColor: '#ef4444',
-                iconCheckmarkColor: '#0570de',
-                borderRadius: '12px',
-                spacingGridRow: '16px',
-              },
-              rules: {
-                '.Input': {
-                  border: '1px solid #e2e8f0',
-                  padding: '12px',
-                  backgroundColor: '#f8fafc', 
-                  transition: 'all 0.2s ease',
-                  boxShadow: 'none',
-                },
-                '.Input:focus': {
-                  border: '1px solid #0570de',
-                  boxShadow: '0 0 0 3px rgba(5, 112, 222, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.08)',
-                  backgroundColor: '#ffffff',
-                },
-                '.Label': {
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginBottom: '8px',
-                  color: '#4d4d4d',
-                }
-              }
-            } 
-          }}
+          options={{ clientSecret }}
         >
           <StripePaymentForm 
+            clientSecret={clientSecret}
             planPrice="30"
             onPaymentSuccess={onPaymentSuccess}
             onBack={onBack}

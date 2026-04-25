@@ -50,6 +50,18 @@ class AuthController {
       const normalizedEmail = (email || "").trim().toLowerCase();
       
       let user = await User.findOne({ firebaseUid: uid });
+      
+      if (user) {
+        if (user.isDeleted) {
+          return res.status(404).json({ message: "Your account does not exist." });
+        }
+        if (user.status === "deactivated") {
+          return res.status(403).json({ 
+            message: "Your account has been deactivated. You can submit some appeals to get your account back." 
+          });
+        }
+      }
+
       let isNewUser = false;
 
       const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();

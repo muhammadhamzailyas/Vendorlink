@@ -227,18 +227,17 @@ export const handleApiError = (
   return showToast("error", message, options);
 };
 
-export const toast = {
+const toast = {
   success: (msg, opts) => showToast("success", msg, { autoX: DURATIONS.success, ...opts }),
   error: (msg, opts) => showToast("error", formatErrorMessage(msg), { autoX: DURATIONS.error, ...opts }),
   info: (msg, opts) => showToast("info", msg, { autoX: DURATIONS.info, ...opts }),
   warning: (msg, opts) => showToast("warning", msg, { autoX: DURATIONS.warning, ...opts }),
+  loading: (msg, opts) => sonnerToast.loading(msg, opts),
   validationError: (msg, opts) => showToast("warning", msg, { autoX: DURATIONS.warning, ...opts }),
   handleApiError,
   dismiss: dismissToast,
   confirm: confirmToast,
 };
 
+export { toast };
 export default toast;
-
-
-

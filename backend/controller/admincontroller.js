@@ -33,6 +33,9 @@ class AdminController {
     this.approveVerification = this.approveVerification.bind(this);
     this.rejectVerification = this.rejectVerification.bind(this);
     this.getStats = this.getStats.bind(this);
+    this.softDeleteUser = this.softDeleteUser.bind(this);
+    this.checkUserDeletion = this.checkUserDeletion.bind(this);
+    this.reactivateUser = this.reactivateUser.bind(this);
   }
 
   async getStats(req, res) {
@@ -42,7 +45,7 @@ class AdminController {
 
       // 1. Cumulative Platform Growth (Area Chart)
       const usersGrowth = await User.aggregate([
-        { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false } },
+        { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false, role: { $ne: "unassigned" }, status: "approved" } },
         {
           $group: {
             _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
@@ -109,7 +112,7 @@ class AdminController {
 
       // Detailed Monthly Stats for Percentage Calculation
       const monthlyBreakdown = await User.aggregate([
-        { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false } },
+        { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false, role: { $ne: "unassigned" } } },
         {
           $group: {
             _id: { 
@@ -130,7 +133,7 @@ class AdminController {
       };
 
       const growthData = months.map(m => {
-        const uCount = getMonthlyTotal(m, () => true);
+        const uCount = getMonthlyTotal(m, (item) => item._id.status === "approved");
         const t = tasksGrowth.find(tg => tg._id.month === m.month && tg._id.year === m.year);
         const r = revenueStats.find(rs => rs._id.month === m.month && rs._id.year === m.year);
         
@@ -313,19 +316,212 @@ class AdminController {
   async deactivateUser(req, res) {
     try {
       const { userId } = req.params;
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { status: "deactivated" },
-        { new: true }
-      ).select("-passwordHash");
+      const reason = typeof req.body?.reason === "string" ? req.body.reason.trim() : "";
+      const acknowledgeWarnings = Boolean(req.body?.acknowledgeWarnings);
 
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      if (!reason) {
+        throw this.createRequestError(400, "Deactivation reason is required.");
       }
 
-      res.json({ message: "User deactivated successfully", user });
+      const user = await User.findById(userId);
+      if (!user) {
+        throw this.createRequestError(404, "User not found");
+      }
+
+      if (user.role === "admin") {
+        throw this.createRequestError(400, "Administrators cannot be deactivated.");
+      }
+
+      const briefing = await this.buildArchiveBriefing(user);
+
+      if (!briefing.canProceed) {
+        throw this.createRequestError(
+          409,
+          "Deactivation is blocked until all money-related conditions are resolved.",
+          { briefing }
+        );
+      }
+
+      if (briefing.warnings.length > 0 && !acknowledgeWarnings) {
+        throw this.createRequestError(
+          400,
+          "Please acknowledge the deactivation warnings before continuing.",
+          { briefing }
+        );
+      }
+
+      // Handle Level 2: Cancel contracts and notify
+      const cancelledContracts = await this.cancelLiveContractsForArchive(
+        user,
+        reason,
+        req.user?._id || null
+      );
+      
+      const notificationCount = await this.notifyDeactivateDeleteCounterparties(
+        req,
+        user,
+        cancelledContracts,
+        reason,
+        "deactivated"
+      );
+
+      user.status = "deactivated";
+      await user.save();
+
+      // Notify the user themselves
+      try {
+        const notificationService = getNotificationService(req);
+        const payload = {
+          recipientId: user._id,
+          senderId: req.user?._id || null,
+          type: "account_deactivated",
+          title: "Account Deactivated",
+          message: `Your account has been deactivated by an administrator. Reason: ${reason}. You can submit an appeal to regain access.`,
+          priority: "high",
+        };
+        if (notificationService) {
+          await notificationService.createNotification(payload);
+        } else {
+          await Notification.create(payload);
+        }
+      } catch (e) {
+        console.error("Failed to notify deactivated user:", e);
+      }
+
+      return res.json({
+        message: "User deactivated successfully",
+        user: this.sanitizeUser(user),
+        cancelledContractsCount: cancelledContracts.length,
+        notificationCount,
+      });
     } catch (error) {
-      res.status(500).json({ message: "Server error", error: error.message });
+      return this.handleRequestError(
+        res,
+        error,
+        "Server error",
+        "Deactivate user error:"
+      );
+    }
+  }
+
+  async notifyDeactivateDeleteCounterparties(req, targetUser, cancelledContracts, reason, action) {
+    if (!cancelledContracts.length) {
+      return 0;
+    }
+
+    const notificationService = getNotificationService(req);
+    let notificationCount = 0;
+
+    const actionText = action === "deactivated" ? "deactivated" : "deleted";
+
+    for (const contract of cancelledContracts) {
+      const recipientId =
+        String(contract.companyId) === String(targetUser._id)
+          ? contract.vendorId
+          : contract.companyId;
+
+      if (!recipientId) {
+        continue;
+      }
+
+      const payload = {
+        recipientId,
+        senderId: req.user?._id || null,
+        type: "contract_cancelled",
+        title: `Account ${actionText.charAt(0).toUpperCase() + actionText.slice(1)}`,
+        message: `The ${targetUser.role} you were working with for "${contract.title}" has been ${actionText}. The contract is cancelled. We apologize for the inconvenience; you can find another professional on our platform.`,
+        data: {
+          contractId: contract._id,
+          targetUserId: targetUser._id,
+          targetUserRole: targetUser.role,
+          action,
+          reason,
+        },
+        relatedId: contract._id,
+        relatedModel: "Contract",
+        priority: "high",
+      };
+
+      try {
+        if (notificationService) {
+          await notificationService.createNotification(payload);
+        } else {
+          await Notification.create(payload);
+        }
+        notificationCount += 1;
+      } catch (error) {
+        console.error(
+          `Failed to notify counterparty for contract ${contract._id}:`,
+          error
+        );
+      }
+    }
+
+    return notificationCount;
+  }
+
+  async softDeleteUser(req, res) {
+    try {
+      const { userId } = req.params;
+      const reason = typeof req.body?.reason === "string" ? req.body.reason.trim() : "";
+      const acknowledgeWarnings = Boolean(req.body?.acknowledgeWarnings);
+
+      if (!reason) {
+        throw this.createRequestError(400, "Delete reason is required.");
+      }
+
+      const user = await this.getArchivableUserOrThrow(userId);
+      const briefing = await this.buildArchiveBriefing(user);
+
+      if (!briefing.canProceed) {
+        throw this.createRequestError(
+          409,
+          "Deletion is blocked until all money-related conditions are resolved.",
+          { briefing }
+        );
+      }
+
+      if (briefing.warnings.length > 0 && !acknowledgeWarnings) {
+        throw this.createRequestError(
+          400,
+          "Please acknowledge the deletion warnings before continuing.",
+          { briefing }
+        );
+      }
+
+      const cancelledContracts = await this.cancelLiveContractsForArchive(
+        user,
+        reason,
+        req.user?._id || null
+      );
+      
+      const notificationCount = await this.notifyDeactivateDeleteCounterparties(
+        req,
+        user,
+        cancelledContracts,
+        reason,
+        "deleted"
+      );
+
+      user.isDeleted = true;
+      user.deletedAt = new Date();
+      user.deletedBy = req.user?._id || null;
+      user.deletionReason = reason;
+      await user.save();
+
+      return res.json({
+        message: "User deleted successfully",
+        user: this.sanitizeUser(user),
+        cancelledContractsCount: cancelledContracts.length,
+        notificationCount,
+      });
+    } catch (error) {
+      return this.handleRequestError(
+        res,
+        error,
+        "Server error",
+        "Soft delete user error:"
+      );
     }
   }
 
@@ -411,12 +607,12 @@ class AdminController {
     if (!ARCHIVE_ELIGIBLE_ROLES.has(user.role)) {
       throw this.createRequestError(
         400,
-        "Only company and vendor accounts can be archived from user management."
+        "Only company and vendor accounts can be deleted from user management."
       );
     }
 
     if (user.isDeleted) {
-      throw this.createRequestError(409, "User is already archived.");
+      throw this.createRequestError(409, "User is already deleted.");
     }
 
     return user;
@@ -474,7 +670,7 @@ class AdminController {
     if (pendingPayments.length > 0) {
       blockers.push({
         code: "pending_payments",
-        message: `User has ${pendingPayments.length} pending or processing payment(s) that must be resolved before archiving.`,
+        message: `User has ${pendingPayments.length} pending or processing payment(s) that must be resolved before deactivating/deleting.`,
         count: pendingPayments.length,
         totalAmount: pendingPaymentTotal,
         details: pendingPayments.map((payment) => ({
@@ -489,7 +685,7 @@ class AdminController {
     if (pendingTransactions.length > 0) {
       blockers.push({
         code: "pending_transactions",
-        message: `User has ${pendingTransactions.length} pending transaction(s) that must clear before archiving.`,
+        message: `User has ${pendingTransactions.length} pending transaction(s) that must clear before deactivating/deleting.`,
         count: pendingTransactions.length,
         totalAmount: pendingTransactionTotal,
         details: pendingTransactions.map((transaction) => ({
@@ -504,7 +700,7 @@ class AdminController {
     if (walletBalance > 0) {
       blockers.push({
         code: "wallet_balance",
-        message: `User still has an available wallet balance of ${walletBalance.toFixed(2)} that must be settled before archiving.`,
+        message: `User still has an available wallet balance of ${walletBalance.toFixed(2)} that must be settled before deactivating/deleting.`,
         amount: walletBalance,
       });
     }
@@ -512,7 +708,7 @@ class AdminController {
     if (lockedBalance > 0) {
       blockers.push({
         code: "locked_wallet_balance",
-        message: `User still has ${lockedBalance.toFixed(2)} in locked wallet funds that must be resolved before archiving.`,
+        message: `User still has ${lockedBalance.toFixed(2)} in locked wallet funds that must be resolved before deactivating/deleting.`,
         amount: lockedBalance,
       });
     }
@@ -521,7 +717,7 @@ class AdminController {
     if (liveContracts.length > 0) {
       warnings.push({
         code: "live_contracts",
-        message: `User is involved in ${liveContracts.length} live contract(s). Continuing will cancel those contracts, store the admin reason, and notify the other party.`,
+        message: `User is involved in ${liveContracts.length} live contract(s). Continuing will cancel those contracts and notify the other party.`,
         count: liveContracts.length,
         details: liveContracts.map((contract) => ({
           id: contract._id,
@@ -563,7 +759,7 @@ class AdminController {
         },
       },
       resultIfConfirmed: {
-        action: "archive_user",
+        action: "deactivate_delete_user",
         requiresWarningAcknowledgement: warnings.length > 0,
         userAccess:
           "The user will immediately lose login access and disappear from active admin user lists.",
@@ -600,122 +796,6 @@ class AdminController {
     return liveContracts;
   }
 
-  async notifyArchiveCounterparties(req, archivedUser, cancelledContracts, reason) {
-    if (!cancelledContracts.length) {
-      return 0;
-    }
-
-    const notificationService = getNotificationService(req);
-    let notificationCount = 0;
-
-    for (const contract of cancelledContracts) {
-      const recipientId =
-        String(contract.companyId) === String(archivedUser._id)
-          ? contract.vendorId
-          : contract.companyId;
-
-      if (!recipientId) {
-        continue;
-      }
-
-      const payload = {
-        recipientId,
-        senderId: req.user?._id || null,
-        type: "contract_cancelled",
-        title: "Contract Ended by Administration",
-        message: `The contract "${contract.title}" was cancelled because the ${archivedUser.role} account was archived by an administrator. Reason: ${reason}`,
-        data: {
-          contractId: contract._id,
-          archivedUserId: archivedUser._id,
-          archivedUserRole: archivedUser.role,
-          reason,
-        },
-        relatedId: contract._id,
-        relatedModel: "Contract",
-        priority: "high",
-      };
-
-      try {
-        if (notificationService) {
-          await notificationService.createNotification(payload);
-        } else {
-          await Notification.create(payload);
-        }
-        notificationCount += 1;
-      } catch (error) {
-        console.error(
-          `Failed to notify counterparty for contract ${contract._id}:`,
-          error
-        );
-      }
-    }
-
-    return notificationCount;
-  }
-
-  async softDeleteUser(req, res) {
-    try {
-      const { userId } = req.params;
-      const reason = typeof req.body?.reason === "string" ? req.body.reason.trim() : "";
-      const acknowledgeWarnings = Boolean(req.body?.acknowledgeWarnings);
-
-      if (!reason) {
-        throw this.createRequestError(400, "Archive reason is required.");
-      }
-
-      const user = await this.getArchivableUserOrThrow(userId);
-      const briefing = await this.buildArchiveBriefing(user);
-
-      if (!briefing.canProceed) {
-        throw this.createRequestError(
-          409,
-          "Archive is blocked until all money-related conditions are resolved.",
-          { briefing }
-        );
-      }
-
-      if (briefing.warnings.length > 0 && !acknowledgeWarnings) {
-        throw this.createRequestError(
-          400,
-          "Please acknowledge the archive warnings before continuing.",
-          { briefing }
-        );
-      }
-
-      const cancelledContracts = await this.cancelLiveContractsForArchive(
-        user,
-        reason,
-        req.user?._id || null
-      );
-      const notificationCount = await this.notifyArchiveCounterparties(
-        req,
-        user,
-        cancelledContracts,
-        reason
-      );
-
-      user.isDeleted = true;
-      user.deletedAt = new Date();
-      user.deletedBy = req.user?._id || null;
-      user.deletionReason = reason;
-      await user.save();
-
-      return res.json({
-        message: "User archived successfully",
-        user: this.sanitizeUser(user),
-        cancelledContractsCount: cancelledContracts.length,
-        notificationCount,
-      });
-    } catch (error) {
-      return this.handleRequestError(
-        res,
-        error,
-        "Server error",
-        "Soft delete user error:"
-      );
-    }
-  }
-
   async reactivateUser(req, res) {
     try {
       const { userId } = req.params;
@@ -744,7 +824,8 @@ class AdminController {
   async checkUserDeletion(req, res) {
     try {
       const { userId } = req.params;
-      const user = await this.getArchivableUserOrThrow(userId);
+      const user = await User.findById(userId);
+      if (!user) throw this.createRequestError(404, "User not found");
       const briefing = await this.buildArchiveBriefing(user);
 
       return res.json(briefing);
@@ -761,7 +842,7 @@ class AdminController {
   async deleteuser(req, res) {
     return res.status(405).json({
       message:
-        "Permanent delete is disabled for admin user management. Use the archive flow instead.",
+        "Permanent delete is disabled for admin user management. Use the soft delete flow instead.",
     });
   }
 

@@ -2,8 +2,8 @@ import React from "react";
 import {
   DotsThreeVertical as MoreVert,
   Eye as Visibility,
-  Prohibit as Block,
-  Archive,
+  Prohibit,
+  Trash,
   CircleNotch,
 } from "@phosphor-icons/react";
 import { 
@@ -45,7 +45,7 @@ const UserActionMenu = ({
       >
         <Visibility className="mr-2 w-4 h-4" /> View Details
       </DropdownMenuItem>
-      
+
       {user?.role !== "admin" && (
         <>
           <DropdownMenuItem 
@@ -53,7 +53,7 @@ const UserActionMenu = ({
             disabled={actionLoading}
             className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted cursor-pointer"
           >
-            <Block className="mr-2 w-4 h-4" /> Suspend
+            <Prohibit className="mr-2 w-4 h-4" /> Deactivate
           </DropdownMenuItem>
           <DropdownMenuSeparator className="my-1.5 bg-border/50" />
           <DropdownMenuItem 
@@ -61,7 +61,7 @@ const UserActionMenu = ({
             disabled={actionLoading}
             className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-danger focus:text-danger focus:bg-danger-surface cursor-pointer"
           >
-            <Archive className="mr-2 w-4 h-4" /> Archive User
+            <Trash className="mr-2 w-4 h-4" /> Delete User
           </DropdownMenuItem>
         </>
       )}

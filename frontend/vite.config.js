@@ -6,8 +6,9 @@ import path from "path"
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    exclude: ["@react-pdf/renderer"],
     include: [
+      "base64-js",
+      "@react-pdf/renderer",
       "@radix-ui/react-accordion",
       "@radix-ui/react-alert-dialog",
       "@radix-ui/react-aspect-ratio",

@@ -4,14 +4,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import toastUtil from "@/lib/toast";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   Button,
   DataTable,
   EmptyState,
@@ -43,6 +35,7 @@ const createInitialArchiveState = () => ({
   submitting: false,
   reason: "",
   acknowledgeWarnings: false,
+  mode: "delete", // 'delete' or 'deactivate'
 });
 
 const UserManagement = () => {
@@ -54,18 +47,12 @@ const UserManagement = () => {
   const [actionLoading, setActionLoading] = useState({});
   const ITEMS_PER_PAGE = 10;
 
-  // ... (rest of states)
-
-  // Reset to first page when search or tab changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, activeTab]);
+
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
-  const [confirmState, setConfirmState] = useState({
-    open: false,
-    user: null,
-  });
   const [archiveState, setArchiveState] = useState(createInitialArchiveState);
 
   const tabOptions = useMemo(() => {
@@ -91,6 +78,11 @@ const UserManagement = () => {
         value: "approved",
         label: "Approved",
         count: validUsers.filter((user) => user.status === "approved").length,
+      },
+      {
+        value: "deactivated",
+        label: "Deactivated",
+        count: validUsers.filter((user) => user.status === "deactivated").length,
       },
       {
         value: "rejected",
@@ -126,8 +118,16 @@ const UserManagement = () => {
     setUserDetails(null);
   };
 
-  const handleDownloadPDF = async () => {
-    if (!userDetails) return;
+  const handleDownloadPDF = async (targetUser) => {
+    const userToExport = targetUser || userDetails;
+    if (!userToExport) {
+      toastUtil.error("No user selected for export");
+      return;
+    }
+
+    const toastId = (typeof toastUtil.loading === "function") 
+      ? toastUtil.loading("Preparing document...")
+      : toastUtil.info("Preparing document...");
 
     try {
       const [{ pdf }, { default: UserDetailsPDF }] = await Promise.all([
@@ -135,8 +135,8 @@ const UserManagement = () => {
         import("@/components/admin/UserDetailsPDF"),
       ]);
 
-      const fileName = `${userDetails.companyName || userDetails.email || "user"}_details.pdf`;
-      const blob = await pdf(<UserDetailsPDF user={userDetails} />).toBlob();
+      const fileName = `${userToExport.companyName || userToExport.username || "user"}_profile.pdf`;
+      const blob = await pdf(<UserDetailsPDF user={userToExport} />).toBlob();
 
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -147,26 +147,18 @@ const UserManagement = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toastUtil.success("PDF downloaded successfully", { autoX: 2000 });
+      toastUtil.success("Profile exported successfully", { id: toastId });
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toastUtil.error("Failed to generate PDF");
+      console.error("PDF Export Error:", error);
+      toastUtil.error("Failed to generate PDF profile", { id: toastId });
     }
-  };
-
-  const openConfirmDialog = (user) => {
-    setConfirmState({ open: true, user });
-  };
-
-  const closeConfirmDialog = () => {
-    setConfirmState({ open: false, user: null });
   };
 
   const closeArchiveDialog = () => {
     setArchiveState(createInitialArchiveState());
   };
 
-  const openArchiveDialog = async (user) => {
+  const openArchiveDialog = async (user, mode = "delete") => {
     setArchiveState({
       open: true,
       user,
@@ -175,6 +167,7 @@ const UserManagement = () => {
       submitting: false,
       reason: "",
       acknowledgeWarnings: false,
+      mode,
     });
     setActionLoading((prev) => ({ ...prev, [user._id]: true }));
 
@@ -201,47 +194,45 @@ const UserManagement = () => {
     }
   };
 
-  const handleConfirmAction = async () => {
-    const user = confirmState.user;
-    if (!user) return;
-
-    setActionLoading((prev) => ({ ...prev, [user._id]: true }));
-    try {
-      await adminService.rejectUser(user._id);
-      await fetchUsers();
-      toastUtil.success("User suspended successfully");
-      closeConfirmDialog();
-    } catch (error) {
-      toastUtil.handleApiError(error);
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [user._id]: false }));
-    }
-  };
-
   const handleArchiveConfirm = async () => {
     const user = archiveState.user;
+    const mode = archiveState.mode;
     if (!user) return;
 
     setArchiveState((current) => ({ ...current, submitting: true }));
     setActionLoading((prev) => ({ ...prev, [user._id]: true }));
 
     try {
-      const response = await adminService.softDeleteUser(user._id, {
-        reason: archiveState.reason.trim(),
-        acknowledgeWarnings: archiveState.acknowledgeWarnings,
-      });
+      let response;
+      if (mode === "deactivate") {
+        response = await adminService.deactivateUser(user._id, {
+          reason: archiveState.reason.trim(),
+          acknowledgeWarnings: archiveState.acknowledgeWarnings,
+        });
+      } else {
+        response = await adminService.softDeleteUser(user._id, {
+          reason: archiveState.reason.trim(),
+          acknowledgeWarnings: archiveState.acknowledgeWarnings,
+        });
+      }
 
-      setUsers((prev) => prev.filter((candidate) => candidate._id !== user._id));
+      if (mode === "delete") {
+        setUsers((prev) => prev.filter((candidate) => candidate._id !== user._id));
+      } else {
+        await fetchUsers();
+      }
+
       closeArchiveDialog();
 
       const cancelledContractsCount = Number(response.data?.cancelledContractsCount || 0);
       const notificationCount = Number(response.data?.notificationCount || 0);
-      let successMessage = "User archived successfully.";
+      const successMessageBase = mode === "deactivate" ? "User deactivated successfully." : "User deleted successfully.";
+      let successMessage = successMessageBase;
 
       if (cancelledContractsCount > 0 && notificationCount > 0) {
-        successMessage = `User archived successfully. ${cancelledContractsCount} live contract(s) were cancelled and ${notificationCount} counterparty notification(s) were sent.`;
+        successMessage = `${successMessageBase} ${cancelledContractsCount} live contract(s) were cancelled and ${notificationCount} counterparty notification(s) were sent.`;
       } else if (cancelledContractsCount > 0) {
-        successMessage = `User archived successfully. ${cancelledContractsCount} live contract(s) were cancelled.`;
+        successMessage = `${successMessageBase} ${cancelledContractsCount} live contract(s) were cancelled.`;
       }
 
       toastUtil.success(successMessage);
@@ -288,17 +279,13 @@ const UserManagement = () => {
     });
   }, [users, searchTerm, tabOptions, activeTab]);
 
-  const isDialogActionLoading = Boolean(
-    confirmState.user?._id && actionLoading[confirmState.user._id]
-  );
-
   const userColumns = [
     {
       key: "user",
       label: "User",
       cellClassName: "px-6 py-4 whitespace-nowrap",
       render: (user) => {
-        const displayName = user.companyName || user.username || user.email || "User";
+        const displayName = user.role === 'admin' ? "Admin" : (user.companyName || user.username || user.email || "User");
         return (
           <div className="flex items-center gap-2">
             <UserAvatar user={user} name={displayName} size="md" />
@@ -341,20 +328,17 @@ const UserManagement = () => {
       label: "",
       headerClassName: "relative px-6 py-3",
       cellClassName: "px-6 py-4 whitespace-nowrap text-right text-sm font-medium",
-      render: (user) => (
+      render: (user) => user.role !== 'admin' && (
         <UserActionMenu
           user={user}
           actionLoading={actionLoading[user._id]}
           onView={() => handleView(user)}
-          onSuspend={() => openConfirmDialog(user)}
-          onArchive={() => openArchiveDialog(user)}
+          onSuspend={() => openArchiveDialog(user, "deactivate")}
+          onArchive={() => openArchiveDialog(user, "delete")}
         />
       ),
     },
   ];
-
-  const dialogUserLabel =
-    confirmState.user?.companyName || confirmState.user?.email || "this user";
 
   const paginatedUsers = useMemo(() => {
     return filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -409,7 +393,6 @@ const UserManagement = () => {
                   
                   {Array.from({ length: totalPages }).map((_, i) => {
                     const page = i + 1;
-                    // Basic ellipsis logic for many pages
                     if (totalPages > 7) {
                         if (page !== 1 && page !== totalPages && (page < currentPage - 1 || page > currentPage + 1)) {
                             if (page === currentPage - 2 || page === currentPage + 2) {
@@ -463,6 +446,7 @@ const UserManagement = () => {
           submitting={archiveState.submitting}
           reason={archiveState.reason}
           acknowledgeWarnings={archiveState.acknowledgeWarnings}
+          mode={archiveState.mode}
           onReasonChange={(value) =>
             setArchiveState((current) => ({ ...current, reason: value }))
           }
@@ -474,32 +458,6 @@ const UserManagement = () => {
           }
           onConfirm={handleArchiveConfirm}
         />
-
-        <AlertDialog open={confirmState.open} onOpenChange={closeConfirmDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Suspend User</AlertDialogTitle>
-              <AlertDialogDescription>
-                This user will be moved to rejected status and lose normal access. Target:{" "}
-                <span className="font-bold">{dialogUserLabel}</span>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                onClick={closeConfirmDialog}
-                disabled={isDialogActionLoading}
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleConfirmAction}
-                disabled={isDialogActionLoading}
-              >
-                {isDialogActionLoading ? "Processing..." : "Suspend"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </PageTransition>
   );

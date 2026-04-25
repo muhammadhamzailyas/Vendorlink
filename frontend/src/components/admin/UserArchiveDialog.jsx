@@ -1,11 +1,12 @@
 import React from "react";
 import {
-  Archive,
   WarningCircle,
   CheckCircle,
   Stack,
   ShieldWarning,
   Wallet,
+  Prohibit,
+  Trash,
 } from "@phosphor-icons/react";
 import {
   Alert,
@@ -18,6 +19,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
+import UserAvatar from "@/components/shared/UserAvatar";
 
 const formatMoney = (value, currency = "PKR") => {
   const amount = Number(value || 0);
@@ -57,126 +59,94 @@ const UserArchiveDialog = ({
   onReasonChange,
   onAcknowledgeWarningsChange,
   onConfirm,
+  mode = "delete", // 'delete' or 'deactivate'
 }) => {
   const blockers = briefing?.blockers || [];
   const warnings = briefing?.warnings || [];
   const impactSummary = briefing?.impactSummary;
   const resultIfConfirmed = briefing?.resultIfConfirmed;
   const currency = impactSummary?.money?.currency || "PKR";
+  const isDeactivate = mode === "deactivate";
+  
   const canConfirm =
     Boolean(briefing) &&
     blockers.length === 0 &&
     reason.trim().length > 0 &&
     (warnings.length === 0 || acknowledgeWarnings);
 
+  const title = isDeactivate ? "Deactivate User" : "Delete User";
+  const displayName = user?.role === 'admin' ? "Admin" : (user?.companyName || user?.username || user?.email || "User");
+
   return (
-    <Dialog open={open} onX={onX} className="sm:max-w-3xl">
-      <Dialog.Header onX={onX}>
-        <div className="space-y-1">
-          <Dialog.Title className="text-lg font-extrabold uppercase tracking-tight">
-            Archive User
-          </Dialog.Title>
-          <Dialog.Description>
-            Review the archive briefing before removing this account from active use.
-          </Dialog.Description>
+    <Dialog open={open} className="sm:max-w-2xl">
+      <Dialog.Header className="border-b-0 px-8 pt-10 pb-6 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <UserAvatar user={user} name={displayName} size="xl" className="border-2 border-background shadow-md" />
+          <div className="space-y-1.5 w-full text-center">
+            <Dialog.Title className="text-xl font-black tracking-tight text-foreground uppercase text-center w-full">
+              {title}
+            </Dialog.Title>
+            <div className="flex items-center justify-center gap-2">
+               <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-widest">{user?.role}</Badge>
+               <StatusChip status={user?.status} size="small" />
+            </div>
+            <Dialog.Description className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center w-full mt-2">
+              {displayName}
+            </Dialog.Description>
+          </div>
         </div>
       </Dialog.Header>
 
-      <Dialog.Body className="space-y-6">
-        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                Target User
-              </p>
-              <h3 className="mt-1 text-lg font-bold text-foreground">
-                {user?.companyName || user?.username || user?.email || "User"}
-              </h3>
-              <p className="text-sm text-muted-foreground">{user?.email || "-"}</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="uppercase">
-                {user?.role || "user"}
-              </Badge>
-              <StatusChip status={user?.status} />
-            </div>
-          </div>
-        </div>
-
+      <Dialog.Body className="px-10 pb-10 bg-card space-y-8">
         {loading ? (
-          <div className="rounded-2xl border border-border/60 bg-card p-6">
-            <div className="flex items-center gap-3 text-sm font-semibold text-muted-foreground">
-              <Archive className="h-4 w-4 animate-pulse" />
-              Loading archive briefing...
-            </div>
+          <div className="rounded-2xl border border-border/60 bg-card p-12 flex flex-col items-center justify-center gap-4">
+             <div className="w-8 h-8 border-4 border-muted border-t-foreground rounded-full animate-spin" />
+             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Analysing account health...</p>
           </div>
         ) : briefing ? (
           <>
-            <Alert
-              variant={
-                blockers.length > 0 ? "destructive" : warnings.length > 0 ? "warning" : "success"
-              }
-            >
-              {blockers.length > 0 ? (
-                <ShieldWarning className="h-4 w-4" />
-              ) : warnings.length > 0 ? (
-                <WarningCircle className="h-4 w-4" />
-              ) : (
-                <CheckCircle className="h-4 w-4" />
-              )}
-              <AlertTitle>
-                {blockers.length > 0
-                  ? "Archive Blocked"
-                  : warnings.length > 0
-                    ? "Archive Requires Review"
-                    : "Archive Ready"}
-              </AlertTitle>
-              <AlertDescription>
-                {blockers.length > 0
-                  ? "The user still has unresolved financial obligations. Archive stays disabled until those are cleared."
-                  : warnings.length > 0
-                    ? "This archive can continue, but it will cancel live contracts and notify the other party."
-                    : "No blocking conditions were found. The account can be archived now."}
-              </AlertDescription>
-            </Alert>
+            {/* Show Alert only for Level 2 (Warning) or Level 3 (Blocked) */}
+            {(blockers.length > 0 || warnings.length > 0) && (
+              <Alert
+                variant={blockers.length > 0 ? "destructive" : "warning"}
+                className="rounded-2xl border-2"
+              >
+                <div className="flex items-start gap-3 text-left">
+                  {blockers.length > 0 ? (
+                    <ShieldWarning className="h-5 w-5 mt-0.5 shrink-0" />
+                  ) : (
+                    <WarningCircle className="h-5 w-5 mt-0.5 shrink-0" />
+                  )}
+                  <div>
+                    <AlertTitle className="text-sm font-black uppercase tracking-wider mb-1">
+                      {blockers.length > 0
+                        ? "Action Blocked (Level 3)"
+                        : "Warning: Level 2 Action"}
+                    </AlertTitle>
+                    <AlertDescription className="text-xs font-medium leading-relaxed opacity-90">
+                      {blockers.length > 0
+                        ? "This account has unresolved financial obligations. You cannot proceed until these are cleared."
+                        : "This account is involved in active contracts. Continuing will cancel them and notify all parties."}
+                    </AlertDescription>
+                  </div>
+                </div>
+              </Alert>
+            )}
 
             {blockers.length > 0 && (
-              <section className="space-y-3 rounded-2xl border border-danger/20 bg-danger-surface/40 p-4">
+              <section className="space-y-4 rounded-2xl border border-danger/20 bg-danger-surface/40 p-5">
                 <div>
-                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-danger">
-                    Blocking Conditions
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-danger">
+                    Critical Blockers
                   </h4>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    These items must be resolved before the user can be archived.
-                  </p>
                 </div>
                 <div className="space-y-3">
                   {blockers.map((blocker) => (
                     <div
                       key={blocker.code}
-                      className="rounded-xl border border-danger/20 bg-background/90 p-3"
+                      className="rounded-xl border border-danger/20 bg-background/90 p-4"
                     >
-                      <p className="text-sm font-semibold text-foreground">{blocker.message}</p>
-                      {Array.isArray(blocker.details) && blocker.details.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {blocker.details.map((detail) => {
-                            const detailLabel = detail.title || detail.type || detail.status || "Item";
-                            const amountLabel = detail.amount
-                              ? ` | ${formatMoney(detail.amount, currency)}`
-                              : "";
-
-                            return (
-                              <Badge
-                                key={detail.id || `${blocker.code}-${detail.status}-${detail.amount}`}
-                                variant="outline"
-                                className="border-danger/30 bg-danger-surface/30 text-danger"
-                              >
-                                {detailLabel + amountLabel}
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                      )}
+                      <p className="text-sm font-bold text-foreground">{blocker.message}</p>
                     </div>
                   ))}
                 </div>
@@ -184,190 +154,124 @@ const UserArchiveDialog = ({
             )}
 
             {warnings.length > 0 && (
-              <section className="space-y-3 rounded-2xl border border-warning/20 bg-warning/5 p-4">
+              <section className="space-y-4 rounded-2xl border border-warning/20 bg-warning/5 p-5">
                 <div>
-                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-warning">
-                    Warnings
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-warning">
+                    Action Warnings
                   </h4>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    These items do not block archive, but they change related contracts.
-                  </p>
                 </div>
                 <div className="space-y-3">
                   {warnings.map((warning) => (
                     <div
                       key={warning.code}
-                      className="rounded-xl border border-warning/20 bg-background/90 p-3"
+                      className="rounded-xl border border-warning/20 bg-background/90 p-4"
                     >
-                      <p className="text-sm font-semibold text-foreground">{warning.message}</p>
-                      {Array.isArray(warning.details) && warning.details.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {warning.details.map((detail) => {
-                            const detailLabel = detail.title || "Contract";
-                            const statusLabel = detail.status ? ` | ${detail.status}` : "";
-
-                            return (
-                              <Badge
-                                key={detail.id || `${warning.code}-${detail.status}`}
-                                variant="warning"
-                                className="uppercase"
-                              >
-                                {detailLabel + statusLabel}
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                      )}
+                      <p className="text-sm font-bold text-foreground">{warning.message}</p>
                     </div>
                   ))}
                 </div>
               </section>
             )}
 
-            <section className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl border border-border/60 bg-card p-4">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-foreground" />
-                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-foreground">
-                    Money Summary
+            <section className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-border/60 bg-card p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Wallet className="h-4 w-4 text-foreground opacity-50" />
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground opacity-50">
+                    Financial Snapshot
                   </h4>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                      Wallet Balance
-                    </p>
-                    <p className="mt-2 text-base font-bold text-foreground">
-                      {formatMoney(impactSummary?.money?.walletBalance, currency)}
-                    </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center sm:text-left">
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground">Available</p>
+                    <p className="mt-1 text-lg font-bold text-foreground">{formatMoney(impactSummary?.money?.walletBalance, currency)}</p>
                   </div>
-                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                      Locked Balance
-                    </p>
-                    <p className="mt-2 text-base font-bold text-foreground">
-                      {formatMoney(impactSummary?.money?.lockedBalance, currency)}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                      Pending Payments
-                    </p>
-                    <p className="mt-2 text-base font-bold text-foreground">
-                      {impactSummary?.money?.pendingPayments?.count || 0}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatMoney(impactSummary?.money?.pendingPayments?.totalAmount, currency)}
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                      Pending Transactions
-                    </p>
-                    <p className="mt-2 text-base font-bold text-foreground">
-                      {impactSummary?.money?.pendingTransactions?.count || 0}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatMoney(
-                        impactSummary?.money?.pendingTransactions?.totalAmount,
-                        currency
-                      )}
-                    </p>
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center sm:text-left">
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground">Locked</p>
+                    <p className="mt-1 text-lg font-bold text-foreground">{formatMoney(impactSummary?.money?.lockedBalance, currency)}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-card p-4">
-                <div className="flex items-center gap-2">
-                  <Stack className="h-4 w-4 text-foreground" />
-                  <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-foreground">
-                    Retained Records
+              <div className="rounded-2xl border border-border/60 bg-card p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Stack className="h-4 w-4 text-foreground opacity-50" />
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground opacity-50">
+                    Activity Records
                   </h4>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  {Object.entries(impactSummary?.retainedRecords || {}).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="rounded-xl border border-border/50 bg-muted/20 p-3"
-                    >
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                        {recordLabels[key] || key}
-                      </p>
-                      <p className="mt-2 text-base font-bold text-foreground">{value}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(impactSummary?.retainedRecords || {}).slice(0, 2).map(([key, value]) => (
+                    <div key={key} className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center sm:text-left">
+                      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-muted-foreground">{recordLabels[key] || key}</p>
+                      <p className="mt-1 text-lg font-bold text-foreground">{value}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            <section className="rounded-2xl border border-border/60 bg-card p-4">
-              <h4 className="text-sm font-extrabold uppercase tracking-[0.16em] text-foreground">
-                Result If Confirmed
-              </h4>
-              <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <p>{resultIfConfirmed?.userAccess}</p>
-                <p>{resultIfConfirmed?.contractOutcome}</p>
-                <p>{resultIfConfirmed?.dataRetention}</p>
-              </div>
-            </section>
-
-            <section className="space-y-3">
+            <section className="space-y-4">
               <Textarea
-                label="Admin Reason"
+                label="Action Rationale"
+                labelClassName="text-[9px] font-black uppercase tracking-widest opacity-50"
                 value={reason}
                 onChange={(event) => onReasonChange(event.target.value)}
-                placeholder="Document why this account is being archived..."
+                placeholder={`Document why this account is being ${mode === 'delete' ? 'deleted' : 'deactivated'}...`}
                 disabled={submitting}
+                className="rounded-2xl border-border/60 min-h-[100px] text-sm"
               />
 
               {warnings.length > 0 && (
-                <label className="flex items-start gap-3 rounded-xl border border-warning/20 bg-warning/5 p-3 text-sm text-foreground">
+                <label className="flex items-start gap-4 rounded-2xl border border-warning/20 bg-warning/5 p-4 cursor-pointer">
                   <Checkbox
                     checked={acknowledgeWarnings}
                     onCheckedChange={(checked) =>
                       onAcknowledgeWarningsChange(Boolean(checked))
                     }
                     disabled={submitting}
-                    className="mt-0.5"
+                    className="mt-1"
                   />
-                  <span>
-                    I understand that continuing will cancel the live contract(s), store the
-                    admin reason, and notify the other party.
+                  <span className="text-[10px] font-bold text-foreground/80 leading-relaxed uppercase tracking-tight text-left">
+                    I acknowledge that this action will cancel all live contracts and notify involved counterparties.
                   </span>
                 </label>
               )}
             </section>
           </>
         ) : (
-          <Alert variant="destructive">
-            <ShieldWarning className="h-4 w-4" />
-            <AlertTitle>Archive Briefing Unavailable</AlertTitle>
-            <AlertDescription>
-              The archive briefing could not be loaded. X this dialog and try again.
+          <Alert variant="destructive" className="rounded-2xl">
+            <ShieldWarning className="h-5 w-5" />
+            <AlertTitle className="text-sm font-black uppercase">Service Error</AlertTitle>
+            <AlertDescription className="text-xs font-medium">
+              We couldn't generate the account briefing. Please close and try again.
             </AlertDescription>
           </Alert>
         )}
-      </Dialog.Body>
 
-      <Dialog.Footer>
-        <Button type="button" variant="secondary" onClick={onX} disabled={submitting}>
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          variant="danger"
-          onClick={onConfirm}
-          loading={submitting}
-          disabled={!canConfirm || loading}
-        >
-          Archive User
-        </Button>
-      </Dialog.Footer>
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/30">
+          <Button 
+            variant="secondary" 
+            onClick={onX} 
+            disabled={submitting} 
+            className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant={isDeactivate ? "warning" : "danger"}
+            onClick={onConfirm}
+            loading={submitting}
+            disabled={!canConfirm || loading}
+            className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl"
+          >
+            {isDeactivate ? "Deactivate User" : "Delete User"}
+          </Button>
+        </div>
+      </Dialog.Body>
     </Dialog>
   );
 };
 
 export default UserArchiveDialog;
-
-
-

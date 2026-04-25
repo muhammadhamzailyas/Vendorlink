@@ -96,9 +96,9 @@ const AdminDashboard = () => {
       });
 
       setStats({
-        totalUsers: validUsers.length,
-        totalCompanies: validUsers.filter((u) => u.role === "company").length,
-        totalVendors: validUsers.filter((u) => u.role === "vendor").length,
+        totalUsers: validUsers.filter(u => u.status === 'approved').length,
+        totalCompanies: validUsers.filter((u) => u.role === "company" && u.status === 'approved').length,
+        totalVendors: validUsers.filter((u) => u.role === "vendor" && u.status === 'approved').length,
         pendingApprovals: pending.length,
         ...statsData
       });
@@ -148,6 +148,12 @@ const AdminDashboard = () => {
         <p className="text-[10px] font-black uppercase tracking-widest">{message}</p>
     </div>
   );
+
+  const sortedRecentUsers = [...recentUsers].sort((a, b) => {
+    const dateA = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+    const dateB = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
+    return dateB - dateA;
+  });
 
   const recentUserColumns = [
     {
@@ -256,16 +262,20 @@ const AdminDashboard = () => {
                     <AreaChart data={stats.growthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                         <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="var(--foreground)" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#262626" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#262626" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#a3a3a3" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#a3a3a3" stopOpacity={0}/>
                         </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
-                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                        <Area type="monotone" dataKey="users" stroke="var(--foreground)" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={2} />
-                        <Area type="monotone" dataKey="tasks" stroke="var(--muted-foreground)" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
+                        <Area type="monotone" dataKey="users" stroke="#262626" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={2} />
+                        <Area type="monotone" dataKey="tasks" stroke="#a3a3a3" fillOpacity={1} fill="url(#colorTasks)" strokeWidth={2} strokeDasharray="5 5" />
                     </AreaChart>
                     </ResponsiveContainer>
                 </ChartContainer>
@@ -301,8 +311,8 @@ const AdminDashboard = () => {
                                 paddingAngle={5}
                                 dataKey="value"
                             >
-                                <Cell fill="var(--foreground)" />
-                                <Cell fill="var(--muted-foreground)" />
+                                <Cell fill="#262626" />
+                                <Cell fill="#d4d4d4" />
                             </Pie>
                             <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                         </PieChart>
@@ -311,7 +321,7 @@ const AdminDashboard = () => {
                     <div className="mt-4 flex flex-wrap justify-center gap-6">
                         {stats.marketplaceBalance.map((entry, index) => (
                             <div key={entry.name} className="flex items-center gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: index === 0 ? 'var(--foreground)' : 'var(--muted-foreground)' }} />
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: index === 0 ? '#262626' : '#d4d4d4' }} />
                                 <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground">
                                     {entry.name}: {entry.value}
                                 </span>
@@ -345,11 +355,12 @@ const AdminDashboard = () => {
                     <ResponsiveContainer width="100%" height={260} minWidth={0}>
                     <BarChart data={stats.growthData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
-                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                        <YAxis axisLine={false} tickLine={false} tickMargin={10} tick={{fill: '#e5e5e5', fontSize: 10}} />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="totalVolume" stackId="a" fill="var(--muted-foreground)" radius={[0, 0, 0, 0]} />
-                        <Bar dataKey="revenue" stackId="a" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
+                        <Legend />
+                        <Bar dataKey="totalVolume" stackId="a" fill="#a3a3a3" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="revenue" stackId="a" fill="#262626" radius={[4, 4, 0, 0]} />
                     </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
@@ -376,10 +387,10 @@ const AdminDashboard = () => {
                     <ResponsiveContainer width="100%" height={260} minWidth={0}>
                     <BarChart layout="vertical" data={stats.taskFunnel} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
-                        <XAxis type="number" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground-light)', fontSize: 10}} />
-                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: 'var(--foreground)', fontSize: 10, fontWeight: 'bold'}} />
+                        <XAxis type="number" axisLine={false} tickLine={false} tick={{fill: '#e5e5e5', fontSize: 10}} />
+                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#e5e5e5', fontSize: 10, fontWeight: 'bold'}} />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="value" fill="var(--foreground)" radius={[0, 4, 4, 0]} barSize={20} />
+                        <Bar dataKey="value" fill="#404040" radius={[0, 4, 4, 0]} barSize={20} />
                     </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
@@ -438,13 +449,13 @@ const AdminDashboard = () => {
 
         <DataTable
         columns={recentUserColumns}
-        data={recentUsers}
+        data={sortedRecentUsers}
         rowKey="_id"
         loading={loading}
         showSectionHeader
         icon={<People size={24} />}
         title="Recent Users"
-        subtitle="Latest registered users on the platform"
+        subtitle="Sorted by most recent login"
         action={(
             <Button
             onClick={() => navigate("/admin/users")}

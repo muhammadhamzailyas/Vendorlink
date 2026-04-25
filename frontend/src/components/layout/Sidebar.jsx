@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { ScrollArea, Button } from "../ui";
 import { SidebarSimple } from "@phosphor-icons/react";
@@ -17,7 +18,6 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
     return location.pathname.startsWith(path);
   };
 
-  // Filter menu items for admin: remove messages and notifications from sidebar
   const filteredListItems = isAdmin 
     ? menuItems.filter(item => 
         !item.text.toLowerCase().includes("message") && 
@@ -26,28 +26,44 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
     : menuItems;
 
   return (
-    <aside className={cn(
-      "fixed left-4 top-4 bottom-4 z-40 hidden flex-col border border-border bg-card transition-all duration-300 lg:flex rounded-2xl shadow-sm",
-      collapsed ? "w-20" : "w-64"
-    )}>
+    <motion.aside 
+      initial={false}
+      animate={{ width: collapsed ? 80 : 256 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className={cn(
+        "fixed left-4 top-4 bottom-4 z-40 hidden flex-col border border-border bg-card lg:flex rounded-2xl shadow-sm overflow-hidden"
+      )}
+    >
       <div className={cn(
-        "flex h-20 items-center justify-between px-4",
+        "flex h-20 items-center justify-between px-4 shrink-0",
         collapsed && "justify-center"
       )}>
         <Link to="/" className="flex items-center gap-2 overflow-hidden">
-          {collapsed ? (
-            <img 
-              src={logo} 
-              alt="Logo" 
-              className="h-9 w-9 shrink-0 object-contain" 
-            />
-          ) : (
-            <img 
-              src={secondaryLogo} 
-              alt="Vendorlink" 
-              className="h-6 w-auto shrink-0 object-contain" 
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {collapsed ? (
+              <motion.img 
+                key="collapsed-logo"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+                src={logo} 
+                alt="Logo" 
+                className="h-9 w-9 shrink-0 object-contain" 
+              />
+            ) : (
+              <motion.img 
+                key="expanded-logo"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                src={secondaryLogo} 
+                alt="Vendorlink" 
+                className="h-6 w-auto shrink-0 object-contain" 
+              />
+            )}
+          </AnimatePresence>
         </Link>
         {!collapsed && (
           <Button 
@@ -62,7 +78,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
       </div>
 
       {collapsed && (
-        <div className="flex justify-center pb-4">
+        <div className="flex justify-center pb-4 shrink-0">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -74,17 +90,24 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
         </div>
       )}
       
-      <div className="h-px bg-border mx-4" />
+      <div className="h-px bg-border mx-4 shrink-0" />
 
       <ScrollArea className="flex-1 px-3">
         <div className="flex flex-col gap-6 py-6">
           {/* Navigation Section */}
           <div className="flex flex-col gap-1">
-            {!collapsed && (
-              <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50">
-                Navigation
-              </p>
-            )}
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.p 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 0.5, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground overflow-hidden whitespace-nowrap"
+                >
+                  Navigation
+                </motion.p>
+              )}
+            </AnimatePresence>
             {filteredListItems
               .filter(item => 
                 !item.text.toLowerCase().includes("message") && 
@@ -100,7 +123,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start gap-3 h-10 transition-all duration-200",
+                        "w-full justify-start gap-3 h-10 transition-colors duration-200",
                         collapsed ? "px-0 justify-center" : "px-3",
                         active 
                           ? "bg-muted text-foreground shadow-xs" 
@@ -108,7 +131,18 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                       )}
                     >
                       <Icon className={cn("h-5 w-5 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
-                      {!collapsed && <span className="truncate font-bold uppercase tracking-tight text-[10px]">{item.text}</span>}
+                      <AnimatePresence mode="popLayout">
+                        {!collapsed && (
+                          <motion.span 
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            className="truncate font-bold uppercase tracking-tight text-[10px] whitespace-nowrap"
+                          >
+                            {item.text}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
                     </Button>
                   </Link>
                 );
@@ -122,11 +156,18 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
               item.text.toLowerCase().includes("feedback")
             )) && (
             <div className="flex flex-col gap-1">
-              {!collapsed && (
-                <p className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50">
-                  Others
-                </p>
-              )}
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.p 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 0.5, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground overflow-hidden whitespace-nowrap"
+                  >
+                    Others
+                  </motion.p>
+                )}
+              </AnimatePresence>
               {filteredListItems
                 .filter(item => 
                   item.text.toLowerCase().includes("message") || 
@@ -142,7 +183,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                       <Button
                         variant="ghost"
                         className={cn(
-                          "w-full justify-start gap-3 h-10 transition-all duration-200",
+                          "w-full justify-start gap-3 h-10 transition-colors duration-200",
                           collapsed ? "px-0 justify-center" : "px-3",
                           active 
                             ? "bg-muted text-foreground shadow-xs" 
@@ -150,7 +191,18 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                         )}
                       >
                         <Icon className={cn("h-5 w-5 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
-                        {!collapsed && <span className="truncate font-bold uppercase tracking-tight text-[10px]">{item.text}</span>}
+                        <AnimatePresence mode="popLayout">
+                          {!collapsed && (
+                            <motion.span 
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -10 }}
+                              className="truncate font-bold uppercase tracking-tight text-[10px] whitespace-nowrap"
+                            >
+                              {item.text}
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
                       </Button>
                     </Link>
                   );
@@ -159,7 +211,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
           )}
         </div>
       </ScrollArea>
-    </aside>
+    </motion.aside>
   );
 };
 

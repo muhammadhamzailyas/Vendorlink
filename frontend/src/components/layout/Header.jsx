@@ -124,11 +124,13 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
                 </div>
             </div>
             <div className="h-px bg-border my-2" />
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-muted">
-              <Link to={`/${user?.role}/profile`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground hover:text-foreground">
-                <User className="h-4 w-4" /> Profile
-              </Link>
-            </DropdownMenuItem>
+            {!isAdmin && (
+              <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-muted">
+                <Link to={`/${user?.role}/profile`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground hover:text-foreground">
+                  <User className="h-4 w-4" /> Profile
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-muted">
               <Link to={`/${user?.role}/settings`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground hover:text-foreground">
                 <Gear className="h-4 w-4" /> Settings

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   ArrowsLeftRight,
   ChartBar,
@@ -192,10 +193,16 @@ const DashboardLayout = () => {
         onLogout={handleSignOut}
       />
 
-      <main className={cn(
-        "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out border border-border bg-card rounded-2xl overflow-hidden shadow-sm",
-        isSidebarCollapsed ? "lg:ml-[112px]" : "lg:ml-[288px]"
-      )}>
+      <motion.main 
+        initial={false}
+        animate={{ 
+          marginLeft: isSidebarCollapsed ? 96 : 272
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className={cn(
+          "flex-1 flex flex-col min-w-0 border border-border bg-card rounded-2xl overflow-hidden shadow-sm"
+        )}
+      >
         <Header 
           user={user} 
           menuItems={main}
@@ -212,7 +219,7 @@ const DashboardLayout = () => {
             <Outlet />
           </div>
         </div>
-      </main>
+      </motion.main>
 
       {role !== "admin" && <FloatingChatButton />}
     </div>

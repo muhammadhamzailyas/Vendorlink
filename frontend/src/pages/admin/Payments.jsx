@@ -92,10 +92,10 @@ const AdminPayments = () => {
       if (status !== "all") params.status = status;
       
       const res = await paymentAPI.getAllPayments(params);
-      const d = res?.data;
-      const payments = toArray(d?.data ?? d);
+      const d = res?.data?.data;
       return {
-        payments,
+        payments: d?.payments || [],
+        counts: d?.counts || {},
         totalPages: d?.pagination?.pages || 1,
         totalCount: d?.pagination?.total || 0
       };
@@ -105,10 +105,13 @@ const AdminPayments = () => {
 
   const payments = data?.payments || [];
   const totalPages = data?.totalPages || 1;
+  const counts = data?.counts || {};
   const changes = statsData?.data?.changes || {};
 
   const handleDownloadInvoice = async (paymentId) => {
-    const toastId = toastUtil.loading("Preparing invoice...");
+    const toastId = (typeof toastUtil.loading === "function") 
+      ? toastUtil.loading("Preparing invoice...")
+      : toastUtil.info("Preparing invoice...");
     try {
       await paymentAPI.downloadInvoice(paymentId);
       toastUtil.success("Invoice downloaded", { id: toastId });
@@ -193,11 +196,11 @@ const AdminPayments = () => {
   ];
 
   const tabOptions = [
-    { label: "All Payments", value: "all" },
-    { label: "Pending", value: "pending" },
-    { label: "Processing", value: "processing" },
-    { label: "Completed", value: "completed" },
-    { label: "Failed", value: "failed" },
+    { label: "All Payments", value: "all", count: counts.all || 0 },
+    { label: "Pending", value: "pending", count: counts.pending || 0 },
+    { label: "Processing", value: "processing", count: counts.processing || 0 },
+    { label: "Completed", value: "completed", count: counts.completed || 0 },
+    { label: "Failed", value: "failed", count: counts.failed || 0 },
   ];
 
   return (
@@ -219,12 +222,12 @@ const AdminPayments = () => {
         />
         <StatCard
           title="Active Settlements"
-          value={payments.filter(p => p.status === 'processing').length}
+          value={counts.processing || 0}
           icon={<Clock />}
         />
         <StatCard
           title="Failed/Refunded"
-          value={payments.filter(p => ['failed', 'refunded'].includes(p.status)).length}
+          value={(counts.failed || 0) + (counts.refunded || 0)}
           icon={<WarningCircle className="text-danger" />}
         />
       </div>
@@ -235,7 +238,7 @@ const AdminPayments = () => {
         searchPlaceholder="search by invoice or name"
         activeTab={activeTab}
         onTabChange={(idx) => { setActiveTab(idx); setPage(1); }}
-        tabs={tabOptions.map(t => t.label)}
+        tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
       />
 
       {isLoading ? (
@@ -309,6 +312,3 @@ const AdminPayments = () => {
 };
 
 export default AdminPayments;
-
-
-

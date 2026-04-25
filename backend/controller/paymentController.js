@@ -747,10 +747,18 @@ class PaymentController {
 
       const total = await Payment.countDocuments(query);
 
+      // Get counts for all statuses
+      const countsRaw = await Payment.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } }
+      ]);
+      const counts = { all: await Payment.countDocuments() };
+      countsRaw.forEach(c => { counts[c._id] = c.count; });
+
       res.json({
         success: true,
         data: {
           payments,
+          counts,
           pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
         },
       });
@@ -782,10 +790,23 @@ class PaymentController {
 
       const total = await Transaction.countDocuments(query);
 
+      // Get counts for all types
+      const countsRaw = await Transaction.aggregate([
+        { $group: { _id: "$type", count: { $sum: 1 } } }
+      ]);
+      const counts = { all: await Transaction.countDocuments() };
+      countsRaw.forEach(c => { counts[c._id] = c.count; });
+      
+      // Ensure specific types exist in the object even if 0
+      ["deposit", "withdrawal", "payment", "refund", "subscription", "fee"].forEach(t => {
+          if (!counts[t]) counts[t] = 0;
+      });
+
       res.json({
         success: true,
         data: {
           transactions,
+          counts,
           pagination: { page: parseInt(page), limit: parseInt(limit), total, pages: Math.ceil(total / limit) },
         },
       });

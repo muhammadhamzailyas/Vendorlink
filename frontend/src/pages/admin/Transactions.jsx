@@ -1,26 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowsDownUp as ArrowUpDown,
-  MagnifyingGlass,
   CheckCircle,
   XCircle,
   ArrowCircleDown as ArrowDownCircle,
   ArrowCircleUp as ArrowUpCircle,
   CreditCard,
   CurrencyDollar,
+  ListChecks,
+  Sparkle
 } from "@phosphor-icons/react";
 import { paymentAPI } from "@/services/paymentAPI";
 import { showToast } from "@/lib/toast";
 import { 
   Button, 
-  Input, 
-  Select, 
   PageTransition, 
   Skeleton, 
   EmptyState, 
   DataTable, 
-  Loader,
+  Badge,
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -30,39 +29,41 @@ import {
   PaginationEllipsis,
 } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
+import FilterSearchBar from "@/components/shared/FilterSearchBar";
+import UserAvatar from "@/components/shared/UserAvatar";
 import dayjs from "dayjs";
+import { cn } from "@/lib/cn";
 
 const typeIcons = {
   deposit: ArrowDownCircle,
   withdrawal: ArrowUpCircle,
   payment: CreditCard,
   refund: CurrencyDollar,
-};
-
-const typeColors = {
-  deposit: "text-success bg-success-surface",
-  withdrawal: "text-warning bg-warning-light",
-  payment: "text-info bg-info-light",
-  refund: "text-purple-600 bg-purple-50",
-  fee: "text-muted-foreground bg-muted",
+  platform_fee: ListChecks,
+  subscription: Sparkle,
 };
 
 const AdminTransactions = () => {
-  const [filters, setFilters] = useState({ type: "", status: "", search: "" });
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["admin", "transactions", page, filters.type, filters.status],
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "transactions", page, activeTab],
     queryFn: async () => {
+      const typeMap = ["all", "deposit", "withdrawal", "payment", "subscription", "refund", "platform_fee"];
+      const type = typeMap[activeTab];
       const params = { page, limit: 20 };
-      if (filters.type) params.type = filters.type;
-      if (filters.status) params.status = filters.status;
+      if (type !== "all") params.type = type;
+      
       const res = await paymentAPI.getAllTransactions(params);
-      const data = res?.data?.data;
+      const d = res?.data?.data;
       return {
-        transactions: data?.transactions || [],
-        totalPages: data?.pagination?.pages || 1,
+        transactions: d?.transactions || [],
+        counts: d?.counts || {},
+        totalPages: d?.pagination?.pages || 1,
+        totalCount: d?.pagination?.total || 0
       };
     },
     onError: () => showToast("error", "Failed to load transactions"),
@@ -70,155 +71,170 @@ const AdminTransactions = () => {
 
   const transactions = data?.transactions || [];
   const totalPages = data?.totalPages || 1;
+  const counts = data?.counts || {};
 
   const withdrawalMutation = useMutation({
-    mutationFn: ({ transactionId, action }) => paymentAPI.processWithdrawal(transactionId, { action }),
-    onSuccess: (_, { action }) => {
-      showToast("success", `Withdrawal ${action === "approve" ? "approved" : "rejected"}`);
+    mutationFn: ({ transactionId, status, adminNotes }) => 
+        paymentAPI.processWithdrawal({ transactionId, status, adminNotes }),
+    onSuccess: (_, { status }) => {
+      showToast("success", `Withdrawal ${status === "completed" ? "approved" : "rejected"}`);
       queryClient.invalidateQueries({ queryKey: ["admin", "transactions"] });
     },
-    onError: (error, { action }) => {
-      showToast("error", error.response?.data?.error || `Failed to ${action} withdrawal`);
+    onError: (error) => {
+      showToast("error", error.response?.data?.error || "Failed to process withdrawal");
     },
   });
 
-  const filteredTransactions = transactions.filter((t) => {
-    if (!filters.search) return true;
-    const q = filters.search.toLowerCase();
-    return (
-      t.invoiceNumber?.toLowerCase().includes(q) ||
-      t.user?.username?.toLowerCase().includes(q) ||
-      t.description?.toLowerCase().includes(q)
-    );
-  });
+  const filteredTransactions = useMemo(() => {
+    const q = search.toLowerCase();
+    return transactions.filter((t) => {
+      if (!q) return true;
+      const fromName = t.fromUserId?.companyName || t.fromUserId?.username || "";
+      const toName = t.toUserId?.companyName || t.toUserId?.username || "";
+      return (
+        t.invoiceNumber?.toLowerCase().includes(q) ||
+        fromName.toLowerCase().includes(q) ||
+        toName.toLowerCase().includes(q) ||
+        t.description?.toLowerCase().includes(q)
+      );
+    });
+  }, [transactions, search]);
+
+  const transactionColumns = [
+    {
+        key: "type",
+        label: "Type",
+        cellClassName: "px-6 py-4",
+        render: (t) => {
+          const Icon = typeIcons[t.type] || ArrowUpDown;
+          return (
+            <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-muted">
+                    <Icon className="h-3.5 w-3.5 text-foreground" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-foreground/80">{t.type.replace('_', ' ')}</span>
+            </div>
+          );
+        },
+    },
+    {
+      key: "user",
+      label: "Initiator",
+      cellClassName: "px-6 py-4",
+      render: (t) => {
+          // Logic: fromUserId is usually the one starting the action (payer or withdrawer)
+          // For deposits, toUserId and fromUserId are often the same (the user)
+          const target = t.fromUserId || t.toUserId;
+          const displayName = target?.companyName || target?.username || "System";
+          
+          return (
+            <div className="flex items-center gap-2">
+              <UserAvatar user={target} name={displayName} size="sm" />
+              <span className="text-sm font-bold text-foreground">{displayName}</span>
+            </div>
+          );
+      }
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      cellClassName: "px-6 py-4 text-sm font-black text-foreground",
+      render: (t) => (
+        <span className={cn(
+            t.type === "deposit" || t.type === "refund" ? "text-success" : "text-foreground"
+        )}>
+          {t.type === "deposit" || t.type === "refund" ? "+" : "-"}${t.amount?.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      cellClassName: "px-6 py-4",
+      render: (t) => <StatusChip status={t.status} />,
+    },
+    {
+      key: "description",
+      label: "Description",
+      cellClassName: "px-6 py-4 text-xs font-medium text-muted-foreground max-w-xs truncate",
+      render: (t) => t.description || "—",
+    },
+    {
+      key: "date",
+      label: "Date",
+      cellClassName: "px-6 py-4 text-sm text-muted-foreground",
+      render: (t) => dayjs(t.createdAt).format("MMM DD, YYYY"),
+    },
+    {
+        key: "actions",
+        label: "",
+        headerClassName: "relative px-6 py-3",
+        cellClassName: "px-6 py-4 whitespace-nowrap text-right text-sm font-medium",
+        render: (t) => {
+            const isWithdrawalPending = t.type === "withdrawal" && t.status === "pending";
+            if (!isWithdrawalPending) return null;
+            return (
+                <div className="flex justify-end gap-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => withdrawalMutation.mutate({ transactionId: t._id, status: "completed", adminNotes: "Approved by admin" })}
+                        disabled={withdrawalMutation.isPending}
+                        className="h-8 w-8 p-0 rounded-full text-success hover:bg-success/10"
+                    >
+                        <CheckCircle className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => withdrawalMutation.mutate({ transactionId: t._id, status: "failed", adminNotes: "Rejected by admin" })}
+                        disabled={withdrawalMutation.isPending}
+                        className="h-8 w-8 p-0 rounded-full text-danger hover:bg-danger/10"
+                    >
+                        <XCircle className="h-4 w-4" />
+                    </Button>
+                </div>
+            );
+        },
+    },
+  ];
+
+  const tabOptions = [
+    { label: "All Activity", count: counts.all || 0 },
+    { label: "Deposits", count: counts.deposit || 0 },
+    { label: "Withdrawals", count: counts.withdrawal || 0 },
+    { label: "Payments", count: counts.payment || 0 },
+    { label: "Subscriptions", count: counts.subscription || 0 },
+    { label: "Refunds", count: counts.refund || 0 },
+    { label: "Fees", count: counts.platform_fee || 0 },
+  ];
 
   return (
     <PageTransition>
       <div className="space-y-8">
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3">
-          <div className="relative flex-1">
-            <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
-            <Input
-              type="text"
-              placeholder="Search transactions..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="pl-9"
+        <FilterSearchBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="search by initiator or description"
+            activeTab={activeTab}
+            onTabChange={(idx) => { setActiveTab(idx); setPage(1); }}
+            tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
+        />
+
+        <DataTable
+          columns={transactionColumns}
+          data={filteredTransactions}
+          rowKey="_id"
+          emptyState={
+            <EmptyState
+              icon={ArrowUpDown}
+              title="No transactions found"
+              description={search ? "Try adjusting your search criteria" : "Financial logs will populate as transactions occur."}
+              className="border-0 bg-transparent py-16 shadow-none"
             />
-          </div>
-          <Select
-            value={filters.type}
-            onChange={(e) => { setFilters({ ...filters, type: e.target.value }); setPage(1); }}
-          >
-            <option value="">All Types</option>
-            <option value="deposit">Deposit</option>
-            <option value="withdrawal">Withdrawal</option>
-            <option value="payment">Payment</option>
-            <option value="refund">Refund</option>
-            <option value="fee">Fee</option>
-          </Select>
-          <Select
-            value={filters.status}
-            onChange={(e) => { setFilters({ ...filters, status: e.target.value }); setPage(1); }}
-          >
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="completed">Completed</option>
-            <option value="failed">Failed</option>
-          </Select>
-        </div>
+          }
+        />
 
-        {/* Table */}
-        {isLoading ? (
-          <Loader />
-        ) : filteredTransactions.length === 0 ? (
-          <EmptyState icon={ArrowUpDown} title="No transactions found" description="No transactions match your filters" />
-        ) : (
-          <DataTable
-            data={filteredTransactions}
-            columns={[
-              {
-                key: "type",
-                label: "Type",
-                render: (t) => {
-                  const Icon = typeIcons[t.type] || ArrowUpDown;
-                  const color = typeColors[t.type] || "text-muted-foreground bg-muted";
-                  return (
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
-                      <Icon className="h-3.5 w-3.5" />
-                      {t.type}
-                    </span>
-                  );
-                },
-              },
-              {
-                key: "invoiceNumber",
-                label: "Invoice",
-                render: (t) => <span className="font-mono text-xs">{t.invoiceNumber || "-"}</span>,
-              },
-              {
-                key: "user",
-                label: "User",
-                render: (t) => t.user?.username || "-",
-              },
-              {
-                key: "amount",
-                label: "Amount",
-                render: (t) => (
-                  <span className={`font-semibold ${t.type === "deposit" || t.type === "refund" ? "text-success" : ""}`}>
-                    {t.type === "deposit" || t.type === "refund" ? "+" : "-"}PKR {t.amount?.toLocaleString()}
-                  </span>
-                ),
-              },
-              {
-                key: "status",
-                label: "Status",
-                render: (t) => <StatusChip status={t.status} />,
-              },
-              {
-                key: "description",
-                label: "Description",
-                cellClassName: "max-w-xs truncate px-4 sm:px-6 py-3 sm:py-4 text-sm text-muted-foreground",
-                render: (t) => t.description || "-",
-              },
-              {
-                key: "createdAt",
-                label: "Date",
-                render: (t) => <span className="text-muted-foreground">{dayjs(t.createdAt).format("MMM D, YYYY")}</span>,
-              },
-            ]}
-            showRowActions
-            actionsHeaderLabel="Actions"
-            rowActions={(t) => {
-              const isWithdrawalPending = t.type === "withdrawal" && t.status === "pending";
-              if (!isWithdrawalPending) return [];
-              return [
-                {
-                  key: "approve",
-                  label: "Approve",
-                  title: "Approve",
-                  icon: <CheckCircle className="h-3.5 w-3.5" />,
-                  onClick: () => withdrawalMutation.mutate({ transactionId: t._id, action: "approve" }),
-                  disabled: withdrawalMutation.isPending,
-                  className: "h-auto whitespace-nowrap px-2.5 py-1.5 text-xs text-success",
-                },
-                {
-                  key: "reject",
-                  label: "Reject",
-                  title: "Reject",
-                  icon: <XCircle className="h-3.5 w-3.5" />,
-                  onClick: () => withdrawalMutation.mutate({ transactionId: t._id, action: "reject" }),
-                  disabled: withdrawalMutation.isPending,
-                  className: "h-auto whitespace-nowrap px-2.5 py-1.5 text-danger",
-                },
-              ];
-            }}
-          />
-        )}
-
-        {/* Pagination */}
         {totalPages > 1 && (
           <Pagination className="mt-4">
             <PaginationContent>
@@ -271,6 +287,3 @@ const AdminTransactions = () => {
 };
 
 export default AdminTransactions;
-
-
-

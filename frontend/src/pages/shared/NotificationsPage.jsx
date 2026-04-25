@@ -21,6 +21,9 @@ import { cn } from "@/lib/cn";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 const priorityConfig = {
   urgent: { dot: "bg-error", label: "Urgent", badge: "bg-error/10 text-error border-error/20" },

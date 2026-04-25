@@ -105,7 +105,34 @@ class EmailService {
             <a href="${loginUrl}" style="display: inline-block; padding: 10px 20px; background: #18181b; color: white; text-decoration: none; border-radius: 8px;">Log In</a>
         </div>
       `;
-      return this.sendEmail({ to: email, subject: "Your New Password - VendorLink", html });
+      return this.sendEmail({
+        to: email,
+        subject: "Your New Password - VendorLink",
+        html
+    });
+  }
+
+  async sendApprovalEmail(user) {
+    const dashboardUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/${user.role}`;
+    const html = `
+        <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
+            <h1 style="font-size: 24px; color: #10b981;">Account Approved!</h1>
+            <p>Hello ${user.fullName || user.username || "User"},</p>
+            <p>We are excited to inform you that your VendorLink account has been successfully verified and approved.</p>
+            <p>You now have full access to our platform to ${user.role === 'company' ? 'post tasks and hire expert vendors' : 'browse tasks and submit proposals'}.</p>
+            <div style="margin: 30px 0;">
+                <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Go to Dashboard</a>
+            </div>
+            <p>Welcome aboard!</p>
+            <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+        </div>
+    `;
+    return this.sendEmail({
+        to: user.email,
+        subject: "Your VendorLink Account is Approved!",
+        html
+    });
   }
 }
 

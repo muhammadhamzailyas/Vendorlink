@@ -45,7 +45,7 @@ const CompanyTaskDetail = () => {
     setLoading(true);
     try {
       const [taskRes, proposalsRes] = await Promise.all([
-        taskAPI.getById(id),
+        taskAPI.getTask(id),
         proposalAPI.getTaskProposals(id),
       ]);
 

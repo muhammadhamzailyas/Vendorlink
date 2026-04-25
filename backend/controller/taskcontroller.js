@@ -1,6 +1,8 @@
 const Task = require("../model/task");
 const Proposal = require("../model/proposal");
 const User = require("../model/user");
+const Contract = require("../model/Contract");
+const Payment = require("../model/Payment");
 
 const getNotificationService = (req) => {
   try { return req.app?.get("notificationService"); } catch { return null; }
@@ -132,33 +134,82 @@ class TaskController {
     }
   }
 
+  // Check deletability
+  async checkDeletability(req, res) {
+    try {
+      const { id } = req.params;
+      const task = await Task.findOne({ _id: id, companyId: req.user._id });
+      if (!task) return res.status(404).json({ error: "Task not found" });
+
+      // Level 1: Simple confirmation (Open, no accepted proposal)
+      const acceptedProposal = await Proposal.findOne({ taskId: id, status: "accepted" });
+      
+      if (!acceptedProposal) {
+        return res.json({
+          canDelete: true,
+          level: 1,
+          message: "Are you sure you want to delete this task? This action cannot be undone.",
+          warning: null
+        });
+      }
+
+      // Check for Level 3: Transaction phase
+      const Contract = require("../model/Contract");
+      const contract = await Contract.findOne({ taskId: id });
+      
+      // If contract exists and has any payments
+      const Payment = require("../model/Payment");
+      const payments = await Payment.find({ taskId: id });
+      
+      if (payments.length > 0) {
+        return res.json({
+          canDelete: false,
+          level: 3,
+          message: "This task is in the transaction phase and cannot be deleted.",
+          warning: "Payments have already been processed or are pending for this task. Please complete or dispute the task through formal channels."
+        });
+      }
+
+      // Level 2: Warning (Has accepted proposal/active contract but no payments)
+      return res.json({
+        canDelete: true,
+        level: 2,
+        message: "Warning: This task is currently being worked on by a vendor.",
+        warning: "A vendor has already been assigned to this task. Deleting it now will cancel their engagement and they must be informed. Are you sure you want to proceed?"
+      });
+
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
 
   // Delete task
   async deleteTask(req, res) {
     try {
-      const task = await Task.findOne({
-        _id: req.params.id,
-        companyId: req.user._id,
-      });
+      const { id } = req.params;
+      const task = await Task.findOne({ _id: id, companyId: req.user._id });
 
-      if (!task)
-        return res
-          .status(404)
-          .json({ error: "Task not found or not authorized" });
+      if (!task) return res.status(404).json({ error: "Task not found" });
 
-      const accepted = await Proposal.findOne({
-        taskId: req.params.id,
-        status: "accepted",
-      });
-
-      if (accepted) {
-        return res
-          .status(400)
-          .json({ error: "Cannot delete task with accepted proposals" });
+      // Verify deletability again before actual delete
+      const Payment = require("../model/Payment");
+      const payments = await Payment.countDocuments({ taskId: id });
+      if (payments > 0) {
+        return res.status(400).json({ error: "Cannot delete task in transaction phase" });
       }
 
-      await Proposal.deleteMany({ taskId: req.params.id });
-      await Task.findByIdAndDelete(req.params.id);
+      // Handle contract cancellation if exists
+      const Contract = require("../model/Contract");
+      const contract = await Contract.findOne({ taskId: id });
+      if (contract) {
+        contract.status = "cancelled";
+        contract.cancelledAt = new Date();
+        contract.cancellationReason = "Task deleted by company";
+        await contract.save();
+      }
+
+      await Proposal.deleteMany({ taskId: id });
+      await Task.findByIdAndDelete(id);
 
       res.json({ message: "Task deleted successfully" });
     } catch (err) {

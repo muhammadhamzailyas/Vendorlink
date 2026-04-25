@@ -10,6 +10,9 @@ import {
   Briefcase
 } from "@phosphor-icons/react";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 import { adminService } from "@/services/api";
 import { useUser } from "@/context/UserContext";
 import { 

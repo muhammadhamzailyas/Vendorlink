@@ -254,8 +254,12 @@ class AdminController {
         user,
       });
 
-      // Notify user
+      // Notify user via Email and System Notification
       try {
+        // Send Email
+        await emailService.sendApprovalEmail(user);
+
+        // Send Notification
         const notificationService = getNotificationService(req);
         if (notificationService) {
           await notificationService.createNotification({
@@ -271,7 +275,7 @@ class AdminController {
           });
         }
       } catch (notifError) {
-        console.error("Failed to send approval notification:", notifError);
+        console.error("Failed to send approval alerts:", notifError);
       }
     } catch (error) {
       console.error("Approve user error:", error);
@@ -1119,8 +1123,12 @@ class AdminController {
       user.onboardingStep = Math.max(user.onboardingStep || 1, 5);
       await user.save();
 
-      // Notify user
+      // Notify user via Email and System Notification
       try {
+        // Send Email
+        await emailService.sendApprovalEmail(user);
+
+        // Send Notification
         const notificationService = getNotificationService(req);
         if (notificationService) {
           await notificationService.createNotification({
@@ -1136,7 +1144,7 @@ class AdminController {
           });
         }
       } catch (notifError) {
-        console.error("Failed to send verification notification:", notifError);
+        console.error("Failed to send verification alerts:", notifError);
       }
 
       return res.json({ message: "Profile approved", user });

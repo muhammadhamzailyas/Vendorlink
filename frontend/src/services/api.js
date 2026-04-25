@@ -99,6 +99,7 @@ export const taskAPI = {
   getCompanyTasks: () => api.get("/tasks/company/my-tasks"),
   updateTask: (id, data) => api.put(`/tasks/${id}`, data),
   deleteTask: (id) => api.delete(`/tasks/${id}`),
+  checkDeletability: (id) => api.get(`/tasks/${id}/check-deletability`),
 };
 
 export const proposalAPI = {

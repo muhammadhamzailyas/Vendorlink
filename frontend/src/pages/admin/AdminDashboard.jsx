@@ -48,9 +48,9 @@ import { adminService } from "@/services/api";
 import { useUser } from "@/context/UserContext";
 import StatusChip from "@/components/shared/StatusChip";
 import UserAvatar from "@/components/shared/UserAvatar";
-import { cn } from "@/lib/cn";
 
 dayjs.extend(relativeTime);
+import { cn } from "@/lib/cn";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

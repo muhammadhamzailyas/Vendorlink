@@ -68,37 +68,37 @@ const UserManagement = () => {
   });
   const [archiveState, setArchiveState] = useState(createInitialArchiveState);
 
-  const tabOptions = useMemo(
-    () => [
-      { value: "all", label: "All Users", count: users.length },
+  const tabOptions = useMemo(() => {
+    const validUsers = users.filter((user) => user.role !== "unassigned");
+    return [
+      { value: "all", label: "All Users", count: validUsers.length },
       {
         value: "company",
         label: "Companies",
-        count: users.filter((user) => user.role === "company").length,
+        count: validUsers.filter((user) => user.role === "company").length,
       },
       {
         value: "vendor",
         label: "Vendors",
-        count: users.filter((user) => user.role === "vendor").length,
+        count: validUsers.filter((user) => user.role === "vendor").length,
       },
       {
         value: "pending",
         label: "Pending",
-        count: users.filter((user) => user.status === "pending").length,
+        count: validUsers.filter((user) => user.status === "pending").length,
       },
       {
         value: "approved",
         label: "Approved",
-        count: users.filter((user) => user.status === "approved").length,
+        count: validUsers.filter((user) => user.status === "approved").length,
       },
       {
         value: "rejected",
         label: "Rejected",
-        count: users.filter((user) => user.status === "rejected").length,
+        count: validUsers.filter((user) => user.status === "rejected").length,
       },
-    ],
-    [users]
-  );
+    ];
+  }, [users]);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);

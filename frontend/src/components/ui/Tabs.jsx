@@ -2,7 +2,9 @@ import React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/cn";
 
-const Tabs = ({ value, onChange, tabs, children, className }) => {
+const Tabs = ({ value, onChange, onValueChange, tabs, children, className }) => {
+  const handleChange = onChange || onValueChange;
+
   return (
     <TabsPrimitive.Root
       value={String(value)}
@@ -17,9 +19,9 @@ const Tabs = ({ value, onChange, tabs, children, className }) => {
             };
           });
           const selectedTab = normalizedTabs.find((tab) => tab.value === nextValue);
-          onChange?.(selectedTab ? selectedTab.rawValue : nextValue);
+          handleChange?.(selectedTab ? selectedTab.rawValue : nextValue);
         } else {
-          onChange?.(nextValue);
+          handleChange?.(nextValue);
         }
       }}
       className={cn("w-full", className)}
@@ -36,8 +38,9 @@ const Tabs = ({ value, onChange, tabs, children, className }) => {
                 key={valueString}
                 value={valueString}
                 className={cn(
-                  "inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-bold transition-all duration-200 uppercase tracking-tight",
+                  "cursor-pointer inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-bold transition-all duration-200 uppercase tracking-tight",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-input-focus/20",
+                  "hover:bg-muted-foreground/10 hover:text-foreground",
                   "data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-soft"
                 )}
               >

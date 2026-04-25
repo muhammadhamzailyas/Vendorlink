@@ -24,8 +24,14 @@ const NotificationProvider = ({ children }) => {
   const pollRef = useRef(null);
 
   const checkAuth = useCallback(() => {
-    // Only fetch if authenticated and has a role
-    return !!(user && (user.id || user._id) && user.role && user.status === "approved");
+    // Admins and approved users definitely get notifications
+    if (!user || !(user.id || user._id) || !user.role) return false;
+    
+    // Admins always get notifications
+    if (user.role === "admin") return true;
+    
+    // For other roles, they must be approved or pending
+    return user.status === "approved" || user.status === "pending" || user.status === "rejected";
   }, [user]);
 
   const fetchUnreadCount = useCallback(async () => {
@@ -50,7 +56,11 @@ const NotificationProvider = ({ children }) => {
       if (page === 1) {
         setNotifications(data.notifications || []);
       } else {
-        setNotifications((prev) => [...prev, ...(data.notifications || [])]);
+        setNotifications((prev) => {
+            const existingIds = new Set(prev.map(n => n._id));
+            const uniqueNew = (data.notifications || []).filter(n => !existingIds.has(n._id));
+            return [...prev, ...uniqueNew];
+        });
       }
       setPagination({ page: data.page || page, totalPages: data.totalPages || 1, total: data.total || 0 });
       setInitialized(true);
@@ -119,9 +129,24 @@ const NotificationProvider = ({ children }) => {
   useEffect(() => {
     const handler = (data) => {
       if (data.notification) {
-        setNotifications((prev) => [data.notification, ...prev]);
+        const newNotif = data.notification;
+        setNotifications((prev) => {
+          if (prev.some(n => n._id === newNotif._id)) return prev;
+          return [newNotif, ...prev];
+        });
         setUnreadCount((c) => c + 1);
-        showToast("info", data.notification.title || "New notification");
+        
+        // Use persistent success toast for new users
+        if (newNotif.type === "new_user") {
+          showToast("success", `ALERT: ${newNotif.title}`, { 
+            description: newNotif.message,
+            duration: 15000 
+          });
+        } else {
+          showToast("info", newNotif.title || "New notification", {
+            description: newNotif.message
+          });
+        }
       }
     };
     wsClient.on("notification", handler);

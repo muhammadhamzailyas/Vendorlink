@@ -1,6 +1,7 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import dayjs from "dayjs";
+import { formatCategory } from "../../lib/status";
 
 const styles = StyleSheet.create({
   page: {
@@ -98,7 +99,7 @@ const UserDetailsPDF = ({ user }) => {
   const isCompany = user.role === "company";
   const profile = isCompany ? user.companyProfile : user.vendorProfile;
   const isAdmin = user.role === "admin";
-  const displayName = isAdmin ? "Admin" : (user.companyName || user.username || "User Profile");
+  const displayName = isAdmin ? "Admin" : (user.companyName || user.fullName || user.username || "User Profile");
 
   return (
     <Document>
@@ -138,7 +139,7 @@ const UserDetailsPDF = ({ user }) => {
                 ) : (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '100%' }}>
                     <DataItem label="Vendor Type" value={profile.vendorType} />
-                    <DataItem label="Category" value={profile.category} />
+                    <DataItem label="Category" value={formatCategory(profile.category)} />
                     <DataItem label="Experience" value={profile.yearsOfExperience ? `${profile.yearsOfExperience} Years` : null} />
                     <DataItem label="National ID / CNIC" value={profile.cnicNumber} />
                     <DataItem label="Skills" value={Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills} />
@@ -153,9 +154,9 @@ const UserDetailsPDF = ({ user }) => {
               <View style={styles.grid}>
                 <DataItem label="Street Address" value={profile.streetAddress} />
                 <DataItem label="City" value={profile.city} />
-                <DataItem label="Province / State" value={profile.provinceName} />
+                <DataItem label="Province / State" value={profile.province} />
                 <DataItem label="Postal / Zip Code" value={profile.zipCode} />
-                <DataItem label="Country" value={profile.countryName} />
+                <DataItem label="Country" value={profile.country} />
               </View>
             </View>
 

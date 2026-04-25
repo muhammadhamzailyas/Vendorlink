@@ -218,12 +218,17 @@ class AdminController {
       const companyMap = new Map(companies.map((c) => [String(c.userId), c]));
       const vendorMap = new Map(vendors.map((v) => [String(v.userId), v]));
 
-      const payload = users.map((user) => ({
-        ...user,
-        companyName: companyMap.get(String(user._id))?.companyName || "",
-        companyProfile: companyMap.get(String(user._id)) || null,
-        vendorProfile: vendorMap.get(String(user._id)) || null,
-      }));
+      const payload = users.map((user) => {
+        const company = companyMap.get(String(user._id));
+        const vendor = vendorMap.get(String(user._id));
+        return {
+          ...user,
+          companyName: company?.companyName || "",
+          fullName: vendor?.fullName || user.fullName || "",
+          companyProfile: company || null,
+          vendorProfile: vendor || null,
+        };
+      });
 
       res.json(payload);
     } catch (error) {
@@ -1084,11 +1089,17 @@ class AdminController {
       const companyMap = new Map(companies.map((company) => [String(company.userId), company]));
       const vendorMap = new Map(vendors.map((vendor) => [String(vendor.userId), vendor]));
 
-      const payload = users.map((user) => ({
-        ...user,
-        companyProfile: companyMap.get(String(user._id)) || null,
-        vendorProfile: vendorMap.get(String(user._id)) || null,
-      }));
+      const payload = users.map((user) => {
+        const company = companyMap.get(String(user._id));
+        const vendor = vendorMap.get(String(user._id));
+        return {
+          ...user,
+          companyName: company?.companyName || "",
+          fullName: vendor?.fullName || user.fullName || "",
+          companyProfile: company || null,
+          vendorProfile: vendor || null,
+        };
+      });
 
       return res.json(payload);
     } catch (error) {
@@ -1115,7 +1126,7 @@ class AdminController {
           await notificationService.createNotification({
             recipientId: user._id,
             senderId: req.user._id,
-            type: "verification_approved",
+            type: "user_approved",
             title: "Profile Verified",
             message: "Your profile has been verified and approved!",
             data: { userId: user._id },
@@ -1170,7 +1181,7 @@ class AdminController {
           await notificationService.createNotification({
             recipientId: user._id,
             senderId: req.user._id,
-            type: "verification_rejected",
+            type: "user_rejected",
             title: "Profile Rejected",
             message: `Your profile application was rejected. Reason: ${reason}. Please update your details and re-apply.`,
             data: { userId: user._id, reason },

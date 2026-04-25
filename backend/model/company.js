@@ -21,6 +21,8 @@ const companySchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     province: { type: String, trim: true, default: "" },
     country: { type: String, trim: true, default: "Pakistan" },
+    streetAddress: { type: String, trim: true, default: "" },
+    zipCode: { type: String, trim: true, default: "" },
     registrationCertificateURL: { type: String, trim: true, default: "" },
     ntnCertificateURL: { type: String, trim: true, default: "" },
     supportingDocumentURL: { type: String, trim: true, default: "" },

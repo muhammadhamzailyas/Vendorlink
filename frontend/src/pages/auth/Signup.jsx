@@ -318,6 +318,7 @@ const Signup = () => {
               payload.append("account", JSON.stringify(formData.step1));
               payload.append("details", JSON.stringify(formData.step2));
               payload.append("step", targetStep);
+              payload.append("zipCode", formData.step2.zipCode); // Ensure zipCode is explicitly available if needed, though details usually contains it
               Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
               await onboardingService.saveProgress(payload);
           }

@@ -27,8 +27,8 @@ const AuthLayout = ({
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6 overflow-hidden bg-background">
-      <div className={`w-full ${maxWidth} relative z-10`}>
+    <div className="relative min-h-screen flex items-center justify-center p-4 md:p-6 bg-background">
+      <div className={`w-full ${maxWidth} relative z-10 py-8`}>
         <Card
           className={cn(
             "overflow-hidden shadow-sm border-border bg-card"

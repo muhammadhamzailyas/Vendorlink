@@ -23,6 +23,8 @@ const vendorSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     province: { type: String, trim: true, default: "" },
     country: { type: String, trim: true, default: "Pakistan" },
+    streetAddress: { type: String, trim: true, default: "" },
+    zipCode: { type: String, trim: true, default: "" },
     bankName: { type: String, trim: true, default: "" },
     accountTitle: { type: String, trim: true, default: "" },
     accountNumber: { type: String, trim: true, default: "" },

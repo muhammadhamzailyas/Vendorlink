@@ -285,7 +285,7 @@ const UserManagement = () => {
       label: "User",
       cellClassName: "px-6 py-4 whitespace-nowrap",
       render: (user) => {
-        const displayName = user.role === 'admin' ? "Admin" : (user.companyName || user.username || user.email || "User");
+        const displayName = user.role === 'admin' ? "Admin" : (user.companyName || user.fullName || user.username || user.email || "User");
         return (
           <div className="flex items-center gap-2">
             <UserAvatar user={user} name={displayName} size="md" />

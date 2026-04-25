@@ -16,6 +16,23 @@ import {
 import { Dialog, Button, DetailField, Badge, Textarea, Label } from "../ui";
 import StatusChip from "../shared/StatusChip";
 import UserAvatar from "../shared/UserAvatar";
+import { formatCategory } from "../../lib/status";
+
+const provinceMap = {
+  "pb": "Punjab",
+  "sd": "Sindh",
+  "kp": "Khyber Pakhtunkhwa",
+  "ba": "Balochistan",
+  "is": "Islamabad Capital Territory",
+  "aj": "Azad Jammu & Kashmir",
+  "gb": "Gilgit-Baltistan"
+};
+
+const formatProvince = (code) => {
+  if (!code) return "";
+  const normalized = code.toLowerCase().trim();
+  return provinceMap[normalized] || code;
+};
 
 const UserDetailsModal = ({ 
   open, 
@@ -27,13 +44,10 @@ const UserDetailsModal = ({
   actionLoading = false
 }) => {
   const [showMore, setShowMore] = useState(false);
-  
-  // States for secondary confirmation dialogs
   const [confirmApproveOpen, setConfirmApproveOpen] = useState(false);
   const [confirmRejectOpen, setConfirmRejectOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   
-  // Reset state whenever the modal opens or the target user changes
   useEffect(() => {
     if (open) {
       setShowMore(false);
@@ -46,7 +60,7 @@ const UserDetailsModal = ({
   if (!open || !user) return null;
 
   const isAdmin = user.role === "admin";
-  const displayName = isAdmin ? "Admin" : (user.companyName || user.username || "User Profile");
+  const displayName = isAdmin ? "Admin" : (user.companyName || user.fullName || user.username || "User Profile");
   const isCompany = user.role === "company";
   const profile = isCompany ? user.companyProfile : user.vendorProfile;
   const isPending = user.status === "pending";
@@ -62,7 +76,7 @@ const UserDetailsModal = ({
   );
 
   const DocumentLink = ({ label, value }) => {
-    if (!value || value === "no-file-uploaded") return null;
+    if (!value || value === "no-file-uploaded" || value === "") return null;
     const processedPath = value.startsWith('uploads/') ? value.replace('uploads/', 'documents/') : value;
     const fileUrl = `${backendRoot}/${processedPath}`;
     
@@ -83,18 +97,17 @@ const UserDetailsModal = ({
     );
   };
 
-  const DescriptionContent = () => {
-    const desc = profile?.description || profile?.bio;
-    if (!desc) return null;
+  const ConditionalField = ({ label, value, ...props }) => {
+    if (!value || value === "—" || (Array.isArray(value) && value.length === 0)) return null;
     return (
-      <div className="mt-6">
-        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">
-          {isCompany ? "Description" : "Professional Bio"}
-        </p>
-        <div className="text-xs font-medium leading-relaxed text-foreground bg-muted/30 p-4 rounded-xl border border-border/50">
-          {desc}
-        </div>
-      </div>
+      <DetailField 
+        label={label} 
+        labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" 
+        valueClassName="text-sm font-bold text-foreground"
+        {...props}
+      >
+        {value}
+      </DetailField>
     );
   };
 
@@ -123,15 +136,9 @@ const UserDetailsModal = ({
           <section>
             <SectionHeader icon={User} title="Account Information" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
-              <DetailField label="Full Name" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                {user.fullName || "—"}
-              </DetailField>
-              <DetailField label="Email Address" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                {user.email || "—"}
-              </DetailField>
-              <DetailField label="Phone Number" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                {user.phone || "—"}
-              </DetailField>
+              <ConditionalField label="Full Name" value={user.fullName} />
+              <ConditionalField label="Email Address" value={user.email} />
+              <ConditionalField label="Phone Number" value={user.phone} />
             </div>
           </section>
 
@@ -141,33 +148,18 @@ const UserDetailsModal = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
                 {isCompany ? (
                   <>
-                    <DetailField label="Company Name" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.companyName || "—"}
-                    </DetailField>
-                    <DetailField label="Industry" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.industry || "—"}
-                    </DetailField>
-                    <DetailField label="Registration No." labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.registrationNumber || "—"}
-                    </DetailField>
-                    <DetailField label="Tax ID / NTN" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.ntn || "—"}
-                    </DetailField>
+                    <ConditionalField label="Company Name" value={profile.companyName} />
+                    <ConditionalField label="Industry" value={profile.industry} />
+                    <ConditionalField label="Registration No." value={profile.registrationNumber} />
+                    <ConditionalField label="Tax ID / NTN" value={profile.ntn} />
                   </>
                 ) : (
                   <>
-                    <DetailField label="Vendor Type" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.vendorType || "—"}
-                    </DetailField>
-                    <DetailField label="Category" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.category || "—"}
-                    </DetailField>
-                    <DetailField label="Experience" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.yearsOfExperience ? `${profile.yearsOfExperience} Years` : "—"}
-                    </DetailField>
-                    <DetailField label="National ID / CNIC" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {profile.cnicNumber || "—"}
-                    </DetailField>
+                    <ConditionalField label="Vendor Type" value={profile.vendorType} />
+                    <ConditionalField label="Category" value={formatCategory(profile.category)} />
+                    <ConditionalField label="Experience" value={profile.yearsOfExperience ? `${profile.yearsOfExperience} Years` : null} />
+                    <ConditionalField label="National ID / CNIC" value={profile.cnicNumber} />
+                    <ConditionalField label="Business Name" value={profile.businessName} />
                   </>
                 )}
 
@@ -175,51 +167,40 @@ const UserDetailsModal = ({
                   <>
                     {isCompany ? (
                       <>
-                        <DetailField label="Company Size" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                          {profile.companySize || "—"}
-                        </DetailField>
-                        <DetailField label="Year Established" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                          {profile.yearEstablished || "—"}
-                        </DetailField>
-                        <DetailField label="Website" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                          {profile.website || "—"}
-                        </DetailField>
+                        <ConditionalField label="Company Size" value={profile.companySize} />
+                        <ConditionalField label="Year Established" value={profile.yearEstablished} />
+                        <ConditionalField label="Website" value={profile.website} />
                       </>
                     ) : (
                       <>
-                        <DetailField label="Skills" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                          {Array.isArray(profile.skills) ? profile.skills.join(", ") : (profile.skills || "—")}
-                        </DetailField>
-                        <DetailField label="Portfolio URL" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                          {profile.portfolioURL || "—"}
-                        </DetailField>
+                        <ConditionalField label="Skills" value={Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills} />
+                        <ConditionalField label="Portfolio URL" value={profile.portfolioURL} />
                       </>
                     )}
-                    <DetailField label="Member Since" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">
-                      {dayjs(user.createdAt).format("MMM DD, YYYY")}
-                    </DetailField>
+                    <ConditionalField label="Member Since" value={dayjs(user.createdAt).format("MMM DD, YYYY")} />
                   </>
                 )}
                 
-                {(profile.description || profile.bio) && (
+                {profile.description || profile.bio ? (
                   <DetailField label={isCompany ? "Description" : "Professional Bio"} colSpan={2} labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-medium leading-relaxed text-foreground">
                     {profile.description || profile.bio}
                   </DetailField>
-                )}
+                ) : null}
+              </div>
+            </section>
+
+            <section className="pt-8 border-t border-border/50">
+              <SectionHeader icon={MapPin} title="Address Information" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
+                <ConditionalField label="Street Address" value={profile.streetAddress} />
+                <ConditionalField label="City" value={profile.city} />
+                <ConditionalField label="Province / State" value={formatProvince(profile.province)} />
+                <ConditionalField label="Postal / Zip Code" value={profile.zipCode} />
+                <ConditionalField label="Country" value={profile.country} />
               </div>
 
               {showMore && (
                 <div className="mt-10 animate-in fade-in slide-in-from-top-2 duration-300 space-y-10">
-                  <div className="space-y-6">
-                    <SectionHeader icon={MapPin} title="Address Details" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
-                      <DetailField label="Street Address" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">{profile.streetAddress || "—"}</DetailField>
-                      <DetailField label="City" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">{profile.city || "—"}</DetailField>
-                      <DetailField label="Province / State" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">{profile.provinceName || "—"}</DetailField>
-                      <DetailField label="Country" labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-bold text-foreground">{profile.countryName || "—"}</DetailField>
-                    </div>
-                  </div>
-
                   <div className="space-y-6">
                     <SectionHeader icon={FileText} title="Documents" />
                     <div className="flex flex-col gap-3">
@@ -251,26 +232,19 @@ const UserDetailsModal = ({
             </section>
           )}
 
-          {user.status === 'deactivated' && (
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/5 border border-warning/20">
-              <Info size={20} weight="bold" className="text-warning shrink-0" />
-              <p className="text-xs font-medium text-warning/80 leading-relaxed text-center w-full">Account restricted. User can appeal for reactivation.</p>
-            </div>
-          )}
-
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/30">
             {isPending && onApprove && onReject ? (
               <>
                 <Button 
                   variant="outline" 
                   onClick={() => setConfirmRejectOpen(true)} 
-                  className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl text-foreground hover:bg-muted transition-all"
+                  className="w-full font-black uppercase tracking-widest text-[10px] h-12 rounded-xl text-foreground hover:bg-muted transition-all"
                 >
                   Reject Profile
                 </Button>
                 <Button 
                   onClick={() => setConfirmApproveOpen(true)} 
-                  className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl bg-foreground text-background hover:opacity-90 shadow-md transition-all"
+                  className="w-full font-black uppercase tracking-widest text-[10px] h-12 rounded-xl bg-foreground text-background hover:opacity-90 shadow-md transition-all"
                 >
                   Approve Profile
                 </Button>
@@ -285,58 +259,38 @@ const UserDetailsModal = ({
         </Dialog.Body>
       </Dialog>
 
-      {/* Confirmation Dialogs */}
       <Dialog open={confirmApproveOpen} onX={() => setConfirmApproveOpen(false)} className="max-w-md">
-        <Dialog.Header onX={() => setConfirmApproveOpen(false)} className="border-b-0 pt-10 pb-6 text-center">
+        <Dialog.Header onX={() => setConfirmApproveOpen(false)} className="border-b-0 pt-10 pb-4 text-center">
             <div className="flex flex-col items-center gap-4">
                 <div className="p-3 rounded-full bg-success/10 text-success"><CheckCircle size={32} weight="bold" /></div>
                 <Dialog.Title className="text-xl font-black tracking-tight text-foreground uppercase">Approve Profile</Dialog.Title>
-                <Dialog.Description className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6">Are you sure you want to verify this application?</Dialog.Description>
+                <Dialog.Description className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-8">Confirm verification for {displayName}?</Dialog.Description>
             </div>
         </Dialog.Header>
-        <Dialog.Body className="px-10 pb-10 space-y-6">
+        <Dialog.Body className="px-10 pb-10">
             <div className="grid grid-cols-2 gap-4">
                 <Button variant="secondary" onClick={() => setConfirmApproveOpen(false)} className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl">Cancel</Button>
-                <Button 
-                    onClick={() => { onApprove(user._id); setConfirmApproveOpen(false); }} 
-                    loading={actionLoading}
-                    className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl bg-foreground text-background hover:opacity-90 shadow-md"
-                >
-                    Confirm
-                </Button>
+                <Button onClick={() => { onApprove(user._id); setConfirmApproveOpen(false); }} loading={actionLoading} className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl bg-foreground text-background shadow-md">Confirm</Button>
             </div>
         </Dialog.Body>
       </Dialog>
 
       <Dialog open={confirmRejectOpen} onX={() => setConfirmRejectOpen(false)} className="max-w-md">
-        <Dialog.Header onX={() => setConfirmRejectOpen(false)} className="border-b-0 pt-10 pb-6 text-center">
+        <Dialog.Header onX={() => setConfirmRejectOpen(false)} className="border-b-0 pt-10 pb-4 text-center">
             <div className="flex flex-col items-center gap-4">
                 <div className="p-3 rounded-full bg-danger/10 text-danger"><XCircle size={32} weight="bold" /></div>
                 <Dialog.Title className="text-xl font-black tracking-tight text-foreground uppercase">Reject Profile</Dialog.Title>
-                <Dialog.Description className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 text-center">User will be notified and sent back to onboarding.</Dialog.Description>
+                <Dialog.Description className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-8">User will be notified to update their information.</Dialog.Description>
             </div>
         </Dialog.Header>
         <Dialog.Body className="px-10 pb-10 space-y-6">
             <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Reason for Rejection</Label>
-                <Textarea
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    placeholder="Provide details to help the user correct their profile..."
-                    className="min-h-[120px] rounded-xl text-sm"
-                />
+                <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Reason for Rejection</Label>
+                <Textarea value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} placeholder="Provide details to help the user..." className="min-h-[100px] rounded-xl text-sm" />
             </div>
             <div className="grid grid-cols-2 gap-4 pt-4">
                 <Button variant="secondary" onClick={() => setConfirmRejectOpen(false)} className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl">Cancel</Button>
-                <Button 
-                    variant="danger"
-                    onClick={() => { if (!rejectionReason.trim()) return; onReject(user._id, rejectionReason.trim()); setConfirmRejectOpen(false); }} 
-                    loading={actionLoading}
-                    disabled={!rejectionReason.trim()}
-                    className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl shadow-md"
-                >
-                    Confirm
-                </Button>
+                <Button variant="danger" onClick={() => { if (!rejectionReason.trim()) return; onReject(user._id, rejectionReason.trim()); setConfirmRejectOpen(false); }} loading={actionLoading} disabled={!rejectionReason.trim()} className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl shadow-md">Confirm</Button>
             </div>
         </Dialog.Body>
       </Dialog>

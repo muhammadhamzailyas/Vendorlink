@@ -337,6 +337,7 @@ class OnboardingController {
             province: details.province,
             country: details.countryName || details.country,
             streetAddress: details.streetAddress,
+            zipCode: details.zipCode,
             registrationCertificateURL: documents.registrationCertificate || "",
             ntnCertificateURL: documents.ntnCertificate || "",
             supportingDocumentURL: documents.supportingDocument || "",
@@ -363,6 +364,7 @@ class OnboardingController {
             province: details.province,
             country: details.countryName || details.country,
             streetAddress: details.streetAddress,
+            zipCode: details.zipCode,
             cnicFrontURL: documents.cnicFront || "",
             cnicBackURL: documents.cnicBack || "",
             businessLicenseURL: documents.businessLicense || "",
@@ -385,7 +387,9 @@ class OnboardingController {
 
       if (isTransactionStarted) await session.commitTransaction();
 
-      this.sendWelcomeNotifications(user, req.app?.get("notificationService"));
+      // Fix: Ensure we pass the actual service instance
+      const notificationService = req.app.get("notificationService");
+      await this.sendWelcomeNotifications(user, notificationService);
 
       return res.status(201).json({ 
           message: "Registration successful. Pending admin approval.",

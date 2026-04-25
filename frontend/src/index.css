@@ -90,7 +90,7 @@
 
 @layer base {
   html, body {
-    @apply overflow-hidden h-full;
+    @apply h-full;
   }
   
   body {

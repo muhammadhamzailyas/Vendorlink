@@ -41,4 +41,28 @@ export const getStatusClass = (status) => {
   return STATUS_STYLES[normalized] || "bg-ink-50 text-ink-700 border border-ink-150";
 };
 
+export const VENDOR_CATEGORIES = [
+  { value: "Web Development", label: "Web & Software Development" },
+  { value: "Mobile Development", label: "Mobile App Development" },
+  { value: "AI & Data Science", label: "AI, Machine Learning & Data Science" },
+  { value: "Graphic Design", label: "Graphics, Design & Branding" },
+  { value: "Digital Marketing", label: "Digital Marketing, SEO & Social Media" },
+  { value: "Writing & Translation", label: "Writing, Content & Translation" },
+  { value: "Video & Animation", label: "Video, Animation & Motion Graphics" },
+  { value: "Music & Audio", label: "Music, Audio & Voice-over" },
+  { value: "Business & Consulting", label: "Business, Consulting & Strategy" },
+  { value: "Sales & Support", label: "Sales, CRM & Customer Support" },
+  { value: "Accounting & Finance", label: "Accounting, Tax & Finance" },
+  { value: "Legal", label: "Legal, Contract & Compliance" },
+  { value: "Architecture", label: "Architecture & Interior Design" },
+  { value: "Engineering", label: "Engineering & Manufacturing" },
+  { value: "Other", label: "Other / General Services" },
+];
+
+export const formatCategory = (value) => {
+  if (!value) return "";
+  const cat = VENDOR_CATEGORIES.find(c => c.value === value);
+  return cat ? cat.label : value;
+};
+
 

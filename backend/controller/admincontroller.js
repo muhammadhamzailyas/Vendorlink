@@ -10,6 +10,7 @@ const { Message: ChatMessage } = require("../model/Chat");
 const ProgressUpdate = require("../model/ProgressUpdate");
 const Wallet = require("../model/Wallet");
 const Transaction = require("../model/Transaction");
+const emailService = require("../services/emailService");
 
 const getNotificationService = (req) => {
   try { return req.app?.get("notificationService"); } catch { return null; }
@@ -919,17 +920,53 @@ class AdminController {
   async rejectVerification(req, res) {
     try {
       const { userId } = req.params;
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { status: "rejected" },
-        { new: true }
-      );
+      const { reason } = req.body;
 
+      if (!reason) {
+        return res.status(400).json({ message: "Rejection reason is required" });
+      }
+
+      const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      return res.json({ message: "Profile rejected", user });
+      // Instead of just setting status to rejected, we set status back to incomplete
+      // or keep as rejected but allow them to go back to onboarding.
+      // Based on requirement: "be able to change the data and reapply"
+      user.status = "rejected";
+      user.onboardingStep = 2; // Send them back to step 2 to update info
+      user.rejectionReason = reason; // Store reason for user to see
+      await user.save();
+
+      // Send Email
+      try {
+        await emailService.sendRejectionEmail(user.email, user.fullName || user.username, reason);
+      } catch (emailError) {
+        console.error("Failed to send rejection email:", emailError);
+      }
+
+      // Notify user on platform
+      try {
+        const notificationService = getNotificationService(req);
+        if (notificationService) {
+          await notificationService.createNotification({
+            recipientId: user._id,
+            senderId: req.user._id,
+            type: "verification_rejected",
+            title: "Profile Rejected",
+            message: `Your profile application was rejected. Reason: ${reason}. Please update your details and re-apply.`,
+            data: { userId: user._id, reason },
+            relatedId: user._id,
+            relatedModel: "User",
+            priority: "high",
+          });
+        }
+      } catch (notifError) {
+        console.error("Failed to send verification notification:", notifError);
+      }
+
+      return res.json({ message: "Profile rejected and user notified", user });
     } catch (error) {
       return res.status(500).json({ message: "Server error", error: error.message });
     }

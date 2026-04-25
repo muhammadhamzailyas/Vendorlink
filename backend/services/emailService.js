@@ -67,6 +67,31 @@ class EmailService {
     });
   }
 
+  async sendRejectionEmail(email, fullName, reason) {
+    const onboardingUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/onboarding`;
+    const html = `
+        <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
+            <h1 style="font-size: 24px; color: #ef4444;">Application Update</h1>
+            <p>Hello ${fullName},</p>
+            <p>Thank you for your interest in VendorLink. After reviewing your profile application, we unfortunately cannot approve it at this time.</p>
+            <div style="background: #fef2f2; border: 1px solid #fee2e2; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; font-weight: bold; color: #991b1b;">Reason for rejection:</p>
+                <p style="margin: 10px 0 0 0; color: #b91c1c;">${reason}</p>
+            </div>
+            <p>You can update your profile information and re-submit your application by following the link below:</p>
+            <a href="${onboardingUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Update & Re-apply</a>
+            <p style="margin-top: 20px;">If you have any questions, feel free to reply to this email.</p>
+            <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+        </div>
+    `;
+    return this.sendEmail({
+        to: email,
+        subject: "Action Required: Your VendorLink Application",
+        html
+    });
+  }
+
   async sendNewPasswordEmail(email, newPassword, username) {
       const loginUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/login`;
       const html = `

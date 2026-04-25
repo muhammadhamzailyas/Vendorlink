@@ -155,14 +155,23 @@ const VendorLayout = () => (
   </ProtectedRoutes>
 );
 
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useUser();
+  if (loading) return <Loader />;
+  if (user && user.role !== "unassigned" && user.profileCompleted) {
+    return <Navigate to={`/${user.role}`} replace />;
+  }
+  return children;
+};
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
     children: [
       { index: true, element: <LandingPage /> },
-      { path: "login", element: <Login /> },
-      { path: "signup", element: <Signup /> },
+      { path: "login", element: <PublicRoute><Login /></PublicRoute> },
+      { path: "signup", element: <PublicRoute><Signup /></PublicRoute> },
       { path: "verify-email", element: <EmailVerification /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "terms", element: <TermsOfService /> },

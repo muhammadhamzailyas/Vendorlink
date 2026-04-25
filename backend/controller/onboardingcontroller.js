@@ -146,6 +146,70 @@ class OnboardingController {
   /**
    * Finalizes user profile and creates role-specific entries.
    */
+  async updateBusinessInfo(req, res) {
+    try {
+      const user = req.user;
+      const details = typeof req.body.details === "string" ? JSON.parse(req.body.details) : req.body;
+      const documents = req.files || {};
+
+      if (user.role === "company") {
+        const updateData = {
+          companyName: details.companyName,
+          businessType: details.businessType,
+          industry: details.industry,
+          registrationNumber: details.registrationNumber,
+          ntn: details.ntn,
+          yearEstablished: details.yearEstablished,
+          website: details.website,
+          companySize: details.companySize,
+          description: details.description,
+          city: details.city,
+          province: details.province,
+          country: details.countryName || details.country,
+          streetAddress: details.streetAddress,
+          zipCode: details.zipCode,
+        };
+
+        if (documents.registrationCertificate) updateData.registrationCertificateURL = documents.registrationCertificate[0].path;
+        if (documents.ntnCertificate) updateData.ntnCertificateURL = documents.ntnCertificate[0].path;
+        if (documents.supportingDocument) updateData.supportingDocumentURL = documents.supportingDocument[0].path;
+
+        await Company.findOneAndUpdate({ userId: user._id }, updateData, { upsert: true, new: true });
+      } else if (user.role === "vendor") {
+        const updateData = {
+          fullName: details.fullName || details.companyName,
+          vendorType: details.vendorType,
+          cnicNumber: details.cnicNumber,
+          businessName: details.businessName,
+          registrationNumber: details.registrationNumber,
+          ntn: details.ntn,
+          category: details.category,
+          skills: details.skills || [],
+          yearsOfExperience: details.yearsOfExperience,
+          portfolioURL: details.portfolioURL,
+          bio: details.bio || details.description,
+          city: details.city,
+          province: details.province,
+          country: details.countryName || details.country,
+          streetAddress: details.streetAddress,
+          zipCode: details.zipCode,
+        };
+
+        if (documents.cnicFront) updateData.cnicFrontURL = documents.cnicFront[0].path;
+        if (documents.cnicBack) updateData.cnicBackURL = documents.cnicBack[0].path;
+        if (documents.businessLicense) updateData.businessLicenseURL = documents.businessLicense[0].path;
+        if (documents.portfolioSamples) updateData.portfolioSamplesURL = documents.portfolioSamples[0].path;
+
+        await Vendor.findOneAndUpdate({ userId: user._id }, updateData, { upsert: true, new: true });
+      }
+
+      res.json({ message: "Business information updated successfully" });
+    } catch (error) {
+      console.error("[Onboarding] Update business info error:", error);
+      res.status(500).json({ message: "Failed to update business info", error: error.message });
+    }
+  }
+
   async finalSubmit(req, res) {
     console.log("[Onboarding] Starting finalSubmit process...");
     const session = await mongoose.startSession();
@@ -178,9 +242,30 @@ class OnboardingController {
         return res.status(401).json({ message: "Unverified identity" });
       }
 
+      // Strict Validation
       if (!account || !account.role || !stripePaymentId) {
         if (isTransactionStarted) await session.abortTransaction();
         return res.status(400).json({ message: "Missing required registration data or payment token" });
+      }
+
+      if (account.role === "company") {
+          if (!details.companyName || !details.industry || !details.description || !details.streetAddress) {
+              if (isTransactionStarted) await session.abortTransaction();
+              return res.status(400).json({ message: "Missing mandatory company profile information" });
+          }
+          if (!req.files?.registrationCertificate || !req.files?.ntnCertificate) {
+              if (isTransactionStarted) await session.abortTransaction();
+              return res.status(400).json({ message: "Mandatory company documents missing" });
+          }
+      } else if (account.role === "vendor") {
+          if (!account.fullName || !details.category || !details.bio || !details.streetAddress) {
+              if (isTransactionStarted) await session.abortTransaction();
+              return res.status(400).json({ message: "Missing mandatory vendor profile information" });
+          }
+          if (!req.files?.cnicFront || !req.files?.cnicBack) {
+              if (isTransactionStarted) await session.abortTransaction();
+              return res.status(400).json({ message: "Mandatory vendor identity documents missing" });
+          }
       }
 
       // Verify Stripe Payment

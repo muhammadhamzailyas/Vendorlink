@@ -216,6 +216,11 @@ const Signup = () => {
 
   // Resume Detection
   useEffect(() => {
+    if (user && user.role !== "unassigned" && user.profileCompleted) {
+        navigate("/" + user.role, { replace: true });
+        return;
+    }
+
     const loadDraft = async () => {
       const stateResume = location.state?.resumeStep;
       const stateVerified = location.state?.isVerified;

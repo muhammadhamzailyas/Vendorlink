@@ -39,7 +39,14 @@ const ProtectedRoutes = ({ role, children }) => {
     return <Navigate to={roleHome[user.role] || "/login"} replace />;
   }
 
-  // 4. Approval Status Check
+  // 4. Onboarding Check
+  if (user.role !== "admin" && !user.profileCompleted) {
+    if (location.pathname !== "/signup") {
+      return <Navigate to="/signup" replace />;
+    }
+  }
+
+  // 5. Approval Status Check
   if (role && role !== "admin") {
     if (user.status !== "approved") {
       const allowedPaths = [`/${role}`, `/${role}/settings`, `/${role}/profile` ];

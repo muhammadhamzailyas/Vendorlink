@@ -10,8 +10,20 @@ const ApprovalStatusBanner = () => {
     return null;
   }
 
-  if (user.status === "approved") {
+  if (user.status === "approved" && user.profileCompleted) {
     return null;
+  }
+
+  if (user.status === "approved" && !user.profileCompleted) {
+    return (
+      <Alert variant="warning" className="mb-6">
+        <ShieldWarning className="h-4 w-4" />
+        <AlertTitle>Incomplete Profile</AlertTitle>
+        <AlertDescription>
+          Some required information or documents are missing from your profile. Please visit your <a href={`/${user.role}/profile`} className="font-bold underline">Profile</a> or <a href={`/${user.role}/settings`} className="font-bold underline">Settings</a> to complete your setup.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   if (user.status === "rejected") {

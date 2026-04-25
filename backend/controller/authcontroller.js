@@ -189,12 +189,40 @@ class AuthController {
         });
       }
 
+      // Deep completeness check for existing users
+      let isActuallyComplete = req.user.profileCompleted;
+      if (isActuallyComplete && req.user.role !== "admin") {
+          const Company = require("../model/company");
+          const Vendor = require("../model/vendor");
+          
+          if (req.user.role === "company") {
+              const profile = await Company.findOne({ userId: req.user._id });
+              if (!profile || !profile.description || !profile.industry || !profile.registrationCertificateURL) {
+                  isActuallyComplete = false;
+              }
+          } else if (req.user.role === "vendor") {
+              const profile = await Vendor.findOne({ userId: req.user._id });
+              if (!profile || !profile.bio || !profile.category || !profile.cnicFrontURL) {
+                  isActuallyComplete = false;
+              }
+          }
+
+          if (isActuallyComplete !== req.user.profileCompleted) {
+              req.user.profileCompleted = isActuallyComplete;
+              await req.user.save();
+          }
+      }
+
       return res.status(200).json({
         needsOnboarding: req.user.role === "unassigned",
-        user: this.buildUserResponse(req.user),
+        user: {
+            ...this.buildUserResponse(req.user),
+            profileCompleted: isActuallyComplete
+        },
         firebaseUser: req.firebaseUser,
       });
     } catch (error) {
+      console.error("Session Bootstrap Error:", error);
       return res.status(500).json({ message: "Session bootstrap failed" });
     }
   }

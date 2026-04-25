@@ -29,6 +29,7 @@ import {
 } from "@phosphor-icons/react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import ApprovalStatusBanner from "../ApprovalStatusBanner";
 import FloatingChatButton from "../FloatingChatButton";
 import { Skeleton } from "../ui";
 import { cn } from "@/lib/cn";
@@ -216,6 +217,7 @@ const DashboardLayout = () => {
             "mx-auto px-4 py-8 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out",
             isSidebarCollapsed ? "max-w-[1600px]" : "max-w-7xl"
           )}>
+            <ApprovalStatusBanner />
             <Outlet />
           </div>
         </div>

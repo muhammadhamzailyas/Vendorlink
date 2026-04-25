@@ -143,64 +143,66 @@ const UserDetailsModal = ({
           </section>
 
           {!isAdmin && profile && (
-            <section className="pt-8 border-t border-border/50">
-              <SectionHeader icon={isCompany ? Buildings : Briefcase} title={isCompany ? "Business Profile" : "Professional Profile"} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
-                {isCompany ? (
-                  <>
-                    <ConditionalField label="Company Name" value={profile.companyName} />
-                    <ConditionalField label="Industry" value={profile.industry} />
-                    <ConditionalField label="Registration No." value={profile.registrationNumber} />
-                    <ConditionalField label="Tax ID / NTN" value={profile.ntn} />
-                  </>
-                ) : (
-                  <>
-                    <ConditionalField label="Vendor Type" value={profile.vendorType} />
-                    <ConditionalField label="Category" value={formatCategory(profile.category)} />
-                    <ConditionalField label="Experience" value={profile.yearsOfExperience ? `${profile.yearsOfExperience} Years` : null} />
-                    <ConditionalField label="National ID / CNIC" value={profile.cnicNumber} />
-                    <ConditionalField label="Business Name" value={profile.businessName} />
-                  </>
-                )}
+            <>
+              <section className="pt-8 border-t border-border/50">
+                <SectionHeader icon={isCompany ? Buildings : Briefcase} title={isCompany ? "Business Profile" : "Professional Profile"} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
+                  {isCompany ? (
+                    <>
+                      <ConditionalField label="Company Name" value={profile.companyName} />
+                      <ConditionalField label="Industry" value={profile.industry} />
+                      <ConditionalField label="Registration No." value={profile.registrationNumber} />
+                      <ConditionalField label="Tax ID / NTN" value={profile.ntn} />
+                    </>
+                  ) : (
+                    <>
+                      <ConditionalField label="Vendor Type" value={profile.vendorType} />
+                      <ConditionalField label="Category" value={formatCategory(profile.category)} />
+                      <ConditionalField label="Experience" value={profile.yearsOfExperience ? `${profile.yearsOfExperience} Years` : null} />
+                      <ConditionalField label="National ID / CNIC" value={profile.cnicNumber} />
+                      <ConditionalField label="Business Name" value={profile.businessName} />
+                    </>
+                  )}
 
-                {showMore && (
-                  <>
-                    {isCompany ? (
-                      <>
-                        <ConditionalField label="Company Size" value={profile.companySize} />
-                        <ConditionalField label="Year Established" value={profile.yearEstablished} />
-                        <ConditionalField label="Website" value={profile.website} />
-                      </>
-                    ) : (
-                      <>
-                        <ConditionalField label="Skills" value={Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills} />
-                        <ConditionalField label="Portfolio URL" value={profile.portfolioURL} />
-                      </>
-                    )}
-                    <ConditionalField label="Member Since" value={dayjs(user.createdAt).format("MMM DD, YYYY")} />
-                  </>
-                )}
-                
-                {profile.description || profile.bio ? (
-                  <DetailField label={isCompany ? "Description" : "Professional Bio"} colSpan={2} labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-medium leading-relaxed text-foreground">
-                    {profile.description || profile.bio}
-                  </DetailField>
-                ) : null}
-              </div>
-            </section>
+                  {showMore && (
+                    <>
+                      {isCompany ? (
+                        <>
+                          <ConditionalField label="Company Size" value={profile.companySize} />
+                          <ConditionalField label="Year Established" value={profile.yearEstablished} />
+                          <ConditionalField label="Website" value={profile.website} />
+                        </>
+                      ) : (
+                        <>
+                          <ConditionalField label="Skills" value={Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills} />
+                          <ConditionalField label="Portfolio URL" value={profile.portfolioURL} />
+                        </>
+                      )}
+                      <ConditionalField label="Member Since" value={dayjs(user.createdAt).format("MMM DD, YYYY")} />
+                    </>
+                  )}
+                  
+                  {profile.description || profile.bio ? (
+                    <DetailField label={isCompany ? "Description" : "Professional Bio"} colSpan={2} labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 justify-center sm:justify-start" valueClassName="text-sm font-medium leading-relaxed text-foreground">
+                      {profile.description || profile.bio}
+                    </DetailField>
+                  ) : null}
+                </div>
+              </section>
 
-            <section className="pt-8 border-t border-border/50">
-              <SectionHeader icon={MapPin} title="Address Information" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
-                <ConditionalField label="Street Address" value={profile.streetAddress} />
-                <ConditionalField label="City" value={profile.city} />
-                <ConditionalField label="Province / State" value={formatProvince(profile.province)} />
-                <ConditionalField label="Postal / Zip Code" value={profile.zipCode} />
-                <ConditionalField label="Country" value={profile.country} />
-              </div>
+              <section className="pt-8 border-t border-border/50">
+                <SectionHeader icon={MapPin} title="Address Information" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-center sm:text-left">
+                  <ConditionalField label="Street Address" value={profile.streetAddress} />
+                  <ConditionalField label="City" value={profile.city} />
+                  <ConditionalField label="Province / State" value={formatProvince(profile.province)} />
+                  <ConditionalField label="Postal / Zip Code" value={profile.zipCode} />
+                  <ConditionalField label="Country" value={profile.country} />
+                </div>
+              </section>
 
               {showMore && (
-                <div className="mt-10 animate-in fade-in slide-in-from-top-2 duration-300 space-y-10">
+                <div className="mt-10 animate-in fade-in slide-in-from-top-2 duration-300 space-y-10 border-t border-border/50 pt-8">
                   <div className="space-y-6">
                     <SectionHeader icon={FileText} title="Documents" />
                     <div className="flex flex-col gap-3">
@@ -224,12 +226,15 @@ const UserDetailsModal = ({
               )}
 
               <div className="flex justify-center mt-8 border-t border-border/30 pt-6">
-                <button onClick={() => setShowMore(!showMore)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-200 group border border-border/40 px-4 py-2 rounded-full hover:bg-muted/50 cursor-pointer">
+                <button 
+                  onClick={() => setShowMore(!showMore)} 
+                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-200 group border border-border/40 px-4 py-2 rounded-full hover:bg-muted/50 cursor-pointer"
+                >
                   {showMore ? "Show Less" : "Show More"}
                   {showMore ? <CaretUp size={12} weight="bold" /> : <CaretDown size={12} weight="bold" />}
                 </button>
               </div>
-            </section>
+            </>
           )}
 
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/30">

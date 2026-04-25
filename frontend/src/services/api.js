@@ -124,6 +124,7 @@ export const contractAPI = {
   getVendorContracts: (status) => api.get("/contracts/vendor/my-contracts", { params: { status } }),
   getActiveContracts: () => api.get("/contracts/vendor/active"),
   getContractById: (id) => api.get(`/contracts/${id}`),
+  checkDeletability: (id) => api.get(`/contracts/${id}/check-deletability`),
   approveContract: (id, data) => api.put(`/contracts/${id}/approve`, data),
   rejectContract: (id, reason) => api.put(`/contracts/${id}/reject`, { reason }),
   cancelContract: (id, reason) => api.put(`/contracts/${id}/cancel`, { reason }),

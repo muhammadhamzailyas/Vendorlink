@@ -439,7 +439,7 @@ class PaymentController {
 
       const contracts = await Contract.find({
         companyId: companyId,
-        status: { $in: ["active", "in-progress", "pending-vendor", "pending-company"] },
+        status: { $in: ["active", "in-progress", "pending-vendor"] },
       })
         .populate("taskId", "title description category budget")
         .populate("vendorId", "username companyName email")
@@ -498,7 +498,7 @@ class PaymentController {
 
       const contracts = await Contract.find({
         vendorId: vendorId,
-        status: { $in: ["active", "in-progress", "pending-vendor", "pending-company"] },
+        status: { $in: ["active", "in-progress", "pending-vendor"] },
       })
         .populate("taskId", "title description category budget")
         .populate("companyId", "username companyName email")

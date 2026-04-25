@@ -37,7 +37,21 @@ class WebSocketClient {
       }
 
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = import.meta.env.VITE_WS_URL || `${protocol}//localhost:8002`;
+      
+      // Try to derive WS URL from API URL if not explicitly provided
+      let defaultHost = `${protocol}//localhost:8002`;
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (apiBaseUrl) {
+        try {
+          const apiUrl = new URL(apiBaseUrl);
+          const wsProtocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
+          defaultHost = `${wsProtocol}//${apiUrl.host}`;
+        } catch (e) {
+          console.warn("Could not parse VITE_API_BASE_URL for WebSocket host", e);
+        }
+      }
+
+      const host = import.meta.env.VITE_WS_URL || defaultHost;
       const url = `${host}?token=${encodeURIComponent(token)}`;
 
       this.ws = new WebSocket(url);

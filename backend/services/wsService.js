@@ -19,6 +19,8 @@ class WebSocketService {
         const token = url.searchParams.get("token");
 
         if (!token) {
+          console.warn("[WS] Connection rejected: No token provided");
+          ws.send(JSON.stringify({ type: "error", error: "Authentication token required" }));
           ws.close(1008, "No token provided");
           return;
         }
@@ -27,19 +29,24 @@ class WebSocketService {
         try {
           decoded = await verifyFirebaseIdToken(token);
         } catch (err) {
+          console.error("[WS] Token verification failed:", err.message);
+          ws.send(JSON.stringify({ type: "error", error: "Invalid authentication token" }));
           ws.close(1008, "Invalid token");
           return;
         }
 
-        const userRecord = await User.findOne({ firebaseUid: decoded.uid }).select("_id role");
+        const userRecord = await User.findOne({ firebaseUid: decoded.uid }).select("_id role username");
         const userId = userRecord?._id;
         const userType = userRecord?.role;
 
         if (!userId) {
+          console.warn(`[WS] Connection rejected: User not found for UID ${decoded.uid}`);
+          ws.send(JSON.stringify({ type: "error", error: "User account not found" }));
           ws.close(1008, "Invalid user ID");
           return;
         }
 
+        console.log(`[WS] User connected: ${userRecord.username} (${userId}) [${userType}]`);
         this.clients.set(userId.toString(), { ws, userType, userId: userId.toString() });
 
         ws.send(

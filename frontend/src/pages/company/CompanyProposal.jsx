@@ -307,12 +307,12 @@ const CompanyProposals = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{taskIdParam ? "Task Proposals" : "Proposal Registry"}</BreadcrumbPage>
+              <BreadcrumbPage>Proposal Registry</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 border-b border-border/40 pb-6">
             <h1 className="text-2xl font-black uppercase tracking-tight text-foreground">
                 {taskIdParam ? `Proposals for: ${currentTaskTitle}` : "Proposal Registry"}
             </h1>

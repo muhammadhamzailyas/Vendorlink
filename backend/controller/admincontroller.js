@@ -17,7 +17,7 @@ const getNotificationService = (req) => {
 };
 
 const ARCHIVE_ELIGIBLE_ROLES = new Set(["company", "vendor"]);
-const LIVE_CONTRACT_STATUSES = ["active", "pending-company", "pending-vendor", "disputed"];
+const LIVE_CONTRACT_STATUSES = ["active", "pending-vendor", "disputed"];
 const BLOCKING_PAYMENT_STATUSES = ["pending", "processing"];
 const BLOCKING_TRANSACTION_STATUSES = ["pending"];
 const ARCHIVE_RETENTION_MESSAGE =

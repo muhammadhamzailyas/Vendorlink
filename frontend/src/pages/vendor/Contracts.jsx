@@ -1,67 +1,79 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Receipt, CheckCircle as CheckCircle, ClipboardText as Assignment, CurrencyDollar as AttachMoney } from "@phosphor-icons/react";
+import { 
+  Receipt, 
+  CheckCircle, 
+  ClipboardText as Assignment, 
+  CurrencyDollar as AttachMoney,
+  DotsThreeVertical,
+  Eye as Visibility,
+  CaretUp,
+  CaretDown,
+  TrendUp
+} from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { proposalAPI } from "@/services/api";
-import { Button, EmptyState, PageTransition, Loader, StatCard, DataTable } from "@/components/ui";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { contractAPI } from "@/services/api";
+import { 
+  Button, 
+  EmptyState, 
+  PageTransition, 
+  Loader, 
+  StatCard, 
+  DataTable,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from "@/components/ui";
 import FilterSearchBar from "@/components/shared/FilterSearchBar";
 import StatusChip from "@/components/shared/StatusChip";
 import UserAvatar from "@/components/shared/UserAvatar";
+import { cn } from "@/lib/cn";
+import toastUtil from "@/lib/toast";
+import ContractDetailsModal from "@/components/admin/ContractDetailsModal";
 
-const Contracts = () => {
+dayjs.extend(relativeTime);
+
+const VendorContracts = () => {
   const navigate = useNavigate();
-  const [proposals, setProposals] = useState([]);
+  const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
   const [search, setMagnifyingGlass] = useState("");
-  const [tab, setTab] = useState(0);
+
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState(null);
 
   useEffect(() => {
     loadContracts();
-  }, []);
+  }, [filter]);
 
   const loadContracts = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await proposalAPI.getVendorProposals();
-      setProposals(res.data || []);
+      const res = await contractAPI.getVendorContracts(filter !== "all" ? filter : undefined);
+      setContracts(res.data?.data || res.data || []);
     } catch (error) {
-      console.error("Contracts load error:", error);
-      setProposals([]);
+      toastUtil.handleApiError(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const contracts = useMemo(() => {
-    return proposals
-      .filter((p) => p.status === "accepted")
-      .map((p) => ({
-        id: p._id,
-        taskTitle: p.taskId?.title || "Untitled Task",
-        company: p.companyId?.companyName || p.companyId?.username || "Company",
-        companyUser: p.companyId || null,
-        value: p.bidAmount || 0,
-        acceptedAt: p.acceptedAt,
-        taskStatus: p.taskId?.status || "in-progress",
-      }));
-  }, [proposals]);
-
-  const filteredContracts = useMemo(() => {
+  const filtered = useMemo(() => {
     return contracts.filter((contract) => {
       const matchesSearch =
-        contract.taskTitle.toLowerCase().includes(search.toLowerCase()) ||
-        contract.company.toLowerCase().includes(search.toLowerCase());
-
-      if (tab === 0) return matchesSearch;
-      if (tab === 1) return matchesSearch && contract.taskStatus !== "completed";
-      return matchesSearch && contract.taskStatus === "completed";
+        (contract.title || "").toLowerCase().includes(search.toLowerCase()) ||
+        (contract.companyId?.companyName || "").toLowerCase().includes(search.toLowerCase());
+      return matchesSearch;
     });
-  }, [contracts, search, tab]);
+  }, [contracts, search]);
 
   const stats = useMemo(() => {
-    const active = contracts.filter((c) => c.taskStatus !== "completed").length;
-    const completed = contracts.filter((c) => c.taskStatus === "completed").length;
-    const totalValue = contracts.reduce((sum, c) => sum + c.value, 0);
+    const active = contracts.filter((c) => ["active", "pending-vendor", "pending-company"].includes(c.status)).length;
+    const completed = contracts.filter((c) => c.status === "completed").length;
+    const totalValue = contracts.reduce((sum, c) => sum + (c.totalBudget || 0), 0);
     return {
       total: contracts.length,
       active,
@@ -70,112 +82,147 @@ const Contracts = () => {
     };
   }, [contracts]);
 
+  const ChangeIndicator = ({ value }) => {
+    const val = parseFloat(value || 0);
+    const isPositive = val > 0;
+    const colorClass = isPositive ? "bg-success/20 text-success border-success/30" : "bg-muted text-muted-foreground border-border";
+
+    return (
+        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1", colorClass)}>
+            <div className="flex items-center gap-0.5">
+                {isPositive && <CaretUp size={10} weight="bold" />}
+                <span className="text-[10px] font-black uppercase tracking-tight">{Math.abs(val)}%</span>
+            </div>
+        </div>
+    );
+  };
+
+  const statusTabs = ["all", "pending-vendor", "pending-company", "active", "completed", "cancelled", "rejected"];
+
   const contractColumns = [
     {
-      key: "task",
-      label: "Task",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground",
-      render: (contract) => contract.taskTitle,
+      key: "title",
+      label: "Agreement Title",
+      cellClassName: "px-6 py-4",
+      render: (contract) => (
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground uppercase tracking-tight">{contract.title || "Untitled Contract"}</p>
+          <p className="mt-0.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            TASK: {contract.taskId?.title || "N/A"}
+          </p>
+        </div>
+      ),
     },
     {
       key: "company",
-      label: "Company",
+      label: "Client Company",
       cellClassName: "px-6 py-4",
       render: (contract) => (
-        <div className="flex items-center gap-2">
-          <UserAvatar user={contract.companyUser || {}} name={contract.company} size="md" />
-          <span className="whitespace-nowrap text-sm text-muted-foreground">{contract.company}</span>
+        <div className="flex items-center gap-3">
+          <UserAvatar user={contract.companyId || {}} name={contract.companyId?.companyName} size="xs" />
+          <span className="text-sm font-bold text-foreground/90 uppercase tracking-tight">
+            {contract.companyId?.companyName || contract.companyId?.username || "N/A"}
+          </span>
         </div>
       ),
     },
     {
       key: "status",
-      label: "Task Status",
-      cellClassName: "px-6 py-4 whitespace-nowrap",
-      render: (contract) => <StatusChip status={contract.taskStatus} />,
+      label: "Status",
+      cellClassName: "px-6 py-4",
+      render: (contract) => <StatusChip status={contract.status} size="small" />,
     },
     {
-      key: "value",
-      label: "Value",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-muted-foreground",
-      render: (contract) => `$${contract.value.toLocaleString()}`,
+      key: "budget",
+      label: "Budget",
+      cellClassName: "px-6 py-4 text-sm text-foreground font-black",
+      render: (contract) => (contract.totalBudget ? `$${contract.totalBudget.toLocaleString()}` : "-"),
     },
     {
-      key: "accepted",
-      label: "Accepted",
-      cellClassName: "px-6 py-4 whitespace-nowrap text-sm text-muted-foreground",
-      render: (contract) => (contract.acceptedAt ? dayjs(contract.acceptedAt).format("MMM DD, YYYY") : "N/A"),
+      key: "actions",
+      label: "Actions",
+      cellClassName: "px-6 py-4 text-right",
+      render: (contract) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+              <DotsThreeVertical size={20} weight="bold" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => {
+              setSelectedContract(contract);
+              setDetailsModalOpen(true);
+            }}>
+              <Visibility className="mr-2 h-4 w-4" />
+              View Contract
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
     },
   ];
 
+  const tabOptions = useMemo(() => {
+    return statusTabs.map(s => ({
+        label: s.replace(/-/g, " "),
+        count: contracts.filter(c => s === 'all' ? true : c.status === s).length
+    }));
+  }, [contracts]);
+
   return (
     <PageTransition>
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Contracts"
-          value={stats.total}
-          icon={<Receipt />}
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard title="All Agreements" value={stats.total} icon={<Receipt />} trend={<ChangeIndicator value={2.1} />} />
+          <StatCard title="Active Work" value={stats.active} icon={<Assignment />} trend={<ChangeIndicator value={5.4} />} />
+          <StatCard title="Completions" value={stats.completed} icon={<CheckCircle />} trend={<ChangeIndicator value={12.0} />} />
+          <StatCard title="Projected Revenue" value={`$${stats.totalValue.toLocaleString()}`} icon={<AttachMoney />} trend={<ChangeIndicator value={8.7} />} />
+        </div>
+
+        <FilterSearchBar
+          searchValue={search}
+          onSearchChange={setMagnifyingGlass}
+          searchPlaceholder="search by task or company name..."
+          activeTab={statusTabs.indexOf(filter)}
+          onTabChange={(index) => setFilter(statusTabs[index] || "all")}
+          tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
+          className="mb-0"
         />
-        <StatCard
-          title="Active"
-          value={stats.active}
-          icon={<Assignment />}
-        />
-        <StatCard
-          title="Completed"
-          value={stats.completed}
-          icon={<CheckCircle />}
-        />
-        <StatCard
-          title="Total Value"
-          value={`$${stats.totalValue.toLocaleString()}`}
-          icon={<AttachMoney />}
+
+        {loading ? (
+          <Loader />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={Receipt}
+            title="No contracts found"
+            description={search ? "Try adjusting your search criteria" : "Your active agreements will appear here."}
+            className="border-0 bg-transparent py-12"
+          />
+        ) : (
+          <div className="pt-6">
+            <DataTable
+                columns={contractColumns}
+                data={filtered}
+                rowKey="_id"
+                showSectionHeader={false}
+                showTableHeader={true}
+                tableClassName="w-full min-w-[900px]"
+            />
+          </div>
+        )}
+
+        <ContractDetailsModal
+            open={detailsModalOpen}
+            contract={selectedContract}
+            onX={() => setDetailsModalOpen(false)}
         />
       </div>
-
-      <FilterSearchBar
-        searchValue={search}
-        onSearchChange={setMagnifyingGlass}
-        searchPlaceholder="MagnifyingGlass by task or company..."
-        activeTab={tab}
-        onTabChange={setTab}
-        tabs={["All", "Active", "Completed"]}
-      />
-
-      {loading ? (
-        <Loader />
-      ) : filteredContracts.length === 0 ? (
-        <EmptyState
-          icon={Receipt}
-          title="No contracts yet"
-          description="Accepted proposals will appear here."
-          action={(
-            <Button onClick={() => navigate("/vendor/available-tasks")}>
-              Browse Available Tasks
-            </Button>
-          )}
-        />
-      ) : (
-        <DataTable
-          columns={contractColumns}
-          data={filteredContracts}
-          rowKey="id"
-          showSectionHeader
-          icon={<Receipt className="h-5 w-5" />}
-          title="Accepted Work"
-          subtitle="Contracts derived from accepted proposals and their current task status"
-          tableClassName="w-full min-w-[860px]"
-          bodyClassName="divide-y divide-border"
-          rowClassName="hover:bg-muted"
-        />
-      )}
-    </div>
     </PageTransition>
   );
 };
 
-export default Contracts;
+export default VendorContracts;
 
 
 

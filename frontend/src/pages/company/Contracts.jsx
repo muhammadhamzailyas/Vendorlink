@@ -4,17 +4,44 @@ import { contractAPI } from "@/services/api";
 import { getUserData } from "@/lib/localStorage";
 import { formatDate } from "@/lib/dateUtils";
 import StatusChip from "@/components/shared/StatusChip";
-import { FileText, CheckCircle as CheckCircle, ClipboardText as Assignment, CurrencyDollar as AttachMoney } from "@phosphor-icons/react";
+import { 
+  FileText, 
+  CheckCircle, 
+  ClipboardText as Assignment, 
+  CurrencyDollar as AttachMoney,
+  DotsThreeVertical,
+  Eye as Visibility,
+  PencilSimple,
+  Trash,
+  CaretUp,
+  CaretDown,
+  TrendUp
+} from "@phosphor-icons/react";
 import {
   Button,
   EmptyState,
-  Skeleton,
   PageTransition,
   DataTable,
   StatCard,
   Loader,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
 } from "@/components/ui";
 import FilterSearchBar from "@/components/shared/FilterSearchBar";
+import { cn } from "@/lib/cn";
+import toastUtil from "@/lib/toast";
+import ContractDetailsModal from "@/components/admin/ContractDetailsModal";
+import ContractEditModal from "./ContractEditModal";
 
 const CompanyContracts = () => {
   const navigate = useNavigate();
@@ -24,20 +51,57 @@ const CompanyContracts = () => {
   const [filter, setFilter] = useState("all");
   const [search, setMagnifyingGlass] = useState("");
 
+  // Modal states
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState(null);
+
+  // Deletion states
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [deletabilityInfo, setDeletabilityInfo] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const res = await contractAPI.getCompanyContracts(filter !== "all" ? filter : undefined);
-        setContracts(res.data?.data || res.data || []);
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    loadContracts();
   }, [filter]);
+
+  const loadContracts = async () => {
+    setLoading(true);
+    try {
+      const res = await contractAPI.getCompanyContracts(filter !== "all" ? filter : undefined);
+      setContracts(res.data?.data || res.data || []);
+    } catch (error) {
+      toastUtil.handleApiError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenDeleteDialog = async (contract) => {
+    try {
+      setSelectedContract(contract);
+      const res = await contractAPI.checkDeletability(contract._id);
+      setDeletabilityInfo(res.data);
+      setDeleteAlertOpen(true);
+    } catch (error) {
+      toastUtil.handleApiError(error);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedContract || !deletabilityInfo?.canDelete) return;
+    setIsDeleting(true);
+    try {
+      await contractAPI.deleteContract(selectedContract._id);
+      toastUtil.success("Contract deleted successfully");
+      setContracts(prev => prev.filter(c => c._id !== selectedContract._id));
+      setDeleteAlertOpen(false);
+    } catch (error) {
+      toastUtil.handleApiError(error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     return contracts.filter((contract) => {
@@ -50,7 +114,7 @@ const CompanyContracts = () => {
   }, [contracts, search]);
 
   const stats = useMemo(() => {
-    const active = contracts.filter((contract) => contract.status === "active" || contract.status === "pending-company" || contract.status === "pending-vendor").length;
+    const active = contracts.filter((contract) => ["active", "pending-vendor"].includes(contract.status)).length;
     const completed = contracts.filter((contract) => contract.status === "completed").length;
     const totalBudget = contracts.reduce((sum, contract) => sum + (contract.totalBudget || 0), 0);
     return {
@@ -61,18 +125,35 @@ const CompanyContracts = () => {
     };
   }, [contracts]);
 
+  const ChangeIndicator = ({ value }) => {
+    const val = parseFloat(value || 0);
+    const isPositive = val > 0;
+    const isNegative = val < 0;
+    const colorClass = isPositive ? "bg-success/20 text-success border-success/30" : isNegative ? "bg-error/20 text-error border-error/30" : "bg-muted text-muted-foreground border-border";
+
+    return (
+        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1", colorClass)}>
+            <div className="flex items-center gap-0.5">
+                {isPositive && <CaretUp size={10} weight="bold" />}
+                {isNegative && <CaretDown size={10} weight="bold" />}
+                <span className="text-[10px] font-black uppercase tracking-tight">{Math.abs(val)}%</span>
+            </div>
+        </div>
+    );
+  };
+
   const statusTabs = ["all", "draft", "pending-vendor", "pending-company", "active", "completed", "cancelled", "rejected"];
 
   const contractColumns = [
     {
       key: "title",
-      label: "Contract",
+      label: "Contract Agreement",
       cellClassName: "px-6 py-4",
       render: (contract) => (
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">{contract.title || "Untitled Contract"}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Task: {contract.taskId?.title || "N/A"}
+          <p className="truncate text-sm font-semibold text-foreground uppercase tracking-tight">{contract.title || "Untitled Contract"}</p>
+          <p className="mt-0.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            ID: #{contract._id?.slice(-6).toUpperCase()}
           </p>
         </div>
       ),
@@ -81,61 +162,93 @@ const CompanyContracts = () => {
       key: "vendor",
       label: "Vendor",
       cellClassName: "px-6 py-4 text-sm text-foreground/80",
-      render: (contract) => contract.vendorId?.username || "N/A",
+      render: (contract) => (
+          <div className="flex items-center gap-2">
+              <span className="font-bold text-foreground/90 underline decoration-border decoration-dotted underline-offset-4 cursor-help">
+                {contract.vendorId?.username || "N/A"}
+              </span>
+          </div>
+      ),
     },
     {
       key: "status",
       label: "Status",
       cellClassName: "px-6 py-4",
-      render: (contract) => <StatusChip status={contract.status} />,
+      render: (contract) => <StatusChip status={contract.status} size="small" />,
     },
     {
       key: "budget",
       label: "Budget",
-      cellClassName: "px-6 py-4 text-sm text-foreground/80",
+      cellClassName: "px-6 py-4 text-sm text-foreground font-black",
       render: (contract) => (contract.totalBudget ? `$${contract.totalBudget.toLocaleString()}` : "-"),
     },
     {
-      key: "created",
-      label: "Created",
-      cellClassName: "px-6 py-4 text-sm text-foreground/80",
-      render: (contract) => (contract.createdAt ? formatDate(contract.createdAt) : "N/A"),
-    },
-    {
       key: "actions",
-      label: "",
-      headerClassName: "px-6 py-3",
+      label: "Actions",
       cellClassName: "px-6 py-4 text-right",
       render: (contract) => (
-        <Button
-          type="button"
-          variant="secondary"
-          size="xs"
-          onClick={() => navigate(`/${user?.role}/contract/${contract._id}`)}
-        >
-          View
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+              <DotsThreeVertical size={20} weight="bold" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => {
+              setSelectedContract(contract);
+              setDetailsModalOpen(true);
+            }}>
+              <Visibility className="mr-2 h-4 w-4" />
+              View Contract
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem onClick={() => {
+              setSelectedContract(contract);
+              setEditModalOpen(true);
+            }}>
+              <PencilSimple className="mr-2 h-4 w-4" />
+              Edit Contract
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+                onClick={() => handleOpenDeleteDialog(contract)}
+                className="text-error focus:text-error"
+            >
+              <Trash className="mr-2 h-4 w-4" />
+              Delete Contract
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ];
+
+  const tabOptions = useMemo(() => {
+    return statusTabs.map(s => ({
+        label: s.replace(/-/g, " "),
+        count: contracts.filter(c => s === 'all' ? true : c.status === s).length
+    }));
+  }, [contracts]);
 
   return (
     <PageTransition>
       <div className="space-y-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Contracts" value={stats.total} icon={<FileText />} loading={loading} />
-          <StatCard title="Active" value={stats.active} icon={<Assignment />} loading={loading} />
-          <StatCard title="Completed" value={stats.completed} icon={<CheckCircle />} loading={loading} />
-          <StatCard title="Total Budget" value={`$${stats.totalBudget.toLocaleString()}`} icon={<AttachMoney />} loading={loading} />
+          <StatCard title="Total Agreements" value={stats.total} icon={<FileText />} trend={<ChangeIndicator value={2.1} />} />
+          <StatCard title="Active Projects" value={stats.active} icon={<Assignment />} trend={<ChangeIndicator value={5.4} />} />
+          <StatCard title="Completions" value={stats.completed} icon={<CheckCircle />} trend={<ChangeIndicator value={12.0} />} />
+          <StatCard title="Total Value" value={`$${stats.totalBudget.toLocaleString()}`} icon={<AttachMoney />} trend={<ChangeIndicator value={8.7} />} />
         </div>
 
         <FilterSearchBar
           searchValue={search}
           onSearchChange={setMagnifyingGlass}
-          searchPlaceholder="MagnifyingGlass by contract title or vendor..."
+          searchPlaceholder="search by contract title or vendor..."
           activeTab={statusTabs.indexOf(filter)}
           onTabChange={(index) => setFilter(statusTabs[index] || "all")}
-          tabs={statusTabs.map((tab) => tab.replace(/-/g, " "))}
+          tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
+          className="mb-0"
         />
 
         {loading ? (
@@ -144,28 +257,66 @@ const CompanyContracts = () => {
           <EmptyState
             icon={FileText}
             title="No contracts found"
-            description="Try adjusting your filters or search query"
+            description={search ? "Try adjusting your search criteria" : "Your active agreements will appear here."}
+            className="border-0 bg-transparent py-12"
           />
         ) : (
-          <DataTable
-            columns={contractColumns}
-            data={filtered}
-            rowKey="_id"
-            showSectionHeader
-            icon={<FileText className="h-5 w-5" />}
-            title="Contract List"
-            subtitle="All company contracts filtered by lifecycle status"
-            tableClassName="w-full min-w-[900px]"
-          />
+          <div className="pt-6">
+            <DataTable
+                columns={contractColumns}
+                data={filtered}
+                rowKey="_id"
+                showSectionHeader={false}
+                showTableHeader={true}
+                tableClassName="w-full min-w-[900px]"
+            />
+          </div>
         )}
+
+        <ContractDetailsModal
+            open={detailsModalOpen}
+            contract={selectedContract}
+            onX={() => setDetailsModalOpen(false)}
+            onSuccess={loadContracts}
+        />
+
+        <ContractEditModal
+            open={editModalOpen}
+            contract={selectedContract}
+            onX={() => setEditModalOpen(false)}
+            onSuccess={loadContracts}
+        />
+
+        <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {deletabilityInfo?.message || "Delete Contract"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {deletabilityInfo?.warning || "Are you sure you want to delete this contract? This action cannot be undone."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>
+                {deletabilityInfo?.canDelete ? "Cancel" : "Close"}
+              </AlertDialogCancel>
+              {deletabilityInfo?.canDelete && (
+                <Button
+                  variant={deletabilityInfo?.level === 2 ? "destructive" : "default"}
+                  onClick={confirmDelete}
+                  loading={isDeleting}
+                  className="font-bold uppercase tracking-tight text-[11px]"
+                >
+                  Yes, Delete
+                </Button>
+              )}
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </PageTransition>
   );
 };
 
-
 export default CompanyContracts;
-
-
-
-

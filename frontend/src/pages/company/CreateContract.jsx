@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Plus, Trash } from "@phosphor-icons/react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,12 @@ import {
   RadixSelectValue,
   RadixSelectContent,
   RadixSelectItem,
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui";
 
 const milestoneSchema = z.object({
@@ -179,16 +185,25 @@ const CreateContract = () => {
   return (
     <PageTransition>
       <div className="mx-auto max-w-5xl space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground uppercase">Create Contract</h2>
-            <p className="text-sm text-muted-foreground">Define scope, milestones, and payment terms before issuing.</p>
-          </div>
-          <Button type="button" variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </div>
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/company">Dashboard</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/company/my-tasks">My Tasks</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/company/proposals">Proposal Registry</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Create Contract</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         {error && (
           <div className="rounded-xl bg-error/15 px-4 py-3 text-sm text-error font-medium border border-error/20">

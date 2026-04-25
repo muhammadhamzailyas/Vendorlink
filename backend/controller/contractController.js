@@ -1,6 +1,8 @@
 const Task = require("../model/task");
 const Proposal = require("../model/proposal");
 const Contract = require("../model/Contract");
+const Payment = require("../model/Payment");
+const User = require("../model/user");
 
 const getNotificationService = (req) => {
   try {
@@ -96,8 +98,8 @@ exports.createCompleteContract = async (req, res) => {
       warrantyPeriod: contractData.warrantyPeriod || 30,
       warrantyDetails: contractData.warrantyDetails || "",
 
-      status: "draft",
-      companyApproved: false,
+      status: "pending-vendor",
+      companyApproved: false, 
       vendorApproved: false,
       contractDate: new Date(),
       createdBy: userId,
@@ -229,8 +231,8 @@ exports.createContractFromProposal = async (req, res) => {
       disputeResolution: "negotiation",
       governingLaw: "Pakistan",
       warrantyPeriod: 30,
-      status: "draft",
-      companyApproved: false,
+      status: "pending-vendor",
+      companyApproved: false, 
       vendorApproved: false,
       contractDate: new Date(),
       createdBy: userId,
@@ -310,10 +312,10 @@ exports.approveContract = async (req, res) => {
       contract.status = "active";
       contract.activatedAt = new Date();
       contract.effectiveDate = new Date();
-    } else if (isCompany) {
-      contract.status = "pending-vendor";
-    } else {
+    } else if (contract.vendorApproved && !contract.companyApproved) {
       contract.status = "pending-company";
+    } else {
+      contract.status = "pending-vendor";
     }
 
     await contract.save();
@@ -428,7 +430,7 @@ exports.cancelContract = async (req, res) => {
     if (!isCompany && !isVendor) return res.status(403).json({ error: "Access denied" });
 
     // Allow cancellation strictly for active or draft state. 
-    // Partially approved (pending-company/vendor) or completed contracts cannot be cancelled via this endpoint.
+    // Partially approved (pending-vendor) or completed contracts cannot be cancelled via this endpoint.
     if (!["active", "draft"].includes(contract.status)) {
       return res.status(400).json({ error: `Cannot cancel contract in ${contract.status} state. Only active or draft contracts can be cancelled.` });
     }
@@ -616,6 +618,54 @@ exports.updateContract = async (req, res) => {
     res.json({ success: true, message: "Contract updated successfully", data: contract });
   } catch (error) {
     console.error("Error in updateContract:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.checkDeletability = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id.toString();
+
+    const contract = await Contract.findById(id);
+    if (!contract) return res.status(404).json({ error: "Contract not found" });
+
+    if (contract.companyId?.toString() !== userId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Level 3: Blocked (Active or Completed contracts with payments)
+    const Payment = require("../model/Payment");
+    const paymentCount = await Payment.countDocuments({ contractId: id });
+    
+    if (paymentCount > 0 || contract.status === "completed") {
+      return res.json({
+        canDelete: false,
+        level: 3,
+        message: "This contract is in the transaction phase or completed and cannot be deleted.",
+        warning: "Financial records or final completions are associated with this contract. Deletion is restricted for auditing purposes."
+      });
+    }
+
+    // Level 2: Warning (Active or Pending contracts but no payments)
+    if (["active", "pending-vendor"].includes(contract.status)) {
+      return res.json({
+        canDelete: true,
+        level: 2,
+        message: "Warning: This is an active or pending agreement.",
+        warning: "Deleting this contract will cancel the engagement with the vendor. The vendor will be notified. Are you sure you want to proceed?"
+      });
+    }
+
+    // Level 1: Simple confirmation (Draft, Rejected, or Cancelled)
+    return res.json({
+      canDelete: true,
+      level: 1,
+      message: "Are you sure you want to delete this contract? This action cannot be undone.",
+      warning: null
+    });
+
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };

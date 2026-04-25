@@ -19,6 +19,7 @@ router.get("/:id/download", contractController.downloadContract);
 
 // Dynamic routes
 router.get("/:id", contractController.getContractById);
+router.get("/:id/check-deletability", contractController.checkDeletability);
 router.put("/:id", contractController.updateContract);
 router.put("/:id/approve", contractController.approveContract);
 router.put("/:id/reject", contractController.rejectContract);

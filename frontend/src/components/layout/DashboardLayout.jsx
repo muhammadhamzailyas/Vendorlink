@@ -73,10 +73,16 @@ const MENU_CONFIG = {
   },
 };
 
+const PAGE_TITLES = {
+  "/company/contract/create": "Create Contract",
+  "/company/proposals": "Proposal Registry",
+  "/company/task": "Task Detail",
+};
+
 const PAGE_SUBTITLES = {
   "/admin": "Overview of platform activity and growth",
   "/admin/users": "Manage and monitor all platform users",
-  "/admin/pending": "Review pending company and vendor accounts",
+  "/admin/pending": "Review pending account verifications",
   "/admin/task-monitoring": "Monitor and track all platform tasks",
   "/admin/contract": "Monitor active and completed task agreements across the platform",
   "/admin/reports": "Platform performance snapshot for users and tasks",
@@ -89,6 +95,7 @@ const PAGE_SUBTITLES = {
   "/company/vendor-marketplace": "Review vendors who have submitted proposals to your tasks",
   "/company/my-tasks": "Manage and track all active and completed tasks",
   "/company/contracts": "Track accepted proposals and ongoing contracts with vendors",
+  "/company/contract/create": "Define scope, milestones, and payment terms before issuing.",
   "/company/proposals": "Review vendor submissions and decide next actions",
   "/company/feedback": "Share your experience and suggestions",
   "/vendor": "Track proposal performance and earnings momentum",
@@ -147,14 +154,26 @@ const DashboardLayout = () => {
   const { main = [] } = MENU_CONFIG[role] || {};
 
   const pageTitle = useMemo(() => {
+    // 1. Check for explicit overrides first
+    if (PAGE_TITLES[location.pathname]) return PAGE_TITLES[location.pathname];
+
+    // 2. Check for exact menu matches
     const exactMatch = main.find((item) => item.path === location.pathname);
     if (exactMatch) return exactMatch.text;
 
+    // 3. Check for sub-route matches (prefix)
     const prefixMatch = main.find(
       (item) => item.path !== `/${role}` && location.pathname.startsWith(`${item.path}/`)
     );
     if (prefixMatch) return prefixMatch.text;
 
+    // 4. Check prefixes in PAGE_TITLES (e.g. for /task/:id)
+    const pageTitlePrefixMatch = Object.keys(PAGE_TITLES).find(path => 
+        location.pathname.startsWith(path) && path !== `/${role}`
+    );
+    if (pageTitlePrefixMatch) return PAGE_TITLES[pageTitlePrefixMatch];
+
+    // 5. Fallback to formatting the last URL segment
     const lastSegment = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
     return lastSegment.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
   }, [location.pathname, main, role]);

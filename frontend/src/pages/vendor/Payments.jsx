@@ -96,16 +96,6 @@ const VendorPayments = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        {/* Summary Cards */}
-        {summary && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <StatCard title="Available Balance" value={formatCurrency(summary.availableBalance)} icon={<Wallet />} />
-            <StatCard title="Gross Earnings" value={formatCurrency(summary.totalEarned)} icon={<TrendUp />} />
-            <StatCard title="Gross Withdrawn" value={formatCurrency(summary.totalWithdrawn)} icon={<ArrowCircleDown />} />
-            <StatCard title="Pending Assets" value={formatCurrency(summary.pendingAmount)} icon={<Clock />} />
-          </div>
-        )}
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="bg-muted/50 p-1 h-auto flex flex-wrap justify-start gap-1 w-fit mb-8 shadow-inner border border-border/50">
                 <TabsTrigger 
@@ -123,8 +113,28 @@ const VendorPayments = () => {
                     Treasury Dashboard
                 </TabsTrigger>
             </TabsList>
+            
+            <div className="mb-8">
+                {activeTab === "wallet" && (
+                    <>
+                        <h2 className="text-2xl font-bold text-foreground">Treasury Dashboard</h2>
+                        <p className="text-muted-foreground">Manage your earnings, view transaction history, and initiate withdrawals.</p>
+                    </>
+                )}
+            </div>
 
             <TabsContent value="earnings" className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+
+                {/* Summary Cards */}
+                {summary && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                    <StatCard title="Available Balance" value={formatCurrency(summary.availableBalance)} icon={<Wallet />} />
+                    <StatCard title="Gross Earnings" value={formatCurrency(summary.totalEarned)} icon={<TrendUp />} />
+                    <StatCard title="Gross Withdrawn" value={formatCurrency(summary.totalWithdrawn)} icon={<ArrowCircleDown />} />
+                    <StatCard title="Pending Assets" value={formatCurrency(summary.pendingAmount)} icon={<Clock />} />
+                  </div>
+                )}
+
                 {isLoading ? (
                 <Loader />
                 ) : activeTasks.length === 0 ? (

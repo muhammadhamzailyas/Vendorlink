@@ -254,11 +254,16 @@ const queryClient = new QueryClient({
   },
 });
 
+import { Elements } from "@stripe/react-stripe-js";
+import stripePromise from "./lib/stripe";
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
+      <Elements stripe={stripePromise}>
         <ToastViewport />
         <RouterProvider router={router} />
+      </Elements>
     </QueryClientProvider>
   </ErrorBoundary>
 );

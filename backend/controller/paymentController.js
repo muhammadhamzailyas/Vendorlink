@@ -82,7 +82,7 @@ class PaymentController {
 
   async depositMoney(req, res) {
     try {
-      const { amount, paymentMethod } = req.body; // Amount in USD
+      const { amount, paymentMethodId } = req.body; // Amount in USD
       const companyId = req.user.id;
 
       if (amount < 10) {
@@ -90,9 +90,13 @@ class PaymentController {
       }
 
       const stripeService = require("../services/stripeService");
+      // Use paymentMethodId to confirm the payment
       const paymentIntent = await stripeService.createPaymentIntent(amount, "usd", {
         companyId,
         type: "wallet_deposit",
+        payment_method: paymentMethodId,
+        confirm: true,
+        automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
       });
 
       const transaction = new Transaction({
@@ -100,8 +104,8 @@ class PaymentController {
         toUserId: companyId,
         amount,
         type: "deposit",
-        status: "pending",
-        paymentMethod: paymentMethod || "stripe",
+        status: paymentIntent.status === 'succeeded' ? 'completed' : 'pending',
+        paymentMethod: "stripe",
         description: `Wallet deposit of $${amount.toLocaleString()}`,
         gateway: {
           name: "stripe",
@@ -112,11 +116,23 @@ class PaymentController {
       });
       await transaction.save();
 
+      if (paymentIntent.status === 'succeeded') {
+        // Credit wallet directly if succeeded
+        await Wallet.findOneAndUpdate(
+            { userId: companyId },
+            { 
+              $inc: { balance: amount, totalDeposited: amount },
+              $set: { lastTransactionAt: new Date() }
+            },
+            { upsert: true }
+        );
+      }
+
       res.json({
         success: true,
-        message: "Deposit initiated",
+        message: paymentIntent.status === 'succeeded' ? "Deposit successful" : "Deposit initiated",
         data: {
-          clientSecret: paymentIntent.clientSecret,
+          status: paymentIntent.status,
           transactionId: transaction._id,
         },
       });

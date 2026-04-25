@@ -253,7 +253,45 @@ class TaskController {
       task.completedAt = new Date();
       await task.save();
 
-      res.json({ message: "Task completed", task });
+      // Automatically complete the associated contract
+      const contract = await Contract.findOne({ taskId: task._id });
+      if (contract) {
+        contract.status = "completed";
+        contract.completedAt = new Date();
+        await contract.save();
+
+        // Automatically transfer remaining balance from company to vendor
+        if (contract.totalBudget > contract.totalPaid) {
+          const remainingAmount = contract.totalBudget - (contract.totalPaid || 0);
+          
+          // Implementation for automatic payment transfer
+          const Wallet = require("../model/Wallet");
+          const companyWallet = await Wallet.findOne({ userId: task.companyId });
+          const vendorWallet = await Wallet.findOne({ userId: task.selectedVendor });
+
+          if (companyWallet && vendorWallet && companyWallet.balance >= remainingAmount) {
+            companyWallet.balance -= remainingAmount;
+            vendorWallet.balance += remainingAmount;
+            
+            await companyWallet.save();
+            await vendorWallet.save();
+
+            // Record the payment
+            const payment = new Payment({
+              contractId: contract._id,
+              taskId: task._id,
+              amount: remainingAmount,
+              paymentType: "milestone",
+              status: "completed",
+              senderId: task.companyId,
+              recipientId: task.selectedVendor,
+            });
+            await payment.save();
+          }
+        }
+      }
+
+      res.json({ message: "Task and contract completed successfully", task });
 
       // Notify vendor
       try {
@@ -264,7 +302,7 @@ class TaskController {
             senderId: req.user._id,
             type: "task_completed",
             title: "Task Completed",
-            message: `Task "${task.title}" has been marked as completed.`,
+            message: `Task "${task.title}" has been marked as completed. Payment has been transferred.`,
             data: { taskId: task._id, taskTitle: task.title },
             relatedId: task._id,
             relatedModel: "Task",

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,34 +15,37 @@ import {
 import { paymentAPI } from "@/services/paymentAPI";
 import { useWallet } from "@/context/WalletContext";
 import { showToast } from "@/lib/toast";
-import { Button, Input, Select, Card, EmptyState, DataTable, StatCard, Badge, Separator } from "@/components/ui";
+import { Button, Input, Card, EmptyState, DataTable, StatCard, Badge, Separator } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
-import FormSection, { FormFieldGrid } from "@/components/shared/FormSection";
 import dayjs from "dayjs";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 const depositSchema = z.object({
   amount: z.coerce.number().min(10, "Minimum deposit is $10"),
-  paymentMethod: z.enum(["bank_transfer", "jazzcash", "easypaisa"]),
 });
 
 const withdrawSchema = z.object({
   amount: z.coerce.number().min(5, "Minimum withdrawal is $5"),
-  paymentMethod: z.enum(["bank_transfer", "jazzcash", "easypaisa"]),
+  accountNumber: z.string().min(5, "Account number required"),
 });
 
 const WalletDashboard = () => {
   const { wallet, transactions, pagination, loading, refreshWallet, loadWallet, formatCurrency } = useWallet();
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [processing, setProcessing] = useState(false);
+
+  const stripe = useStripe();
+  const elements = useElements();
 
   const depositForm = useForm({
     resolver: zodResolver(depositSchema),
-    defaultValues: { amount: "", paymentMethod: "bank_transfer" },
+    defaultValues: { amount: "" },
   });
 
   const withdrawForm = useForm({
     resolver: zodResolver(withdrawSchema),
-    defaultValues: { amount: "", paymentMethod: "bank_transfer" },
+    defaultValues: { amount: "", accountNumber: "" },
   });
 
   const depositMutation = useMutation({
@@ -52,12 +55,16 @@ const WalletDashboard = () => {
       depositForm.reset();
       setShowDeposit(false);
       refreshWallet();
+      setProcessing(false);
     },
-    onError: (error) => showToast("error", error.response?.data?.error || "Deposit failed"),
+    onError: (error) => {
+      showToast("error", error.response?.data?.error || "Deposit failed");
+      setProcessing(false);
+    },
   });
 
   const withdrawMutation = useMutation({
-    mutationFn: (data) => paymentAPI.requestWithdrawal({ ...data, accountDetails: {} }),
+    mutationFn: (data) => paymentAPI.requestWithdrawal({ ...data, paymentMethod: 'stripe' }),
     onSuccess: () => {
       showToast("success", "Withdrawal request submitted");
       withdrawForm.reset();
@@ -67,7 +74,24 @@ const WalletDashboard = () => {
     onError: (error) => showToast("error", error.response?.data?.error || "Withdrawal failed"),
   });
 
-  const onDeposit = (data) => depositMutation.mutate(data);
+  const onDeposit = async (data) => {
+    if (!stripe || !elements) return;
+    setProcessing(true);
+
+    const cardElement = elements.getElement(CardElement);
+    const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+    });
+
+    if (error) {
+        showToast("error", error.message);
+        setProcessing(false);
+        return;
+    }
+
+    depositMutation.mutate({ amount: data.amount, paymentMethodId: paymentMethod.id });
+  };
 
   const onWithdraw = (data) => {
     if (data.amount > (wallet?.balance || 0)) {
@@ -85,12 +109,6 @@ const WalletDashboard = () => {
     fee: "error",
     transfer: "outline",
   };
-
-  const paymentMethods = [
-    { value: "bank_transfer", label: "Bank Transfer" },
-    { value: "jazzcash", label: "JazzCash" },
-    { value: "easypaisa", label: "EasyPaisa" },
-  ];
 
   if (loading) {
     return (
@@ -220,7 +238,7 @@ const WalletDashboard = () => {
                             onClick={() => { setShowDeposit(!showDeposit); setShowWithdraw(false); }}
                         >
                             <ArrowCircleUp className="h-5 w-5 mr-3 text-success" />
-                            Load Wallet
+                            Load Wallet (Stripe)
                         </Button>
                         <Button
                             variant={showWithdraw ? "primary" : "secondary"}
@@ -236,7 +254,7 @@ const WalletDashboard = () => {
 
                     {showDeposit && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
-                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Load Capital</p>
+                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60">Load Capital via Stripe</p>
                             <form onSubmit={depositForm.handleSubmit(onDeposit)} className="space-y-4">
                                 <Input
                                     label="USD Amount"
@@ -246,13 +264,10 @@ const WalletDashboard = () => {
                                     {...depositForm.register("amount")}
                                     className="h-11 bg-muted/20"
                                 />
-                                <Select
-                                    label="Gateway"
-                                    options={paymentMethods}
-                                    {...depositForm.register("paymentMethod")}
-                                    className="h-11 bg-muted/20"
-                                />
-                                <Button type="submit" loading={depositMutation.isPending} className="w-full font-bold uppercase tracking-tight h-11">
+                                <div className="p-3 border border-border/50 rounded-lg bg-card">
+                                    <CardElement />
+                                </div>
+                                <Button type="submit" loading={processing} className="w-full font-bold uppercase tracking-tight h-11">
                                     Finalize Deposit
                                 </Button>
                             </form>
@@ -271,10 +286,11 @@ const WalletDashboard = () => {
                                     {...withdrawForm.register("amount")}
                                     className="h-11 bg-muted/20"
                                 />
-                                <Select
-                                    label="Payout Method"
-                                    options={paymentMethods}
-                                    {...withdrawForm.register("paymentMethod")}
+                                <Input
+                                    label="Bank/Stripe Account Number"
+                                    placeholder="e.g., 1234567890"
+                                    error={withdrawForm.formState.errors.accountNumber?.message}
+                                    {...withdrawForm.register("accountNumber")}
                                     className="h-11 bg-muted/20"
                                 />
                                 <Button type="submit" loading={withdrawMutation.isPending} variant="primary" className="w-full font-bold uppercase tracking-tight h-11 bg-warning hover:bg-warning-dark border-none">
@@ -300,6 +316,3 @@ const WalletDashboard = () => {
 };
 
 export default WalletDashboard;
-
-
-

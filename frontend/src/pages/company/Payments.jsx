@@ -10,11 +10,30 @@ import {
   PaperPlaneTilt as Send,
   CheckCircle,
   Clock,
+  Briefcase,
+  Hourglass,
+  HandCoins,
 } from "@phosphor-icons/react";
 import { paymentAPI } from "@/services/paymentAPI";
+import { progressAPI } from "@/services/api";
 import { useWallet } from "@/context/WalletContext";
 import { showToast } from "@/lib/toast";
-import { Button, Input, Select, Textarea, Card, Dialog, Tabs, PageTransition, Loader, EmptyState } from "@/components/ui";
+import {
+  Button,
+  Input,
+  Select,
+  Textarea,
+  Card,
+  Dialog,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  PageTransition,
+  Loader,
+  EmptyState,
+  StatCard,
+} from "@/components/ui";
 import WalletDashboard from "@/components/wallet/WalletDashboard";
 import StatusChip from "@/components/shared/StatusChip";
 import FormSection from "@/components/shared/FormSection";
@@ -29,7 +48,7 @@ const paymentSchema = z.object({
 const CompanyPayments = () => {
   const [paymentDialog, setPaymentDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
+  const [activeTab, setActiveTab] = useState("tasks");
 
   const { wallet, refreshWallet, formatCurrency } = useWallet();
   const navigate = useNavigate();
@@ -38,7 +57,7 @@ const CompanyPayments = () => {
   const { data: activeTasks = [], isLoading } = useQuery({
     queryKey: ["company", "active-tasks"],
     queryFn: async () => {
-      const res = await paymentAPI.getCompanyActiveTasks();
+      const res = await progressAPI.getCompanyActiveTasks();
       return res?.data?.data || res?.data || [];
     },
     onError: (error) => {
@@ -72,7 +91,7 @@ const CompanyPayments = () => {
   const handleMakePayment = (task) => {
     if ((wallet?.balance || 0) < task.pendingAmount) {
       showToast("error", `Insufficient balance. Please deposit $${task.pendingAmount - (wallet?.balance || 0)} more.`);
-      setTabValue(1);
+      setActiveTab("wallet");
       return;
     }
     setSelectedTask(task);
@@ -103,30 +122,29 @@ const CompanyPayments = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <Tabs value={tabValue} onChange={setTabValue} tabs={["Active Tasks", "Wallet"]} />
-
-        {/* Tab: Active Tasks */}
-        {tabValue === 0 && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <Card.Content className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Wallet Balance</p>
-                  <p className="mt-1 text-2xl font-bold text-foreground">{formatCurrency(wallet?.balance)}</p>
-                </Card.Content>
-              </Card>
-              <Card>
-                <Card.Content className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Active Contracts</p>
-                  <p className="mt-1 text-2xl font-bold text-foreground">{activeTasks.length}</p>
-                </Card.Content>
-              </Card>
-              <Card>
-                <Card.Content className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pending Disbursement</p>
-                  <p className="mt-1 text-2xl font-bold text-warning-muted-fg">{formatCurrency(pendingTotal)}</p>
-                </Card.Content>
-              </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="bg-muted/50 p-1 h-auto flex flex-wrap justify-start gap-1 w-fit mb-8 shadow-inner border border-border/50">
+            <TabsTrigger 
+                value="tasks"
+                className="rounded-lg px-6 py-2.5 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-soft transition-all"
+            >
+                <HandCoins className="mr-2 h-3.5 w-3.5" />
+                Active Tasks
+            </TabsTrigger>
+            <TabsTrigger 
+                value="wallet"
+                className="rounded-lg px-6 py-2.5 font-bold uppercase tracking-tight text-[11px] data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-soft transition-all"
+            >
+                <Wallet className="mr-2 h-3.5 w-3.5" />
+                Treasury Dashboard
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="tasks" className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <StatCard title="Wallet Balance" value={formatCurrency(wallet?.balance)} icon={<Wallet />} />
+              <StatCard title="Active Contracts" value={activeTasks.length} icon={<Briefcase />} />
+              <StatCard title="Pending Disbursement" value={formatCurrency(pendingTotal)} icon={<Hourglass />} />
             </div>
 
             {isLoading ? (
@@ -196,11 +214,12 @@ const CompanyPayments = () => {
                 ))}
               </div>
             )}
-          </div>
-        )}
+          </TabsContent>
 
-        {/* Tab: Wallet */}
-        {tabValue === 1 && <WalletDashboard />}
+          <TabsContent value="wallet" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <WalletDashboard />
+          </TabsContent>
+        </Tabs>
 
         {/* Payment Dialog */}
         <Dialog open={paymentDialog} onX={() => setPaymentDialog(false)} className="max-w-lg">
@@ -267,7 +286,3 @@ const CompanyPayments = () => {
 };
 
 export default CompanyPayments;
-
-
-
-

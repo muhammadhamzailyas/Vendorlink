@@ -4,16 +4,15 @@ const onboardingController = require("../controller/onboardingcontroller");
 const { onboardingDocumentUpload } = require("../middleware/onboardingUpload");
 const { authAllowUnprovisioned } = require("../middleware/authmiddle");
 
-// Track progress
-router.get("/me", authAllowUnprovisioned, onboardingController.getMyOnboarding.bind(onboardingController));
-router.post("/save-progress", authAllowUnprovisioned, onboardingDocumentUpload, onboardingController.saveProgress.bind(onboardingController));
-router.post("/reset-progress", authAllowUnprovisioned, onboardingController.resetProgress.bind(onboardingController));
-router.put("/step2/business", authAllowUnprovisioned, onboardingDocumentUpload, onboardingController.updateBusinessInfo.bind(onboardingController));
+/**
+ * Onboarding routes are now simplified to handle only final registration and payments.
+ * Partial progress and draft tracking have been removed as per requirements.
+ */
 
-// Route to initiate real Stripe payment
-router.post("/create-payment-intent", onboardingController.createPaymentIntent.bind(onboardingController));
+// Route to initiate Stripe payment for activation fee
+router.post("/create-payment-intent", authAllowUnprovisioned, onboardingController.createPaymentIntent.bind(onboardingController));
 
-// Unified final submission
+// Unified final submission: Creates the MongoDB user and profile after Step 5
 router.post(
   "/final-submit",
   authAllowUnprovisioned,

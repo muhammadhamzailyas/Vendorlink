@@ -23,7 +23,14 @@ import {
   Select, 
   Textarea, 
   Label,
-  AlertDialog
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
 } from "@/components/ui";
 import FormSection, { FormFieldGrid } from "@/components/shared/FormSection";
 import DynamicListField from "@/components/shared/DynamicListField";
@@ -123,23 +130,25 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
   const handleAddSkill = () => {
     const newSkills = [...skills, ""];
     setSkills(newSkills);
-    setValue("skills", newSkills);
+    setValue("skills", newSkills, { shouldDirty: true });
   };
 
   const handleRemoveSkill = (index) => {
     const newSkills = skills.filter((_, i) => i !== index);
     setSkills(newSkills);
-    setValue("skills", newSkills);
+    setValue("skills", newSkills, { shouldDirty: true });
   };
 
   const handleSkillChange = (index, value) => {
     const newSkills = [...skills];
     newSkills[index] = value;
     setSkills(newSkills);
-    setValue("skills", newSkills);
+    setValue("skills", newSkills, { shouldDirty: true });
   };
 
   if (!open) return null;
+
+  const isTaskOpen = task?.status === "open";
 
   return (
     <>
@@ -157,6 +166,12 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                 Modify your project requirements and budget
               </Dialog.Description>
             </div>
+            {!isTaskOpen && (
+              <div className="mt-2 flex items-center gap-2 px-4 py-2 bg-error/10 border border-error/20 rounded-lg text-error text-[10px] font-bold uppercase tracking-widest">
+                <Warning size={14} />
+                Only open tasks can be edited
+              </div>
+            )}
           </div>
         </Dialog.Header>
 
@@ -171,6 +186,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   label="Task Title"
                   error={errors.title?.message}
                   className="md:col-span-2"
+                  disabled={!isTaskOpen}
                   {...register("title")}
                 />
                 
@@ -178,6 +194,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   label="Category"
                   options={CATEGORIES}
                   error={errors.category?.message}
+                  disabled={!isTaskOpen}
                   {...register("category")}
                 />
 
@@ -185,6 +202,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   label="Priority Level"
                   options={PRIORITIES}
                   error={errors.priority?.message}
+                  disabled={!isTaskOpen}
                   {...register("priority")}
                 />
               </FormFieldGrid>
@@ -199,6 +217,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   label="Project Description"
                   rows={4}
                   error={errors.description?.message}
+                  disabled={!isTaskOpen}
                   {...register("description")}
                 />
 
@@ -206,6 +225,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   label="Technical Requirements"
                   rows={3}
                   error={errors.requirements?.message}
+                  disabled={!isTaskOpen}
                   {...register("requirements")}
                 />
               </div>
@@ -228,6 +248,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                     placeholder="e.g. React.js"
                     addLabel="Add Skill"
                     error={errors.skills?.message}
+                    disabled={!isTaskOpen}
                   />
                 )}
               />
@@ -242,6 +263,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   label="Payment Type"
                   options={TASK_TYPES}
                   error={errors.taskType?.message}
+                  disabled={!isTaskOpen}
                   {...register("taskType")}
                 />
 
@@ -250,6 +272,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   type="number"
                   error={errors.budget?.message}
                   icon={<CurrencyDollar className="h-4 w-4" />}
+                  disabled={!isTaskOpen}
                   {...register("budget")}
                 />
 
@@ -258,6 +281,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
                   type="date"
                   error={errors.deadline?.message}
                   icon={<Calendar className="h-4 w-4" />}
+                  disabled={!isTaskOpen}
                   {...register("deadline")}
                 />
               </FormFieldGrid>
@@ -278,7 +302,7 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
               type="submit"
               form="edit-task-form"
               loading={isSubmitting}
-              disabled={!isDirty}
+              disabled={!isDirty || !isTaskOpen}
               className="font-black uppercase tracking-widest text-[10px] h-11 px-8"
             >
               <FloppyDisk className="mr-2 h-4 w-4" weight="bold" />
@@ -287,16 +311,20 @@ const TaskEditModal = ({ open, task, onX, onSuccess }) => {
         </div>
       </Dialog>
 
-      <AlertDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title="Confirm Updates"
-        description="Are you sure you want to save these changes? This will update the task details visible to all potential vendors."
-        confirmText="Yes, Save"
-        cancelText="Cancel"
-        onConfirm={handleConfirmSave}
-        variant="default"
-      />
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Updates</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to save these changes? This will update the task details visible to all potential vendors.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSave}>Yes, Save</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

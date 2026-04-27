@@ -131,6 +131,7 @@ class AdminController {
       ]);
 
       const getMonthlyTotal = (m, filterFn) => {
+          if (!Array.isArray(monthlyBreakdown)) return 0;
           return monthlyBreakdown
             .filter(item => item._id.month === m.month && item._id.year === m.year && filterFn(item))
             .reduce((sum, item) => sum + item.count, 0);
@@ -138,8 +139,8 @@ class AdminController {
 
       const growthData = months.map(m => {
         const uCount = getMonthlyTotal(m, (item) => item._id.status === "approved");
-        const t = tasksGrowth.find(tg => tg._id.month === m.month && tg._id.year === m.year);
-        const r = revenueStats.find(rs => rs._id.month === m.month && rs._id.year === m.year);
+        const t = Array.isArray(tasksGrowth) ? tasksGrowth.find(tg => tg._id.month === m.month && tg._id.year === m.year) : null;
+        const r = Array.isArray(revenueStats) ? revenueStats.find(rs => rs._id.month === m.month && rs._id.year === m.year) : null;
         
         return {
           name: m.name,
@@ -154,11 +155,13 @@ class AdminController {
       });
 
       // Calculate Percent Changes
-      const lastMonth = growthData[5];
-      const prevMonth = growthData[4];
+      const lastMonth = growthData[5] || { users: 0, tasks: 0, revenue: 0, companies: 0, vendors: 0, pending: 0 };
+      const prevMonth = growthData[4] || { users: 0, tasks: 0, revenue: 0, companies: 0, vendors: 0, pending: 0 };
       const calculateChange = (curr, prev) => {
-          if (!prev) return 0;
-          return (((curr - prev) / prev) * 100).toFixed(1);
+          const c = Number(curr) || 0;
+          const p = Number(prev) || 0;
+          if (p === 0) return c > 0 ? "100.0" : "0.0";
+          return (((c - p) / p) * 100).toFixed(1);
       };
 
       res.json({
@@ -168,14 +171,14 @@ class AdminController {
             value: ur.count 
         })),
         taskFunnel: [
-            { name: "Open Tasks", value: openTasks },
-            { name: "With Proposals", value: tasksWithProposals.length },
-            { name: "Active Contracts", value: activeContracts },
-            { name: "Completed Tasks", value: completedTasks },
+            { name: "Open Tasks", value: openTasks || 0 },
+            { name: "With Proposals", value: Array.isArray(tasksWithProposals) ? tasksWithProposals.length : 0 },
+            { name: "Active Contracts", value: activeContracts || 0 },
+            { name: "Completed Tasks", value: completedTasks || 0 },
         ],
         withdrawalHealth: withdrawalHealth.map(wh => ({ 
-            name: wh._id.charAt(0).toUpperCase() + wh._id.slice(1), 
-            value: wh.count 
+            name: String(wh._id || "Unknown").charAt(0).toUpperCase() + String(wh._id || "Unknown").slice(1), 
+            value: wh.count || 0
         })),
         changes: {
             users: calculateChange(lastMonth.users, prevMonth.users),
@@ -187,6 +190,7 @@ class AdminController {
         }
       });
     } catch (error) {
+      console.error("[AdminStats] Error:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   }
@@ -641,13 +645,18 @@ class AdminController {
     try {
       const [users, tasks, contracts, payments] = await Promise.all([
         User.find().sort({ createdAt: -1 }).limit(20).lean(),
-        Task.find().sort({ updatedAt: -1 }).limit(20).populate("companyId", "companyName username").lean(),
+        Task.find().sort({ updatedAt: -1 }).limit(20).populate("companyId", "username email").lean(),
         Contract.find().sort({ updatedAt: -1 }).limit(20).lean(),
         Payment.find().sort({ updatedAt: -1 }).limit(20).lean()
       ]);
 
+      // Fetch company names separately to ensure accuracy
+      const companyIds = tasks.map(t => t.companyId?._id).filter(id => id);
+      const companies = await Company.find({ userId: { $in: companyIds } }).select("userId companyName").lean();
+      const companyMap = new Map(companies.map(c => [String(c.userId), c.companyName]));
+
       const activities = [
-        ...users.map(u => ({
+        ...(users || []).map(u => ({
           id: u._id,
           action: u.status === 'approved' ? `User "${u.username || u.email}" verified` : `New user "${u.username || u.email}" registered`,
           user: u.username || u.email,
@@ -655,15 +664,15 @@ class AdminController {
           status: u.status,
           timestamp: u.createdAt
         })),
-        ...tasks.map(t => ({
+        ...(tasks || []).map(t => ({
           id: t._id,
           action: `Task "${t.title}" ${t.status}`,
-          user: t.companyId?.companyName || t.companyId?.username || "System",
+          user: companyMap.get(String(t.companyId?._id)) || t.companyId?.username || "System",
           type: "TASK",
           status: t.status,
           timestamp: t.updatedAt || t.createdAt
         })),
-        ...contracts.map(c => ({
+        ...(contracts || []).map(c => ({
           id: c._id,
           action: `Contract "${c.title}" ${c.status}`,
           user: "System",
@@ -671,7 +680,7 @@ class AdminController {
           status: c.status,
           timestamp: c.updatedAt || c.createdAt
         })),
-        ...payments.map(p => ({
+        ...(payments || []).map(p => ({
           id: p._id,
           action: `Payment of $${p.amount} ${p.status}`,
           user: "Finance",
@@ -683,6 +692,7 @@ class AdminController {
 
       res.json({ success: true, data: activities });
     } catch (error) {
+      console.error("[AdminActivity] Error:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   }

@@ -24,9 +24,8 @@ class StripeService {
         ...rest,
       };
 
-      if (automatic_payment_methods) {
-        params.automatic_payment_methods = automatic_payment_methods;
-      }
+      // Default to automatic payment methods if nothing else provided
+      params.automatic_payment_methods = automatic_payment_methods || { enabled: true };
 
       const paymentIntent = await stripe.paymentIntents.create(params);
 

@@ -130,13 +130,14 @@ const CompanyTaskProgressDetail = () => {
                     <Button variant="warning" size="xs" className="uppercase font-bold tracking-tight">Top Up Wallet</Button>
                 </Link>
             )}
-            {canApprove && (
+            {isPendingCompletion && (
               <Button 
                 onClick={() => setShowConfirmModal(true)} 
                 variant="primary"
                 size="xs"
                 className="font-bold uppercase tracking-tight shadow-soft"
                 loading={approving}
+                disabled={!readiness?.isReady}
               >
                 <SealCheck className="w-4 h-4 mr-1.5" /> Approve Completion
               </Button>

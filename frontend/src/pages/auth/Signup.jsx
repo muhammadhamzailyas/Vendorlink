@@ -44,10 +44,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [stepVisible, setStepVisible] = useState(false);
 
-  const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
-  const [pendingDraft, setPendingDraft] = useState(null);
-  const [pendingDraftStep, setPendingDraftStep] = useState(1);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
 
@@ -125,75 +122,6 @@ const Signup = () => {
     }
   });
 
-  const handleResume = useCallback(() => {
-    if (pendingDraft) {
-        setFormData(prev => ({
-            ...prev,
-            ...pendingDraft,
-            step1: { ...prev.step1, ...pendingDraft.step1, password: "", confirmPassword: "" }
-        }));
-        setStep(pendingDraftStep || step);
-    }
-    setShowResumeDialog(false);
-    setIsFormDirty(true);
-  }, [pendingDraft, pendingDraftStep, step]);
-
-  const handleStartOver = useCallback(async () => {
-    try {
-        await onboardingService.resetProgress();
-    } catch (e) {
-        console.warn("Failed to reset backend progress");
-    }
-    localStorage.removeItem("vendorlink_signup_draft");
-    setShowResumeDialog(false);
-    setPendingDraft(null);
-    
-    // Reset local state to initial
-    setFormData({
-        step1: { ...INITIAL_STEP1 },
-        step2: {
-          companyName: "",
-          businessType: "",
-          industry: "",
-          registrationNumber: "",
-          ntn: "",
-          yearEstablished: "",
-          website: "",
-          companySize: "",
-          description: "",
-          vendorType: "Individual",
-          cnicNumber: "",
-          businessName: "",
-          category: "",
-          skills: [],
-          skillsInput: "",
-          yearsOfExperience: "",
-          portfolioURL: "",
-          bio: "",
-          city: "",
-          province: "",
-          country: "PK",
-          countryName: "Pakistan",
-          streetAddress: "",
-          zipCode: "",
-        },
-        step3: {
-          registrationCertificate: null,
-          ntnCertificate: null,
-          supportingDocument: null,
-          cnicFront: null,
-          cnicBack: null,
-          businessLicense: null,
-          portfolioSamples: null,
-        },
-        step4: {
-          stripePaymentId: null,
-        }
-    });
-    setStep(1);
-    setIsFormDirty(false);
-  }, []);
-
   const handleLinkClick = useCallback((e, to) => {
     if (isFormDirty && step < TOTAL_STEPS) {
       e.preventDefault();
@@ -214,116 +142,16 @@ const Signup = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isFormDirty, step]);
 
-  // Resume Detection
+  // Handle immediate verification redirect
   useEffect(() => {
-    if (user && user.role !== "unassigned" && user.profileCompleted) {
-        navigate("/" + user.role, { replace: true });
-        return;
+    const stateResume = location.state?.resumeStep;
+    const stateVerified = location.state?.isVerified;
+
+    if (stateResume === 2 && stateVerified) {
+        setStep(2);
+        setFormData(prev => ({ ...prev, step1: { ...prev.step1, emailVerified: true } }));
     }
-
-    const loadDraft = async () => {
-      const stateResume = location.state?.resumeStep;
-      const stateVerified = location.state?.isVerified;
-
-      // Handle immediate verification redirect
-      if (stateResume === 2 && stateVerified) {
-          setStep(2);
-          setFormData(prev => ({ ...prev, step1: { ...prev.step1, emailVerified: true } }));
-      }
-
-      const savedDraft = localStorage.getItem("vendorlink_signup_draft");
-      let backendData = null;
-
-      if (user) {
-          try {
-              const res = await onboardingService.getMyOnboarding();
-              if (res.data?.user) backendData = res.data;
-          } catch (e) { console.warn("Backend load failed"); }
-      }
-
-      if (backendData) {
-          const { user: bUser, details: bDetails } = backendData;
-          
-          if (bUser.onboardingStep > 1) {
-              const merged = {
-                  step1: { ...INITIAL_STEP1, role: bUser.role || "company", fullName: bUser.fullName || "", email: bUser.email || "", phone: bUser.phone || "", emailVerified: bUser.emailVerified },
-                  step2: { ...formData.step2, ...bDetails },
-                  step3: { ...formData.step3, registrationCertificate: bDetails?.registrationCertificateURL || null, ntnCertificate: bDetails?.ntnCertificateURL || null, supportingDocument: bDetails?.supportingDocumentURL || null, cnicFront: bDetails?.cnicFrontURL || null, cnicBack: bDetails?.cnicBackURL || null, businessLicense: bDetails?.businessLicenseURL || null, portfolioSamples: bDetails?.portfolioSamplesURL || null },
-                  step4: { stripePaymentId: null }
-              };
-              if (stateResume && stateVerified) {
-                  setFormData(prev => ({ ...prev, ...merged }));
-                  setStep(stateResume);
-                  return;
-              }
-              setPendingDraft(merged);
-              setPendingDraftStep(bUser.onboardingStep || 1);
-              setShowResumeDialog(true);
-              return;
-          }
-      }
-
-      if (savedDraft) {
-        try {
-          const parsed = JSON.parse(savedDraft);
-          const hasData = parsed.step1?.fullName || parsed.step2?.companyName || parsed.step2?.bio || parsed.step2?.streetAddress || parsed.step4?.stripePaymentId;
-          if (hasData || parsed.lastStep > 1) {
-              if (stateResume && stateVerified) {
-                  setFormData(prev => ({ ...prev, ...parsed, step1: { ...prev.step1, ...parsed.step1, emailVerified: true, password: "", confirmPassword: "" } }));
-                  setStep(stateResume);
-                  return;
-              }
-              setPendingDraft(parsed);
-              setPendingDraftStep(parsed.lastStep || 1);
-              setShowResumeDialog(true);
-              return;
-          }
-        } catch (e) { console.warn("Local load failed"); }
-      } else if (user && user.emailVerified && step === 1) {
-          setStep(2);
-      }
-    };
-
-    const timer = setTimeout(loadDraft, 100);
-    return () => clearTimeout(timer);
-  }, [user, location.state]);
-
-  // Local Save
-  useEffect(() => {
-    if (step > 1 || isFormDirty) {
-        const draft = JSON.parse(JSON.stringify(formData));
-        if (draft.step1) {
-            delete draft.step1.password;
-            delete draft.step1.confirmPassword;
-        }
-        // Do not save File objects to localStorage, as they cannot be serialized.
-        // The backend URL or a temporary session storage is the correct way to handle this,
-        // but for a simple local draft, we just avoid saving them.
-        if (draft.step3) {
-            Object.keys(formData.step3).forEach(k => {
-                if (formData.step3[k] instanceof File) {
-                    draft.step3[k] = null;
-                }
-            });
-        }
-        draft.lastStep = step;
-        localStorage.setItem("vendorlink_signup_draft", JSON.stringify(draft));
-    }
-  }, [formData, step, isFormDirty]);
-
-  const saveToBackend = async (targetStep) => {
-      try {
-          if (user?.emailVerified) {
-              const payload = new FormData();
-              payload.append("account", JSON.stringify(formData.step1));
-              payload.append("details", JSON.stringify(formData.step2));
-              payload.append("step", targetStep);
-              payload.append("zipCode", formData.step2.zipCode); // Ensure zipCode is explicitly available if needed, though details usually contains it
-              Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
-              await onboardingService.saveProgress(payload);
-          }
-      } catch (e) { console.warn("Backend save failed"); }
-  };
+  }, [location.state]);
 
   const step1Errors = useMemo(() => {
     const errs = {};
@@ -373,12 +201,10 @@ const Signup = () => {
     return errs;
   }, [formData.step2, formData.step1.role]);
 
-  const nextStep = async () => {
+  const nextStep = () => {
     if (step === 1 && Object.keys(step1Errors).length > 0) return;
     if (step === 2 && Object.keys(step2Errors).length > 0) return;
-    const next = Math.min(TOTAL_STEPS, step + 1);
-    await saveToBackend(next);
-    setStep(next);
+    setStep(Math.min(TOTAL_STEPS, step + 1));
   };
 
   const prevStep = () => setStep((prev) => Math.max(1, prev - 1));
@@ -386,10 +212,14 @@ const Signup = () => {
   const handleStep1Submit = async () => {
     const { step1 } = formData;
     if (Object.keys(step1Errors).length > 0) return;
+    
+    // 1. Mandatory field validation
     if (!step1.fullName || !step1.email || !step1.phone || !step1.agreeToTerms) {
       toastUtil.validationError("Required fields missing");
       return;
     }
+
+    // 2. Local-only password validation
     if (step1.authProvider !== "google") {
         if (!step1.password || step1.password.length < 8) {
             toastUtil.validationError("Password too short");
@@ -400,32 +230,43 @@ const Signup = () => {
             return;
         }
     }
-    if (step1.authProvider === "google") { nextStep(); return; }
-
+    
     setLoading(true);
     try {
-      const { createFirebaseUser, signInFirebase } = await import("../../lib/firebase");
-      let fUser = user;
+      const { createFirebaseUser, signInFirebase, auth } = await import("../../lib/firebase");
+      let fUser = auth.currentUser;
+      
+      // 3. Only create/sign-in if not already authenticated via Google
       if (!fUser || fUser.email !== step1.email) {
-        try { fUser = await createFirebaseUser(step1.email, step1.password); }
-        catch (e) {
-          if (e.code === "auth/email-already-in-use") fUser = await signInFirebase(step1.email, step1.password);
-          else throw e;
-        }
+          try { 
+            fUser = await createFirebaseUser(step1.email, step1.password); 
+          } catch (e) {
+            if (e.code === "auth/email-already-in-use") {
+              fUser = await signInFirebase(step1.email, step1.password);
+            } else throw e;
+          }
       }
-      if (!fUser) throw new Error("Auth failed");
-      if (!fUser.emailVerified) {
+
+      if (!fUser) throw new Error("Authentication failed");
+      
+      // 4. Verification Check
+      await fUser.reload();
+      const isVerified = fUser.emailVerified;
+
+      if (!isVerified) {
         const { sendEmailVerification } = await import("firebase/auth");
         await sendEmailVerification(fUser);
-        toastUtil.info("Verify your email to continue.");
+        toastUtil.info("Please verify your email address to continue.");
         navigate("/verify-email", { state: { email: fUser.email } });
         return;
       }
-      toastUtil.success("Verified!");
+
+      toastUtil.success("Email verified!");
       setFormData(prev => ({ ...prev, step1: { ...prev.step1, emailVerified: true } }));
       nextStep();
     } catch (error) {
-      toastUtil.error("Signup failed.");
+      console.error("Step 1 Submit Error:", error);
+      toastUtil.error(error.message || "Signup failed.");
     } finally { setLoading(false); }
   };
 
@@ -441,19 +282,31 @@ const Signup = () => {
   const handleFinalSubmit = async () => {
     setLoading(true);
     try {
-      if (!user) throw new Error("No user");
+      const { auth } = await import("../../lib/firebase");
+      const fUser = auth.currentUser;
+      if (!fUser) throw new Error("Authentication session expired. Please restart signup.");
+
+      const idToken = await fUser.getIdToken();
+      
+      // Perform one-time backend sync and registration
       const payload = new FormData();
+      payload.append("idToken", idToken);
       payload.append("account", JSON.stringify(formData.step1));
       payload.append("details", JSON.stringify(formData.step2));
-      payload.append("onboardingFeePaid", "true");
-      if (formData.step4.stripePaymentId) payload.append("stripePaymentId", formData.step4.stripePaymentId);
-      Object.keys(formData.step3).forEach(k => { if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); });
+      payload.append("stripePaymentId", formData.step4.stripePaymentId || "");
+      
+      Object.keys(formData.step3).forEach(k => { 
+        if (formData.step3[k] instanceof File) payload.append(k, formData.step3[k]); 
+      });
+
       await onboardingService.submitFinal(payload);
-      toastUtil.success("Complete!");
+      
+      toastUtil.success("Registration complete! Pending admin review.");
       setIsFormDirty(false);
-      localStorage.removeItem("vendorlink_signup_draft");
       navigate("/login");
-    } catch (e) { toastUtil.error("Failed"); } finally { setLoading(false); }
+    } catch (e) { 
+      toastUtil.error(e.response?.data?.message || "Registration failed."); 
+    } finally { setLoading(false); }
   };
 
   const handleGoogleSignup = async () => {
@@ -462,11 +315,23 @@ const Signup = () => {
     try {
       const { signInWithGoogle } = await import("../../lib/firebase");
       const { user: gUser } = await signInWithGoogle();
-      const loginRes = await authService.firebaseLogin(await gUser.getIdToken(true));
-      const existing = loginRes.data?.user;
-      if (existing?.role && existing.role !== "unassigned") { navigate("/login"); return; }
-      setFormData(prev => ({ ...prev, step1: { ...prev.step1, email: gUser.email, fullName: gUser.displayName, emailVerified: true, authProvider: "google" } }));
-    } catch (e) { toastUtil.error("Google failed"); } finally { setGoogleLoading(false); }
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        step1: { 
+          ...prev.step1, 
+          email: gUser.email || prev.step1.email, 
+          fullName: gUser.displayName || prev.step1.fullName, 
+          emailVerified: false, // ALWAYS force verification check on submit
+          authProvider: "google" 
+        } 
+      }));
+      
+      toastUtil.info("Account linked. Please complete your profile and verify your email.");
+    } catch (e) { 
+        console.error("Google Signup Error:", e);
+        toastUtil.error("Google login failed"); 
+    } finally { setGoogleLoading(false); }
   };
 
   useEffect(() => {
@@ -492,21 +357,10 @@ const Signup = () => {
   };
 
   return (
-    <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading || googleLoading} googleLoading={googleLoading} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} onLinkClick={handleLinkClick} maxWidth="max-w-2xl" >
+    <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading || googleLoading} googleLoading={googleLoading} hideGoogle={step > 1} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} onLinkClick={handleLinkClick} maxWidth="max-w-2xl" >
       <div className="mb-8"> <SignupProgressBar step={step} /> </div>
       <div className={cn("transition-all duration-300", stepVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}> {renderStep()} </div>
-      <Dialog open={showResumeDialog} persistent>
-        <Dialog.Header>
-          <Dialog.Title>Resume Registration?</Dialog.Title>
-          <Dialog.Description>
-            You have an incomplete registration. Continue?
-          </Dialog.Description>
-        </Dialog.Header>
-        <Dialog.Footer className="gap-4 sm:gap-4">
-          <Button variant="secondary" onClick={handleStartOver} className="flex-1 font-normal">Start Over</Button>
-          <Button variant="primary" onClick={handleResume} className="flex-1 font-normal shadow-soft">Continue</Button>
-        </Dialog.Footer>
-      </Dialog>
+      
       <Dialog open={showLeaveDialog} persistent>
         <Dialog.Header>
           <Dialog.Title>Leave Signup?</Dialog.Title>

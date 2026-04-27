@@ -7,7 +7,7 @@ const SignupProgressBar = ({ step }) => {
     { id: 1, label: "Account" },
     { id: 2, label: "Details" },
     { id: 3, label: "Docs" },
-    { id: 4, label: "Plan" },
+    { id: 4, label: "Payment" },
     { id: 5, label: "Review" },
   ];
 

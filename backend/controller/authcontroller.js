@@ -74,40 +74,21 @@ class AuthController {
         if (user) {
           console.log(`[Auth] Linking existing user ${normalizedEmail} to new Firebase UID: ${uid}`);
           user.firebaseUid = uid;
+          await user.save();
         } else {
-          // Idempotent creation of a minimal user record
-          user = new User({
-            firebaseUid: uid,
-            email: normalizedEmail || `${uid}@no-email.vendorlink`,
-            phone: phoneNumber || "",
-            role: isAdminByEmail ? "admin" : "unassigned",
-            status: isAdminByEmail ? "approved" : "pending",
-            authProvider: "firebase",
-            emailVerified: Boolean(normalizedEmail),
+          // DO NOT create user here. Return a placeholder for the frontend to know it's a new user.
+          return res.status(200).json({
+            user: {
+              id: uid, // Use firebaseUid as temporary id
+              firebaseUid: uid,
+              email: normalizedEmail,
+              role: "unassigned",
+              status: "incomplete",
+              emailVerified: Boolean(normalizedEmail),
+            },
+            isNewUser: true,
           });
-          isNewUser = true;
-
-          // Notify Admins about new registration
-          try {
-            const notificationService = req.app?.get("notificationService");
-            if (notificationService) {
-              const admins = await User.find({ role: "admin" }).select("_id");
-              for (const admin of admins) {
-                await notificationService.createNotification({
-                  recipientId: admin._id,
-                  type: "new_user_registered",
-                  title: "New User Registration",
-                  message: `A new user "${normalizedEmail}" has registered on the platform.`,
-                  data: { userId: user._id, email: normalizedEmail },
-                  priority: "low",
-                });
-              }
-            }
-          } catch (notifErr) {
-            console.error("[Auth] Admin notification failed:", notifErr);
-          }
         }
-        await user.save();
       } else {
         // Update last login unconditionally for existing user
         user.lastLogin = Date.now();

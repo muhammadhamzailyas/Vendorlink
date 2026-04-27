@@ -59,14 +59,13 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planPrice, clientSecret }
           <div className="flex justify-between items-center mb-4">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Order Summary</h3>
               <span className="px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded uppercase tracking-tighter">
-                Monthly Subscription
+                One-time Activation
               </span>
           </div>
           <div className="flex justify-between items-baseline mb-2">
               <span className="text-foreground text-sm font-medium">Professional Profile Access</span>
               <div className="flex items-baseline gap-0.5">
                 <span className="text-3xl font-black tracking-tighter text-foreground">${planPrice}</span>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">/mo</span>
               </div>
           </div>
           <p className="text-[11px] text-muted-foreground font-medium italic border-t border-border/50 pt-3">

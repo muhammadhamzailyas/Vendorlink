@@ -207,6 +207,15 @@ const MyTaskPage = () => {
               <Visibility className="mr-2 h-4 w-4" />
               Show Details
             </DropdownMenuItem>
+            {task.contractStatus === "pending-completion" && (
+                <DropdownMenuItem 
+                    onClick={() => navigate(`/company/task/${task._id}/progress`)}
+                    className="text-warning focus:text-warning font-bold"
+                >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Review Completion
+                </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => navigate(`/company/proposals?taskId=${task._id}`)}>
               <ClipboardText className="mr-2 h-4 w-4" />
               View Proposals

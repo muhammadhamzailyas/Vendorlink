@@ -99,7 +99,17 @@ class TaskController {
       const tasks = await Task.find({ companyId: req.user._id }).sort({
         createdAt: -1,
       });
-      res.json(tasks);
+
+      // Augment tasks with contract status
+      const augmentedTasks = await Promise.all(tasks.map(async (task) => {
+        const contract = await Contract.findOne({ taskId: task._id });
+        return {
+          ...task.toObject(),
+          contractStatus: contract?.status || null,
+        };
+      }));
+
+      res.json(augmentedTasks);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

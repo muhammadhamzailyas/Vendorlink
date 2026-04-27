@@ -249,6 +249,7 @@ exports.getCompanyActiveTasks = async (req, res) => {
             vendorId: contract.vendorId?._id,
             progress: latestUpdate?.percentage || 0,
             currentStatus: latestUpdate?.status || "in-progress",
+            contractStatus: contract.status,
             lastUpdated: latestUpdate?.updateDate || contract.activatedAt,
             activatedAt: contract.activatedAt,
             updatesCount,

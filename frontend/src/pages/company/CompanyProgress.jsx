@@ -126,10 +126,23 @@ const CompanyProgress = () => {
                         </div>
                     </Card.Content>
                     <Card.Footer className="px-5 py-3 bg-muted/10 border-t border-border/50 flex items-center justify-between">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">{task.updatesCount || 0} Ledger Entries</span>
-                        <Badge variant={task.currentStatus === "completed" ? "success" : "secondary"} className="text-[9px] px-1.5 py-0">
-                            {task.currentStatus}
-                        </Badge>
+                        <div className="flex flex-col">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">{task.updatesCount || 0} Ledger Entries</span>
+                            {task.contractStatus === "pending-completion" && (
+                                <span className="text-[8px] font-bold text-warning uppercase mt-0.5 animate-pulse">Needs Review</span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {task.contractStatus === "pending-completion" ? (
+                                <Badge variant="warning" className="text-[9px] px-1.5 py-0">
+                                    Reviewing
+                                </Badge>
+                            ) : (
+                                <Badge variant={task.currentStatus === "completed" ? "success" : "secondary"} className="text-[9px] px-1.5 py-0">
+                                    {task.currentStatus}
+                                </Badge>
+                            )}
+                        </div>
                     </Card.Footer>
                 </Card>
             </StaggerItem>

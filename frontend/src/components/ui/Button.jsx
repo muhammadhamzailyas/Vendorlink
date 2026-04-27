@@ -38,7 +38,6 @@ const Button = React.forwardRef(
       size = "md",
       loading = false,
       disabled = false,
-      icon,
       className,
       asChild = false,
       ...props
@@ -48,8 +47,6 @@ const Button = React.forwardRef(
     const Comp = asChild ? Slot : "button";
     const adornment = loading ? (
       <CircleNotch className="h-4 w-4 animate-spin" />
-    ) : icon ? (
-      <span className="shrink-0">{icon}</span>
     ) : null;
 
     if (asChild) {
@@ -92,6 +89,3 @@ const Button = React.forwardRef(
 Button.displayName = "Button";
 
 export { Button, buttonVariants };
-
-
-

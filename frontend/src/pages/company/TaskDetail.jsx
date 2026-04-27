@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft as ArrowBack, ClipboardText, Info, Calendar, CheckCircle } from "@phosphor-icons/react";
+import { ArrowLeft as ArrowBack, ClipboardText, Info, Calendar, CheckCircle, PencilSimple } from "@phosphor-icons/react";
 import toastUtil from "@/lib/toast";
 import { formatDate } from "@/lib/dateUtils";
 
@@ -30,6 +30,7 @@ import { DetailSection } from "@/components/shared/DetailLayout";
 import DetailTask from "./DetailTask";
 import DetailProposalCard from "./DetailProposalCard";
 import RankProposalsButton from "./RankProposalsButton";
+import TaskEditModal from "./TaskEditModal";
 
 const CompanyTaskDetail = () => {
   const { id } = useParams();
@@ -41,6 +42,7 @@ const CompanyTaskDetail = () => {
   const [loading, setLoading] = useState(true);
   const [rankedIds, setRankedIds] = useState(null);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "overview");
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -188,6 +190,17 @@ const CompanyTaskDetail = () => {
           </div>
           <div className="flex items-center gap-3 shrink-0 pt-1">
             <StatusChip status={task.status || "open"} />
+            {task.status === "open" && (
+                <Button 
+                    variant="outline" 
+                    size="xs" 
+                    onClick={() => setEditModalOpen(true)}
+                    className="font-bold uppercase tracking-tight h-8 px-4 border-border/60 hover:bg-muted"
+                >
+                    <PencilSimple className="mr-2 h-4 w-4" weight="bold" />
+                    Edit Task
+                </Button>
+            )}
             <Button variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight h-8 px-4">
               <ArrowBack className="mr-2 h-4 w-4" weight="bold" />
               Back
@@ -311,6 +324,13 @@ const CompanyTaskDetail = () => {
                 </Card>
             </TabsContent>
         </Tabs>
+
+        <TaskEditModal
+          open={editModalOpen}
+          task={task}
+          onX={() => setEditModalOpen(false)}
+          onSuccess={fetchData}
+        />
       </div>
     </PageTransition>
   );

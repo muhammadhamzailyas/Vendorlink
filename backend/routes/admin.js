@@ -18,6 +18,12 @@ router.get("/contracts", contractController.getAllContracts);
 router.get("/pending", adminController.getPendingUsers);
 router.get("/pending-verifications", adminController.getPendingVerifications);
 router.get("/users", adminController.getAllUsers);
+
+// Report Generation Routes
+router.get("/reports/tasks", adminController.getTaskReport);
+router.get("/reports/users", adminController.getUserReport);
+router.get("/reports/finance", adminController.getFinanceReport);
+
 router.put("/approve/:userId", adminController.approveUser);
 router.put("/reject/:userId", adminController.rejectuser);
 router.put("/approve-verification/:userId", adminController.approveVerification);

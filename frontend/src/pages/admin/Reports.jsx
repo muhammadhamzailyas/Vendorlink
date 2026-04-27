@@ -175,8 +175,43 @@ const Reports = () => {
     { label: "Finance", count: activities.filter(a => a.type === "PAYMENT").length },
   ];
 
-  const handleExport = (reportType) => {
-    toastUtil.info(`Generating ${reportType} report...`);
+  const handleExport = async (reportType) => {
+    try {
+      const toastId = toastUtil.info(`Generating ${reportType} PDF report...`);
+      let response;
+      let filename = `${reportType.toLowerCase()}_report_${dayjs().format("YYYY-MM-DD")}.pdf`;
+
+      if (reportType === 'User') {
+        response = await adminService.getUserReport();
+      } else if (reportType === 'Finance') {
+        response = await adminService.getFinanceReport();
+      } else if (reportType === 'Platform') {
+        response = await adminService.getTaskReport();
+      }
+
+      if (response && response.data) {
+        const [{ pdf }, { default: AdminReportsPDF }] = await Promise.all([
+          import("@react-pdf/renderer"),
+          import("@/components/admin/AdminReportsPDF"),
+        ]);
+
+        const blob = await pdf(<AdminReportsPDF type={reportType} data={response.data} />).toBlob();
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        toastUtil.success(`${reportType} report downloaded as PDF`);
+      }
+    } catch (error) {
+      console.error(`Error exporting ${reportType} report:`, error);
+      toastUtil.error(`Failed to generate PDF report`);
+    }
   };
 
   if (loading && !stats) {

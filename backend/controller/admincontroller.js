@@ -1163,6 +1163,33 @@ class AdminController {
     }
   }
 
+  async getTaskReport(req, res) {
+    try {
+      const tasks = await Task.find().populate("companyId", "username email").lean();
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Error generating task report", error: error.message });
+    }
+  }
+
+  async getUserReport(req, res) {
+    try {
+      const users = await User.find({ isDeleted: false }).select("-passwordHash").lean();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Error generating user report", error: error.message });
+    }
+  }
+
+  async getFinanceReport(req, res) {
+    try {
+      const payments = await Payment.find().sort({ createdAt: -1 }).lean();
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: "Error generating finance report", error: error.message });
+    }
+  }
+
   async rejectVerification(req, res) {
     try {
       const { userId } = req.params;

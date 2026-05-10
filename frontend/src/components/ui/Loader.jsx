@@ -1,17 +1,18 @@
 import React from "react";
-import { ClipLoader } from "react-spinners";
 
-export const Spinner = ({ size = 40, color = "var(--foreground)" }) => (
-  <ClipLoader color={color} size={size} speedMultiplier={0.8} />
+export const Spinner = ({ size = 40, className = "" }) => (
+  <div 
+    className={`animate-spin rounded-full border-2 border-current border-t-transparent ${className}`}
+    style={{ width: size, height: size }}
+    role="status"
+    aria-label="loading"
+  />
 );
 
 const Loader = () => (
   <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background">
-    <Spinner />
+    <Spinner size={40} className="text-foreground" />
   </div>
 );
 
 export default Loader;
-
-
-

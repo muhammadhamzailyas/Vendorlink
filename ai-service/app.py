@@ -18,8 +18,10 @@ CORS(app, origins=allowed_origins)
 
 # Configure Gemini API
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+MODEL_NAME = os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash')
+
 if GEMINI_API_KEY:
-    print("Gemini API key detected. AI ranking will use Gemini.")
+    print(f"Gemini API key detected. AI ranking will use model: {MODEL_NAME}")
 else:
     print("Warning: GEMINI_API_KEY not set. AI ranking will use fallback.")
 
@@ -28,18 +30,12 @@ def health():
     return jsonify({
         "status": "healthy",
         "service": "AI Ranking Service",
+        "model": MODEL_NAME,
         "gemini_configured": bool(GEMINI_API_KEY)
     })
 
-@app.route('/rank-proposals', methods=['POST', 'OPTIONS'])
+@app.route('/rank-proposals', methods=['POST'])
 def rank_proposals():
-    if request.method == 'OPTIONS':
-        response = jsonify({"status": "ok"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-        return response
-
     try:
         data = request.json
         if not data:
@@ -73,7 +69,7 @@ def rank_with_gemini(task, proposals, vendors_data):
     try:
         prompt = create_skill_based_ranking_prompt(task, proposals, vendors_data)
 
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel(MODEL_NAME)
         response = model.generate_content(prompt)
 
         try:

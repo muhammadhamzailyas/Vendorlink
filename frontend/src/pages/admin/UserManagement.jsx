@@ -359,7 +359,11 @@ const UserManagement = () => {
         />
 
         {loading ? (
-          <Skeleton className="h-96 w-full rounded-2xl bg-muted" />
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl bg-muted/50" />
+            ))}
+          </div>
         ) : (
           <>
             <DataTable

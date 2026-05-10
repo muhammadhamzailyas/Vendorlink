@@ -69,6 +69,17 @@ app.use(
   })
 );
 
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Too many authentication attempts. Please try again in 15 minutes.",
+});
+app.use("/api/auth/login", authRateLimit);
+app.use("/api/auth/register", authRateLimit);
+app.use("/api/auth/forgot-password", authRateLimit);
+
 // Stripe Webhook MUST be before express.json()
 app.post(
   "/api/payments/webhook",
@@ -94,6 +105,19 @@ app.use("/api/progress", require("./routes/progress"));
 app.use("/api/payments", require("./routes/payment"));
 app.use("/api/ai", require("./routes/aiRanking"));
 app.use("/api/feedback", require("./routes/feedback"));
+
+// Global error handler — must be defined after all routes
+app.use((err, req, res, next) => {
+  const status = err.status || err.statusCode || 500;
+  const isProduction = process.env.NODE_ENV === "production";
+
+  console.error(`[Error] ${req.method} ${req.originalUrl} — ${err.message}`);
+
+  res.status(status).json({
+    message: isProduction ? "An unexpected error occurred" : err.message,
+    ...(isProduction ? {} : { stack: err.stack }),
+  });
+});
 
 app.get("/", (req, res) => {
   res.send("Server is running and connected to MongoDB!");

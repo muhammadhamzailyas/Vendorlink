@@ -21,7 +21,7 @@ import {
   EmptyState, 
   PageTransition, 
   DataTable, 
-  Loader,
+  Skeleton,
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
@@ -322,7 +322,11 @@ const CompanyProposals = () => {
         </div>
 
         {loading ? (
-          <Loader />
+          <div className="space-y-3 pt-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl bg-muted/50" />
+            ))}
+          </div>
         ) : (
           <>
             <FilterSearchBar

@@ -30,7 +30,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from "@/components/ui";
-import MilestonePencilor from "@/components/vendor/MilestonePencilor";
+import MilestoneEditor from "@/components/vendor/MilestoneEditor";
 import DynamicListField from "@/components/shared/DynamicListField";
 import { FloppyDisk, PencilSimple as Edit } from "@phosphor-icons/react";
 
@@ -267,7 +267,7 @@ const ProposalUpdateModal = ({
                     <FormItem>
                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Milestone Plan (Optional)</FormLabel>
                         <FormControl>
-                        <MilestonePencilor
+                        <MilestoneEditor
                             milestones={field.value || []}
                             onChange={(idx, f, val) => {
                             const next = [...(field.value || [])];

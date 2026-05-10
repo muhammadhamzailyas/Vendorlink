@@ -23,7 +23,7 @@ import {
   RadixSelectContent,
   RadixSelectItem,
 } from "@/components/ui";
-import MilestonePencilor from "@/components/vendor/MilestonePencilor";
+import MilestoneEditor from "@/components/vendor/MilestoneEditor";
 import DynamicListField from "@/components/shared/DynamicListField";
 
 const milestoneSchema = z.object({
@@ -313,7 +313,7 @@ const ProposalForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <MilestonePencilor
+                      <MilestoneEditor
                         milestones={field.value || []}
                         onChange={(idx, f, val) => {
                           const next = [...(field.value || [])];

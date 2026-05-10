@@ -399,24 +399,31 @@ const TaskMonitoring = () => {
           tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
         />
 
-        <DataTable
-          columns={taskColumns}
-          data={filteredTasks}
-          rowKey="_id"
-          showSectionHeader
-          icon={<Assignment className="h-5 w-5" />}
-          title="Tracked Tasks"
-          subtitle="All platform tasks, deadlines, and current execution status"
-          loading={loading}
-          emptyState={
-            <EmptyState
-              icon={Assignment}
-              title="No tasks found"
-              description={searchTerm ? "Try adjusting your search criteria" : "No tasks match the selected filter"}
-              className="border-0 bg-transparent py-2 shadow-none"
-            />
-          }
-        />
+        {loading ? (
+          <div className="space-y-3 pt-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl bg-muted/50" />
+            ))}
+          </div>
+        ) : (
+          <DataTable
+            columns={taskColumns}
+            data={filteredTasks}
+            rowKey="_id"
+            showSectionHeader
+            icon={<Assignment className="h-5 w-5" />}
+            title="Tracked Tasks"
+            subtitle="All platform tasks, deadlines, and current execution status"
+            emptyState={
+              <EmptyState
+                icon={Assignment}
+                title="No tasks found"
+                description={searchTerm ? "Try adjusting your search criteria" : "No tasks match the selected filter"}
+                className="border-0 bg-transparent py-2 shadow-none"
+              />
+            }
+          />
+        )}
 
         <TaskDetailsModal 
             open={viewModalOpen}

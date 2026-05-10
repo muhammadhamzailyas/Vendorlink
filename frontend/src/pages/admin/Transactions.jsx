@@ -221,19 +221,27 @@ const AdminTransactions = () => {
             tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
         />
 
-        <DataTable
-          columns={transactionColumns}
-          data={filteredTransactions}
-          rowKey="_id"
-          emptyState={
-            <EmptyState
-              icon={ArrowUpDown}
-              title="No transactions found"
-              description={search ? "Try adjusting your search criteria" : "Financial logs will populate as transactions occur."}
-              className="border-0 bg-transparent py-16 shadow-none"
-            />
-          }
-        />
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl bg-muted/50" />
+            ))}
+          </div>
+        ) : (
+          <DataTable
+            columns={transactionColumns}
+            data={filteredTransactions}
+            rowKey="_id"
+            emptyState={
+              <EmptyState
+                icon={ArrowUpDown}
+                title="No transactions found"
+                description={search ? "Try adjusting your search criteria" : "Financial logs will populate as transactions occur."}
+                className="border-0 bg-transparent py-16 shadow-none"
+              />
+            }
+          />
+        )}
 
         {totalPages > 1 && (
           <Pagination className="mt-4">

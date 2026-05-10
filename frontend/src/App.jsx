@@ -6,8 +6,9 @@ import {
   Navigate,
   Outlet,
 } from "react-router-dom";
-import { ToastViewport } from "./lib/toast";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastViewport, showToast } from "./lib/toast";
+import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
+import { removeToken } from "./lib/auth";
 
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -87,13 +88,12 @@ const AddTaskForm = lazy(() => import("./pages/company/AddTask"));
 const CompanyTaskDetail = lazy(() => import("./pages/company/TaskDetail"));
 const VendorMarketplace = lazy(() => import("./pages/company/VendorMarketplace"));
 const MyTaskPage = lazy(() => import("./pages/company/MyTaskPage"));
-const CompanyProfile = lazy(() => import("./pages/company/Profile"));
+const UserProfile = lazy(() => import("./components/UserProfile"));
 const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));
 const VendorTaskDetail = lazy(() => import("./pages/vendor/VendorTaskDetail"));
 const AvailableTasks = lazy(() => import("./pages/vendor/AvailableTasks"));
 const MyProposals = lazy(() => import("./pages/vendor/MyProposals"));
 const VendorContracts = lazy(() => import("./pages/vendor/Contracts"));
-const VendorProfile = lazy(() => import("./pages/vendor/Profile"));
 const SharedSettings = lazy(() => import("./pages/shared/Settings"));
 const SharedFeedback = lazy(() => import("./pages/shared/FeedbackPage"));
 const AdminFeedback = lazy(() => import("./pages/admin/FeedbackPage"));
@@ -210,7 +210,7 @@ const router = createBrowserRouter([
           { path: "contracts", element: <CompanyContracts /> },
           { path: "contract/create", element: <CreateContract /> },
           { path: "contract/:id", element: <ContractDetail /> },
-          { path: "profile", element: <CompanyProfile /> },
+          { path: "profile", element: <UserProfile userType="company" /> },
           { path: "tasks", element: <MyTaskPage /> },
           { path: "proposals", element: <CompanyProposals /> },
           { path: "task/:id", element: <CompanyTaskDetail /> },
@@ -232,7 +232,7 @@ const router = createBrowserRouter([
           { path: "my-proposals", element: <MyProposals /> },
           { path: "contracts", element: <VendorContracts /> },
           { path: "contract/:id", element: <ContractDetail /> },
-          { path: "profile", element: <VendorProfile /> },
+          { path: "profile", element: <UserProfile userType="vendor" /> },
           { path: "task/:id", element: <VendorTaskDetail /> },
           { path: "progress", element: <VendorProgress /> },
           { path: "task/:taskId/progress", element: <VendorTaskProgressDetail /> },
@@ -251,6 +251,16 @@ const router = createBrowserRouter([
 ]);
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (error?.response?.status === 401) {
+        removeToken();
+        window.location.href = "/login";
+      } else if (error?.response?.status >= 500) {
+        showToast("error", "Server error. Please try again later.");
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,

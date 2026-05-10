@@ -19,7 +19,7 @@ const Transaction = require("./model/Transaction");
 const Wallet = require("./model/Wallet");
 
 // Services
-const WebSocketService = require("./services/wsService");
+const SocketService = require("./services/wsService");
 const NotificationService = require("./services/notificationService");
 const NotificationController = require("./controller/notificationController");
 
@@ -29,12 +29,12 @@ const app = express();
 const server = http.createServer(app);
 const basePort = Number(process.env.PORT || 8002);
 
-// Initialize WebSocket + Notification services
-const wsService = new WebSocketService(server);
-const notificationService = new NotificationService(wsService);
+// Initialize Socket + Notification services
+const socketService = new SocketService(server);
+const notificationService = new NotificationService(socketService);
 
 // Make services accessible from controllers via req.app.get(...)
-app.set("wsService", wsService);
+app.set("socketService", socketService);
 app.set("notificationService", notificationService);
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS

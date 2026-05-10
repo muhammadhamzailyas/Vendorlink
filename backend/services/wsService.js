@@ -1,27 +1,32 @@
-const WebSocket = require("ws");
+const { Server } = require("socket.io");
 const { Message, Conversation } = require("../model/Chat");
 const User = require("../model/user");
 const Task = require("../model/task");
 const Notification = require("../model/Notification");
 const { verifyFirebaseIdToken } = require("../utils/firebaseAdmin");
 
-class WebSocketService {
+class SocketService {
   constructor(server) {
-    this.wss = new WebSocket.Server({ server, clientTracking: true });
-    this.clients = new Map();
+    this.io = new Server(server, {
+      cors: {
+        origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : ["http://localhost:5173", "http://localhost:3000"],
+        methods: ["GET", "POST"],
+        credentials: true
+      }
+    });
+    this.clients = new Map(); // userId -> { socketId, userId, userType }
     this.setupWebSocket();
   }
 
   setupWebSocket() {
-    this.wss.on("connection", async (ws, req) => {
+    this.io.on("connection", async (socket) => {
       try {
-        const url = new URL(req.url, `http://${req.headers.host}`);
-        const token = url.searchParams.get("token");
+        const token = socket.handshake.query.token;
 
         if (!token) {
           console.warn("[WS] Connection rejected: No token provided");
-          ws.send(JSON.stringify({ type: "error", error: "Authentication token required" }));
-          ws.close(1008, "No token provided");
+          socket.emit("error", { error: "Authentication token required" });
+          socket.disconnect(true);
           return;
         }
 
@@ -30,8 +35,8 @@ class WebSocketService {
           decoded = await verifyFirebaseIdToken(token);
         } catch (err) {
           console.error("[WS] Token verification failed:", err.message);
-          ws.send(JSON.stringify({ type: "error", error: "Invalid authentication token" }));
-          ws.close(1008, "Invalid token");
+          socket.emit("error", { error: "Invalid authentication token" });
+          socket.disconnect(true);
           return;
         }
 
@@ -41,48 +46,61 @@ class WebSocketService {
 
         if (!userId) {
           console.warn(`[WS] Connection rejected: User not found for UID ${decoded.uid}`);
-          ws.send(JSON.stringify({ type: "error", error: "User account not found" }));
-          ws.close(1008, "Invalid user ID");
+          socket.emit("error", { error: "User account not found" });
+          socket.disconnect(true);
           return;
         }
 
-        console.log(`[WS] User connected: ${userRecord.username} (${userId}) [${userType}]`);
-        this.clients.set(userId.toString(), { ws, userType, userId: userId.toString() });
+        const userIdStr = userId.toString();
+        console.log(`[WS] User connected: ${userRecord.username} (${userIdStr}) [${userType}]`);
+        
+        // Store client info
+        this.clients.set(userIdStr, { socketId: socket.id, userId: userIdStr, userType });
+        
+        // Join a room for this specific user to easily send messages to all their devices if needed
+        socket.join(userIdStr);
 
-        ws.send(
-          JSON.stringify({
-            type: "connected",
-            message: "Connected to server",
-            userId,
-            userType,
-          })
-        );
+        socket.emit("connected", {
+          message: "Connected to server",
+          userId,
+          userType,
+        });
 
-        await this.sendUndeliveredNotifications(userId.toString());
+        await this.sendUndeliveredNotifications(userIdStr);
 
-        ws.on("message", async (data) => {
+        socket.on("message", async (data) => {
           try {
-            if (data.length > 64 * 1024) {
-              ws.send(JSON.stringify({ type: "error", error: "Message too large" }));
-              return;
-            }
-            const messageData = JSON.parse(data);
-            await this.handleMessage(userId.toString(), userType, messageData);
+            // Socket.io automatically parses JSON, but if it comes as a string, parse it
+            const messageData = typeof data === 'string' ? JSON.parse(data) : data;
+            await this.handleMessage(userIdStr, userType, messageData);
           } catch (error) {
-            ws.send(JSON.stringify({ type: "error", error: "Failed to process message" }));
+            socket.emit("error", { error: "Failed to process message" });
           }
         });
 
-        ws.on("close", () => {
-          this.clients.delete(userId.toString());
+        // Add explicit handlers for the message types if the client emits them directly
+        const handlers = ["send-message", "get-messages", "mark-read", "typing", "stop-typing"];
+        handlers.forEach(type => {
+          socket.on(type, async (data) => {
+            try {
+              await this.handleMessage(userIdStr, userType, { ...data, type });
+            } catch (error) {
+              socket.emit("error", { error: `Failed to process ${type}` });
+            }
+          });
         });
 
-        ws.on("error", (error) => {
-          console.error(`WebSocket error for user ${userId}:`, error);
+        socket.on("disconnect", () => {
+          console.log(`[WS] User disconnected: ${userIdStr}`);
+          this.clients.delete(userIdStr);
+        });
+
+        socket.on("error", (error) => {
+          console.error(`Socket.io error for user ${userIdStr}:`, error);
         });
       } catch (error) {
-        console.error("WebSocket connection error:", error);
-        ws.close(1011, "Internal server error");
+        console.error("Socket.io connection error:", error);
+        socket.disconnect(true);
       }
     });
   }
@@ -150,9 +168,6 @@ class WebSocketService {
         break;
       case "stop-typing":
         this.sendTypingIndicator(senderId, taskId, receiverId, false);
-        break;
-      case "ping":
-        this.sendToUser(senderId, { type: "pong" });
         break;
       default:
         break;
@@ -225,13 +240,9 @@ class WebSocketService {
   sendToUser(userId, data) {
     try {
       const userIdStr = userId.toString();
-      const client = this.clients.get(userIdStr);
-
-      if (client && client.ws && client.ws.readyState === WebSocket.OPEN) {
-        client.ws.send(JSON.stringify(data));
-        return true;
-      }
-      return false;
+      // Use Socket.io rooms to send to all connections for this user
+      this.io.to(userIdStr).emit(data.type || "message", data);
+      return true;
     } catch (error) {
       console.error(`Error sending to user ${userId}:`, error);
       return false;
@@ -271,9 +282,9 @@ class WebSocketService {
 
       const conversation = await Conversation.findOne({ taskId });
       if (conversation) {
-        const reader = this.clients.get(readerId.toString());
-        if (reader) {
-          if (reader.userType === "company") {
+        const clientInfo = this.clients.get(readerId.toString());
+        if (clientInfo) {
+          if (clientInfo.userType === "company") {
             conversation.unreadCount.company = 0;
           } else {
             conversation.unreadCount.vendor = 0;
@@ -297,4 +308,4 @@ class WebSocketService {
   }
 }
 
-module.exports = WebSocketService;
+module.exports = SocketService;

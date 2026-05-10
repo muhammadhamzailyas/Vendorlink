@@ -1,15 +1,12 @@
+import { io } from "socket.io-client";
 import { getFirebaseIdToken } from "../lib/firebase";
 
 class WebSocketClient {
   constructor() {
-    this.ws = null;
+    this.socket = null;
     this.listeners = new Map();
     this.connectionListeners = new Set();
     this.errorListeners = new Set();
-    this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 10;
-    this.reconnectTimer = null;
-    this.heartbeatTimer = null;
     this.userId = null;
     this.userRole = null;
     this.isConnecting = false;
@@ -17,7 +14,7 @@ class WebSocketClient {
   }
 
   async connect(user) {
-    if (this.isConnecting || this.ws?.readyState === WebSocket.OPEN) return;
+    if (this.isConnecting || this.socket?.connected) return;
     
     if (user) {
       this.currentUser = user;
@@ -36,77 +33,101 @@ class WebSocketClient {
         this.userRole = this.currentUser.role;
       }
 
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const protocol = window.location.protocol === "https:" ? "https:" : "http:";
       
-      // Try to derive WS URL from API URL if not explicitly provided
+      // Try to derive Host URL from API URL if not explicitly provided
       let defaultHost = `${protocol}//localhost:8002`;
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
       if (apiBaseUrl) {
         try {
           const apiUrl = new URL(apiBaseUrl);
-          const wsProtocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
-          defaultHost = `${wsProtocol}//${apiUrl.host}`;
+          defaultHost = `${apiUrl.protocol}//${apiUrl.host}`;
         } catch (e) {
-          console.warn("Could not parse VITE_API_BASE_URL for WebSocket host", e);
+          console.warn("Could not parse VITE_API_BASE_URL for Socket.io host", e);
         }
       }
 
       const host = import.meta.env.VITE_WS_URL || defaultHost;
-      const url = `${host}?token=${encodeURIComponent(token)}`;
 
-      this.ws = new WebSocket(url);
+      this.socket = io(host, {
+        query: { token },
+        transports: ["websocket"],
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+      });
 
-      this.ws.onopen = () => {
-        this.reconnectAttempts = 0;
-        this._startHeartbeat();
+      this.socket.on("connect", () => {
+        console.log("[WS] Connected to server");
         this.connectionListeners.forEach((fn) => fn(true));
         this.isConnecting = false;
-      };
+      });
 
-      this.ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === "pong") return;
-          const handlers = this.listeners.get(data.type);
+      this.socket.on("disconnect", (reason) => {
+        console.log("[WS] Disconnected:", reason);
+        this.connectionListeners.forEach((fn) => fn(false));
+        this.isConnecting = false;
+      });
+
+      this.socket.on("connect_error", (error) => {
+        console.error("[WS] Connection error:", error);
+        this.errorListeners.forEach((fn) => fn(error));
+        this.isConnecting = false;
+      });
+
+      // Catch-all for events to support existing .on() API
+      // Since Socket.io doesn't have a native catch-all in the same way, 
+      // we'll explicitly listen for common types or the generic "message" type
+      // Our backend sends specific types, so we handle them here:
+      const commonEventTypes = [
+        "connected",
+        "new-message",
+        "messages-history",
+        "messages-read",
+        "user-typing",
+        "user-stop-typing",
+        "notification",
+        "error"
+      ];
+
+      commonEventTypes.forEach(type => {
+        this.socket.on(type, (data) => {
+          const handlers = this.listeners.get(type);
           if (handlers) {
             handlers.forEach((fn) => fn(data));
           }
-        } catch {
-          // ignore non-JSON
+        });
+      });
+
+      // Also listen to generic "message" if sent
+      this.socket.on("message", (data) => {
+        const type = data.type;
+        if (type) {
+          const handlers = this.listeners.get(type);
+          if (handlers) {
+            handlers.forEach((fn) => fn(data));
+          }
         }
-      };
+      });
 
-      this.ws.onclose = () => {
-        this._stopHeartbeat();
-        this.connectionListeners.forEach((fn) => fn(false));
-        this._scheduleReconnect();
-        this.isConnecting = false;
-      };
-
-      this.ws.onerror = () => {
-        this.errorListeners.forEach((fn) => fn());
-        this.isConnecting = false;
-      };
     } catch (error) {
-      console.error("WebSocket connection error:", error);
+      console.error("Socket.io initialization error:", error);
       this.isConnecting = false;
-      this._scheduleReconnect();
     }
   }
 
   disconnect() {
-    this._stopHeartbeat();
-    clearTimeout(this.reconnectTimer);
-    this.reconnectAttempts = this.maxReconnectAttempts;
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
     }
   }
 
   send(type, data = {}) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type, ...data }));
+    if (this.socket?.connected) {
+      this.socket.emit(type, data);
     }
   }
 
@@ -115,6 +136,17 @@ class WebSocketClient {
       this.listeners.set(type, new Set());
     }
     this.listeners.get(type).add(handler);
+    
+    // If it's a new type not in our pre-defined list, register it on the socket
+    if (this.socket && !["connect", "disconnect", "connect_error"].includes(type)) {
+      this.socket.off(type); // Avoid duplicate listeners
+      this.socket.on(type, (data) => {
+        const handlers = this.listeners.get(type);
+        if (handlers) {
+          handlers.forEach((fn) => fn(data));
+        }
+      });
+    }
   }
 
   off(type, handler) {
@@ -132,7 +164,7 @@ class WebSocketClient {
   }
 
   isConnected() {
-    return this.ws?.readyState === WebSocket.OPEN;
+    return this.socket?.connected || false;
   }
 
   getUserId() {
@@ -142,29 +174,7 @@ class WebSocketClient {
   getUserRole() {
     return this.userRole;
   }
-
-  _startHeartbeat() {
-    this._stopHeartbeat();
-    this.heartbeatTimer = setInterval(() => {
-      this.send("ping");
-    }, 30000);
-  }
-
-  _stopHeartbeat() {
-    clearInterval(this.heartbeatTimer);
-  }
-
-  _scheduleReconnect() {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) return;
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-    this.reconnectTimer = setTimeout(() => {
-      this.reconnectAttempts++;
-      this.connect();
-    }, delay);
-  }
 }
 
 const wsClient = new WebSocketClient();
 export default wsClient;
-
-

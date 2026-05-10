@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { auth } from "../lib/firebase";
-import { onIdTokenChanged } from "firebase/auth";
+import { getToken, removeToken } from "../lib/auth";
 import { authService } from "../services/api";
 import wsClient from "../services/wsClient";
 
@@ -8,9 +7,7 @@ const UserContext = createContext();
 
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
+  if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;
 };
 
@@ -19,34 +16,27 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Get server-validated user data
-          const response = await authService.sessionBootstrap();
-          const { user: serverUser, needsOnboarding } = response.data;
-          
-          if (needsOnboarding) {
-            const idToken = await firebaseUser.getIdToken();
-            const syncRes = await authService.firebaseLogin(idToken);
-            const syncedUser = syncRes.data?.user || syncRes.user;
-            setUser(syncedUser);
-          } else if (serverUser) {
-            setUser(serverUser);
-          }
-        } catch (error) {
-          if (error.response?.status !== 401) {
-            console.error("User session sync error:", error);
-          }
-          setUser(null);
-        }
-      } else {
-        setUser(null);
+    const initAuth = async () => {
+      const token = getToken();
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    });
+      
+      try {
+        // Fetch current user profile using the stored JWT
+        const res = await authService.getMe();
+        setUser(res.data);
+      } catch (err) {
+        console.error("Auth init failed:", err);
+        removeToken();
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => unsubscribe();
+    initAuth();
   }, []);
 
   useEffect(() => {
@@ -59,17 +49,24 @@ export const UserProvider = ({ children }) => {
 
   const refreshUser = async () => {
     try {
-      const response = await authService.sessionBootstrap();
-      if (response.data?.user) {
-        setUser(response.data.user);
-      }
-    } catch (error) {
-      console.error("Failed to refresh user:", error);
+      const res = await authService.getMe();
+      setUser(res.data);
+    } catch (err) {
+      console.error("Failed to refresh user:", err);
+      setUser(null);
     }
   };
 
+  const logout = () => {
+    removeToken();
+    wsClient.disconnect();
+    setUser(null);
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser, loading, refreshUser }}>
+    <UserContext.Provider value={{ user, setUser, loading, refreshUser, logout }}>
       {children}
     </UserContext.Provider>
   );

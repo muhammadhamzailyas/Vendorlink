@@ -37,25 +37,18 @@ const TYPE_METHOD = {
 };
 
 const FRIENDLY_ERRORS = {
-  // Firebase Auth
-  "auth/invalid-email": "The email address you entered is not valid",
-  "auth/user-not-found": "We couldn't find an account with that email",
-  "auth/wrong-password": "The password you entered is incorrect",
-  "auth/email-already-in-use": "This email is already registered. Try logging in instead",
-  "auth/weak-password": "Your password should be at least 6 characters long",
-  "auth/too-many-requests": "Too many failed attempts. Please try again in a few minutes",
-  "auth/network-request-failed": "Network error. Please check your internet connection",
-  "auth/popup-closed-by-user": "Login window was closed before completion",
-  "auth/operation-not-allowed": "This login method is currently disabled",
-  "auth/invalid-credential": "The credentials provided are invalid or expired",
-  "auth/user-disabled": "This account has been disabled",
-  "auth/requires-recent-login": "Please log in again before making this change",
-  "auth/account-exists-with-different-credential": "An account already exists with this email using a different login method",
+  // Auth Errors
+  "invalid-email": "The email address you entered is not valid",
+  "user-not-found": "We couldn't find an account with that email",
+  "wrong-password": "The password you entered is incorrect",
+  "email-already-in-use": "This email is already registered. Try logging in instead",
+  "weak-password": "Your password should be at least 6 characters long",
+  "too-many-requests": "Too many failed attempts. Please try again in a few minutes",
+  "unauthorized": "Invalid credentials or session expired",
   
   // General & Technical
   "Network Error": "Could not connect to the server. Please check your internet",
   "Request failed with status code 500": "The server encountered an error. Please try again later",
-  "Firebase is not configured": "Service temporarily unavailable. Please try again later",
   "config-not-found": "System configuration missing. Please contact support",
 };
 
@@ -64,24 +57,16 @@ const formatErrorMessage = (message) => {
   
   const msgStr = String(message);
 
-  // 1. Check for explicit code matches (e.g. auth/invalid-email)
-  const firebaseMatch = msgStr.match(/\((auth\/[^)]+)\)/);
-  const codeToMatch = firebaseMatch ? firebaseMatch[1] : msgStr;
-
-  // 2. Direct match or key-in-string match
+  // 1. Direct match or key-in-string match
   const exactMatchKey = Object.keys(FRIENDLY_ERRORS).find(key => 
-    codeToMatch.toLowerCase().includes(key.toLowerCase()) || 
     msgStr.toLowerCase().includes(key.toLowerCase())
   );
   
   if (exactMatchKey) return FRIENDLY_ERRORS[exactMatchKey];
 
-  // 3. Fallback: Strip common technical prefixes
+  // 2. Fallback: Strip common technical prefixes
   return msgStr
-    .replace(/^Firebase: Error\s*/i, "")
     .replace(/^Error:\s*/i, "")
-    .replace(/\(auth\/[^)]+\)\.?/g, "") // remove (auth/...)
-    .replace(/\.$/, "")
     .trim() || "An unexpected error occurred";
 };
 

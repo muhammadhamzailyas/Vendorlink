@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { cn } from "../../lib/cn";
-import GoogleAuthButton from "./GoogleAuthButton";
-import { Card } from "../ui";
+import { Card, Button } from "../ui";
+import { loginWithGoogle } from "../../lib/auth";
+import { GoogleLogo } from "@phosphor-icons/react";
 
 const AuthLayout = ({
   children,
   title,
   subtitle,
   headerIcon,
-  onGoogleLogin,
   googleDisabled = false,
-  googleLoading = false,
   hideGoogle = false,
   footerText,
   footerLinkText,
@@ -24,6 +23,10 @@ const AuthLayout = ({
     if (onLinkClick) {
       onLinkClick(e, to);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    loginWithGoogle();
   };
 
   return (
@@ -55,12 +58,15 @@ const AuthLayout = ({
             {!hideGoogle && (
               <>
                 <div className="flex items-center gap-3 mb-6">
-                  <GoogleAuthButton 
-                    onClick={onGoogleLogin} 
-                    disabled={googleDisabled} 
-                    loading={googleLoading} 
-                    fullWidth 
-                  />
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-11 font-normal tracking-wide uppercase text-xs gap-2"
+                    onClick={handleGoogleLogin} 
+                    disabled={googleDisabled}
+                  >
+                    <GoogleLogo size={20} weight="bold" />
+                    Continue with Google
+                  </Button>
                 </div>
 
                 {/* Divider */}

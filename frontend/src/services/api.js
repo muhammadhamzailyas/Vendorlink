@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getFirebaseIdToken } from "../lib/firebase";
+import { getAuthToken, removeToken } from "../lib/auth";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8002/api";
@@ -21,33 +21,29 @@ api.interceptors.response.use(
 );
 
 /**
- * Interceptor to attach Firebase ID Token to every request.
- * This is the ONLY authentication source trusted by the backend.
+ * Interceptor to attach JWT Token to every request.
  */
-api.interceptors.request.use(async (config) => {
-  const publicRoutes = ["/onboarding/plans"];
+api.interceptors.request.use((config) => {
+  const publicRoutes = [
+    "/onboarding/plans", 
+    "/auth/login", 
+    "/auth/register", 
+    "/auth/forgot-password",
+    "/auth/reset-password",
+    "/auth/verify-email"
+  ];
   const isPublic = publicRoutes.some(route => config.url.includes(route));
 
-  // Skip token logic for bootstrapping itself or static public assets
   if (isPublic) return config;
 
-  try {
-    // 1. Wait for auth state to be resolved (not null/initializing)
-    const token = await getFirebaseIdToken();
-    
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      // 2. Definitive: No active session. Abort request to prevent 401 noise.
-      const controller = new AbortController();
-      config.signal = controller.signal;
-      controller.abort("AUTH_REQUIRED");
-    }
-  } catch {
-    // Silently abort on auth error
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    // Definitive: No active session. Abort request to prevent 401 noise.
     const controller = new AbortController();
     config.signal = controller.signal;
-    controller.abort("AUTH_ERROR");
+    controller.abort("AUTH_REQUIRED");
   }
   return config;
 });
@@ -66,27 +62,35 @@ export const onboardingService = {
 
 export const authService = {
   /**
-   * Syncs the Firebase identity with MongoDB and returns the user profile.
+   * Login with email and password
    */
-  firebaseLogin: async (idToken) => {
-    const response = await api.post("/auth/firebase-login", { idToken });
-    return response.data;
-  },
+  login: (email, password) => api.post("/auth/login", { email, password }),
+
+  /**
+   * Register a new user
+   */
+  register: (email, password, username) => api.post("/auth/register", { email, password, username }),
+
+  /**
+   * Forgot password request
+   */
+  forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
+
+  /**
+   * Reset password with token
+   */
+  resetPassword: (token, newPassword) => api.put("/auth/reset-password", { token, newPassword }),
   
   /**
-   * Fetches the current MongoDB user profile using the current Firebase session.
+   * Fetches the current user profile using JWT.
    */
   getMe: () => api.get("/auth/me"),
 
   /**
-   * Bootstraps the session on app load to determine onboarding status.
-   */
-  sessionBootstrap: () => api.get("/auth/session/bootstrap"),
-
-  /**
-   * Clears local state. Actual logout is handled via Firebase SDK.
+   * Clears local state and tokens.
    */
   logout: () => {
+    removeToken();
     localStorage.removeItem("user");
     window.location.href = "/login";
   }
@@ -199,5 +203,3 @@ export const adminService = {
 };
 
 export default api;
-
-

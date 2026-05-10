@@ -22,6 +22,7 @@ const Wallet = require("./model/Wallet");
 const SocketService = require("./services/wsService");
 const NotificationService = require("./services/notificationService");
 const NotificationController = require("./controller/notificationController");
+const passport = require("./config/passport");
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use(
 );
 
 app.use(helmet());
+app.use(passport.initialize());
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -100,12 +102,6 @@ app.get("/", (req, res) => {
 const startServer = async () => {
   try {
     await connectDB();
-
-    // CLEANUP: Remove any legacy users with null firebaseUid to prevent index build failures
-    const cleanupResult = await User.deleteMany({ firebaseUid: { $eq: null } });
-    if (cleanupResult.deletedCount > 0) {
-      console.log(`Cleaned up ${cleanupResult.deletedCount} legacy users with null firebaseUid`);
-    }
 
     // Ensure DB indexes are created for all schemas.
     await Promise.all([

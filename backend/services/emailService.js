@@ -134,6 +134,48 @@ class EmailService {
         html
     });
   }
+
+  async sendVerificationEmail(email, token) {
+    const verifyUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/verify-email?token=${token}`;
+    const html = `
+        <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
+            <h1 style="font-size: 24px;">Verify Your Email</h1>
+            <p>Thank you for registering with VendorLink. Please click the button below to verify your email address:</p>
+            <div style="margin: 30px 0;">
+                <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Verify Email Address</a>
+            </div>
+            <p>If you did not create an account, please ignore this email.</p>
+            <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+        </div>
+    `;
+    return this.sendEmail({
+        to: email,
+        subject: "Verify your VendorLink email",
+        html
+    });
+  }
+
+  async sendPasswordResetEmail(email, token) {
+    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/reset-password?token=${token}`;
+    const html = `
+        <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
+            <h1 style="font-size: 24px;">Reset Your Password</h1>
+            <p>You requested a password reset for your VendorLink account. Click the button below to set a new password:</p>
+            <div style="margin: 30px 0;">
+                <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Reset Password</a>
+            </div>
+            <p>This link will expire in 1 hour. If you did not request a password reset, please ignore this email.</p>
+            <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+        </div>
+    `;
+    return this.sendEmail({
+        to: email,
+        subject: "Password Reset Request - VendorLink",
+        html
+    });
+  }
 }
 
 module.exports = new EmailService();

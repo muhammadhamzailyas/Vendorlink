@@ -1,40 +1,55 @@
 const User = require("../model/user");
 
+/**
+ * Seeds or synchronizes the system administrator account.
+ * This replaces the legacy Firebase-based admin seeding.
+ */
 const seedDemoAdmin = async () => {
   const adminEmail = process.env.ADMIN_EMAIL;
-  const adminFirebaseUid = process.env.ADMIN_FIREBASE_UID;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (!adminEmail || !adminFirebaseUid) {
-    if (process.env.NODE_ENV === "production") {
-      console.warn("ADMIN_EMAIL or ADMIN_FIREBASE_UID not set - skipping admin seed/update in production.");
-      return { created: false, user: null };
-    }
-    console.warn("Admin Firebase configuration missing in .env - admin account not created/updated.");
+  if (!adminEmail || !adminPassword) {
+    console.warn("[Seed] ADMIN_EMAIL or ADMIN_PASSWORD not set — skipping admin seed.");
     return { created: false, user: null };
   }
 
-  const existingAdmin = await User.findOne({ role: "admin" });
+  try {
+    let admin = await User.findOne({ role: "admin" });
 
-  if (existingAdmin) {
-    existingAdmin.email = adminEmail;
-    existingAdmin.firebaseUid = adminFirebaseUid;
-    await existingAdmin.save();
-    return { created: false, updated: true, user: existingAdmin };
+    if (admin) {
+      console.log(`[Seed] Syncing existing admin account: ${adminEmail}`);
+      admin.email = adminEmail.toLowerCase();
+      admin.password = adminPassword; // Pre-save hook will hash this if modified
+      admin.authProvider = "local";
+      admin.emailVerified = true;
+      admin.status = "approved";
+      await admin.save();
+      return { created: false, updated: true, user: admin };
+    }
+
+    console.log(`[Seed] Creating new admin account: ${adminEmail}`);
+    
+    // Generate a default username for admin if none provided
+    const username = adminEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "") || "admin";
+
+    admin = await User.create({
+      username,
+      email: adminEmail.toLowerCase(),
+      password: adminPassword,
+      authProvider: "local",
+      role: "admin",
+      status: "approved",
+      emailVerified: true,
+      profileCompleted: true,
+      onboardingStep: 5,
+      selectedPlan: "enterprise",
+    });
+
+    return { created: true, updated: false, user: admin };
+  } catch (error) {
+    console.error("[Seed] Admin seeding failed:", error);
+    return { created: false, error };
   }
-
-  // Create new admin if none exists
-  const adminUser = await User.create({
-    firebaseUid: adminFirebaseUid,
-    email: adminEmail,
-    authProvider: "firebase",
-    role: "admin",
-    status: "approved",
-    profileCompleted: true,
-    onboardingStep: 5,
-    selectedPlan: "free",
-  });
-
-  return { created: true, updated: false, user: adminUser };
 };
 
 module.exports = { seedDemoAdmin };

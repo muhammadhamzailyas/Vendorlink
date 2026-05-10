@@ -9,12 +9,11 @@ import { authService } from "../../services/api";
 import { useUser } from "../../context/UserContext";
 import AuthLayout from "../../components/auth/AuthLayout";
 import { Button, Input } from "../../components/ui";
-import { signInWithGoogle, isFirebaseConfigured, signInFirebase } from "../../lib/firebase";
+import { setToken, loginWithGoogle } from "../../lib/auth";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const { user, setUser } = useUser();
@@ -29,7 +28,7 @@ const Login = () => {
       };
       navigate(roleRoutes[user.role] || "/", { replace: true });
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,48 +39,31 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const firebaseUser = await signInFirebase(formData.email, formData.password);
-      const idToken = await firebaseUser.getIdToken(true);
-      const response = await authService.firebaseLogin(idToken);
-      const backendUser = response.data?.user || response.user;
+      const res = await authService.login(formData.email, formData.password);
+      const { token, user: backendUser } = res.data;
 
       if (!backendUser) {
-        throw new Error("Failed to sync user profile");
+        throw new Error("Failed to load user profile");
       }
 
-      // We only store the user in context. Token is handled by Firebase SDK + API Interceptor.
+      setToken(token);
       setUser(backendUser);
       
       toastUtil.success("Login successful");
 
       if (backendUser.role === "unassigned") {
-        toastUtil.error("Your role is not assigned. Please contact support.");
-        // Prevent further navigation by not proceeding
+        toastUtil.error("Your account setup is incomplete. Redirecting to onboarding...");
+        navigate("/signup", { replace: true });
         return; 
       }
 
-      // Check for selected plan from pricing section
-      let selectedPlan = null;
-      try {
-        const storedPlan = localStorage.getItem("selectedPlan");
-        if (storedPlan) {
-          selectedPlan = JSON.parse(storedPlan);
-          localStorage.removeItem("selectedPlan");
-        }
-      } catch {
-        console.error("Error reading selected plan");
-      }
+      const roleRoutes = { admin: "/admin", company: "/company", vendor: "/vendor" };
+      navigate(roleRoutes[backendUser.role] || "/", { replace: true });
 
-      if (backendUser.role === "admin" || !selectedPlan || selectedPlan.isFree) {
-        const roleRoutes = { admin: "/admin", company: "/company", vendor: "/vendor" };
-        navigate(roleRoutes[backendUser.role] || "/", { replace: true });
-      } else {
-        navigate("/payment", { replace: true });
-      }
     } catch (err) {
       console.error("Login Error:", err);
       toastUtil.handleApiError(err, {
-        unauthorized: "Invalid username or password",
+        unauthorized: "Invalid email or password",
         default: "Login failed. Please try again.",
       });
     } finally {
@@ -96,41 +78,9 @@ const Login = () => {
     });
   };
 
-  const handleOAuthLogin = async (provider) => {
+  const handleOAuthLogin = (provider) => {
     if (provider !== "google") return;
-
-    if (!isFirebaseConfigured()) {
-      toastUtil.error("Firebase is not configured.");
-      return;
-    }
-
-    setGoogleLoading(true);
-    try {
-      const { user } = await signInWithGoogle();
-      const idToken = await user.getIdToken(true);
-      const loginRes = await authService.firebaseLogin(idToken);
-      const backendUser = loginRes.data?.user || loginRes.user;
-
-      if (backendUser) {
-        setUser(backendUser);
-        if (backendUser.role === "unassigned") {
-          toastUtil.error("Your role is not assigned. Please contact support.");
-          return;
-        } else {
-          const roleRoutes = { admin: "/admin", company: "/company", vendor: "/vendor" };
-          navigate(roleRoutes[backendUser.role] || "/", { replace: true });
-        }
-      }
-    } catch (err) {
-      console.error("Google login error:", err);
-      if (err.code !== "auth/popup-closed-by-user") {
-        toastUtil.handleApiError(err, {
-          default: "Google login failed.",
-        });
-      }
-    } finally {
-      setGoogleLoading(false);
-    }
+    loginWithGoogle();
   };
 
   return (
@@ -138,8 +88,7 @@ const Login = () => {
       title="Welcome Back"
       subtitle="Sign in to your account to continue your journey"
       onGoogleLogin={() => handleOAuthLogin("google")}
-      googleDisabled={loading || googleLoading}
-      googleLoading={googleLoading}
+      googleDisabled={loading}
       footerText="Don't have an account?"
       footerLinkText="Create Account"
       footerLinkTo="/signup"
@@ -152,7 +101,7 @@ const Login = () => {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          disabled={loading || googleLoading}
+          disabled={loading}
           autoComplete="email"
         />
 
@@ -164,7 +113,7 @@ const Login = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            disabled={loading || googleLoading}
+            disabled={loading}
             autoComplete="current-password"
           />
           <Button
@@ -189,7 +138,7 @@ const Login = () => {
 
         <Button
           type="submit"
-          disabled={loading || googleLoading || !formData.email || !formData.password}
+          disabled={loading || !formData.email || !formData.password}
           loading={loading}
           size="lg"
           className="w-full shadow-soft font-normal"
@@ -202,6 +151,3 @@ const Login = () => {
 };
 
 export default Login;
-
-
-

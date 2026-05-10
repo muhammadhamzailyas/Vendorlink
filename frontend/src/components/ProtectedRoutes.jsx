@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate, useLocation, Outlet } from "react-router-dom";
-import { Skeleton, Loader } from "./ui";
-import { auth } from "../lib/firebase";
+import { Loader } from "./ui";
+import { getToken } from "../lib/auth";
 import { useUser } from "../context/UserContext";
 
 const ProtectedRoutes = ({ role, children }) => {
@@ -16,15 +16,14 @@ const ProtectedRoutes = ({ role, children }) => {
     );
   }
 
-  // 1. Authentication Check
-  if (!auth.currentUser) {
+  // 1. Authentication Check (JWT based)
+  if (!getToken()) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // 2. Profile Sync Check
   if (!user || !user.id) {
-    // If authenticated via Firebase but profile not in context yet, 
-    // something went wrong or sync is pending.
+    // If token exists but user profile not loaded yet, wait or redirect if failed
     return <Navigate to="/login" replace />;
   }
 
@@ -62,6 +61,3 @@ const ProtectedRoutes = ({ role, children }) => {
 };
 
 export default ProtectedRoutes;
-
-
-

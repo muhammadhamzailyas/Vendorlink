@@ -3,7 +3,7 @@ const { Message, Conversation } = require("../model/Chat");
 const User = require("../model/user");
 const Task = require("../model/task");
 const Notification = require("../model/Notification");
-const { verifyFirebaseIdToken } = require("../utils/firebaseAdmin");
+const { verifyToken } = require("../utils/jwt");
 
 class SocketService {
   constructor(server) {
@@ -32,7 +32,7 @@ class SocketService {
 
         let decoded;
         try {
-          decoded = await verifyFirebaseIdToken(token);
+          decoded = verifyToken(token);
         } catch (err) {
           console.error("[WS] Token verification failed:", err.message);
           socket.emit("error", { error: "Invalid authentication token" });
@@ -40,7 +40,7 @@ class SocketService {
           return;
         }
 
-        const userRecord = await User.findOne({ firebaseUid: decoded.uid }).select("_id role username");
+        const userRecord = await User.findById(decoded.id).select("_id role username");
         const userId = userRecord?._id;
         const userType = userRecord?.role;
 

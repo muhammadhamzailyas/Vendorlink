@@ -67,9 +67,11 @@ class ErrorBoundary extends React.Component {
 const LandingPage = lazy(() => import("./pages/landing/LandingPage.jsx"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
+const AuthCallback = lazy(() => import("./pages/auth/AuthCallback"));
 const EmailVerification = lazy(() => import("./pages/auth/EmailVerification"));
 const Payment = lazy(() => import("./pages/auth/Payment"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 const TermsOfService = lazy(() => import("./pages/auth/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/auth/PrivacyPolicy"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -170,8 +172,10 @@ const router = createBrowserRouter([
       { index: true, element: <LandingPage /> },
       { path: "login", element: <PublicRoute><Login /></PublicRoute> },
       { path: "signup", element: <PublicRoute><Signup /></PublicRoute> },
-      { path: "verify-email", element: <EmailVerification /> },
+      { path: "auth/callback", element: <AuthCallback /> },
+      { path: "auth/verify-email", element: <EmailVerification /> },
       { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "auth/reset-password", element: <ResetPassword /> },
       { path: "terms", element: <TermsOfService /> },
       { path: "privacy", element: <PrivacyPolicy /> },
       { path: "payment", element: <Payment /> },

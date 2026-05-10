@@ -1,15 +1,21 @@
+const crypto = require("crypto");
 const User = require("../model/user");
+const { signToken } = require("../utils/jwt");
+const emailService = require("../services/emailService");
 
 /**
  * AuthController manages user session and profile logic.
- * Authentication is handled by Firebase; this controller maps Firebase identities to MongoDB profiles.
  */
 class AuthController {
   constructor() {
-    this.firebaseLogin = this.firebaseLogin.bind(this);
+    this.register = this.register.bind(this);
+    this.login = this.login.bind(this);
+    this.googleCallback = this.googleCallback.bind(this);
+    this.verifyEmail = this.verifyEmail.bind(this);
+    this.forgotPassword = this.forgotPassword.bind(this);
+    this.resetPassword = this.resetPassword.bind(this);
     this.getMe = this.getMe.bind(this);
     this.updateMe = this.updateMe.bind(this);
-    this.sessionBootstrap = this.sessionBootstrap.bind(this);
   }
 
   /**
@@ -20,12 +26,12 @@ class AuthController {
     return {
       id: user._id,
       username: user.username,
-      firebaseUid: user.firebaseUid,
       email: user.email,
       phone: user.phone,
       fullName: user.fullName,
       role: user.role,
       status: user.status,
+      authProvider: user.authProvider,
       profileCompleted: user.profileCompleted,
       onboardingStep: user.onboardingStep,
       selectedPlan: user.selectedPlan,
@@ -35,89 +41,197 @@ class AuthController {
   }
 
   /**
-   * Syncs Firebase User with MongoDB.
-   * If user doesn't exist, it creates a placeholder.
-   * If it exists, it returns the profile.
+   * Register a new user with email/password
    */
-  async firebaseLogin(req, res) {
+  async register(req, res) {
     try {
-      const { uid, email, phoneNumber } = req.firebaseUser;
+      const { email, password, username } = req.body;
 
-      if (!uid) {
-        return res.status(401).json({ message: "Invalid Firebase identity" });
+      if (!email || !password || !username) {
+        return res.status(400).json({ message: "Missing required fields" });
       }
 
-      const normalizedEmail = (email || "").trim().toLowerCase();
-      
-      let user = await User.findOne({ firebaseUid: uid });
-      
-      if (user) {
-        if (user.isDeleted) {
-          return res.status(404).json({ message: "Your account does not exist." });
-        }
-        if (user.status === "deactivated") {
-          return res.status(403).json({ 
-            message: "Your account has been deactivated. You can submit some appeals to get your account back." 
-          });
-        }
+      const existingUser = await User.findOne({ 
+        $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }] 
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ message: "Email or username already taken" });
       }
 
-      let isNewUser = false;
+      const verificationToken = crypto.randomBytes(32).toString("hex");
 
+      const user = new User({
+        email: email.toLowerCase(),
+        password,
+        username: username.toLowerCase(),
+        authProvider: "local",
+        emailVerificationToken: verificationToken
+      });
+
+      await user.save();
+
+      // Send verification email
+      await emailService.sendVerificationEmail(user.email, verificationToken);
+
+      return res.status(201).json({ message: "Registration successful. Please check your email to verify your account." });
+    } catch (error) {
+      console.error("Registration Error:", error);
+      return res.status(500).json({ message: "Registration failed" });
+    }
+  }
+
+  /**
+   * Login with email/password
+   * Note: This is called AFTER passport.authenticate('local')
+   */
+  async login(req, res) {
+    try {
+      const user = req.user;
+
+      if (user.isDeleted) {
+        return res.status(404).json({ message: "Your account does not exist." });
+      }
+      if (user.status === "deactivated") {
+        return res.status(403).json({ 
+          message: "Your account has been deactivated." 
+        });
+      }
+
+      // Check if promoted by admin email match (legacy logic)
       const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-      const isAdminByEmail = normalizedEmail && adminEmail && normalizedEmail === adminEmail;
-
-      if (!user) {
-        // Check if a user with this email already exists but lacks firebaseUid (e.g. legacy or seed mismatch)
-        user = await User.findOne({ email: normalizedEmail });
-        
-        if (user) {
-          console.log(`[Auth] Linking existing user ${normalizedEmail} to new Firebase UID: ${uid}`);
-          user.firebaseUid = uid;
-          await user.save();
-        } else {
-          // DO NOT create user here. Return a placeholder for the frontend to know it's a new user.
-          return res.status(200).json({
-            user: {
-              id: uid, // Use firebaseUid as temporary id
-              firebaseUid: uid,
-              email: normalizedEmail,
-              role: "unassigned",
-              status: "incomplete",
-              emailVerified: Boolean(normalizedEmail),
-            },
-            isNewUser: true,
-          });
-        }
-      } else {
-        // Update last login unconditionally for existing user
-        user.lastLogin = Date.now();
-
-        // Ensure admin status is synchronized if email matches
-        if (isAdminByEmail && user.role !== "admin") {
-          console.log(`[Auth] Promoting user ${normalizedEmail} to Admin based on env configuration.`);
-          user.role = "admin";
-          user.status = "approved";
-          await user.save();
-        } else {
-          // Update basic info if changed in Firebase
-          if (normalizedEmail && user.email !== normalizedEmail) {
-            user.email = normalizedEmail;
-          }
-          if (phoneNumber && user.phone !== phoneNumber) {
-            user.phone = phoneNumber;
-          }
-          await user.save();
-        }
+      if (adminEmail && user.email === adminEmail && user.role !== "admin") {
+        user.role = "admin";
+        user.status = "approved";
+        await user.save();
       }
+
+      user.lastLogin = Date.now();
+      await user.save();
+
+      const token = signToken(user._id);
 
       return res.status(200).json({
+        token,
         user: this.buildUserResponse(user),
-        isNewUser,
       });
     } catch (error) {
-      console.error("Firebase Login Sync Error:", error);
-      return res.status(500).json({ message: "Identity sync failed" });
+      console.error("Login Error:", error);
+      return res.status(500).json({ message: "Login failed" });
+    }
+  }
+
+  /**
+   * Handle Google OAuth callback
+   * Note: This is called AFTER passport.authenticate('google')
+   */
+  async googleCallback(req, res) {
+    try {
+      const user = req.user;
+      const token = signToken(user._id);
+
+      // Update last login
+      user.lastLogin = Date.now();
+      await user.save();
+
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      return res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
+    } catch (error) {
+      console.error("Google Auth Callback Error:", error);
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      return res.redirect(`${frontendUrl}/login?error=auth_failed`);
+    }
+  }
+
+  /**
+   * Verify email address
+   */
+  async verifyEmail(req, res) {
+    try {
+      const { token } = req.query;
+
+      if (!token) {
+        return res.status(400).json({ message: "Verification token is required" });
+      }
+
+      const user = await User.findOne({ emailVerificationToken: token });
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+
+      user.emailVerified = true;
+      user.emailVerificationToken = null;
+      await user.save();
+
+      return res.status(200).json({ message: "Email verified successfully. You can now log in." });
+    } catch (error) {
+      console.error("Email Verification Error:", error);
+      return res.status(500).json({ message: "Email verification failed" });
+    }
+  }
+
+  /**
+   * Generate password reset token and send email
+   */
+  async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const user = await User.findOne({ email: email.toLowerCase(), authProvider: "local" });
+
+      if (!user) {
+        // Return success even if user not found for security reasons
+        return res.status(200).json({ message: "If an account with that email exists, a reset link has been sent." });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      user.passwordResetToken = resetToken;
+      user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+      await user.save();
+
+      await emailService.sendPasswordResetEmail(user.email, resetToken);
+
+      return res.status(200).json({ message: "Reset link sent to your email." });
+    } catch (error) {
+      console.error("Forgot Password Error:", error);
+      return res.status(500).json({ message: "Failed to process forgot password request" });
+    }
+  }
+
+  /**
+   * Reset password using token
+   */
+  async resetPassword(req, res) {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: "Token and new password are required" });
+      }
+
+      const user = await User.findOne({
+        passwordResetToken: token,
+        passwordResetExpires: { $gt: Date.now() }
+      });
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      user.password = newPassword;
+      user.passwordResetToken = null;
+      user.passwordResetExpires = null;
+      await user.save();
+
+      return res.status(200).json({ message: "Password reset successful. You can now log in with your new password." });
+    } catch (error) {
+      console.error("Reset Password Error:", error);
+      return res.status(500).json({ message: "Failed to reset password" });
     }
   }
 
@@ -154,57 +268,6 @@ class AuthController {
     } catch (error) {
       console.error("Update Profile Error:", error);
       return res.status(500).json({ message: "Failed to update profile" });
-    }
-  }
-
-  /**
-   * Specialized endpoint for initial app load.
-   * Determines if the user needs to start onboarding.
-   */
-  async sessionBootstrap(req, res) {
-    try {
-      if (!req.user) {
-        return res.status(200).json({
-          needsOnboarding: true,
-          firebaseUser: req.firebaseUser,
-        });
-      }
-
-      // Deep completeness check for existing users
-      let isActuallyComplete = req.user.profileCompleted;
-      if (isActuallyComplete && req.user.role !== "admin") {
-          const Company = require("../model/company");
-          const Vendor = require("../model/vendor");
-          
-          if (req.user.role === "company") {
-              const profile = await Company.findOne({ userId: req.user._id });
-              if (!profile || !profile.description || !profile.industry || !profile.registrationCertificateURL) {
-                  isActuallyComplete = false;
-              }
-          } else if (req.user.role === "vendor") {
-              const profile = await Vendor.findOne({ userId: req.user._id });
-              if (!profile || !profile.bio || !profile.category || !profile.cnicFrontURL) {
-                  isActuallyComplete = false;
-              }
-          }
-
-          if (isActuallyComplete !== req.user.profileCompleted) {
-              req.user.profileCompleted = isActuallyComplete;
-              await req.user.save();
-          }
-      }
-
-      return res.status(200).json({
-        needsOnboarding: req.user.role === "unassigned",
-        user: {
-            ...this.buildUserResponse(req.user),
-            profileCompleted: isActuallyComplete
-        },
-        firebaseUser: req.firebaseUser,
-      });
-    } catch (error) {
-      console.error("Session Bootstrap Error:", error);
-      return res.status(500).json({ message: "Session bootstrap failed" });
     }
   }
 }

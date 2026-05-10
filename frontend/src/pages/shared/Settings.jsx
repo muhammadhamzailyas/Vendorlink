@@ -1,34 +1,20 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { SignOut, Lock, ShieldWarning, Key, ArrowsClockwise } from "@phosphor-icons/react";
+import { SignOut, ShieldWarning, Key, ArrowsClockwise } from "@phosphor-icons/react";
 import { useUser } from "@/context/UserContext";
-import { signOutFirebase } from "@/lib/firebase";
+import { authService } from "@/services/api";
 import { PageTransition, Button, Card, Alert, AlertTitle, AlertDescription } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
 import toastUtil from "@/lib/toast";
 
 const Settings = () => {
-  const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const [loading, setLoading] = useState(false);
-
-  const logout = async () => {
-    try {
-      await signOutFirebase();
-      localStorage.removeItem("user");
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
 
   const handlePasswordReset = async () => {
     setLoading(true);
     try {
-        const { sendPasswordResetEmail } = await import("firebase/auth");
-        const { auth } = await import("@/lib/firebase");
-        await sendPasswordResetEmail(auth, user.email);
+        await authService.forgotPassword(user.email);
         toastUtil.success("Password reset link sent to your email");
     } catch (error) {
         toastUtil.handleApiError(error);

@@ -79,7 +79,6 @@ export { DataTable } from "./DataTable";
 export { StatCard } from "./StatCard";
 export { Typography } from "./Typography";
 export { DetailField } from "./DetailField";
-export { InputOTP } from "./InputOTP";
 export {
 	AlertDialog,
 	AlertDialogPortal,
@@ -152,17 +151,6 @@ export { Toggle, toggleVariants } from "./Toggle";
 export { ToggleGroup, ToggleGroupItem } from "./ToggleGroup";
 export { RadioGroup, RadioGroupItem } from "./RadioGroup";
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./Accordion";
-export {
-  navigationMenuTriggerStyle,
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuContent,
-  NavigationMenuTrigger,
-  NavigationMenuLink,
-  NavigationMenuIndicator,
-  NavigationMenuViewport,
-} from "./NavigationMenu";
 export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./Collapsible";
 
 

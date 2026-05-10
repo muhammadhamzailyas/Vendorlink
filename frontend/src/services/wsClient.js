@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { getFirebaseIdToken } from "../lib/firebase";
+import { getAuthToken } from "../lib/auth";
 
 class WebSocketClient {
   constructor() {
@@ -22,7 +22,7 @@ class WebSocketClient {
     
     this.isConnecting = true;
     try {
-      const token = await getFirebaseIdToken();
+      const token = getAuthToken();
       if (!token) {
         this.isConnecting = false;
         return;

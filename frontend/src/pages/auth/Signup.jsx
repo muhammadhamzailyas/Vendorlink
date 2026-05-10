@@ -4,10 +4,7 @@ import toastUtil from "../../lib/toast";
 import { authService, onboardingService } from "../../services/api";
 import AuthLayout from "../../components/auth/AuthLayout";
 import { cn } from "../../lib/cn";
-import {
-  signInWithGoogle,
-  isFirebaseConfigured,
-} from "../../lib/firebase";
+import { loginWithGoogle } from "../../lib/auth";
 import SignupStep1 from "../../components/auth/signup/SignupStep1";
 import SignupStep2 from "../../components/auth/signup/SignupStep2";
 import SignupStep3 from "../../components/auth/signup/SignupStep3";
@@ -23,6 +20,7 @@ const INITIAL_STEP1 = {
   role: "company",
   fullName: "",
   email: "",
+  username: "",
   password: "",
   confirmPassword: "",
   countryCode: "+92",
@@ -30,7 +28,6 @@ const INITIAL_STEP1 = {
   phone: "",
   agreeToTerms: false,
   authProvider: "local",
-  emailVerified: false,
 };
 
 const Signup = () => {
@@ -39,7 +36,6 @@ const Signup = () => {
   const { user } = useUser();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [stepVisible, setStepVisible] = useState(false);
@@ -142,21 +138,11 @@ const Signup = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isFormDirty, step]);
 
-  // Handle immediate verification redirect
-  useEffect(() => {
-    const stateResume = location.state?.resumeStep;
-    const stateVerified = location.state?.isVerified;
-
-    if (stateResume === 2 && stateVerified) {
-        setStep(2);
-        setFormData(prev => ({ ...prev, step1: { ...prev.step1, emailVerified: true } }));
-    }
-  }, [location.state]);
-
   const step1Errors = useMemo(() => {
     const errs = {};
     const { step1 } = formData;
     if (step1.fullName && step1.fullName.trim().length < 3) errs.fullName = "Name is too short (min 3 characters)";
+    if (step1.username && !/^[a-zA-Z0-9_]{3,30}$/.test(step1.username)) errs.username = "Invalid username (3-30 alphanumeric characters)";
     if (step1.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(step1.email)) errs.email = "Invalid email format";
     if (step1.phone) {
         const raw = step1.phone.replace(/\D/g, "");
@@ -214,7 +200,7 @@ const Signup = () => {
     if (Object.keys(step1Errors).length > 0) return;
     
     // 1. Mandatory field validation
-    if (!step1.fullName || !step1.email || !step1.phone || !step1.agreeToTerms) {
+    if (!step1.fullName || !step1.email || !step1.username || !step1.phone || !step1.agreeToTerms) {
       toastUtil.validationError("Required fields missing");
       return;
     }
@@ -233,64 +219,33 @@ const Signup = () => {
     
     setLoading(true);
     try {
-      const { createFirebaseUser, signInFirebase, auth } = await import("../../lib/firebase");
-      let fUser = auth.currentUser;
+      // Register initial account on backend
+      await authService.register(step1.email, step1.password, step1.username);
       
-      // 3. Only create/sign-in if not already authenticated via Google
-      if (!fUser || fUser.email !== step1.email) {
-          try { 
-            fUser = await createFirebaseUser(step1.email, step1.password); 
-          } catch (e) {
-            if (e.code === "auth/email-already-in-use") {
-              fUser = await signInFirebase(step1.email, step1.password);
-            } else throw e;
-          }
-      }
-
-      if (!fUser) throw new Error("Authentication failed");
-      
-      // 4. Verification Check
-      await fUser.reload();
-      const isVerified = fUser.emailVerified;
-
-      if (!isVerified) {
-        const { sendEmailVerification } = await import("firebase/auth");
-        await sendEmailVerification(fUser);
-        toastUtil.info("Please verify your email address to continue.");
-        navigate("/verify-email", { state: { email: fUser.email } });
-        return;
-      }
-
-      toastUtil.success("Email verified!");
-      setFormData(prev => ({ ...prev, step1: { ...prev.step1, emailVerified: true } }));
-      nextStep();
+      toastUtil.success("Account created! Please check your email to verify your account.");
+      setIsFormDirty(false);
+      navigate("/login");
     } catch (error) {
-      console.error("Step 1 Submit Error:", error);
-      toastUtil.error(error.message || "Signup failed.");
+      console.error("Signup Step 1 Error:", error);
+      toastUtil.handleApiError(error, {
+        default: "Signup failed. Please try again."
+      });
     } finally { setLoading(false); }
   };
 
   const handleStep1Change = (fields) => {
     setIsFormDirty(true);
-    setFormData(prev => {
-        const newData = { ...prev, step1: { ...prev.step1, ...fields } };
-        if (fields.email !== undefined && fields.email !== prev.step1.email) newData.step1.emailVerified = false;
-        return newData;
-    });
+    setFormData(prev => ({ 
+      ...prev, 
+      step1: { ...prev.step1, ...fields } 
+    }));
   };
 
   const handleFinalSubmit = async () => {
     setLoading(true);
     try {
-      const { auth } = await import("../../lib/firebase");
-      const fUser = auth.currentUser;
-      if (!fUser) throw new Error("Authentication session expired. Please restart signup.");
-
-      const idToken = await fUser.getIdToken();
-      
-      // Perform one-time backend sync and registration
+      // Perform final onboarding submit
       const payload = new FormData();
-      payload.append("idToken", idToken);
       payload.append("account", JSON.stringify(formData.step1));
       payload.append("details", JSON.stringify(formData.step2));
       payload.append("stripePaymentId", formData.step4.stripePaymentId || "");
@@ -301,37 +256,19 @@ const Signup = () => {
 
       await onboardingService.submitFinal(payload);
       
-      toastUtil.success("Registration complete! Pending admin review.");
+      toastUtil.success("Onboarding complete! Your profile is now pending review.");
       setIsFormDirty(false);
       navigate("/login");
     } catch (e) { 
-      toastUtil.error(e.response?.data?.message || "Registration failed."); 
+      console.error("Final Submit Error:", e);
+      toastUtil.handleApiError(e, {
+        default: "Submission failed."
+      });
     } finally { setLoading(false); }
   };
 
-  const handleGoogleSignup = async () => {
-    if (!isFirebaseConfigured()) return;
-    setGoogleLoading(true);
-    try {
-      const { signInWithGoogle } = await import("../../lib/firebase");
-      const { user: gUser } = await signInWithGoogle();
-      
-      setFormData(prev => ({ 
-        ...prev, 
-        step1: { 
-          ...prev.step1, 
-          email: gUser.email || prev.step1.email, 
-          fullName: gUser.displayName || prev.step1.fullName, 
-          emailVerified: false, // ALWAYS force verification check on submit
-          authProvider: "google" 
-        } 
-      }));
-      
-      toastUtil.info("Account linked. Please complete your profile and verify your email.");
-    } catch (e) { 
-        console.error("Google Signup Error:", e);
-        toastUtil.error("Google login failed"); 
-    } finally { setGoogleLoading(false); }
+  const handleGoogleSignup = () => {
+    loginWithGoogle();
   };
 
   useEffect(() => {
@@ -342,7 +279,6 @@ const Signup = () => {
 
   const renderStep = () => {
     const { step1, step2, step3, step4 } = formData;
-    const isS1Disabled = loading || Object.keys(step1Errors).length > 0 || !step1.fullName || !step1.email || !step1.phone || (step1.authProvider === "local" && (!step1.password || !step1.confirmPassword)) || !step1.agreeToTerms;
     const isS2Disabled = loading || Object.keys(step2Errors).length > 0;
     const isS3Disabled = loading || (step1.role === "company" ? (!step3.registrationCertificate || !step3.ntnCertificate) : (!step3.cnicFront || !step3.cnicBack));
 
@@ -357,7 +293,7 @@ const Signup = () => {
   };
 
   return (
-    <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading || googleLoading} googleLoading={googleLoading} hideGoogle={step > 1} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} onLinkClick={handleLinkClick} maxWidth="max-w-2xl" >
+    <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading} hideGoogle={step > 1} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} onLinkClick={handleLinkClick} maxWidth="max-w-2xl" >
       <div className="mb-8"> <SignupProgressBar step={step} /> </div>
       <div className={cn("transition-all duration-300", stepVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}> {renderStep()} </div>
       

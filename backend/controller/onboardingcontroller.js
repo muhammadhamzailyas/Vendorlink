@@ -16,7 +16,6 @@ class OnboardingController {
   
   /**
    * Finalizes user profile and creates role-specific entries.
-   * This is now the ONLY point where a full user profile is created/finalized in MongoDB.
    */
   async finalSubmit(req, res) {
     console.log("[Onboarding] Starting finalSubmit process...");
@@ -44,10 +43,17 @@ class OnboardingController {
       account = parseJson(account);
       details = parseJson(details);
 
-      const firebaseUid = req.firebaseUser?.uid;
-      if (!firebaseUid) {
+      // req.user is attached by authAllowUnprovisioned middleware if token is valid
+      let user = req.user;
+      const userIdFromToken = req.tokenPayload?.id;
+
+      if (!user && userIdFromToken) {
+        user = await User.findById(userIdFromToken).session(isTransactionStarted ? session : null);
+      }
+
+      if (!user) {
         if (isTransactionStarted) await session.abortTransaction();
-        return res.status(401).json({ message: "Unverified identity" });
+        return res.status(401).json({ message: "Unauthorized: User session not found" });
       }
 
       // Strict Validation
@@ -93,31 +99,13 @@ class OnboardingController {
         });
       }
 
-      const normalizedEmail = (req.firebaseUser.email || account.email || "").trim().toLowerCase();
-
-      let user = await User.findOne({ firebaseUid }).session(isTransactionStarted ? session : null);
-
-      if (!user) {
-        let username = normalizedEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "");
-        const existingUsername = await User.findOne({ username }).session(isTransactionStarted ? session : null);
-        if (existingUsername) username = `${username}_${Date.now().toString().slice(-4)}`;
-
-        user = new User({
-          firebaseUid,
-          username,
-          email: normalizedEmail,
-          authProvider: "firebase",
-        });
-      }
-
-      user.fullName = account.fullName;
+      user.fullName = account.fullName || user.fullName;
       user.role = account.role;
-      user.phone = account.phone || "";
+      user.phone = account.phone || user.phone || "";
       user.status = "pending"; 
       user.profileCompleted = true;
       user.onboardingStep = 5;
       user.selectedPlan = "premium";
-      user.emailVerified = true;
 
       await user.save({ session: isTransactionStarted ? session : null });
 
@@ -223,7 +211,7 @@ class OnboardingController {
             senderId: user._id,
             type: "new_user",
             title: "New Registration Pending",
-            message: `New ${user.role} "${user.fullName}" has registered and needs approval.`,
+            message: `New ${user.role} "${user.fullName || user.username}" has registered and needs approval.`,
             data: { userId: user._id, role: user.role },
             priority: "medium",
           });

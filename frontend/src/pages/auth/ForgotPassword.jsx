@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toastUtil from "../../lib/toast";
 import { Button, Input } from "../../components/ui";
 import AuthLayout from "../../components/auth/AuthLayout";
-import { sendPasswordReset } from "../../lib/firebase";
+import { authService } from "../../services/api";
 import { LockKey } from "@phosphor-icons/react";
 
 const ForgotPassword = () => {
@@ -20,14 +20,16 @@ const ForgotPassword = () => {
 
     setLoading(true);
     try {
-      await sendPasswordReset(email);
-      toastUtil.success("Password reset link sent! Redirecting to login...");
-      // Redirect to login after a short delay to allow user to read the toast
-      setTimeout(() => navigate("/login"), 2000);
+      await authService.forgotPassword(email);
+      toastUtil.success("Password reset link sent! Check your inbox.");
+      // Redirect to login after a short delay
+      setTimeout(() => navigate("/login"), 3000);
     } catch (error) {
       console.error("Forgot password error:", error);
-      toastUtil.error("Failed to send reset link. Please try again.");
-      setLoading(false); // Only stop loading on error, success will navigate away
+      toastUtil.handleApiError(error, {
+        default: "Failed to send reset link. Please try again."
+      });
+      setLoading(false);
     }
   };
 

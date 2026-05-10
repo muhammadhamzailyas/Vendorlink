@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import {
   ArrowsLeftRight,
   ChartBar,
-  Bell,
-  ChartBar as Assessment,
   CaretLeft,
   CaretRight,
   CheckCircle,
@@ -17,13 +15,10 @@ import {
   Layout as Dashboard,
   ListChecks as Task,
   SignOut as SignOutIcon,
-  List as List,
-  ChatCircleText as ChatCircleText,
+  ChatCircleText,
   ChatText as Feedback,
   Receipt,
   Gear as Settings,
-  Storefront,
-  User,
   Users as People,
   Wallet,
 } from "@phosphor-icons/react";
@@ -33,7 +28,9 @@ import ApprovalStatusBanner from "../ApprovalStatusBanner";
 import { Skeleton } from "../ui";
 import { cn } from "@/lib/cn";
 import { useUser } from "../../context/UserContext";
-import { signOutFirebase } from "../../lib/firebase";
+
+// Re-using Assessment icon for Reports
+const Assessment = ChartBar;
 
 const MENU_CONFIG = {
   admin: {
@@ -118,7 +115,7 @@ const PAGE_SUBTITLES = {
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useUser();
+  const { user, logout } = useUser();
 
   const role = user?.role;
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -147,14 +144,8 @@ const DashboardLayout = () => {
     localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
   }, [isSidebarCollapsed]);
 
-  const handleSignOut = async () => {
-    try {
-      await signOutFirebase();
-      localStorage.removeItem("user");
-      navigate("/login");
-    } catch (error) {
-      console.error("SignOut failed:", error);
-    }
+  const handleSignOut = () => {
+    logout();
   };
 
   const toggleDesktopSidebar = () => {
@@ -273,6 +264,3 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
-
-
-

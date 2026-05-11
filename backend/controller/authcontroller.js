@@ -98,14 +98,6 @@ class AuthController {
         });
       }
 
-      // Check if promoted by admin email match (legacy logic)
-      const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-      if (adminEmail && user.email === adminEmail && user.role !== "admin") {
-        user.role = "admin";
-        user.status = "approved";
-        await user.save();
-      }
-
       user.lastLogin = Date.now();
       await user.save();
 

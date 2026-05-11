@@ -9,11 +9,7 @@ const ProtectedRoutes = ({ role, children }) => {
   const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader />
-      </div>
-    );
+    return <Loader />;
   }
 
   // 1. Authentication Check (JWT based)

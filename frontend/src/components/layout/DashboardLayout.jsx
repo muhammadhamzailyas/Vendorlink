@@ -93,7 +93,6 @@ const PAGE_SUBTITLES = {
   "/admin/settings": "Manage access preferences and account-level notifications",
   "/company": "Monitor tasks, proposals, and budgets in one place",
   "/company/add-task": "Create and publish a new task",
-  "/company/vendor-marketplace": "Review vendors who have submitted proposals to your tasks",
   "/company/my-tasks": "Manage and track all active and completed tasks",
   "/company/contracts": "Track accepted proposals and ongoing contracts with vendors",
   "/company/progress": "Monitor real-time execution and delivery milestones",

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { notificationAPI } from "../services/api";
+import { notificationAPI, chatAPI } from "../services/api";
 import wsClient from "../services/wsClient";
 import { showToast } from "../lib/toast";
 import { useUser } from "./UserContext";

@@ -86,7 +86,6 @@ const CompanyDashboard = lazy(() => import("./pages/company/CompanyDashboard"));
 const CompanyProposals = lazy(() => import("./pages/company/CompanyProposal"));
 const AddTaskForm = lazy(() => import("./pages/company/AddTask"));
 const CompanyTaskDetail = lazy(() => import("./pages/company/TaskDetail"));
-const VendorMarketplace = lazy(() => import("./pages/company/VendorMarketplace"));
 const MyTaskPage = lazy(() => import("./pages/company/MyTaskPage"));
 const UserProfile = lazy(() => import("./components/UserProfile"));
 const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));

@@ -170,6 +170,10 @@ export const chatAPI = {
   getUnreadCount: () => api.get("/chat/unread"),
 };
 
+export const dashboardAPI = {
+  getStats: () => api.get("/dashboard/stats"),
+};
+
 export const adminService = {
   getAllUsers: () => api.get("/admin/users"),
   getAllTasks: () => api.get("/tasks"),

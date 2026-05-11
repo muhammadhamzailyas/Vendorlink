@@ -31,7 +31,7 @@ import {
 } from "recharts";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { taskAPI, proposalAPI } from "@/services/api";
+import { taskAPI, proposalAPI, dashboardAPI } from "@/services/api";
 import {
   Button,
   EmptyState,
@@ -71,30 +71,25 @@ const CompanyDashboard = () => {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const [tasksRes, proposalsRes] = await Promise.all([
+      const [tasksRes, proposalsRes, statsRes] = await Promise.all([
         taskAPI.getCompanyTasks().catch(() => ({ data: [] })),
         proposalAPI.getCompanyProposals().catch(() => ({ data: [] })),
+        dashboardAPI.getStats().catch(() => ({ data: { stats: {}, changes: {} } })),
       ]);
 
       const tasksData = tasksRes.data || [];
       const proposalsData = proposalsRes.data || [];
+      const dashboardData = statsRes.data || { stats: {}, changes: {} };
 
       setTasks(tasksData);
       setProposals(proposalsData);
 
-      // Mocking some change values since they are not in the API yet
-      // In a real scenario, these would come from the backend stats endpoint
       setStats({
-        totalTasks: tasksData.length,
-        pendingProposals: proposalsData.filter((p) => p.status === "submitted").length,
-        activeTasks: tasksData.filter((t) => t.status === "in-progress").length,
-        completedTasks: tasksData.filter((t) => t.status === "completed").length,
-        changes: {
-          tasks: tasksData.length > 0 ? 12.5 : 0,
-          proposals: proposalsData.length > 0 ? 5.2 : 0,
-          active: 0,
-          completed: 0
-        }
+        totalTasks: dashboardData.stats.totalTasks || tasksData.length,
+        pendingProposals: dashboardData.stats.totalProposals || proposalsData.filter((p) => p.status === "submitted").length,
+        activeTasks: dashboardData.stats.activeContracts || tasksData.filter((t) => t.status === "in-progress").length,
+        completedTasks: dashboardData.stats.completedTasks || tasksData.filter((t) => t.status === "completed").length,
+        changes: dashboardData.changes || { tasks: 0, proposals: 0, active: 0, completed: 0 }
       });
     } catch (error) {
       console.error("Error loading stats:", error);

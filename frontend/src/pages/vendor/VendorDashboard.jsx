@@ -33,7 +33,7 @@ import {
 } from "recharts";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import api from "@/services/api";
+import api, { dashboardAPI } from "@/services/api";
 import StatusChip from "@/components/shared/StatusChip";
 import {
   Button,
@@ -73,29 +73,31 @@ const VendorDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [proposalsRes, contractsRes] = await Promise.all([
+      const [proposalsRes, contractsRes, statsRes] = await Promise.all([
         api.get("/proposals/vendor/my-proposals").catch(() => ({ data: [] })),
         api.get("/contracts/vendor/my-contracts").catch(() => ({ data: [] })),
+        dashboardAPI.getStats().catch(() => ({ data: { stats: {}, changes: {} } })),
       ]);
 
       const proposalsData = Array.isArray(proposalsRes.data) ? proposalsRes.data : proposalsRes.data?.data || [];
       const contractsData = Array.isArray(contractsRes.data) ? contractsRes.data : contractsRes.data?.data || [];
+      const dashboardData = statsRes.data || { stats: {}, changes: {} };
 
       setProposals(proposalsData);
       setContracts(contractsData);
 
       setStats({
-        assignedProjects: contractsData.filter((c) => c.status === "active").length,
-        submittedProposals: proposalsData.length,
-        ongoingWork: contractsData.filter((c) => c.status === "active" || c.status === "pending-vendor").length,
-        weeklyEarnings: contractsData
+        assignedProjects: dashboardData.stats.acceptedProposals || contractsData.filter((c) => c.status === "active").length,
+        submittedProposals: dashboardData.stats.totalProposals || proposalsData.length,
+        ongoingWork: dashboardData.stats.activeContracts || contractsData.filter((c) => c.status === "active" || c.status === "pending-vendor").length,
+        weeklyEarnings: dashboardData.stats.totalEarned || contractsData
           .filter((c) => c.status === "active" || c.status === "completed")
           .reduce((sum, c) => sum + (c.totalBudget || 0), 0),
         changes: {
-          projects: 12.5,
-          proposals: 8.4,
-          work: 0,
-          earnings: 24.2
+          projects: dashboardData.changes.accepted || 0,
+          proposals: dashboardData.changes.proposals || 0,
+          work: dashboardData.changes.active || 0,
+          earnings: dashboardData.changes.earnings || 0
         }
       });
     } catch (error) {

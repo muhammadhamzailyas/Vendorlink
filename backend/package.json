@@ -7,15 +7,14 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "start": "node server.js",
-    "dev:backend": "nodemon server.js",
-    "dev:ai": "cd ../ai-service && .\\venv\\Scripts\\python.exe app.py",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:ai\""
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.14.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

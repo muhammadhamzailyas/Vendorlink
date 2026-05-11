@@ -1,10 +1,12 @@
-const axios = require("axios");
 const Proposal = require("../model/proposal");
 const Task = require("../model/task");
-const User = require("../model/user");
 const Contract = require("../model/Contract");
+const aiService = require("../services/aiService");
 
 class AIRankingController {
+  /**
+   * Main entry point to rank proposals for a task
+   */
   async rankProposals(req, res) {
     try {
       const { taskId } = req.params;
@@ -30,11 +32,10 @@ class AIRankingController {
         return res.status(400).json({ error: "No proposals to rank" });
       }
 
-      // Get vendor history data for each proposal
+      // Prepare vendor history context
       const vendorsData = {};
-
       for (const proposal of proposals) {
-        const vendorId = proposal.vendorId._id;
+        const vendorId = proposal.vendorId._id.toString();
 
         const contracts = await Contract.find({
           vendorId,
@@ -80,51 +81,27 @@ class AIRankingController {
         };
       }
 
-      // Call Python AI service
-      const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:5001";
+      // Direct call to migrated AI service
+      const rankedProposals = await aiService.rankProposals(
+        {
+          title: task.title,
+          description: task.description,
+          requirements: task.requirements,
+          budget: task.budget,
+          deadline: task.deadline,
+          category: task.category,
+        },
+        proposals,
+        vendorsData
+      );
 
-      try {
-        await axios.get(`${aiServiceUrl}/health`, { timeout: 2000 });
-      } catch (healthError) {
-        console.log("AI service not available, using fallback ranking");
-        return this.fallbackRanking(task, proposals, vendorsData, res);
-      }
+      return res.json({
+        success: true,
+        ranked_proposals: rankedProposals,
+      });
 
-      try {
-        const response = await axios.post(
-          `${aiServiceUrl}/rank-proposals`,
-          {
-            task: {
-              title: task.title,
-              description: task.description,
-              requirements: task.requirements,
-              budget: task.budget,
-              deadline: task.deadline,
-              category: task.category,
-            },
-            proposals: proposals,
-            vendorsData: vendorsData,
-          },
-          {
-            timeout: 30000,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        if (response.data.success) {
-          return res.json({
-            success: true,
-            ranked_proposals: response.data.ranked_proposals,
-          });
-        } else {
-          throw new Error("AI ranking failed");
-        }
-      } catch (aiError) {
-        console.error("AI service error:", aiError.message);
-        return this.fallbackRanking(task, proposals, vendorsData, res);
-      }
     } catch (error) {
-      console.error("AI Ranking error:", error);
+      console.error("[AIRankingController] Critical Error:", error);
       return res.status(500).json({
         error: "Failed to rank proposals",
         details: error.message,
@@ -132,93 +109,9 @@ class AIRankingController {
     }
   }
 
-  async fallbackRanking(task, proposals, vendorsData, res) {
-    try {
-      const rankedProposals = proposals.map((proposal) => {
-        const vendorId = proposal.vendorId._id;
-        const vendorData = vendorsData[vendorId] || {
-          totalProjects: 0,
-          completedProjects: 0,
-          onTimeCompletion: 0,
-          averageRating: 0,
-          relevantExperience: 0,
-        };
-
-        const taskReq = (task.requirements + " " + task.description).toLowerCase();
-        const vendorSkills = proposal.skills || [];
-        const matchingSkills = vendorSkills.filter(skill =>
-          taskReq.includes(skill.toLowerCase())
-        );
-
-        const skillsScore = Math.min(35, matchingSkills.length * 7);
-        const experienceScore = Math.min(30, vendorData.completedProjects * 2 + vendorData.relevantExperience * 3);
-        const reliabilityScore = Math.min(20, vendorData.onTimeCompletion / 5);
-        const timelineScore = Math.min(10, vendorData.onTimeCompletion / 10);
-
-        const bidVsBudget = (proposal.bidAmount / task.budget) * 100;
-        let bidScore = 5;
-        if (bidVsBudget < 30) bidScore = 1;
-        else if (bidVsBudget > 150) bidScore = 2;
-        else bidScore = 4;
-
-        const totalScore = skillsScore + experienceScore + reliabilityScore + timelineScore + bidScore;
-
-        let reasoning = "";
-        if (matchingSkills.length > 2) {
-          reasoning = `Strong skills match: ${matchingSkills.slice(0, 3).join(", ")}. `;
-        } else if (matchingSkills.length > 0) {
-          reasoning = `Has some relevant skills: ${matchingSkills.join(", ")}. `;
-        } else {
-          reasoning = `No matching skills found. `;
-        }
-
-        if (vendorData.completedProjects > 5) {
-          reasoning += `Experienced with ${vendorData.completedProjects} projects. `;
-        } else if (vendorData.completedProjects > 0) {
-          reasoning += `Some experience (${vendorData.completedProjects} projects). `;
-        } else {
-          reasoning += `New vendor. `;
-        }
-
-        if (vendorData.onTimeCompletion > 80) {
-          reasoning += `Reliable (${Math.round(vendorData.onTimeCompletion)}% on-time).`;
-        }
-
-        return {
-          ...proposal,
-          aiRank: 0,
-          aiScore: Math.round(totalScore),
-          aiReasoning: reasoning,
-          aiBreakdown: {
-            skills_score: skillsScore,
-            experience_score: experienceScore,
-            reliability_score: reliabilityScore,
-            timeline_score: timelineScore,
-            bid_score: bidScore,
-          },
-        };
-      });
-
-      rankedProposals.sort((a, b) => b.aiScore - a.aiScore);
-      rankedProposals.forEach((prop, index) => {
-        prop.aiRank = index + 1;
-      });
-
-      return res.json({
-        success: true,
-        ranked_proposals: rankedProposals,
-        fallback: true,
-        message: "Ranked by skills and experience (AI service unavailable)",
-      });
-    } catch (error) {
-      console.error("Fallback ranking error:", error);
-      return res.status(500).json({
-        error: "Ranking failed",
-        details: error.message,
-      });
-    }
-  }
-
+  /**
+   * Helper to get detailed vendor history for UI visualization
+   */
   async getVendorHistory(req, res) {
     try {
       const { vendorId } = req.params;

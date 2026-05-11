@@ -28,12 +28,10 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
     return 0;
   }
 
-  const filteredListItems = isAdmin 
-    ? menuItems.filter(item => 
-        !item.text.toLowerCase().includes("message") && 
-        !item.text.toLowerCase().includes("notification")
-      )
-    : menuItems;
+  const isOtherItem = (item) => {
+    const text = item.text.toLowerCase();
+    return text.includes("message") || text.includes("notification") || text.includes("feedback");
+  };
 
   return (
     <motion.aside 
@@ -118,12 +116,8 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                 </motion.p>
               )}
             </AnimatePresence>
-            {filteredListItems
-              .filter(item => 
-                !item.text.toLowerCase().includes("message") && 
-                !item.text.toLowerCase().includes("notification") &&
-                !item.text.toLowerCase().includes("feedback")
-              )
+            {menuItems
+              .filter(item => !isOtherItem(item))
               .map((item) => {
                 const active = isActive(item.path);
                 const Icon = item.icon;
@@ -160,11 +154,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
           </div>
 
           {/* Other Section */}
-          {(filteredListItems.some(item => 
-              item.text.toLowerCase().includes("message") || 
-              item.text.toLowerCase().includes("notification") ||
-              item.text.toLowerCase().includes("feedback")
-            )) && (
+          {(menuItems.some(item => isOtherItem(item))) && (
             <div className="flex flex-col gap-1">
               <AnimatePresence>
                 {!collapsed && (
@@ -178,12 +168,8 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                   </motion.p>
                 )}
               </AnimatePresence>
-              {filteredListItems
-                .filter(item => 
-                  item.text.toLowerCase().includes("message") || 
-                  item.text.toLowerCase().includes("notification") ||
-                  item.text.toLowerCase().includes("feedback")
-                )
+              {menuItems
+                .filter(item => isOtherItem(item))
                 .map((item) => {
                   const active = isActive(item.path);
                   const Icon = item.icon;

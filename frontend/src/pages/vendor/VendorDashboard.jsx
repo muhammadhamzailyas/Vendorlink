@@ -34,7 +34,6 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import api from "@/services/api";
-import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
 import StatusChip from "@/components/shared/StatusChip";
 import {
   Button,
@@ -217,7 +216,7 @@ const VendorDashboard = () => {
         <Loader />
       ) : (
         <div className="space-y-8">
-          <ApprovalStatusBanner />
+          
           
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="flex flex-wrap items-center gap-3 sm:ml-auto">

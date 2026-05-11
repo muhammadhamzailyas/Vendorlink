@@ -61,7 +61,6 @@ export const UserProvider = ({ children }) => {
     removeToken();
     wsClient.disconnect();
     setUser(null);
-    localStorage.removeItem("user");
     window.location.href = "/login";
   };
 

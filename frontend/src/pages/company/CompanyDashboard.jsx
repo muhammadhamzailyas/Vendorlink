@@ -46,7 +46,6 @@ import {
 } from "@/components/ui";
 import { useWallet } from "@/context/WalletContext";
 import StatusChip from "@/components/shared/StatusChip";
-import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
 import { cn } from "@/lib/cn";
 
 dayjs.extend(relativeTime);
@@ -272,7 +271,6 @@ const CompanyDashboard = () => {
         <Skeleton className="h-96 w-full rounded-2xl bg-muted" />
       ) : (
         <>
-          <ApprovalStatusBanner />
           
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
             <div className="flex flex-wrap items-center gap-3">

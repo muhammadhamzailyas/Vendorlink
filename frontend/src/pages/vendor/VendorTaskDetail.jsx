@@ -4,8 +4,7 @@ import { formatDate } from "@/lib/dateUtils";
 import api from "@/services/api";
 import ProposalForm from "./ProposalForm";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
-import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
-import { getUserData } from "@/lib/localStorage";
+import { useUser } from "@/context/UserContext";
 import { 
   Button, 
   PageTransition, 
@@ -38,7 +37,7 @@ const VendorTaskDetail = () => {
   const [myProposal, setMyProposal] = useState(null);
   const [showProposalForm, setShowProposalForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const user = getUserData();
+  const { user } = useUser();
   const { isApproved } = useApprovalStatus();
 
   const fetchTaskDetails = useCallback(async () => {
@@ -55,12 +54,13 @@ const VendorTaskDetail = () => {
   const checkMyProposal = useCallback(async () => {
     try {
       const { data: proposals } = await api.get(`/proposals/task/${id}`);
-      const myProp = proposals.find((p) => (p.vendorId?._id || p.vendorId) === user.id);
+      const userId = user?.id || user?._id;
+      const myProp = proposals.find((p) => (p.vendorId?._id || p.vendorId) === userId);
       setMyProposal(myProp || null);
     } catch (error) {
       console.error("Proposal check error:", error);
     }
-  }, [id, user.id]);
+  }, [id, user]);
 
   useEffect(() => {
     fetchTaskDetails();
@@ -119,7 +119,7 @@ const VendorTaskDetail = () => {
                 <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
                 Back to Tasks
             </Button>
-            <ApprovalStatusBanner />
+            
         </div>
         
         <Card className="overflow-hidden shadow-soft border-border/50">

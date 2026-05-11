@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { contractAPI } from "@/services/api";
-import { getUserData } from "@/lib/localStorage";
+import { useUser } from "@/context/UserContext";
 import { formatDate } from "@/lib/dateUtils";
 import StatusChip from "@/components/shared/StatusChip";
 import { 
@@ -45,7 +45,7 @@ import ContractEditModal from "./ContractEditModal";
 
 const CompanyContracts = () => {
   const navigate = useNavigate();
-  const user = getUserData();
+  const { user } = useUser();
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");

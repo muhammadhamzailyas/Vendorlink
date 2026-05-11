@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { taskAPI } from "@/services/api";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
-import ApprovalStatusBanner from "@/components/ApprovalStatusBanner";
 import toastUtil from "@/lib/toast";
 import { Button, Input, PageTransition, Select, Textarea, Label } from "@/components/ui";
 import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
@@ -112,7 +111,7 @@ const AddTask = () => {
   return (
     <PageTransition>
       <div className="mx-auto max-w-4xl space-y-8 pb-12 pt-4">
-        <ApprovalStatusBanner />
+        
 
         {!isApproved && (
           <div className="rounded-2xl bg-warning/10 px-6 py-4 text-sm text-warning font-bold border border-warning/20 flex items-center gap-3">

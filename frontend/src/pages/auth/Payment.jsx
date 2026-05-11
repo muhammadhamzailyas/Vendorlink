@@ -2,28 +2,27 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle as CheckCircle, Layout as DashboardIcon } from "@phosphor-icons/react";
 import { Button, Loader } from "../../components/ui";
+import { useUser } from "../../context/UserContext";
 
 const Payment = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, loading: userLoading } = useUser();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userData = getUserData();
+    if (userLoading) return;
 
-    if (!userData || !userData.id) {
+    if (!user || !user.id) {
       navigate("/login");
       return;
     }
 
-    setUser(userData);
-
     // Admin users don't need payment - redirect directly to dashboard
-    if (userData.role === "admin") {
+    if (user.role === "admin") {
       navigate("/admin", { replace: true });
     }
     setLoading(false);
-  }, [navigate]);
+  }, [navigate, user, userLoading]);
 
   const handleGoToDashboard = () => {
     if (!user) return;
@@ -37,7 +36,7 @@ const Payment = () => {
     navigate(roleRoutes[user.role] || "/company");
   };
 
-  if (loading) {
+  if (loading || userLoading) {
     return <Loader />;
   }
 

@@ -91,7 +91,6 @@ export const authService = {
    */
   logout: () => {
     removeToken();
-    localStorage.removeItem("user");
     window.location.href = "/login";
   }
 };

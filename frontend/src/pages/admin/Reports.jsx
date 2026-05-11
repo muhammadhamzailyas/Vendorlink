@@ -83,7 +83,10 @@ const ReportActionCard = ({ title, description, onDownload, icon: Icon }) => (
     </Card>
 );
 
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 const Reports = () => {
+  usePageMeta("Reports", "Platform performance snapshot for users and tasks");
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
@@ -299,6 +302,8 @@ const Reports = () => {
                 />
             }
         />
+          </>
+        )}
       </div>
     </PageTransition>
   );

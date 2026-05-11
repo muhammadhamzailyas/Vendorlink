@@ -50,7 +50,10 @@ const ChangeIndicator = ({ value }) => {
   );
 };
 
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 const Pending = () => {
+  usePageMeta("Approvals", "Review pending account verifications");
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
@@ -232,7 +235,20 @@ const Pending = () => {
   return (
     <PageTransition>
       <div className="space-y-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {loading ? (
+          <div className="space-y-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
+              </div>
+              <div className="space-y-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full rounded-xl" />
+                  ))}
+              </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard 
               title="Pending Total" 
               value={stats.total} 
@@ -282,6 +298,7 @@ const Pending = () => {
             }
             emptyCellClassName="px-4 py-6"
           />
+          </>
         )}
 
         <UserDetailsModal

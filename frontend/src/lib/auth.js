@@ -31,11 +31,6 @@ export const handleGoogleCallback = (token) => {
   setToken(token);
 };
 
-export const logoutUser = () => {
-  removeToken();
-  window.location.href = '/login';
-};
-
 export const sendPasswordReset = async (email) => {
   const res = await axios.post(`${API_BASE}/auth/forgot-password`, { email });
   return res.data;

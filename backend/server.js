@@ -120,8 +120,16 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ 
+    status: "ok", 
+    timestamp: new Date().toISOString(),
+    service: "vendorlink-api"
+  });
+});
+
 app.get("/", (req, res) => {
-  res.send("Server is running and connected to MongoDB!");
+  res.redirect("/health");
 });
 
 const startServer = async () => {

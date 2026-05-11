@@ -15,6 +15,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import { NotificationProvider } from "./context/NotificationContext";
 import { WalletProvider } from "./context/WalletContext";
 import { UserProvider, useUser } from "./context/UserContext";
+import { PageMetaProvider } from "./context/PageMetaContext";
 import { Button, Loader } from "./components/ui";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -87,7 +88,7 @@ const CompanyProposals = lazy(() => import("./pages/company/CompanyProposal"));
 const AddTaskForm = lazy(() => import("./pages/company/AddTask"));
 const CompanyTaskDetail = lazy(() => import("./pages/company/TaskDetail"));
 const MyTaskPage = lazy(() => import("./pages/company/MyTaskPage"));
-const UserProfile = lazy(() => import("./components/UserProfile"));
+const UserProfilePage = lazy(() => import("./pages/shared/UserProfilePage"));
 const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));
 const VendorTaskDetail = lazy(() => import("./pages/vendor/VendorTaskDetail"));
 const AvailableTasks = lazy(() => import("./pages/vendor/AvailableTasks"));
@@ -116,15 +117,17 @@ const AppLayout = () => (
     <>
         <ScrollToTop />
         <UserProvider>
-            <UserSessionProvider>
-                <NotificationProvider>
-                    <WalletProvider>
-                        <Suspense fallback={<Loader />}>
-                            <Outlet />
-                        </Suspense>
-                    </WalletProvider>
-                </NotificationProvider>
-            </UserSessionProvider>
+            <PageMetaProvider>
+                <UserSessionProvider>
+                    <NotificationProvider>
+                        <WalletProvider>
+                            <Suspense fallback={<Loader />}>
+                                <Outlet />
+                            </Suspense>
+                        </WalletProvider>
+                    </NotificationProvider>
+                </UserSessionProvider>
+            </PageMetaProvider>
         </UserProvider>
     </>
 );
@@ -208,7 +211,7 @@ const router = createBrowserRouter([
           { path: "contracts", element: <CompanyContracts /> },
           { path: "contract/create", element: <CreateContract /> },
           { path: "contract/:id", element: <ContractDetail /> },
-          { path: "profile", element: <UserProfile userType="company" /> },
+          { path: "profile", element: <UserProfilePage userType="company" /> },
           { path: "tasks", element: <MyTaskPage /> },
           { path: "proposals", element: <CompanyProposals /> },
           { path: "task/:id", element: <CompanyTaskDetail /> },
@@ -230,7 +233,7 @@ const router = createBrowserRouter([
           { path: "my-proposals", element: <MyProposals /> },
           { path: "contracts", element: <VendorContracts /> },
           { path: "contract/:id", element: <ContractDetail /> },
-          { path: "profile", element: <UserProfile userType="vendor" /> },
+          { path: "profile", element: <UserProfilePage userType="vendor" /> },
           { path: "task/:id", element: <VendorTaskDetail /> },
           { path: "progress", element: <VendorProgress /> },
           { path: "task/:taskId/progress", element: <VendorTaskProgressDetail /> },

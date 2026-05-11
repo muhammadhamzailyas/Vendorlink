@@ -38,7 +38,10 @@ const createInitialArchiveState = () => ({
   mode: "delete", // 'delete' or 'deactivate'
 });
 
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 const UserManagement = () => {
+  usePageMeta("User Management", "Manage and monitor all platform users");
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState(0);

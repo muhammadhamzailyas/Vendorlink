@@ -51,8 +51,10 @@ import UserAvatar from "@/components/shared/UserAvatar";
 
 dayjs.extend(relativeTime);
 import { cn } from "@/lib/cn";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const AdminDashboard = () => {
+  usePageMeta("Admin Dashboard", "Overview of platform activity and growth");
   const navigate = useNavigate();
   const { user } = useUser();
   const [stats, setStats] = useState({

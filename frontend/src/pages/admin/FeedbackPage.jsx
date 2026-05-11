@@ -4,8 +4,11 @@ import api from "@/services/api";
 import { PageTransition, Card, DataTable, Loader, EmptyState, Skeleton } from "@/components/ui";
 import { ChatTeardropText } from "@phosphor-icons/react";
 
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 const FeedbackPage = () => {
-  const { data: feedback, isLoading } = useQuery({
+  usePageMeta("Feedback", "Review user feedback and system ratings");
+  const { data: feedback = [], isLoading } = useQuery({
     queryKey: ["admin", "feedback"],
     queryFn: async () => {
       const res = await api.get("/feedback");

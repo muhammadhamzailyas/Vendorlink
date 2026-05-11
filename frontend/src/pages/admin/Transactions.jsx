@@ -43,7 +43,10 @@ const typeIcons = {
   subscription: Sparkle,
 };
 
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 const AdminTransactions = () => {
+  usePageMeta("Transactions", "Complete chronological record of all platform monetary movements");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);

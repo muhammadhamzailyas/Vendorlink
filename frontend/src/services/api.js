@@ -85,14 +85,6 @@ export const authService = {
    * Fetches the current user profile using JWT.
    */
   getMe: () => api.get("/auth/me"),
-
-  /**
-   * Clears local state and tokens.
-   */
-  logout: () => {
-    removeToken();
-    window.location.href = "/login";
-  }
 };
 
 export const taskAPI = {

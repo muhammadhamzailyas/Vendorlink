@@ -77,7 +77,10 @@ const ChangeIndicator = ({ value }) => {
   );
 };
 
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 const TaskMonitoring = () => {
+  usePageMeta("Task Monitoring", "Monitor and track all platform tasks");
   const [tasks, setTasks] = useState([]);
   const [monitorData, setMonitorData] = useState(null);
   const [loading, setLoading] = useState(true);

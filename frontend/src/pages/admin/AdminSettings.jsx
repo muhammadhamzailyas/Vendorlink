@@ -37,7 +37,10 @@ import toastUtil from "@/lib/toast";
 import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
 import { cn } from "@/lib/cn";
 
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 const AdminSettings = () => {
+  usePageMeta("Admin Settings", "Manage access preferences and account-level notifications");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
@@ -119,11 +122,11 @@ const AdminSettings = () => {
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid gap-6">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-64 w-full" />
+      <div className="space-y-10">
+        <div className="space-y-6">
+            <Skeleton className="h-48 w-full rounded-2xl" />
+            <Skeleton className="h-[400px] w-full rounded-2xl" />
+            <Skeleton className="h-64 w-full rounded-2xl" />
         </div>
       </div>
     );

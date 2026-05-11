@@ -123,23 +123,6 @@ const DashboardLayout = () => {
   });
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-  }, [user, navigate]);
-
-  useEffect(() => {
-    if (!user || !role) return;
-    const currentPath = location.pathname;
-    
-    // Simple role-based protection
-    if (currentPath.startsWith("/admin") && role !== "admin") navigate("/" + role);
-    else if (currentPath.startsWith("/company") && role !== "company") navigate("/" + role);
-    else if (currentPath.startsWith("/vendor") && role !== "vendor") navigate("/" + role);
-  }, [location.pathname, user, role, navigate]);
-
-  useEffect(() => {
     localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
   }, [isSidebarCollapsed]);
 

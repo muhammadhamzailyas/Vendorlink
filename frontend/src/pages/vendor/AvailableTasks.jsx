@@ -372,9 +372,9 @@ const AvailableTasks = () => {
         />
 
         {loading ? (
-          <div className="space-y-6 pt-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+          <div className="space-y-3 pt-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-xl" />
             ))}
           </div>
         ) : filteredTasks.length === 0 ? (

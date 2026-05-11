@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle as CheckCircle, Layout as DashboardIcon } from "@phosphor-icons/react";
-import { Button, Loader } from "../../components/ui";
+import { Button, Loader, Skeleton } from "../../components/ui";
 import { useUser } from "../../context/UserContext";
 
 const Payment = () => {
@@ -37,7 +37,11 @@ const Payment = () => {
   };
 
   if (loading || userLoading) {
-    return <Loader />;
+    return (
+        <div className="min-h-screen bg-muted flex items-center justify-center py-16 px-4">
+            <Skeleton className="h-[400px] w-full max-w-sm rounded-2xl" />
+        </div>
+    );
   }
 
   return (

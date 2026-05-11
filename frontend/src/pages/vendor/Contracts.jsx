@@ -191,7 +191,14 @@ const VendorContracts = () => {
         />
 
         {loading ? (
-          <Loader />
+          <div className="space-y-3">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
+             </div>
+             {Array.from({ length: 6 }).map((_, i) => (
+               <Skeleton key={i} className="h-12 w-full rounded-xl" />
+             ))}
+          </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Receipt}

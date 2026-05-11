@@ -250,9 +250,12 @@ const CompanyContracts = () => {
           tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
           className="mb-0"
         />
-
         {loading ? (
-          <Loader />
+          <div className="space-y-3 pt-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={FileText}

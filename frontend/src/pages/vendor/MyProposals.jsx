@@ -272,10 +272,10 @@ const MyProposals = () => {
         {loading ? (
           <div className="space-y-3">
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
              </div>
-             {Array.from({ length: 5 }).map((_, i) => (
-               <Skeleton key={i} className="h-16 w-full rounded-xl bg-muted/50" />
+             {Array.from({ length: 6 }).map((_, i) => (
+               <Skeleton key={i} className="h-12 w-full rounded-xl" />
              ))}
           </div>
         ) : (

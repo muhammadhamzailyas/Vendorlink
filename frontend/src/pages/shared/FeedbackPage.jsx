@@ -1,7 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
-import { PageTransition, Card, DataTable, Loader, EmptyState, Button, Textarea } from "@/components/ui";
+import { PageTransition, Card, DataTable, Loader, EmptyState, Button, Textarea, Skeleton } from "@/components/ui";
 import { ChatTeardropText } from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";
 import { showToast } from "@/lib/toast";
@@ -47,7 +47,11 @@ const FeedbackPage = () => {
 
         {isAdmin && (
             isLoading ? (
-              <Loader />
+                <div className="space-y-3 pt-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full rounded-xl" />
+                  ))}
+                </div>
             ) : feedback?.length === 0 ? (
               <EmptyState icon={ChatTeardropText} title="No feedback yet" description="All user feedback will appear here." />
             ) : (

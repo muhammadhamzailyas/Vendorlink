@@ -251,11 +251,10 @@ const SharedPayments = ({ role }) => {
       const platformRev = adminStatsData?.data?.growthData?.[5]?.revenue || 0;
 
       return (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Volume" value={formatCurrency(totalVolume)} icon={<CurrencyDollar />} trend={<ChangeIndicator value={changes.revenue} />} />
-          <StatCard title="Platform Revenue" value={formatCurrency(platformRev)} icon={<TrendUp />} trend={<ChangeIndicator value={changes.revenue} />} />
-          <StatCard title="Active Settlements" value={counts.processing || 0} icon={<Clock />} />
-          <StatCard title="Failed/Refunded" value={(counts.failed || 0) + (counts.refunded || 0)} icon={<WarningCircle className="text-danger" />} />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+          ))}
         </div>
       );
     } else if (role === "company") {
@@ -359,7 +358,9 @@ const SharedPayments = ({ role }) => {
             />
             {isLoading ? (
               <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-xl bg-muted/50" />)}
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full rounded-xl" />
+                ))}
               </div>
             ) : (
               <DataTable

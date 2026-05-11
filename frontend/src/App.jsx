@@ -110,6 +110,7 @@ const AdminPaymentDetail = lazy(() => import("./pages/admin/PaymentDetail"));
 const AdminTransactions = lazy(() => import("./pages/admin/Transactions"));
 const PaymentSuccess = lazy(() => import("./pages/shared/PaymentSuccess"));
 const PaymentCancel = lazy(() => import("./pages/shared/PaymentCancel"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const AppLayout = () => (
     <>
@@ -242,7 +243,7 @@ const router = createBrowserRouter([
       },
       { path: "payment-success", element: <PaymentSuccess /> },
       { path: "payment-cancel", element: <PaymentCancel /> },
-      { path: "*", element: <Navigate to="/" replace /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 ]);

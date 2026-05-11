@@ -105,9 +105,7 @@ const CompanyTaskProgressDetail = lazy(() => import("./pages/company/CompanyTask
 const CreateContract = lazy(() => import("./pages/company/CreateContract"));
 const VendorProgress = lazy(() => import("./pages/vendor/VendorProgress"));
 const VendorTaskProgressDetail = lazy(() => import("./pages/vendor/TaskProgressDetail"));
-const CompanyPayments = lazy(() => import("./pages/company/Payments"));
-const VendorPayments = lazy(() => import("./pages/vendor/Payments"));
-const AdminPayments = lazy(() => import("./pages/admin/Payments"));
+const SharedPayments = lazy(() => import("./pages/shared/Payments"));
 const AdminPaymentDetail = lazy(() => import("./pages/admin/PaymentDetail"));
 const AdminTransactions = lazy(() => import("./pages/admin/Transactions"));
 const PaymentSuccess = lazy(() => import("./pages/shared/PaymentSuccess"));
@@ -192,7 +190,7 @@ const router = createBrowserRouter([
           { path: "settings", element: <AdminSettings /> },
           { path: "messages", element: <ChatPage /> },
           { path: "notifications", element: <NotificationsPage /> },
-          { path: "payments", element: <AdminPayments /> },
+          { path: "payments", element: <SharedPayments role="admin" /> },
           { path: "payments/:id", element: <AdminPaymentDetail /> },
           { path: "transactions", element: <AdminTransactions /> },
           { path: "feedback", element: <AdminFeedback /> },
@@ -219,7 +217,7 @@ const router = createBrowserRouter([
           { path: "notifications", element: <NotificationsPage /> },
           { path: "settings", element: <SharedSettings /> },
           { path: "feedback", element: <SharedFeedback /> },
-          { path: "payments", element: <CompanyPayments /> },
+          { path: "payments", element: <SharedPayments role="company" /> },
         ],
       },
       {
@@ -239,7 +237,7 @@ const router = createBrowserRouter([
           { path: "notifications", element: <NotificationsPage /> },
           { path: "settings", element: <SharedSettings /> },
           { path: "feedback", element: <SharedFeedback /> },
-          { path: "payments", element: <VendorPayments /> },
+          { path: "payments", element: <SharedPayments role="vendor" /> },
         ],
       },
       { path: "payment-success", element: <PaymentSuccess /> },

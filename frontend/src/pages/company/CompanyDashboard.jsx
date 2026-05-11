@@ -257,8 +257,7 @@ const CompanyDashboard = () => {
     },
   ];
 
-
-
+  return (
     <PageTransition>
     <div className="space-y-8">
       {loading ? (

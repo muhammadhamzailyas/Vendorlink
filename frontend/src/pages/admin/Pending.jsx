@@ -298,7 +298,6 @@ const Pending = () => {
             }
             emptyCellClassName="px-4 py-6"
           />
-          </>
         )}
 
         <UserDetailsModal
@@ -310,8 +309,10 @@ const Pending = () => {
           onReject={onReject}
           actionLoading={selectedUser ? actionLoading[selectedUser._id] : false}
         />
-      </div>
-    </PageTransition>
+      </>
+    )}
+  </div>
+</PageTransition>
   );
 };
 

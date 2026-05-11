@@ -302,8 +302,6 @@ const Reports = () => {
                 />
             }
         />
-          </>
-        )}
       </div>
     </PageTransition>
   );

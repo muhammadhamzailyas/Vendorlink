@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus as PlusIcon, Tag, Briefcase, Calendar, CurrencyDollar, Lightning, ListChecks } from "@phosphor-icons/react";
+import { Briefcase, CurrencyDollar, Lightning, ListChecks, Tag } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,26 +7,72 @@ import { z } from "zod";
 import { taskAPI } from "@/services/api";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
 import toastUtil from "@/lib/toast";
-import { Button, Input, PageTransition, Select, Textarea, Label } from "@/components/ui";
-import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
-import DynamicListField from "@/components/shared/DynamicListField";
+import { Button, Input, PageTransition, Textarea, Label, DatePicker } from "@/components/ui";
+import FormSection, { FormFieldGrid } from "@/components/shared/FormSection";
+import SearchableSelect from "@/components/auth/signup/SearchableSelect";
+import SkillsTagInput from "@/components/auth/signup/SkillsTagInput";
 
 const CATEGORIES = [
-  { value: "web-development", label: "Web Development" },
-  { value: "mobile-development", label: "Mobile Development" },
-  { value: "graphic-design", label: "Graphic Design" },
-  { value: "digital-marketing", label: "Digital Marketing" },
+  { value: "3d-modeling-rendering", label: "3D Modeling & Rendering" },
+  { value: "ai-ml", label: "AI & Machine Learning" },
+  { value: "android-development", label: "Android Development" },
+  { value: "architecture-interior", label: "Architecture & Interior Design" },
+  { value: "backend-development", label: "Backend Development" },
+  { value: "big-data", label: "Big Data Solutions" },
+  { value: "blockchain-crypto", label: "Blockchain & Cryptocurrency" },
+  { value: "business-consulting", label: "Business Consulting" },
+  { value: "cad-engineering", label: "CAD & Engineering" },
+  { value: "computer-vision", label: "Computer Vision" },
+  { value: "content-marketing", label: "Content Marketing" },
   { value: "content-writing", label: "Content Writing" },
-  { value: "seo", label: "SEO" },
+  { value: "copywriting", label: "Copywriting" },
+  { value: "customer-support", label: "Customer & Tech Support" },
+  { value: "cybersecurity-audit", label: "Cybersecurity & Security Audit" },
+  { value: "data-engineering", label: "Data Engineering" },
   { value: "data-entry", label: "Data Entry" },
-  { value: "other", label: "Other" },
+  { value: "data-science-analytics", label: "Data Science & Analytics" },
+  { value: "desktop-apps", label: "Desktop Software Development" },
+  { value: "devops-cloud", label: "DevOps & Cloud Computing" },
+  { value: "digital-marketing", label: "Digital Marketing" },
+  { value: "ecommerce-development", label: "E-commerce Development" },
+  { value: "editing-proofreading", label: "Editing & Proofreading" },
+  { value: "email-marketing", label: "Email Marketing" },
+  { value: "financial-accounting", label: "Financial & Accounting" },
+  { value: "frontend-development", label: "Frontend Development" },
+  { value: "fullstack-development", label: "Full-Stack Development" },
+  { value: "game-development", label: "Game Development" },
+  { value: "ghostwriting", label: "Ghostwriting" },
+  { value: "graphic-design", label: "Graphic Design" },
+  { value: "hr-recruitment", label: "HR & Recruitment" },
+  { value: "illustration", label: "Illustration" },
+  { value: "ios-development", label: "iOS Development" },
+  { value: "it-support-troubleshooting", label: "IT Support & Troubleshooting" },
+  { value: "lead-generation", label: "Lead Generation" },
+  { value: "legal-services", label: "Legal Services" },
+  { value: "logo-branding", label: "Logo & Branding" },
+  { value: "market-research", label: "Market Research" },
+  { value: "mobile-development", label: "Mobile App Development" },
+  { value: "motion-graphics", label: "Motion Graphics & Animation" },
+  { value: "network-administration", label: "Network Administration" },
+  { value: "nlp-chatbots", label: "NLP & Chatbots" },
+  { value: "other", label: "Other / General" },
+  { value: "product-design", label: "Product Design" },
+  { value: "project-management", label: "Project Management" },
+  { value: "seo-sem", label: "SEO & SEM" },
+  { value: "social-media-marketing", label: "Social Media Marketing" },
+  { value: "technical-writing", label: "Technical Writing" },
+  { value: "translation-localization", label: "Translation & Localization" },
+  { value: "ui-ux-design", label: "UI/UX Design" },
+  { value: "video-editing", label: "Video Editing" },
+  { value: "virtual-assistant", label: "Virtual Assistant" },
+  { value: "web-development", label: "Web Development" },
 ];
 
 const PRIORITIES = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-  { value: "urgent", label: "Urgent" },
+  { value: "low", label: "Low Priority" },
+  { value: "medium", label: "Medium Priority" },
+  { value: "high", label: "High Priority" },
+  { value: "urgent", label: "Urgent Priority" },
 ];
 
 const TASK_TYPES = [
@@ -35,28 +81,55 @@ const TASK_TYPES = [
   { value: "milestone-based", label: "Milestone Based" },
 ];
 
+const COMPLEXITY_LEVELS = [
+  { value: "beginner", label: "Beginner - Simple tasks" },
+  { value: "intermediate", label: "Intermediate - Specialized skills" },
+  { value: "expert", label: "Expert - High-level expertise" },
+];
+
+const DURATIONS = [
+  { value: "less-than-1-week", label: "Less than 1 week" },
+  { value: "1-2-weeks", label: "1 to 2 weeks" },
+  { value: "2-4-weeks", label: "2 to 4 weeks" },
+  { value: "1-month", label: "1 month" },
+  { value: "1-3-months", label: "1 to 3 months" },
+  { value: "3-6-months", label: "3 to 6 months" },
+  { value: "6-months-1-year", label: "6 months to 1 year" },
+  { value: "more-than-1-year", label: "More than 1 year" },
+];
+
 const schema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(50, "Description must be at least 50 characters to provide enough context for vendors"),
+  description: z.string().min(50, "Description must be at least 50 characters"),
   requirements: z.string().min(30, "Requirements must be at least 30 characters"),
   budget: z.coerce.number().positive("Enter a valid budget greater than zero"),
-  deadline: z.string().min(1, "Deadline is required"),
+  deadline: z.any().refine(val => !!val, "Deadline is required"),
   category: z.string().min(1, "Category is required"),
-  priority: z.string().default("medium"),
-  taskType: z.string().default("fixed-price"),
+  priority: z.string().min(1, "Priority is required"),
+  taskType: z.string().min(1, "Task type is required"),
+  complexity: z.string().min(1, "Complexity is required"),
+  duration: z.string().min(1, "Duration is required"),
   skills: z.array(z.string()).min(1, "At least one skill is required"),
 });
+
+const ErrorMsg = ({ children }) => (
+  <div className="mt-2 flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-[11px] font-bold tracking-tight text-error animate-in fade-in slide-in-from-top-1 border border-error/20">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
+        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,16,0v40A8,8,0,0,1,144,176ZM128,80a12,12,0,1,1-12,12A12,12,0,0,1,128,80Z"></path>
+    </svg>
+    <span className="leading-none">{children}</span>
+  </div>
+);
 
 const AddTask = () => {
   const navigate = useNavigate();
   const { isApproved } = useApprovalStatus();
-  const [skills, setSkills] = useState([""]);
+  const [skillsInput, setSkillsInput] = useState("");
 
   const {
     register,
     handleSubmit,
     control,
-    setValue,
     watch,
     formState: { errors, isSubmitting },
   } = useForm({
@@ -66,20 +139,37 @@ const AddTask = () => {
       description: "",
       requirements: "",
       budget: "",
-      deadline: "",
+      deadline: null,
       category: "",
       priority: "medium",
       taskType: "fixed-price",
-      skills: [""],
+      complexity: "intermediate",
+      duration: "1-3-months",
+      skills: [],
     },
   });
+
+  const watchAll = watch();
+  const isSubmitDisabled = 
+    !isApproved || 
+    isSubmitting || 
+    !watchAll.title?.trim() || 
+    !watchAll.description?.trim() || 
+    !watchAll.requirements?.trim() || 
+    !watchAll.budget || 
+    !watchAll.deadline || 
+    !watchAll.category || 
+    !watchAll.priority || 
+    !watchAll.taskType || 
+    !watchAll.complexity || 
+    !watchAll.duration || 
+    watchAll.skills.length === 0;
 
   const onSubmit = async (data) => {
     try {
       const payload = {
         ...data,
         budget: Number(data.budget),
-        skills: data.skills.filter(s => s.trim() !== ""),
       };
       await taskAPI.createTask(payload);
       toastUtil.success("Task posted successfully");
@@ -89,30 +179,9 @@ const AddTask = () => {
     }
   };
 
-  const handleAddSkill = () => {
-    const newSkills = [...skills, ""];
-    setSkills(newSkills);
-    setValue("skills", newSkills);
-  };
-
-  const handleRemoveSkill = (index) => {
-    const newSkills = skills.filter((_, i) => i !== index);
-    setSkills(newSkills);
-    setValue("skills", newSkills);
-  };
-
-  const handleSkillChange = (index, value) => {
-    const newSkills = [...skills];
-    newSkills[index] = value;
-    setSkills(newSkills);
-    setValue("skills", newSkills);
-  };
-
   return (
     <PageTransition>
       <div className="mx-auto max-w-4xl space-y-8 pb-12 pt-4">
-        
-
         {!isApproved && (
           <div className="rounded-2xl bg-warning/10 px-6 py-4 text-sm text-warning font-bold border border-warning/20 flex items-center gap-3">
             <Lightning className="h-5 w-5 shrink-0" weight="fill" />
@@ -127,31 +196,53 @@ const AddTask = () => {
             icon={<Briefcase className="h-5 w-5" />}
           >
             <FormFieldGrid>
-              <Input
-                label="Task Title"
-                placeholder="e.g. Modern E-commerce Website Development"
-                disabled={!isApproved}
-                error={errors.title?.message}
-                className="md:col-span-2"
-                {...register("title")}
-              />
+              <div className="md:col-span-2 space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Task Title</Label>
+                <Input
+                  placeholder="e.g. Modern E-commerce Website Development"
+                  disabled={!isApproved}
+                  {...register("title")}
+                />
+                {errors.title && <ErrorMsg>{errors.title.message}</ErrorMsg>}
+              </div>
               
-              <Select
-                label="Category"
-                placeholder="Select a category"
-                options={CATEGORIES}
-                disabled={!isApproved}
-                error={errors.category?.message}
-                {...register("category")}
-              />
+              <div className="space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Category</Label>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchableSelect
+                      options={CATEGORIES}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select category"
+                      searchPlaceholder="Search categories..."
+                      disabled={!isApproved}
+                    />
+                  )}
+                />
+                {errors.category && <ErrorMsg>{errors.category.message}</ErrorMsg>}
+              </div>
 
-              <Select
-                label="Priority Level"
-                options={PRIORITIES}
-                disabled={!isApproved}
-                error={errors.priority?.message}
-                {...register("priority")}
-              />
+              <div className="space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Priority Level</Label>
+                <Controller
+                  name="priority"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchableSelect
+                      options={PRIORITIES}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select priority"
+                      searchPlaceholder="Search priorities..."
+                      disabled={!isApproved}
+                    />
+                  )}
+                />
+                {errors.priority && <ErrorMsg>{errors.priority.message}</ErrorMsg>}
+              </div>
             </FormFieldGrid>
           </FormSection>
 
@@ -161,23 +252,27 @@ const AddTask = () => {
             icon={<ListChecks className="h-5 w-5" />}
           >
             <div className="space-y-6">
-              <Textarea
-                label="Project Description"
-                placeholder="Describe the overall project goals, context, and what you aim to achieve..."
-                rows={6}
-                disabled={!isApproved}
-                error={errors.description?.message}
-                {...register("description")}
-              />
+              <div className="space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Project Description</Label>
+                <Textarea
+                  placeholder="Describe the overall project goals, context, and what you aim to achieve..."
+                  rows={6}
+                  disabled={!isApproved}
+                  {...register("description")}
+                />
+                {errors.description && <ErrorMsg>{errors.description.message}</ErrorMsg>}
+              </div>
 
-              <Textarea
-                label="Technical Requirements & Deliverables"
-                placeholder="List specific technical requirements, tools, features, and final deliverables expected..."
-                rows={4}
-                disabled={!isApproved}
-                error={errors.requirements?.message}
-                {...register("requirements")}
-              />
+              <div className="space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Technical Deliverables & Requirements</Label>
+                <Textarea
+                  placeholder="Define exact artifacts to be handed over (e.g. 'GitHub Source Code', 'Deployed URL', 'Postman Collection', 'Documentation PDF')..."
+                  rows={4}
+                  disabled={!isApproved}
+                  {...register("requirements")}
+                />
+                {errors.requirements && <ErrorMsg>{errors.requirements.message}</ErrorMsg>}
+              </div>
             </div>
           </FormSection>
 
@@ -186,74 +281,145 @@ const AddTask = () => {
             description="What specific skills should the vendor possess?"
             icon={<Tag className="h-5 w-5" />}
           >
-            <Controller
-              name="skills"
-              control={control}
-              render={({ field }) => (
-                <DynamicListField
-                  label="Required Skills"
-                  items={skills}
-                  onAdd={handleAddSkill}
-                  onRemove={handleRemoveSkill}
-                  onChange={handleSkillChange}
-                  placeholder="e.g. React.js"
-                  addLabel="Add Skill"
-                  disabled={!isApproved}
-                  error={errors.skills?.message}
-                  helperText="Press the button below to add more specific skills."
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Complexity Level</Label>
+                  <Controller
+                    name="complexity"
+                    control={control}
+                    render={({ field }) => (
+                      <SearchableSelect
+                        options={COMPLEXITY_LEVELS}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select complexity"
+                        searchPlaceholder="Search complexity levels..."
+                        disabled={!isApproved}
+                      />
+                    )}
+                  />
+                  {errors.complexity && <ErrorMsg>{errors.complexity.message}</ErrorMsg>}
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Expected Duration</Label>
+                  <Controller
+                    name="duration"
+                    control={control}
+                    render={({ field }) => (
+                      <SearchableSelect
+                        options={DURATIONS}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select duration"
+                        searchPlaceholder="Search project durations..."
+                        disabled={!isApproved}
+                      />
+                    )}
+                  />
+                  {errors.duration && <ErrorMsg>{errors.duration.message}</ErrorMsg>}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Controller
+                  name="skills"
+                  control={control}
+                  render={({ field }) => (
+                    <SkillsTagInput
+                      skills={field.value}
+                      skillsInput={skillsInput}
+                      onChange={setSkillsInput}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === ",") {
+                          e.preventDefault();
+                          const val = (e.overrideValue || skillsInput).trim();
+                          if (val && !field.value.some(s => s.toLowerCase() === val.toLowerCase())) {
+                            field.onChange([...field.value, val]);
+                            setSkillsInput("");
+                          }
+                        }
+                      }}
+                      onRemove={(skill) => field.onChange(field.value.filter((s) => s !== skill))}
+                      disabled={!isApproved}
+                    />
+                  )}
                 />
-              )}
-            />
+                {errors.skills && <ErrorMsg>{errors.skills.message}</ErrorMsg>}
+              </div>
+            </div>
           </FormSection>
 
           <FormSection
             title="Timeline & Budget"
             description="Define your financial scope and project deadlines."
             icon={<CurrencyDollar className="h-5 w-5" />}
-            footer={(
-              <FormActionRow>
-                <Button
-                  type="submit"
-                  loading={isSubmitting}
-                  disabled={!isApproved}
-                  size="lg"
-                  className="w-full sm:w-auto font-black uppercase tracking-widest px-10"
-                >
-                  <PlusIcon className="h-5 w-5 mr-2" weight="bold" />
-                  Publish Task
-                </Button>
-              </FormActionRow>
-            )}
           >
             <FormFieldGrid className="sm:grid-cols-3">
-              <Select
-                label="Payment Type"
-                options={TASK_TYPES}
-                disabled={!isApproved}
-                error={errors.taskType?.message}
-                {...register("taskType")}
-              />
+              <div className="space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Payment Type</Label>
+                <Controller
+                  name="taskType"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchableSelect
+                      options={TASK_TYPES}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select type"
+                      searchPlaceholder="Search payment types..."
+                      disabled={!isApproved}
+                    />
+                  )}
+                />
+                {errors.taskType && <ErrorMsg>{errors.taskType.message}</ErrorMsg>}
+              </div>
 
-              <Input
-                label="Budget (USD)"
-                type="number"
-                placeholder="e.g. 500"
-                disabled={!isApproved}
-                error={errors.budget?.message}
-                icon={<CurrencyDollar className="h-4 w-4" />}
-                {...register("budget")}
-              />
+              <div className="space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Budget (USD)</Label>
+                <Input
+                  type="number"
+                  numericOnly
+                  placeholder="e.g. 500"
+                  disabled={!isApproved}
+                  icon={<CurrencyDollar className="h-4 w-4" />}
+                  {...register("budget")}
+                />
+                {errors.budget && <ErrorMsg>{errors.budget.message}</ErrorMsg>}
+              </div>
 
-              <Input
-                label="Deadline"
-                type="date"
-                disabled={!isApproved}
-                error={errors.deadline?.message}
-                icon={<Calendar className="h-4 w-4" />}
-                {...register("deadline")}
-              />
+              <div className="space-y-1">
+                <Label className="mb-2 block text-[10px] font-black uppercase tracking-widest text-foreground">Submission Deadline</Label>
+                <Controller
+                  name="deadline"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={!isApproved}
+                      placeholder="Select deadline date"
+                    />
+                  )}
+                />
+                {errors.deadline && <ErrorMsg>{errors.deadline.message}</ErrorMsg>}
+              </div>
             </FormFieldGrid>
           </FormSection>
+
+          <div className="pt-4">
+            <Button
+              type="submit"
+              loading={isSubmitting}
+              disabled={isSubmitDisabled}
+              variant="primary"
+              size="lg"
+              className="w-full h-14 rounded-xl shadow-soft font-normal text-base"
+            >
+              {isSubmitting ? "Publishing..." : "Publish Task"}
+            </Button>
+          </div>
         </form>
       </div>
     </PageTransition>

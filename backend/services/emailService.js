@@ -37,7 +37,7 @@ class EmailService {
     if (!this.transporter) return { success: false, error: "Transporter not ready" };
     try {
         const info = await this.transporter.sendMail({
-            from: process.env.EMAIL_FROM || '"VendorLink" <support.vendorlink@gmail.com>',
+            from: process.env.EMAIL_FROM || '"Vendorlink" <support.vendorlink@gmail.com>',
             to,
             subject,
             html
@@ -52,17 +52,17 @@ class EmailService {
   async sendOnboardingWelcome(user) {
     const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
-            <h1 style="font-size: 24px;">Welcome to VendorLink, ${user.fullName}!</h1>
+            <h1 style="font-size: 24px;">Welcome to Vendorlink, ${user.fullName}!</h1>
             <p>Your registration is successful and is now being reviewed by our team.</p>
             <p><strong>Account Type:</strong> ${user.role.toUpperCase()}</p>
             <p>We will notify you once your account is verified.</p>
             <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from Vendorlink.</p>
         </div>
     `;
     return this.sendEmail({
         to: user.email,
-        subject: "Welcome to VendorLink - Application Received",
+        subject: "Welcome to Vendorlink - Application Received",
         html
     });
   }
@@ -73,7 +73,7 @@ class EmailService {
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
             <h1 style="font-size: 24px; color: #ef4444;">Application Update</h1>
             <p>Hello ${fullName},</p>
-            <p>Thank you for your interest in VendorLink. After reviewing your profile application, we unfortunately cannot approve it at this time.</p>
+            <p>Thank you for your interest in Vendorlink. After reviewing your profile application, we unfortunately cannot approve it at this time.</p>
             <div style="background: #fef2f2; border: 1px solid #fee2e2; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <p style="margin: 0; font-weight: bold; color: #991b1b;">Reason for rejection:</p>
                 <p style="margin: 10px 0 0 0; color: #b91c1c;">${reason}</p>
@@ -82,12 +82,12 @@ class EmailService {
             <a href="${onboardingUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Update & Re-apply</a>
             <p style="margin-top: 20px;">If you have any questions, feel free to reply to this email.</p>
             <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from Vendorlink.</p>
         </div>
     `;
     return this.sendEmail({
         to: email,
-        subject: "Action Required: Your VendorLink Application",
+        subject: "Action Required: Your Vendorlink Application",
         html
     });
   }
@@ -107,7 +107,7 @@ class EmailService {
       `;
       return this.sendEmail({
         to: email,
-        subject: "Your New Password - VendorLink",
+        subject: "Your New Password - Vendorlink",
         html
     });
   }
@@ -118,19 +118,19 @@ class EmailService {
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
             <h1 style="font-size: 24px; color: #10b981;">Account Approved!</h1>
             <p>Hello ${user.fullName || user.username || "User"},</p>
-            <p>We are excited to inform you that your VendorLink account has been successfully verified and approved.</p>
+            <p>We are excited to inform you that your Vendorlink account has been successfully verified and approved.</p>
             <p>You now have full access to our platform to ${user.role === 'company' ? 'post tasks and hire expert vendors' : 'browse tasks and submit proposals'}.</p>
             <div style="margin: 30px 0;">
                 <a href="${dashboardUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Go to Dashboard</a>
             </div>
             <p>Welcome aboard!</p>
             <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from Vendorlink.</p>
         </div>
     `;
     return this.sendEmail({
         to: user.email,
-        subject: "Your VendorLink Account is Approved!",
+        subject: "Your Vendorlink Account is Approved!",
         html
     });
   }
@@ -140,18 +140,18 @@ class EmailService {
     const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
             <h1 style="font-size: 24px;">Verify Your Email</h1>
-            <p>Thank you for registering with VendorLink. Please click the button below to verify your email address:</p>
+            <p>Thank you for registering with Vendorlink. Please click the button below to verify your email address:</p>
             <div style="margin: 30px 0;">
                 <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Verify Email Address</a>
             </div>
             <p>If you did not create an account, please ignore this email.</p>
             <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from Vendorlink.</p>
         </div>
     `;
     return this.sendEmail({
         to: email,
-        subject: "Verify your VendorLink email",
+        subject: "Verify your Vendorlink email",
         html
     });
   }
@@ -161,18 +161,18 @@ class EmailService {
     const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
             <h1 style="font-size: 24px;">Reset Your Password</h1>
-            <p>You requested a password reset for your VendorLink account. Click the button below to set a new password:</p>
+            <p>You requested a password reset for your Vendorlink account. Click the button below to set a new password:</p>
             <div style="margin: 30px 0;">
                 <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Reset Password</a>
             </div>
             <p>This link will expire in 1 hour. If you did not request a password reset, please ignore this email.</p>
             <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #71717a;">This is an automated message from VendorLink.</p>
+            <p style="font-size: 12px; color: #71717a;">This is an automated message from Vendorlink.</p>
         </div>
     `;
     return this.sendEmail({
         to: email,
-        subject: "Password Reset Request - VendorLink",
+        subject: "Password Reset Request - Vendorlink",
         html
     });
   }

@@ -51,7 +51,7 @@ const MyTaskPage = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [search, setMagnifyingGlass] = useState("");
+  const [search, setSearch] = useState("");
   const [tab, setTab] = useState(0);
 
   // Modal states
@@ -292,8 +292,8 @@ const MyTaskPage = () => {
 
             <FilterSearchBar
               searchValue={search}
-              onSearchChange={setMagnifyingGlass}
-              searchPlaceholder="search by task name"
+              onSearchChange={setSearch}
+              searchPlaceholder="Search tasks by title, category, or status..."
               activeTab={tab}
               onTabChange={setTab}
               tabs={tabOptions.map(t => `${t.label} (${t.count})`)}

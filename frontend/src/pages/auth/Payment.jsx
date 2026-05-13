@@ -60,8 +60,7 @@ const Payment = () => {
 
           <p className="text-muted-foreground mb-8 leading-relaxed">
             Payment integration is currently under development. You can access
-            your dashboard and start using VendorLink with the free plan.
-          </p>
+            your dashboard and start using Vendorlink with the free plan.          </p>
 
           <Button
             variant="secondary"

@@ -38,7 +38,7 @@ const AboutSection = () => {
             <p
               className="text-base sm:text-lg text-muted-foreground mb-8 font-medium leading-relaxed"
             >
-              VendorLink was founded with a simple goal: to eliminate the friction and 
+              Vendorlink was founded with a simple goal: to eliminate the friction and 
               uncertainty often associated with finding and managing external partners. 
               We believe that every business deserves access to verified talent, and 
               every vendor deserves a platform that rewards excellence.

@@ -111,7 +111,7 @@ const skillBasedFallbackRanking = (task, proposals, vendorsData) => {
     const matchingSkills = [];
     proposalSkills.forEach((skill) => {
       if (taskText.includes(skill)) {
-        matchingSkills.append(skill);
+        matchingSkills.push(skill);
       }
       for (const common of commonSkills) {
         if (skill.includes(common) || common.includes(skill)) {

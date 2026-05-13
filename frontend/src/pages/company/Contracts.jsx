@@ -24,6 +24,7 @@ import {
   DataTable,
   StatCard,
   Loader,
+  Skeleton,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -49,7 +50,7 @@ const CompanyContracts = () => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
-  const [search, setMagnifyingGlass] = useState("");
+  const [search, setSearch] = useState("");
 
   // Modal states
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
@@ -243,8 +244,8 @@ const CompanyContracts = () => {
 
         <FilterSearchBar
           searchValue={search}
-          onSearchChange={setMagnifyingGlass}
-          searchPlaceholder="search by contract title or vendor..."
+          onSearchChange={setSearch}
+          searchPlaceholder="Search agreements by task or client..."
           activeTab={statusTabs.indexOf(filter)}
           onTabChange={(index) => setFilter(statusTabs[index] || "all")}
           tabs={tabOptions.map(t => `${t.label} (${t.count})`)}

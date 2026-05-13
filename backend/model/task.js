@@ -55,6 +55,15 @@ const taskSchema = new mongoose.Schema({
     enum: ["fixed-price", "hourly", "milestone-based"],
     default: "fixed-price"
   },
+  complexity: {
+    type: String,
+    enum: ["beginner", "intermediate", "expert"],
+    default: "intermediate"
+  },
+  duration: {
+    type: String,
+    default: "1-3-months"
+  },
   createdAt: {
     type: Date,
     default: Date.now,

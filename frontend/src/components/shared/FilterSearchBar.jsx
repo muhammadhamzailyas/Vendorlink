@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 const FilterSearchBar = ({
   searchValue,
   onSearchChange,
-  searchPlaceholder = "MagnifyingGlass...",
+  searchPlaceholder = "Search...",
   activeTab,
   onTabChange,
   tabs = [],

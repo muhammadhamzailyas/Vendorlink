@@ -3,16 +3,17 @@ import { CaretDown, MagnifyingGlass, Check } from "@phosphor-icons/react";
 import { Popover, PopoverTrigger, PopoverContent, ScrollArea } from "../../ui";
 import { cn } from "@/lib/cn";
 
-const MagnifyingGlassableSelect = ({ 
+const SearchableSelect = ({ 
   options, 
   value, 
   onChange, 
   placeholder, 
   className,
-  searchPlaceholder = "MagnifyingGlass options..." 
+  searchPlaceholder = "Search options...",
+  disabled = false
 }) => {
   const [open, setOpen] = useState(false);
-  const [search, setMagnifyingGlass] = useState("");
+  const [search, setSearch] = useState("");
 
   const filteredOptions = useMemo(() => {
     return options.filter(opt => 
@@ -27,8 +28,9 @@ const MagnifyingGlassableSelect = ({
       <PopoverTrigger asChild>
         <button
           type="button"
+          disabled={disabled}
           className={cn(
-            "flex h-12 w-full items-center justify-between rounded-xl border border-input-border bg-input-bg px-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-input-focus/15 focus:border-input-focus",
+            "flex h-12 w-full items-center justify-between rounded-xl border border-input-border bg-input-bg px-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-input-focus/15 focus:border-input-focus disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
             !value && "text-muted-foreground/60",
             value && "text-foreground font-medium",
             className
@@ -47,7 +49,7 @@ const MagnifyingGlassableSelect = ({
               placeholder={searchPlaceholder}
               className="w-full bg-transparent pl-8 pr-3 py-2 text-xs focus:outline-none text-foreground font-medium"
               value={search}
-              onChange={(e) => setMagnifyingGlass(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
@@ -60,7 +62,7 @@ const MagnifyingGlassableSelect = ({
                 onClick={() => {
                   onChange(opt.value);
                   setOpen(false);
-                  setMagnifyingGlass("");
+                  setSearch("");
                 }}
                 className={cn(
                   "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all text-left",
@@ -81,7 +83,7 @@ const MagnifyingGlassableSelect = ({
   );
 };
 
-export default MagnifyingGlassableSelect;
+export default SearchableSelect;
 
 
 

@@ -940,7 +940,7 @@ class PaymentController {
         </table>
         <div class="total">Total: ${formatCurrency(payment.amount)}</div>
         ${payment.notes ? `<p><strong>Notes:</strong> ${payment.notes}</p>` : ""}
-        <div class="footer">This is a computer generated invoice - VendorLink</div>
+        <div class="footer">This is a computer generated invoice - Vendorlink</div>
       </div>
     </body>
     </html>`;

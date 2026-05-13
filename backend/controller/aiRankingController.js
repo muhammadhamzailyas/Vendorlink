@@ -35,6 +35,10 @@ class AIRankingController {
       // Prepare vendor history context
       const vendorsData = {};
       for (const proposal of proposals) {
+        if (!proposal.vendorId) {
+          console.warn(`[AIRankingController] Skipping proposal ${proposal._id} because vendorId is missing.`);
+          continue;
+        }
         const vendorId = proposal.vendorId._id.toString();
 
         const contracts = await Contract.find({

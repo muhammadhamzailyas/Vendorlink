@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Input } from "../../ui";
-import MagnifyingGlassableSelect from "./SearchableSelect";
+import SearchableSelect from "./SearchableSelect";
 import { Country, State, City } from "country-state-city";
 
 // Fetch all countries and format for select
@@ -41,7 +41,7 @@ const AddressFields = ({ data, onChange, errors = {} }) => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MagnifyingGlassableSelect
+          <SearchableSelect
             value={data.country}
             placeholder="Select Country"
             searchPlaceholder="Search country..."
@@ -61,7 +61,7 @@ const AddressFields = ({ data, onChange, errors = {} }) => {
           />
           
           {provinceOptions.length > 0 ? (
-            <MagnifyingGlassableSelect
+            <SearchableSelect
               value={data.province}
               placeholder="Province / State"
               searchPlaceholder="Search province..."
@@ -84,7 +84,7 @@ const AddressFields = ({ data, onChange, errors = {} }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {cityOptions.length > 0 ? (
-            <MagnifyingGlassableSelect
+            <SearchableSelect
               value={data.city}
               placeholder="City"
               searchPlaceholder="Search city..."

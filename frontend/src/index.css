@@ -1,4 +1,40 @@
 @import "tailwindcss";
+@import "react-day-picker/style.css";
+
+/* Pointer Cursors for interactive elements */
+button, 
+[role="button"],
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+input[type="submit"],
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+/* Custom DayPicker Styling (Shadcn style overrides) */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: var(--color-foreground);
+  --rdp-background-color: var(--color-accent);
+  margin: 0;
+}
+
+.rdp-day_today {
+  font-weight: bold;
+  color: var(--color-foreground);
+}
+
+.rdp-day_selected {
+  background-color: var(--color-foreground) !important;
+  color: var(--color-background) !important;
+  border-radius: 8px;
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: var(--color-muted);
+}
 
 @theme {
   /* =========================
@@ -111,17 +147,38 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--color-background) !important;
+    background: transparent !important;
   }
 
   ::-webkit-scrollbar-thumb {
     background: var(--color-border);
     border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
     transition: background 0.2s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-ring);
+    background: var(--color-muted-foreground);
+    background-clip: content-box;
+  }
+
+  textarea::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  textarea::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  textarea::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+
+  textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted-foreground);
   }
 
   /* Target specific containers that might have forced backgrounds */

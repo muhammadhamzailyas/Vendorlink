@@ -64,7 +64,7 @@ const Button = React.forwardRef(
         <Comp
           ref={ref}
           disabled={disabled || loading}
-          className={cn(buttonVariants({ variant, size }), className)}
+          className={cn(buttonVariants({ variant, size }), "cursor-pointer", className)}
           {...props}
         >
           {React.cloneElement(child, undefined, mergedChildren)}
@@ -76,7 +76,7 @@ const Button = React.forwardRef(
       <Comp
         ref={ref}
         disabled={disabled || loading}
-        className={cn(buttonVariants({ variant, size }), className)}
+        className={cn(buttonVariants({ variant, size }), "cursor-pointer", className)}
         {...props}
       >
         {adornment}

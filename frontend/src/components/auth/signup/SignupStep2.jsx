@@ -4,27 +4,61 @@ import AddressFields from "./AddressFields";
 import CompanyBusinessFields from "./CompanyBusinessFields";
 import VendorBusinessFields from "./VendorBusinessFields";
 import SkillsTagInput from "./SkillsTagInput";
-import MagnifyingGlassableSelect from "./SearchableSelect";
-
-const RAW_VENDOR_CATEGORIES = [
-  { value: "Web Development", label: "Web & Software Development" },
-  { value: "Mobile Development", label: "Mobile App Development" },
-  { value: "AI & Data Science", label: "AI, Machine Learning & Data Science" },
-  { value: "Graphic Design", label: "Graphics, Design & Branding" },
-  { value: "Digital Marketing", label: "Digital Marketing, SEO & Social Media" },
-  { value: "Writing & Translation", label: "Writing, Content & Translation" },
-  { value: "Video & Animation", label: "Video, Animation & Motion Graphics" },
-  { value: "Music & Audio", label: "Music, Audio & Voice-over" },
-  { value: "Business & Consulting", label: "Business, Consulting & Strategy" },
-  { value: "Sales & Support", label: "Sales, CRM & Customer Support" },
-  { value: "Accounting & Finance", label: "Accounting, Tax & Finance" },
-  { value: "Legal", label: "Legal, Contract & Compliance" },
-  { value: "Architecture", label: "Architecture & Interior Design" },
-  { value: "Engineering", label: "Engineering & Manufacturing" },
-];
+import SearchableSelect from "./SearchableSelect";
 
 const VENDOR_CATEGORY_OPTIONS = [
-  ...RAW_VENDOR_CATEGORIES.sort((a, b) => a.label.localeCompare(b.label)),
+  { value: "3D Modeling & Rendering", label: "3D Modeling & Rendering" },
+  { value: "AI & Machine Learning", label: "AI & Machine Learning" },
+  { value: "Android App Development", label: "Android App Development" },
+  { value: "Architecture & Interior Design", label: "Architecture & Interior Design" },
+  { value: "Backend Development", label: "Backend Development" },
+  { value: "Big Data & Analytics", label: "Big Data & Analytics" },
+  { value: "Blockchain & Cryptocurrency", label: "Blockchain & Cryptocurrency" },
+  { value: "Business Consulting", label: "Business Consulting" },
+  { value: "CAD & Engineering", label: "CAD & Engineering" },
+  { value: "Computer Vision", label: "Computer Vision" },
+  { value: "Content Marketing", label: "Content Marketing" },
+  { value: "Content Writing", label: "Content Writing" },
+  { value: "Copywriting", label: "Copywriting" },
+  { value: "Customer & Tech Support", label: "Customer & Tech Support" },
+  { value: "Cybersecurity & Security Audit", label: "Cybersecurity & Security Audit" },
+  { value: "Data Engineering", label: "Data Engineering" },
+  { value: "Data Entry", label: "Data Entry" },
+  { value: "Data Science & Analytics", label: "Data Science & Analytics" },
+  { value: "Desktop Software Development", label: "Desktop Software Development" },
+  { value: "DevOps & Cloud Computing", label: "DevOps & Cloud Computing" },
+  { value: "Digital Marketing & SEO", label: "Digital Marketing & SEO" },
+  { value: "E-commerce Development", label: "E-commerce Development" },
+  { value: "Editing & Proofreading", label: "Editing & Proofreading" },
+  { value: "Email Marketing", label: "Email Marketing" },
+  { value: "Financial & Accounting", label: "Financial & Accounting" },
+  { value: "Frontend Development", label: "Frontend Development" },
+  { value: "Full-Stack Development", label: "Full-Stack Development" },
+  { value: "Game Development", label: "Game Development" },
+  { value: "Ghostwriting", label: "Ghostwriting" },
+  { value: "Graphics & Brand Design", label: "Graphics & Brand Design" },
+  { value: "HR & Recruitment", label: "HR & Recruitment" },
+  { value: "Illustration", label: "Illustration" },
+  { value: "iOS App Development", label: "iOS App Development" },
+  { value: "IT Support & Troubleshooting", label: "IT Support & Troubleshooting" },
+  { value: "Lead Generation", label: "Lead Generation" },
+  { value: "Legal Services", label: "Legal Services" },
+  { value: "Logo & Branding", label: "Logo & Branding" },
+  { value: "Market Research", label: "Market Research" },
+  { value: "Mobile App Development", label: "Mobile App Development" },
+  { value: "Motion Graphics & Animation", label: "Motion Graphics & Animation" },
+  { value: "Network Administration", label: "Network Administration" },
+  { value: "NLP & Chatbots", label: "NLP & Chatbots" },
+  { value: "Product Design", label: "Product Design" },
+  { value: "Project Management", label: "Project Management" },
+  { value: "SEO & SEM", label: "SEO & SEM" },
+  { value: "Social Media Marketing", label: "Social Media Marketing" },
+  { value: "Technical Writing", label: "Technical Writing" },
+  { value: "Translation & Localization", label: "Translation & Localization" },
+  { value: "UI/UX Design", label: "UI/UX Design" },
+  { value: "Video Editing", label: "Video Editing" },
+  { value: "Virtual Assistant", label: "Virtual Assistant" },
+  { value: "Web Development", label: "Web Development" },
   { value: "Other", label: "Other / General Services" },
 ];
 
@@ -50,7 +84,7 @@ const SignupStep2 = ({
         <>
             <VendorBusinessFields data={data} errors={errors} onChange={onChange} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <MagnifyingGlassableSelect
+                <SearchableSelect
                 value={data.category}
                 placeholder="Service Category"
                 searchPlaceholder="Search category..."
@@ -75,16 +109,10 @@ const SignupStep2 = ({
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ',') {
                         e.preventDefault();
-                        const val = data.skillsInput.trim();
-                        if (val && !data.skills.includes(val)) {
+                        const val = (e.overrideValue || data.skillsInput).trim();
+                        if (val && !data.skills.some(s => s.toLowerCase() === val.toLowerCase())) {
                             onChange({ skills: [...data.skills, val], skillsInput: '' });
                         }
-                    }
-                }}
-                onBlur={() => {
-                    const val = data.skillsInput.trim();
-                    if (val && !data.skills.includes(val)) {
-                        onChange({ skills: [...data.skills, val], skillsInput: '' });
                     }
                 }}
                 onRemove={(skill) => onChange({ skills: data.skills.filter(s => s !== skill) })}

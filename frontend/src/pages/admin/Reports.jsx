@@ -283,7 +283,7 @@ const Reports = () => {
         <FilterSearchBar
             searchValue={searchTerm}
             onSearchChange={setSearchTerm}
-            searchPlaceholder="search global activity logs..."
+            searchPlaceholder="Search activity logs by action or user..."
             activeTab={activeTab}
             onTabChange={setActiveTab}
             tabs={tabOptions.map(t => `${t.label} (${t.count})`)}

@@ -10,6 +10,7 @@ import {
   Clock,
   ArrowRight,
   User,
+  Pulse,
 } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -35,14 +36,59 @@ dayjs.extend(relativeTime);
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
-  { value: "web-development", label: "Web Development" },
-  { value: "mobile-development", label: "Mobile Development" },
-  { value: "graphic-design", label: "Graphic Design" },
-  { value: "digital-marketing", label: "Digital Marketing" },
+  { value: "3d-modeling-rendering", label: "3D Modeling & Rendering" },
+  { value: "ai-ml", label: "AI & Machine Learning" },
+  { value: "android-development", label: "Android Development" },
+  { value: "architecture-interior", label: "Architecture & Interior Design" },
+  { value: "backend-development", label: "Backend Development" },
+  { value: "big-data", label: "Big Data Solutions" },
+  { value: "blockchain-crypto", label: "Blockchain & Cryptocurrency" },
+  { value: "business-consulting", label: "Business Consulting" },
+  { value: "cad-engineering", label: "CAD & Engineering" },
+  { value: "computer-vision", label: "Computer Vision" },
+  { value: "content-marketing", label: "Content Marketing" },
   { value: "content-writing", label: "Content Writing" },
-  { value: "seo", label: "SEO" },
+  { value: "copywriting", label: "Copywriting" },
+  { value: "customer-support", label: "Customer & Tech Support" },
+  { value: "cybersecurity-audit", label: "Cybersecurity & Security Audit" },
+  { value: "data-engineering", label: "Data Engineering" },
   { value: "data-entry", label: "Data Entry" },
-  { value: "other", label: "Other" },
+  { value: "data-science-analytics", label: "Data Science & Analytics" },
+  { value: "desktop-apps", label: "Desktop Software Development" },
+  { value: "devops-cloud", label: "DevOps & Cloud Computing" },
+  { value: "digital-marketing", label: "Digital Marketing" },
+  { value: "ecommerce-development", label: "E-commerce Development" },
+  { value: "editing-proofreading", label: "Editing & Proofreading" },
+  { value: "email-marketing", label: "Email Marketing" },
+  { value: "financial-accounting", label: "Financial & Accounting" },
+  { value: "frontend-development", label: "Frontend Development" },
+  { value: "fullstack-development", label: "Full-Stack Development" },
+  { value: "game-development", label: "Game Development" },
+  { value: "ghostwriting", label: "Ghostwriting" },
+  { value: "graphic-design", label: "Graphic Design" },
+  { value: "hr-recruitment", label: "HR & Recruitment" },
+  { value: "illustration", label: "Illustration" },
+  { value: "ios-development", label: "iOS Development" },
+  { value: "it-support-troubleshooting", label: "IT Support & Troubleshooting" },
+  { value: "lead-generation", label: "Lead Generation" },
+  { value: "legal-services", label: "Legal Services" },
+  { value: "logo-branding", label: "Logo & Branding" },
+  { value: "market-research", label: "Market Research" },
+  { value: "mobile-development", label: "Mobile App Development" },
+  { value: "motion-graphics", label: "Motion Graphics & Animation" },
+  { value: "network-administration", label: "Network Administration" },
+  { value: "nlp-chatbots", label: "NLP & Chatbots" },
+  { value: "other", label: "Other / General" },
+  { value: "product-design", label: "Product Design" },
+  { value: "project-management", label: "Project Management" },
+  { value: "seo-sem", label: "SEO & SEM" },
+  { value: "social-media-marketing", label: "Social Media Marketing" },
+  { value: "technical-writing", label: "Technical Writing" },
+  { value: "translation-localization", label: "Translation & Localization" },
+  { value: "ui-ux-design", label: "UI/UX Design" },
+  { value: "video-editing", label: "Video Editing" },
+  { value: "virtual-assistant", label: "Virtual Assistant" },
+  { value: "web-development", label: "Web Development" },
 ];
 
 const PRICE_RANGES = [
@@ -71,70 +117,80 @@ const PRIORITY_OPTIONS = [
 const TaskWidthCard = ({ task, onOpenDetails }) => {
   return (
     <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
-      <Card.Content className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between">
+      <Card.Content className="relative flex flex-col gap-5 p-6">
+        {/* Top Right: Posted Time */}
+        <div className="absolute top-6 right-6">
+           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+             {dayjs(task.createdAt).fromNow()}
+           </p>
+        </div>
+
         <div className="flex flex-1 flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-black text-[9px] tracking-widest uppercase py-1 px-3">
+          {/* Header Row: Company | Category */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[11px] font-black text-foreground uppercase tracking-widest flex items-center gap-1.5">
+              <Business size={14} className="text-primary" weight="fill" />
+              {task.companyId?.companyName || "Company Name"}
+            </span>
+            <span className="text-muted-foreground/30">|</span>
+            <Badge className="bg-primary/20 text-primary border border-primary/20 font-black text-[9px] tracking-widest uppercase py-1 px-3 rounded-full shadow-sm">
               {task.category?.replace(/-/g, ' ')}
             </Badge>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight flex items-center gap-1.5">
-              <Business size={14} className="opacity-50" />
-              {task.companyId?.companyName || "Verified Company"}
-            </span>
           </div>
 
+          {/* Title and Description */}
           <div className="space-y-1.5">
             <h3 className="text-xl font-black tracking-tight text-foreground uppercase group-hover:text-primary transition-colors line-clamp-1">
               {task.title}
             </h3>
-            <p className="text-xs font-medium text-muted-foreground line-clamp-2 leading-relaxed max-w-3xl">
+            <p className="text-sm font-medium text-muted-foreground/80 line-clamp-2 leading-relaxed max-w-4xl">
               {task.description}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 pt-1">
-             <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-muted/30 flex items-center justify-center text-foreground/70">
-                    <Clock size={16} />
-                </div>
-                <div>
-                    <p className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground">Project Deadline</p>
-                    <p className="text-sm font-bold text-foreground">{dayjs(task.deadline).format("MMM DD, YYYY")}</p>
-                </div>
+          {/* Info & Action Row: Deadline, Budget, Priority, Complexity + Button */}
+          <div className="flex flex-wrap items-end justify-between gap-6 pt-3 border-t border-border/30 mt-1">
+             <div className="flex flex-wrap gap-x-10 gap-y-4">
+                 <div className="flex flex-col">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Project Deadline</p>
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                        <Clock size={16} className="text-muted-foreground/60" />
+                        {dayjs(task.deadline).format("MMM DD, YYYY")}
+                    </div>
+                 </div>
+
+                 <div className="flex flex-col">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Task Budget</p>
+                    <div className="flex items-center gap-1.5 text-sm font-black text-foreground">
+                        <AttachMoney size={16} className="text-muted-foreground/60" />
+                        ${(task.budget || 0).toLocaleString()}
+                    </div>
+                 </div>
+
+                 <div className="flex flex-col">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Priority</p>
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-foreground uppercase">
+                        <Tag size={16} className="text-muted-foreground/60" />
+                        {task.priority || "Medium"}
+                    </div>
+                 </div>
+
+                 <div className="flex flex-col">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1">Complexity</p>
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-foreground uppercase">
+                        <Pulse size={16} className="text-muted-foreground/60" />
+                        {task.complexity || "Intermediate"}
+                    </div>
+                 </div>
              </div>
 
-             <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-muted/30 flex items-center justify-center text-foreground/70">
-                    <AttachMoney size={16} />
-                </div>
-                <div>
-                    <p className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground">Task Budget</p>
-                    <p className="text-sm font-black text-slate-900">$ {(task.budget || 0).toLocaleString()}</p>
-                </div>
-             </div>
-
-             <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-muted/30 flex items-center justify-center text-foreground/70">
-                    <Tag size={16} />
-                </div>
-                <div>
-                    <p className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground">Priority</p>
-                    <p className="text-sm font-bold text-foreground uppercase">{task.priority || "Medium"}</p>
-                </div>
-             </div>
+             <Button 
+               onClick={() => onOpenDetails(task)}
+               className="w-full sm:w-auto font-black uppercase tracking-widest text-[10px] h-10 px-8 shadow-soft"
+             >
+               View Specifications
+             </Button>
           </div>
-        </div>
-
-        <div className="flex items-center md:flex-col md:items-end gap-3 shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-border/40">
-           <p className="hidden md:block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
-             Posted {dayjs(task.createdAt).fromNow()}
-           </p>
-           <Button 
-             onClick={() => onOpenDetails(task)}
-             className="w-full md:w-44 font-black uppercase tracking-widest text-[10px] h-12 shadow-sm"
-           >
-             View Specifications
-           </Button>
         </div>
       </Card.Content>
     </Card>
@@ -255,7 +311,7 @@ const AvailableTasks = () => {
   
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setMagnifyingGlass] = useState("");
+  const [search, setSearch] = useState("");
 
   // Advanced filters
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -334,8 +390,8 @@ const AvailableTasks = () => {
       <div className="space-y-8">
         <FilterSearchBar
           searchValue={search}
-          onSearchChange={setMagnifyingGlass}
-          searchPlaceholder="search by task name"
+          onSearchChange={setSearch}
+          searchPlaceholder="Search available tasks by title or category..."
           className="mb-0"
           filters={(
             <>

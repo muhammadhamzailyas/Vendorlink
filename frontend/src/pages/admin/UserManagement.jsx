@@ -355,7 +355,7 @@ const UserManagement = () => {
         <FilterSearchBar
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          searchPlaceholder="Search by name, or email..."
+          searchPlaceholder="Search users by name, email, or role..."
           activeTab={activeTab}
           onTabChange={setActiveTab}
           tabs={tabOptions.map((tab) => `${tab.label} (${tab.count})`)}

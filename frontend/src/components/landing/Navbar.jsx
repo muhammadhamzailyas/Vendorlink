@@ -29,7 +29,7 @@ const Navbar = ({ scrollToSection }) => {
         >
           <img
             src={logoLight}
-            alt="VendorLink"
+            alt="Vendorlink"
             className="h-5 w-auto"
           />
         </button>
@@ -82,7 +82,7 @@ const Navbar = ({ scrollToSection }) => {
             >
               <img
                 src={logoLight}
-                alt="VendorLink"
+                alt="Vendorlink"
                 className="h-6 w-auto"
               />
             </button>

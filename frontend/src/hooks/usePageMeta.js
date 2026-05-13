@@ -6,7 +6,7 @@ export const usePageMeta = (title, subtitle = "") => {
 
   useEffect(() => {
     setMeta({ title, subtitle });
-    document.title = `${title} — VendorLink`;
+    document.title = `${title} — Vendorlink`;
 
     // Cleanup when component unmounts
     return () => setMeta({ title: "", subtitle: "" });

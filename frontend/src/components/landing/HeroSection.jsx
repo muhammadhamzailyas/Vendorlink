@@ -25,7 +25,7 @@ const HeroSection = () => {
       <div className="relative inline-flex items-center justify-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <img
           src={logo}
-          alt="VendorLink Logo"
+          alt="Vendorlink Logo"
           loading="eager"
           className="w-48 h-auto drop-shadow-2xl"
         />

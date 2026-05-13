@@ -46,7 +46,7 @@ const AdminSettings = () => {
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
   
   const [settings, setSettings] = useState({
-    siteName: "VendorLink",
+    siteName: "Vendorlink",
     contactEmail: "support.vendorlink@gmail.com",
     maintenanceMode: false,
     enableRegistration: true,

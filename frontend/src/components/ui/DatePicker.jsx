@@ -2,7 +2,6 @@ import * as React from "react";
 import dayjs from "dayjs";
 import { Calendar as CalendarIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/cn";
-import { Button } from "./Button";
 import { Calendar } from "./Calendar";
 import {
   Popover,
@@ -10,34 +9,47 @@ import {
   PopoverTrigger,
 } from "./Popover";
 
-export function DatePicker({ value, onChange, placeholder = "Pick a date", className, disabled }) {
+export function DatePicker({ 
+  value, 
+  onChange, 
+  placeholder = "Pick a date", 
+  className, 
+  disabled,
+  disablePastDates = true 
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  const disabledDays = disablePastDates ? { before: dayjs().startOf('day').toDate() } : undefined;
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="secondary"
+        <button
+          type="button"
+          disabled={disabled}
           className={cn(
-            "w-full justify-start text-left font-normal h-11 rounded-xl border-input-border bg-input-bg",
-            !value && "text-muted-foreground",
+            "flex h-12 w-full items-center justify-start rounded-xl border border-input-border bg-input-bg px-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-input-focus/15 focus:border-input-focus disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer relative",
+            !value && "text-muted-foreground/60",
+            value && "text-foreground font-medium",
             className
           )}
-          disabled={disabled}
         >
-          <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-          {value ? dayjs(value).format("MMM D, YYYY") : <span>{placeholder}</span>}
-        </Button>
+          <CalendarIcon className="mr-3 h-4 w-4 text-muted-foreground/60 shrink-0" />
+          <span className="truncate">{value ? dayjs(value).format("MMMM D, YYYY") : placeholder}</span>
+        </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 bg-popover border-border shadow-xl rounded-xl overflow-hidden" align="start">
         <Calendar
           mode="single"
-          selected={value}
-          onSelect={onChange}
+          selected={value ? new Date(value) : undefined}
+          disabled={disabledDays}
+          onSelect={(date) => {
+            onChange(date);
+            setOpen(false);
+          }}
           initialFocus
         />
       </PopoverContent>
     </Popover>
   );
 }
-
-
-

@@ -396,7 +396,7 @@ const TaskMonitoring = () => {
         <FilterSearchBar
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          searchPlaceholder="search by task name"
+          searchPlaceholder="Search tasks by title, company, or category..."
           activeTab={activeTab}
           onTabChange={setActiveTab}
           tabs={tabOptions.map(t => `${t.label} (${t.count})`)}

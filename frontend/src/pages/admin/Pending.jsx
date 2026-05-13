@@ -275,7 +275,7 @@ const Pending = () => {
         <FilterSearchBar
           searchValue={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Search by name and email"
+          searchPlaceholder="Search users by name or email..."
           activeTab={activeTab}
           onTabChange={setActiveTab}
           tabs={tabOptions.map(t => `${t.label} (${t.count})`)}

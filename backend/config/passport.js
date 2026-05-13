@@ -8,16 +8,28 @@ passport.use(new LocalStrategy(
   { usernameField: 'email', passwordField: 'password' },
   async (email, password, done) => {
     try {
+      console.log(`[Auth] Attempting login for: ${email}`);
       const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+password');
-      if (!user || !user.password) {
+      
+      if (!user) {
+        console.log(`[Auth] User not found: ${email}`);
         return done(null, false, { message: 'Invalid email or password' });
       }
+
+      if (!user.password) {
+        console.log(`[Auth] User has no password (OAuth?): ${email}`);
+        return done(null, false, { message: 'Invalid email or password' });
+      }
+
       const isMatch = await user.comparePassword(password);
+      console.log(`[Auth] Password match for ${email}: ${isMatch}`);
+
       if (!isMatch) {
         return done(null, false, { message: 'Invalid email or password' });
       }
       return done(null, user);
     } catch (err) {
+      console.error(`[Auth] LocalStrategy Error:`, err);
       return done(err);
     }
   }

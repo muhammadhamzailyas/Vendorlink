@@ -1,6 +1,6 @@
 import React from "react";
 import { Input, Textarea } from "../../ui";
-import MagnifyingGlassableSelect from "./SearchableSelect";
+import SearchableSelect from "./SearchableSelect";
 
 const BUSINESS_TYPE_OPTIONS = [
   { value: "Private Limited", label: "Private Limited Company" },
@@ -69,7 +69,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
       onChange={(e) => onChange({ companyName: e.target.value })}
     />
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <MagnifyingGlassableSelect
+        <SearchableSelect
           value={data.businessType}
           placeholder="Business Type"
           searchPlaceholder="Search type..."
@@ -77,7 +77,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
           error={errors.businessType}
           onChange={(val) => onChange({ businessType: val })}
         />
-        <MagnifyingGlassableSelect
+        <SearchableSelect
           value={data.industry}
           placeholder="Industry/Sector"
           searchPlaceholder="Search industry..."
@@ -112,7 +112,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
         />
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <MagnifyingGlassableSelect
+        <SearchableSelect
           value={data.yearEstablished}
           placeholder="Year Established"
           searchPlaceholder="Search year..."
@@ -120,7 +120,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
           error={errors.yearEstablished}
           onChange={(val) => onChange({ yearEstablished: val })}
         />
-        <MagnifyingGlassableSelect
+        <SearchableSelect
           value={data.companySize}
           placeholder="Company Size"
           searchPlaceholder="Search size..."
@@ -145,6 +145,3 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
 );
 
 export default CompanyBusinessFields;
-
-
-

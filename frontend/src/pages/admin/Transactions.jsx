@@ -218,7 +218,7 @@ const AdminTransactions = () => {
         <FilterSearchBar
             searchValue={search}
             onSearchChange={setSearch}
-            searchPlaceholder="search by initiator or description"
+            searchPlaceholder="Search transactions by ID, initiator or status..."
             activeTab={activeTab}
             onTabChange={(idx) => { setActiveTab(idx); setPage(1); }}
             tabs={tabOptions.map(t => `${t.label} (${t.count})`)}

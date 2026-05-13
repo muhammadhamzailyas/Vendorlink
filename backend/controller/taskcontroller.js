@@ -12,8 +12,19 @@ class TaskController {
   // Create Task
   async createTask(req, res) {
     try {
-      const { title, description, requirements, budget, deadline, category, skills, priority, taskType } =
-        req.body;
+      const { 
+        title, 
+        description, 
+        requirements, 
+        budget, 
+        deadline, 
+        category, 
+        skills, 
+        priority, 
+        taskType,
+        complexity,
+        duration
+      } = req.body;
 
       if (
         !title ||
@@ -42,6 +53,8 @@ class TaskController {
         skills: Array.isArray(skills) ? skills : [],
         priority: priority || "medium",
         taskType: taskType || "fixed-price",
+        complexity: complexity || "intermediate",
+        duration: duration || "1-3-months",
         companyId: req.user._id,
       });
 

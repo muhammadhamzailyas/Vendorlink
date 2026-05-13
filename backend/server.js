@@ -104,6 +104,7 @@ app.use("/api/contracts", require("./routes/contract"));
 app.use("/api/notifications", require("./routes/notification"));
 app.use("/api/progress", require("./routes/progress"));
 app.use("/api/payments", require("./routes/payment"));
+app.use("/api/chat", require("./routes/chatRouter"));
 app.use("/api/ai", require("./routes/aiRanking"));
 app.use("/api/feedback", require("./routes/feedback"));
 

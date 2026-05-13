@@ -21,6 +21,7 @@ import {
   Loader, 
   StatCard, 
   DataTable,
+  Skeleton,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -40,7 +41,7 @@ const VendorContracts = () => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
-  const [search, setMagnifyingGlass] = useState("");
+  const [search, setSearch] = useState("");
 
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState(null);
@@ -182,8 +183,8 @@ const VendorContracts = () => {
 
         <FilterSearchBar
           searchValue={search}
-          onSearchChange={setMagnifyingGlass}
-          searchPlaceholder="search by task or company name..."
+          onSearchChange={setSearch}
+          searchPlaceholder="Search agreements by task or client..."
           activeTab={statusTabs.indexOf(filter)}
           onTabChange={(index) => setFilter(statusTabs[index] || "all")}
           tabs={tabOptions.map(t => `${t.label} (${t.count})`)}
@@ -230,6 +231,9 @@ const VendorContracts = () => {
 };
 
 export default VendorContracts;
+
+
+
 
 
 

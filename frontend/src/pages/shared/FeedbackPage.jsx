@@ -59,7 +59,11 @@ const FeedbackPage = () => {
                 <DataTable
                   data={feedback}
                   columns={[
-                    { key: "userId.username", label: "User" },
+                    { 
+                      key: "userId.fullName", 
+                      label: "User",
+                      render: (f) => f.userId?.fullName || f.userId?.email || "N/A"
+                    },
                     { key: "userId.email", label: "Email" },
                     { key: "message", label: "Feedback" },
                     { key: "createdAt", label: "Date", render: (f) => new Date(f.createdAt).toLocaleDateString() },

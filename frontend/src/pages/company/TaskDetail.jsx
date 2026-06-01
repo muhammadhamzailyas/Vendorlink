@@ -123,7 +123,7 @@ const CompanyTaskDetail = () => {
                 variant="secondary"
                 onClick={() => navigate(-1)}
               >
-                <ArrowBack className="mr-2 h-4 w-4" />
+                
                 Back
               </Button>
             )}
@@ -197,19 +197,19 @@ const CompanyTaskDetail = () => {
                     onClick={() => setEditModalOpen(true)}
                     className="font-bold uppercase tracking-tight h-8 px-4 border-border/60 hover:bg-muted"
                 >
-                    <PencilSimple className="mr-2 h-4 w-4" weight="bold" />
+                    
                     Edit Task
                 </Button>
             )}
             <Button variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight h-8 px-4">
-              <ArrowBack className="mr-2 h-4 w-4" weight="bold" />
+              
               Back
             </Button>
           </div>
         </div>
 
         {task.selectedVendor && (
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                     <CheckCircle size={28} weight="bold" />
@@ -217,14 +217,14 @@ const CompanyTaskDetail = () => {
                 <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-0.5">Assigned Partner</p>
                     <p className="text-sm font-black text-foreground uppercase tracking-tight">
-                        {task.selectedVendor?.companyName || task.selectedVendor?.username}
+                        {task.selectedVendor?.companyName || task.selectedVendor?.fullName || task.selectedVendor?.email}
                     </p>
                 </div>
             </div>
             <Button 
                 variant="ghost" 
                 size="sm"
-                className="font-black uppercase tracking-widest text-[10px] h-10 px-6 text-primary hover:bg-primary/10 border border-primary/10"
+                className="font-semibold uppercase tracking-widest text-[10px] h-10 px-6 text-primary hover:bg-primary/10 border border-primary/10"
                 onClick={() => setActiveTab("proposals")}
             >
                 View Agreement
@@ -337,6 +337,7 @@ const CompanyTaskDetail = () => {
 };
 
 export default CompanyTaskDetail;
+
 
 
 

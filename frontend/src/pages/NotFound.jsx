@@ -11,10 +11,11 @@ const NotFound = () => (
     <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
       The page you're looking for doesn't exist or has been moved.
     </p>
-    <Button asChild className="mt-8 rounded-xl font-bold uppercase tracking-widest text-[10px] h-11 px-8 shadow-sm">
+    <Button asChild className="mt-8 rounded-xl font-semibold uppercase tracking-widest text-[10px] h-11 px-8 shadow-sm">
       <Link to="/">Go Home</Link>
     </Button>
   </div>
 );
 
 export default NotFound;
+

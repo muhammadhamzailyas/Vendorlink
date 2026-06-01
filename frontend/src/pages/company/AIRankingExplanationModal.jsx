@@ -26,7 +26,7 @@ const AIRankingExplanationModal = ({ open, onX, rankedData }) => {
     <Dialog open={open} onX={onX} className="sm:max-w-4xl" aria-describedby="ai-ranking-description">
       <Dialog.Header className="border-b-0 px-8 pt-10 pb-6">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="p-4 rounded-2xl bg-primary/10 text-primary animate-pulse">
+          <div className="p-4 rounded-xl bg-primary/10 text-primary animate-pulse">
             <Sparkle size={40} weight="fill" />
           </div>
           <div className="space-y-2">
@@ -54,7 +54,7 @@ const AIRankingExplanationModal = ({ open, onX, rankedData }) => {
                     </Badge>
                     <div>
                         <h3 className="text-3xl font-black text-foreground uppercase tracking-tight">
-                            {topChoice.vendorId?.companyName || topChoice.vendorId?.username}
+                            {topChoice.vendorId?.companyName || topChoice.vendorId?.fullName || topChoice.vendorId?.email}
                         </h3>
                         <p className="text-sm font-bold text-primary flex items-center gap-2 mt-1">
                             <Star weight="fill" /> Match Score: {topChoice.aiScore}%
@@ -88,14 +88,14 @@ const AIRankingExplanationModal = ({ open, onX, rankedData }) => {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {rankedData.slice(1).map((proposal, idx) => (
-                        <Card key={idx} className="border-border/60 bg-muted/20 p-5 rounded-2xl hover:border-border transition-colors">
+                        <Card key={idx} className="border-border/60 bg-muted/20 p-5 rounded-xl hover:border-border transition-colors">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-xs font-black">
                                         #{idx + 2}
                                     </div>
                                     <p className="text-sm font-black text-foreground uppercase tracking-tight truncate max-w-[140px]">
-                                        {proposal.vendorId?.companyName || proposal.vendorId?.username}
+                                        {proposal.vendorId?.companyName || proposal.vendorId?.fullName || proposal.vendorId?.email}
                                     </p>
                                 </div>
                                 <Badge variant="outline" className="text-[9px] font-bold border-border/40">
@@ -112,18 +112,18 @@ const AIRankingExplanationModal = ({ open, onX, rankedData }) => {
         )}
       </Dialog.Body>
 
-      <div className="flex items-center justify-center px-8 py-8 border-t border-border/50 bg-muted/20">
+      <div className="grid-cols-1 grid px-8 py-8 border-t border-border/50 bg-muted/20">
           <Button
             type="button"
             variant="secondary"
             onClick={onX}
-            className="font-black uppercase tracking-widest text-[10px] h-12 w-full max-w-xs rounded-xl shadow-sm"
+            className="font-semibold uppercase tracking-widest text-[10px] h-12 w-full max-w-xs rounded-xl shadow-sm"
           >
             I understand these insights
-          </Button>
-      </div>
+          </Button></div>
     </Dialog>
   );
 };
 
 export default AIRankingExplanationModal;
+

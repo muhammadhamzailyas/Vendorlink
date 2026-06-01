@@ -67,7 +67,7 @@ const FeaturesSection = () => {
                   to="/signup"
                   className="group p-8 sm:p-10 bg-card rounded-[2.5rem] border border-border shadow-soft hover:shadow-2xl transition-all duration-500 flex flex-col items-start relative overflow-hidden h-full"
                 >
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-10 bg-muted text-foreground shadow-inner border border-border transition-all duration-500 group-hover:scale-110`}>
+                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-10 bg-muted text-foreground shadow-inner border border-border transition-all duration-500 group-hover:scale-110`}>
                     <Icon size={28} strokeWidth={2.5} />
                   </div>
 
@@ -93,6 +93,7 @@ const FeaturesSection = () => {
 };
 
 export default FeaturesSection;
+
 
 
 

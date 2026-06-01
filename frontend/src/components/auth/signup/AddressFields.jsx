@@ -34,7 +34,7 @@ const AddressFields = ({ data, onChange, errors = {} }) => {
       <p className="text-sm font-medium text-muted-foreground">Address Information</p>
       
       <Input
-        placeholder="Street Address (e.g., 123 Main St, Apt 4B)"
+        placeholder="Street address (e.g., 123 Main St, Apt 4B)"
         value={data.streetAddress || ""}
         error={errors.streetAddress}
         onChange={(e) => onChange({ streetAddress: e.target.value })}
@@ -43,7 +43,7 @@ const AddressFields = ({ data, onChange, errors = {} }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SearchableSelect
             value={data.country}
-            placeholder="Select Country"
+            placeholder="Select country"
             searchPlaceholder="Search country..."
             options={WORLD_COUNTRIES}
             error={errors.country}
@@ -101,7 +101,7 @@ const AddressFields = ({ data, onChange, errors = {} }) => {
             />
           )}
           <Input
-            placeholder="Postal / Zip Code"
+            placeholder="Postal / Zip code"
             type="text"
             value={data.zipCode || ""}
             error={errors.zipCode}

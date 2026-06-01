@@ -1,58 +1,28 @@
 import React from "react";
-import {
-  DotsThreeVertical as MoreVert,
-  Eye as Visibility,
-  Download,
-  CircleNotch,
-} from "@phosphor-icons/react";
-import { 
-  Button, 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "../ui";
+import { Eye as Visibility, Download } from "@phosphor-icons/react";
+import ActionMenu from "./ActionMenu";
 
 const PaymentActionMenu = ({
   actionLoading,
   onView,
   onDownload,
   hasInvoice
-}) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        disabled={actionLoading}
-        className="h-8 w-8 rounded-full"
-      >
-        {actionLoading ? (
-          <CircleNotch className="h-5 w-5 animate-spin text-muted-foreground" />
-        ) : (
-          <MoreVert className="w-5 h-5" />
-        )}
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-48 p-1.5">
-      <DropdownMenuItem 
-        onClick={onView}
-        className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted cursor-pointer"
-      >
-        <Visibility className="mr-2 w-4 h-4" /> View Details
-      </DropdownMenuItem>
-      
-      {hasInvoice && (
-        <DropdownMenuItem 
-            onClick={onDownload}
-            className="rounded-lg font-bold uppercase tracking-tight text-[11px] text-muted-foreground hover:text-foreground focus:text-foreground focus:bg-muted cursor-pointer"
-        >
-            <Download className="mr-2 w-4 h-4" /> Download PDF
-        </DropdownMenuItem>
-      )}
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+}) => {
+  const items = [
+    {
+      label: "View Details",
+      icon: Visibility,
+      onClick: onView,
+    },
+    {
+      label: "Download PDF",
+      icon: Download,
+      onClick: onDownload,
+      hidden: !hasInvoice,
+    },
+  ];
+
+  return <ActionMenu loading={actionLoading} items={items} />;
+};
 
 export default PaymentActionMenu;

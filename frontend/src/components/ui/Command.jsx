@@ -8,7 +8,7 @@ const Command = React.forwardRef(({ className, ...props }, ref) => (
   <CommandPrimitive
     ref={ref}
     className={cn(
-      "flex h-full w-full flex-col overflow-hidden rounded-2xl bg-popover text-popover-foreground",
+      "flex h-full w-full flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground",
       className
     )}
     {...props}
@@ -34,7 +34,7 @@ const CommandInput = React.forwardRef(({ className, ...props }, ref) => (
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-11 w-full rounded-xl bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
@@ -118,6 +118,7 @@ export {
   CommandShortcut,
   CommandSeparator,
 };
+
 
 
 

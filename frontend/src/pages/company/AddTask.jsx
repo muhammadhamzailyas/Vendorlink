@@ -7,7 +7,7 @@ import { z } from "zod";
 import { taskAPI } from "@/services/api";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
 import toastUtil from "@/lib/toast";
-import { Button, Input, PageTransition, Textarea, Label, DatePicker } from "@/components/ui";
+import { Button, Input, PageTransition, Textarea, Label, DatePicker, ErrorBanner } from "@/components/ui";
 import FormSection, { FormFieldGrid } from "@/components/shared/FormSection";
 import SearchableSelect from "@/components/auth/signup/SearchableSelect";
 import SkillsTagInput from "@/components/auth/signup/SkillsTagInput";
@@ -112,15 +112,6 @@ const schema = z.object({
   skills: z.array(z.string()).min(1, "At least one skill is required"),
 });
 
-const ErrorMsg = ({ children }) => (
-  <div className="mt-2 flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-[11px] font-bold tracking-tight text-error animate-in fade-in slide-in-from-top-1 border border-error/20">
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
-        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,16,0v40A8,8,0,0,1,144,176ZM128,80a12,12,0,1,1-12,12A12,12,0,0,1,128,80Z"></path>
-    </svg>
-    <span className="leading-none">{children}</span>
-  </div>
-);
-
 const AddTask = () => {
   const navigate = useNavigate();
   const { isApproved } = useApprovalStatus();
@@ -183,7 +174,7 @@ const AddTask = () => {
     <PageTransition>
       <div className="mx-auto max-w-4xl space-y-8 pb-12 pt-4">
         {!isApproved && (
-          <div className="rounded-2xl bg-warning/10 px-6 py-4 text-sm text-warning font-bold border border-warning/20 flex items-center gap-3">
+          <div className="rounded-xl bg-warning/10 px-6 py-4 text-sm text-warning font-bold border border-warning/20 flex items-center gap-3">
             <Lightning className="h-5 w-5 shrink-0" weight="fill" />
             Your account is pending approval. You cannot post tasks until verified by an admin.
           </div>
@@ -201,9 +192,9 @@ const AddTask = () => {
                 <Input
                   placeholder="e.g. Modern E-commerce Website Development"
                   disabled={!isApproved}
+                  error={errors.title?.message}
                   {...register("title")}
                 />
-                {errors.title && <ErrorMsg>{errors.title.message}</ErrorMsg>}
               </div>
               
               <div className="space-y-1">
@@ -222,7 +213,7 @@ const AddTask = () => {
                     />
                   )}
                 />
-                {errors.category && <ErrorMsg>{errors.category.message}</ErrorMsg>}
+                <ErrorBanner error={errors.category?.message} />
               </div>
 
               <div className="space-y-1">
@@ -241,7 +232,7 @@ const AddTask = () => {
                     />
                   )}
                 />
-                {errors.priority && <ErrorMsg>{errors.priority.message}</ErrorMsg>}
+                <ErrorBanner error={errors.priority?.message} />
               </div>
             </FormFieldGrid>
           </FormSection>
@@ -258,9 +249,9 @@ const AddTask = () => {
                   placeholder="Describe the overall project goals, context, and what you aim to achieve..."
                   rows={6}
                   disabled={!isApproved}
+                  error={errors.description?.message}
                   {...register("description")}
                 />
-                {errors.description && <ErrorMsg>{errors.description.message}</ErrorMsg>}
               </div>
 
               <div className="space-y-1">
@@ -269,9 +260,9 @@ const AddTask = () => {
                   placeholder="Define exact artifacts to be handed over (e.g. 'GitHub Source Code', 'Deployed URL', 'Postman Collection', 'Documentation PDF')..."
                   rows={4}
                   disabled={!isApproved}
+                  error={errors.requirements?.message}
                   {...register("requirements")}
                 />
-                {errors.requirements && <ErrorMsg>{errors.requirements.message}</ErrorMsg>}
               </div>
             </div>
           </FormSection>
@@ -299,7 +290,7 @@ const AddTask = () => {
                       />
                     )}
                   />
-                  {errors.complexity && <ErrorMsg>{errors.complexity.message}</ErrorMsg>}
+                  <ErrorBanner error={errors.complexity?.message} />
                 </div>
 
                 <div className="space-y-1">
@@ -318,7 +309,7 @@ const AddTask = () => {
                       />
                     )}
                   />
-                  {errors.duration && <ErrorMsg>{errors.duration.message}</ErrorMsg>}
+                  <ErrorBanner error={errors.duration?.message} />
                 </div>
               </div>
 
@@ -346,7 +337,7 @@ const AddTask = () => {
                     />
                   )}
                 />
-                {errors.skills && <ErrorMsg>{errors.skills.message}</ErrorMsg>}
+                <ErrorBanner error={errors.skills?.message} />
               </div>
             </div>
           </FormSection>
@@ -373,7 +364,7 @@ const AddTask = () => {
                     />
                   )}
                 />
-                {errors.taskType && <ErrorMsg>{errors.taskType.message}</ErrorMsg>}
+                <ErrorBanner error={errors.taskType?.message} />
               </div>
 
               <div className="space-y-1">
@@ -384,9 +375,9 @@ const AddTask = () => {
                   placeholder="e.g. 500"
                   disabled={!isApproved}
                   icon={<CurrencyDollar className="h-4 w-4" />}
+                  error={errors.budget?.message}
                   {...register("budget")}
                 />
-                {errors.budget && <ErrorMsg>{errors.budget.message}</ErrorMsg>}
               </div>
 
               <div className="space-y-1">
@@ -403,7 +394,7 @@ const AddTask = () => {
                     />
                   )}
                 />
-                {errors.deadline && <ErrorMsg>{errors.deadline.message}</ErrorMsg>}
+                <ErrorBanner error={errors.deadline?.message} />
               </div>
             </FormFieldGrid>
           </FormSection>
@@ -415,7 +406,7 @@ const AddTask = () => {
               disabled={isSubmitDisabled}
               variant="primary"
               size="lg"
-              className="w-full h-14 rounded-xl shadow-soft font-normal text-base"
+              className="w-full h-14 rounded-xl shadow-soft font-semibold text-base"
             >
               {isSubmitting ? "Publishing..." : "Publish Task"}
             </Button>

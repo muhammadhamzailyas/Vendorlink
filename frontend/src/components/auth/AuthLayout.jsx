@@ -65,17 +65,16 @@ const AuthLayout = ({
             {/* Google Login */}
             {!hideGoogle && (
               <>
-                <div className="flex items-center gap-3 mb-6">
+                <div className="grid-cols-1 grid gap-3 mb-6">
                   <Button 
                     variant="secondary" 
-                    className="w-full h-11 font-normal tracking-wide uppercase text-xs gap-2"
+                    className="w-full h-11 font-semibold tracking-wide uppercase text-xs gap-2"
                     onClick={handleGoogleLogin} 
                     disabled={googleDisabled}
                   >
                     <GoogleIcon />
                     Continue with Google
-                  </Button>
-                </div>
+                  </Button></div>
 
                 {/* Divider */}
                 <div className="flex items-center gap-3 mb-6">

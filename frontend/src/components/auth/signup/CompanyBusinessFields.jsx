@@ -63,7 +63,7 @@ const YEAR_OPTIONS = Array.from(
 const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
   <>
     <Input
-      placeholder="Company/Business Name"
+      placeholder="Company/Business name"
       value={data.companyName}
       error={errors.companyName}
       onChange={(e) => onChange({ companyName: e.target.value })}
@@ -71,7 +71,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SearchableSelect
           value={data.businessType}
-          placeholder="Business Type"
+          placeholder="Business type"
           searchPlaceholder="Search type..."
           options={BUSINESS_TYPE_OPTIONS}
           error={errors.businessType}
@@ -88,7 +88,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          placeholder="Registration Number / License No."
+          placeholder="Registration number / License no."
           type="text"
           value={data.registrationNumber}
           error={errors.registrationNumber}
@@ -98,7 +98,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
           }}
         />
         <Input
-          placeholder="Tax ID / VAT / NTN Number"
+          placeholder="Tax ID / VAT / NTN number"
           type="text"
           value={data.ntn}
           onChange={(e) => {
@@ -114,7 +114,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SearchableSelect
           value={data.yearEstablished}
-          placeholder="Year Established"
+          placeholder="Year established"
           searchPlaceholder="Search year..."
           options={YEAR_OPTIONS}
           error={errors.yearEstablished}
@@ -122,7 +122,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
         />
         <SearchableSelect
           value={data.companySize}
-          placeholder="Company Size"
+          placeholder="Company size"
           searchPlaceholder="Search size..."
           options={COMPANY_SIZE_OPTIONS}
           error={errors.companySize}
@@ -130,7 +130,7 @@ const CompanyBusinessFields = ({ data, errors = {}, onChange }) => (
         />
     </div>
     <Input
-      placeholder="Company Website (optional)"
+      placeholder="Company website (optional)"
       value={data.website}
       onChange={(e) => onChange({ website: e.target.value })}
     />

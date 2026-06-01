@@ -1,21 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../assets/Vendorlink Logo.png";
 import { Button } from "../ui";
 
 const HeroSection = () => {
-  const [textIndex, setTextIndex] = useState(0);
-  
-  const texts = useMemo(() => ["Initiate Project", "Register Expertise"], []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTextIndex((prev) => (prev + 1) % texts.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [texts.length]);
-
   return (
     <section
       id="hero-section"
@@ -45,27 +33,21 @@ const HeroSection = () => {
         within a secure, high-performance ecosystem.
       </p>
 
-      <div className="mt-4 flex justify-center w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
         <Button
           asChild
-          className="relative overflow-hidden w-full max-w-[240px] sm:max-w-[280px] md:max-w-[320px] h-14 rounded-md font-bold uppercase tracking-widest text-sm bg-foreground text-background hover:opacity-90 shadow-soft transition-all duration-300 hover:scale-105 active:scale-95 border-none"
+          size="lg"
+          className="h-16 rounded-xl font-semibold uppercase tracking-widest text-sm bg-foreground text-background shadow-soft transition-all duration-300 hover:scale-105 active:scale-95 border-none"
         >
-          <Link to="/signup">
-            <div className="flex items-center justify-center w-full h-full">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={textIndex}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -20, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="absolute inset-0 flex items-center justify-center whitespace-nowrap text-background"
-                >
-                  {texts[textIndex]}
-                </motion.span>
-              </AnimatePresence>
-            </div>
-          </Link>
+          <Link to="/signup?role=company">Initiate Project</Link>
+        </Button>
+        <Button
+          asChild
+          variant="secondary"
+          size="lg"
+          className="h-16 rounded-xl font-semibold uppercase tracking-widest text-sm shadow-soft transition-all duration-300 hover:scale-105 active:scale-95"
+        >
+          <Link to="/signup?role=vendor">Register Expertise</Link>
         </Button>
       </div>
     </section>
@@ -73,6 +55,3 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
-
-
-

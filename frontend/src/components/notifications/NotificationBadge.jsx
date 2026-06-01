@@ -49,19 +49,16 @@ const NotificationBadge = ({ className }) => {
           className={cn("relative h-9 w-9 p-0 rounded-xl hover:bg-muted transition-all", className)}
           aria-label="Notifications"
         >
-          <Bell className="w-5 h-5 text-muted-foreground" />
+          <Bell size={20} weight="bold" className="text-foreground" />
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] flex items-center justify-center rounded-full text-white text-[10px] font-bold px-1 ring-2 ring-background border-none p-0"
-            >
+            <Badge className="absolute -right-1 -top-1 h-5 min-w-[20px] flex items-center justify-center border-2 border-background p-0 text-[10px] font-bold bg-red-600 text-white shadow-sm tracking-normal">
               {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
       
-      <PopoverContent align="end" className="w-80 p-0 overflow-hidden shadow-soft border-border/50 rounded-2xl bg-card mt-2">
+      <PopoverContent align="end" className="w-80 p-0 overflow-hidden shadow-soft border-border/50 rounded-xl bg-card mt-2">
         <div className="flex items-center justify-between px-5 py-4 bg-muted/20">
           <div className="flex flex-col">
             <span className="text-xs font-black text-foreground uppercase tracking-tight">Recent Alerts</span>
@@ -76,7 +73,7 @@ const NotificationBadge = ({ className }) => {
                 onClick={(e) => { e.stopPropagation(); markAllAsRead(); }}
                 className="h-7 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted gap-1"
             >
-                <Checks size={14} weight="bold" /> Read All
+                 Read All
             </Button>
           )}
         </div>
@@ -126,5 +123,6 @@ const NotificationBadge = ({ className }) => {
 };
 
 export default NotificationBadge;
+
 
 

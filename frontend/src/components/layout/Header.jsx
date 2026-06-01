@@ -75,7 +75,7 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
                           active ? "bg-muted text-foreground" : "text-muted-foreground"
                         )}
                       >
-                        <Icon className={cn("h-5 w-5", active ? "text-foreground" : "text-muted-foreground")} />
+                        
                         <span className="font-bold uppercase tracking-tight text-[10px]">{item.text}</span>
                       </Button>
                     </Link>
@@ -98,18 +98,16 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Requirement: Header should contain the notification icon for all roles including admin */}
-        <div className="relative">
-          <NotificationBadge className="h-10 w-10 rounded-xl border border-border bg-card shadow-sm hover:bg-muted" />
-        </div>
+        <NotificationBadge className="h-10 w-10 rounded-xl border border-border bg-card shadow-sm hover:bg-muted" />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-10 gap-2 rounded-xl px-2 hover:bg-muted border border-border shadow-sm">
               <UserAvatar user={user} size="sm" />
               <div className="hidden flex-col items-start text-left sm:flex min-w-[80px]">
-                <span className="text-xs font-bold leading-none truncate w-24 text-foreground">{user?.username}</span>
+                <span className="text-xs font-bold leading-none truncate w-24 text-foreground">{user?.fullName || user?.email}</span>
                 <span className="text-[10px] text-muted-foreground uppercase leading-none mt-1">{user?.role}</span>
               </div>
               <CaretRight className="h-4 w-4 text-muted-foreground hidden sm:block" />
@@ -119,25 +117,25 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
             <div className="flex items-center gap-3 p-2 mb-2 bg-muted rounded-lg">
                 <UserAvatar user={user} size="md" />
                 <div className="flex flex-col">
-                    <span className="text-sm font-bold truncate w-40 text-foreground">{user?.companyName || user?.username}</span>
+                    <span className="text-sm font-bold truncate w-40 text-foreground">{user?.companyName || user?.fullName || user?.email}</span>
                     <span className="text-[10px] text-muted-foreground uppercase">{user?.email}</span>
                 </div>
             </div>
             <div className="h-px bg-border my-2" />
             {!isAdmin && (
-              <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-muted">
-                <Link to={`/${user?.role}/profile`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground hover:text-foreground">
+              <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2">
+                <Link to={`/${user?.role}/profile`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">
                   <User className="h-4 w-4" /> Profile
                 </Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2 focus:bg-muted">
-              <Link to={`/${user?.role}/settings`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground hover:text-foreground">
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer py-2">
+              <Link to={`/${user?.role}/settings`} className="flex w-full items-center gap-2 font-bold uppercase tracking-tight text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">
                 <Gear className="h-4 w-4" /> Settings
               </Link>
             </DropdownMenuItem>
             <div className="h-px bg-border my-2" />
-            <DropdownMenuItem onClick={onLogout} className="rounded-lg cursor-pointer py-2 text-error focus:bg-error/5 font-bold uppercase tracking-tight text-[10px]">
+            <DropdownMenuItem onClick={onLogout} className="rounded-lg cursor-pointer py-2 text-error focus:bg-error/80 focus:text-white font-bold uppercase tracking-tight text-[10px] transition-all">
               <SignOut className="h-4 w-4 mr-2" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -148,6 +146,7 @@ const Header = ({ user, menuItems, pageTitle, pageSubtitle, onLogout }) => {
 };
 
 export default Header;
+
 
 
 

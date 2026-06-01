@@ -33,7 +33,7 @@ const ChangeIndicator = ({ value }) => {
 
   return (
       <div className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
           colorClass
       )}>
           <div className="flex items-center gap-0.5">
@@ -96,8 +96,7 @@ const Pending = () => {
       const matchesSearch =
         record.email?.toLowerCase().includes(query) ||
         record.fullName?.toLowerCase().includes(query) ||
-        record.companyName?.toLowerCase().includes(query) ||
-        record.username?.toLowerCase().includes(query);
+        record.companyName?.toLowerCase().includes(query);
 
       if (activeTab === 0) return matchesSearch;
       if (activeTab === 1) return matchesSearch && record.role === "company";
@@ -155,7 +154,7 @@ const Pending = () => {
         import("@/components/admin/UserDetailsPDF"),
       ]);
 
-      const fileName = `${user.companyName || user.username || "user"}_profile.pdf`;
+      const fileName = `${user.companyName || user.fullName || user.email || "user"}_profile.pdf`;
       const blob = await pdf(<UserDetailsPDF user={user} />).toBlob();
 
       const url = URL.createObjectURL(blob);
@@ -180,7 +179,7 @@ const Pending = () => {
       label: "User",
       cellClassName: "px-6 py-4 whitespace-nowrap",
       render: (user) => {
-        const displayName = user.companyName || user.fullName || user.username || user.email;
+        const displayName = user.companyName || user.fullName || user.email;
         return (
           <div className="flex items-center gap-2">
             <UserAvatar user={user} name={displayName} size="md" />
@@ -237,8 +236,8 @@ const Pending = () => {
       <div className="space-y-8">
         {loading ? (
           <div className="space-y-8">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
               </div>
               <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, i) => (
@@ -248,7 +247,7 @@ const Pending = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard 
               title="Pending Total" 
               value={stats.total} 
@@ -282,7 +281,7 @@ const Pending = () => {
         />
 
         {loading ? (
-          <Skeleton className="h-96 w-full rounded-2xl bg-muted" />
+          <Skeleton className="h-96 w-full rounded-xl bg-muted" />
         ) : (
           <DataTable
             columns={userColumns}
@@ -317,3 +316,4 @@ const Pending = () => {
 };
 
 export default Pending;
+

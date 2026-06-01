@@ -54,7 +54,7 @@ const Navbar = ({ scrollToSection }) => {
           >
             Sign In
           </Link>
-          <Button asChild size="sm" className="rounded-2xl font-bold uppercase tracking-widest text-[10px] bg-foreground text-background hover:opacity-90 shadow-soft transition-all duration-300 hover:scale-105 active:scale-95">
+          <Button asChild size="sm" className="rounded-xl font-semibold uppercase tracking-widest text-[10px] bg-foreground text-background hover:opacity-90 shadow-soft transition-all duration-300 hover:scale-105 active:scale-95">
             <Link to="/signup">Get Started</Link>
           </Button>
         </div>
@@ -67,7 +67,7 @@ const Navbar = ({ scrollToSection }) => {
           onClick={() => setMobileOpen(true)}
           aria-label="Toggle menu"
         >
-          <List />
+          <List className="h-6 w-6" />
         </Button>
       </div>
 
@@ -98,11 +98,11 @@ const Navbar = ({ scrollToSection }) => {
                 {item.label}
               </Button>
             ))}
-            <div className="pt-10 flex flex-col gap-4">
-              <Button asChild variant="secondary" className="w-full h-12 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-soft">
+            <div className="grid grid-cols-2 pt-10 gap-4">
+              <Button asChild variant="secondary" className="w-full h-12 rounded-xl font-semibold uppercase tracking-widest text-xs shadow-soft">
                 <Link to="/login" onClick={() => setMobileOpen(false)}>Sign In</Link>
               </Button>
-              <Button asChild className="w-full h-12 rounded-2xl font-bold uppercase tracking-widest text-xs bg-foreground text-background shadow-soft">
+              <Button asChild className="w-full h-12 rounded-xl font-semibold uppercase tracking-widest text-xs bg-foreground text-background shadow-soft">
                 <Link to="/signup" onClick={() => setMobileOpen(false)}>Get Started</Link>
               </Button>
             </div>
@@ -114,5 +114,3 @@ const Navbar = ({ scrollToSection }) => {
 };
 
 export default Navbar;
-
-

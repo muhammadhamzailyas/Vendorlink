@@ -26,7 +26,8 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbPage,
-  BreadcrumbSeparator
+  BreadcrumbSeparator,
+  Skeleton
 } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import { DetailMetaGrid, DetailMetaItem, DetailSection } from "@/components/shared/DetailLayout";
@@ -102,8 +103,17 @@ const TaskProgressDetail = () => {
   if (loading) {
     return (
       <PageTransition>
-        <div className="flex justify-center py-12">
-          <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground/70" />
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="flex justify-between items-center pb-4 border-b border-border/50">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <Skeleton className="h-24 w-full rounded-xl mt-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <Skeleton className="h-48 w-full rounded-xl" />
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
         </div>
       </PageTransition>
     );
@@ -155,16 +165,16 @@ const TaskProgressDetail = () => {
                     size="xs"
                     className="font-bold uppercase tracking-tight"
                 >
-                  {showForm ? <><X className="w-4 h-4 mr-1.5" /> Close</> : <><Plus className="w-4 h-4 mr-1.5" /> Add Update</>}
+                  {showForm ? <> Close</> : <> Add Update</>}
                 </Button>
                 <Button 
                     onClick={handleCompleteProject} 
                     variant="success"
                     size="xs"
-                    className="font-bold uppercase tracking-tight shadow-soft"
+                    className="font-semibold uppercase tracking-tight shadow-soft"
                     loading={completing}
                 >
-                  <SealCheck className="w-4 h-4 mr-1.5" /> Project Completed
+                   Project Completed
                 </Button>
               </>
             )}
@@ -270,14 +280,13 @@ const TaskProgressDetail = () => {
                         className="resize-none"
                         required
                     />
-                    <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                    <div className="grid-cols-2 grid grid-col-reverse gap-2 pt-2 sm:grid-row sm:justify-end">
                         <Button type="button" variant="ghost" onClick={() => setShowForm(false)} className="w-full sm:w-auto font-bold uppercase tracking-tight">
                         Cancel
                         </Button>
-                        <Button type="submit" loading={submitting} disabled={submitting} className="w-full sm:w-auto font-bold uppercase tracking-tight shadow-soft">
+                        <Button type="submit" loading={submitting} disabled={submitting} className="w-full sm:w-auto font-semibold uppercase tracking-tight shadow-soft">
                         Save Progress Entry
-                        </Button>
-                    </div>
+                        </Button></div>
                     </form>
                 </Card.Content>
             </Card>
@@ -286,7 +295,7 @@ const TaskProgressDetail = () => {
 
         <DetailSection title="Update History" description="Timeline of submitted progress entries for company review.">
           {(!data?.progressUpdates || data.progressUpdates.length === 0) ? (
-            <div className="py-12 text-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
+            <div className="py-12 text-center rounded-xl border-2 border-dashed border-border/50 bg-muted/20">
               <ChartBar className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
               <p className="text-sm font-bold uppercase tracking-tight text-muted-foreground/60">No progress entries yet</p>
             </div>
@@ -319,3 +328,4 @@ const TaskProgressDetail = () => {
 };
 
 export default TaskProgressDetail;
+

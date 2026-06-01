@@ -88,7 +88,7 @@ const TableRow = ({ data, columns }) => (
 
 const UserReport = ({ data }) => {
   const columns = [
-    { label: "Username", key: "username", width: "25%" },
+    { label: "Full Name", key: "fullName", width: "25%" },
     { label: "Email", key: "email", width: "35%" },
     { label: "Role", key: "role", width: "15%" },
     { label: "Status", key: "status", width: "15%" },

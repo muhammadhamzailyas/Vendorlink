@@ -23,6 +23,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
   Dialog,
+  Skeleton,
 } from "@/components/ui";
 import StatusChip from "@/components/shared/StatusChip";
 import { DetailMetaGrid, DetailMetaItem, DetailSection } from "@/components/shared/DetailLayout";
@@ -74,8 +75,17 @@ const CompanyTaskProgressDetail = () => {
   if (loading) {
     return (
       <PageTransition>
-        <div className="flex justify-center py-12">
-          <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground/70" />
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="flex justify-between items-center pb-4 border-b border-border/50">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <Skeleton className="h-24 w-full rounded-xl mt-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <Skeleton className="h-48 w-full rounded-xl" />
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
         </div>
       </PageTransition>
     );
@@ -127,7 +137,7 @@ const CompanyTaskProgressDetail = () => {
           <div className="flex items-center gap-2">
             {isPendingCompletion && !readiness?.isReady && (
                 <Link to="/company/payments">
-                    <Button variant="warning" size="xs" className="uppercase font-bold tracking-tight">Top Up Wallet</Button>
+                    <Button variant="warning" size="xs" className="uppercase font-semibold tracking-tight">Top Up Wallet</Button>
                 </Link>
             )}
             {isPendingCompletion && (
@@ -139,7 +149,7 @@ const CompanyTaskProgressDetail = () => {
                 loading={approving}
                 disabled={!readiness?.isReady}
               >
-                <SealCheck className="w-4 h-4 mr-1.5" /> Approve Completion
+                 Approve Completion
               </Button>
             )}
           </div>
@@ -202,7 +212,7 @@ const CompanyTaskProgressDetail = () => {
 
         <DetailSection title="Progress Overview" description="Current completion and execution status for this task.">
           <DetailMetaGrid className="lg:grid-cols-4">
-            <DetailMetaItem label="Vendor" value={vendor?.username || "N/A"} />
+            <DetailMetaItem label="Vendor" value={vendor?.fullName || vendor?.email || "N/A"} />
             <DetailMetaItem label="Current Progress" value={`${stats?.lastUpdate?.percentage || 0}%`} />
             <DetailMetaItem label="Current Status" value={<StatusChip status={contract?.status || "active"} />} />
             <DetailMetaItem label="Budget" value={`$${(contract?.totalBudget || 0).toLocaleString()}`} />
@@ -219,7 +229,7 @@ const CompanyTaskProgressDetail = () => {
 
         <DetailSection title="Progress History" description="Timeline of submitted progress entries from the vendor.">
           {(!progressUpdates || progressUpdates.length === 0) ? (
-            <div className="py-12 text-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/20">
+            <div className="py-12 text-center rounded-xl border-2 border-dashed border-border/50 bg-muted/20">
               <ChartBar className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
               <p className="text-sm font-bold uppercase tracking-tight text-muted-foreground/60">No progress entries reported yet</p>
             </div>
@@ -254,7 +264,7 @@ const CompanyTaskProgressDetail = () => {
             </Dialog.Header>
             <Dialog.Body>
                 <div className="space-y-4">
-                    <p className="text-sm">You are about to release final payment of <strong>${readiness?.remainingAmount}</strong> to {vendor?.username}.</p>
+                    <p className="text-sm">You are about to release final payment of <strong>${readiness?.remainingAmount}</strong> to {vendor?.fullName || vendor?.email}.</p>
                     <div className="bg-muted p-3 rounded-lg text-xs space-y-1">
                         <div className="flex justify-between"><span>Vendor Receives</span><span>${(readiness?.remainingAmount * 0.95).toFixed(2)}</span></div>
                         <div className="flex justify-between"><span>Platform Fee (5%)</span><span>${(readiness?.remainingAmount * 0.05).toFixed(2)}</span></div>

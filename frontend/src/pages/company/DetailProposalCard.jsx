@@ -54,11 +54,11 @@ const DetailProposalCard = ({
           <div className="flex-1">
             <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-muted/50 flex items-center justify-center text-foreground font-black text-xs">
-                    {proposal.vendorId?.username?.slice(0, 2).toUpperCase()}
+                    {(proposal.vendorId?.fullName || proposal.vendorId?.email || "U").slice(0, 2).toUpperCase()}
                 </div>
                 <div>
                     <h3 className="text-base font-black tracking-tight text-foreground uppercase">
-                    {proposal.vendorId?.username || "Verified Vendor"}
+                    {proposal.vendorId?.fullName || proposal.vendorId?.email || "Verified Vendor"}
                     </h3>
                     <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/70">
                     Submitted {formatDate(proposal.submittedAt)}
@@ -129,7 +129,7 @@ const DetailProposalCard = ({
                     <Briefcase size={12} weight="bold" />
                     Strategic Approach
                 </Label>
-                <div className="rounded-2xl border border-border/60 bg-card p-5 text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                <div className="rounded-xl border border-border/60 bg-card p-5 text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
                 {proposal.proposalText}
                 </div>
             </div>
@@ -139,7 +139,7 @@ const DetailProposalCard = ({
                     <Tag size={12} weight="bold" />
                     Relevant Experience
                 </Label>
-                <div className="rounded-2xl border border-border/60 bg-card p-5 text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                <div className="rounded-xl border border-border/60 bg-card p-5 text-sm font-medium leading-relaxed text-foreground/80 whitespace-pre-wrap">
                 {proposal.experience || "No specific experience provided."}
                 </div>
             </div>
@@ -189,9 +189,7 @@ const DetailProposalCard = ({
             variant="ghost"
             size="sm"
             onClick={() => setExpanded(!expanded)}
-            className="h-10 px-5 font-black uppercase tracking-widest text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted"
           >
-            {expanded ? <CaretUp className="mr-2 h-4 w-4" weight="bold" /> : <CaretDown className="mr-2 h-4 w-4" weight="bold" />}
             {expanded ? "Minimize Brief" : "Read Full Proposal"}
           </Button>
 
@@ -206,7 +204,7 @@ const DetailProposalCard = ({
                 disabled={!isApproved}
                 className="h-10 px-5 font-black uppercase tracking-widest text-[10px] text-error hover:bg-error/10"
               >
-                <X className="mr-2 h-4 w-4" weight="bold" />
+                
                 Reject
               </Button>
               <Button
@@ -215,32 +213,31 @@ const DetailProposalCard = ({
                 disabled={!isApproved}
                 className="h-10 px-8 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20"
               >
-                <Check className="mr-2 h-4 w-4" weight="bold" />
+                
                 Accept Bid
               </Button>
             </div>
           )}
 
           {proposal.status === "accepted" && (
-            <div className="flex gap-3">
+            <div className="grid-cols-2 grid gap-3">
               <Button 
                 variant="secondary"
                 size="sm" 
-                className="h-10 px-6 font-black uppercase tracking-widest text-[10px]"
+                className="w-full h-10 px-6 font-semibold uppercase tracking-widest text-[10px]"
                 onClick={() => navigate(`/company/messages?userId=${proposal.vendorId?._id}`)}
               >
-                <Chat className="mr-2 h-4 w-4" weight="bold" />
+                
                 Chat
               </Button>
               <Button 
                 size="sm" 
-                className="h-10 px-8 font-black uppercase tracking-widest text-[10px] shadow-lg"
+                className="w-full h-10 px-8 font-semibold uppercase tracking-widest text-[10px] shadow-lg"
                 onClick={() => navigate(`/company/contract/create?proposalId=${proposal._id}`)}
               >
-                <ContractIcon className="mr-2 h-4 w-4" weight="bold" />
+                
                 Create Contract
-              </Button>
-            </div>
+              </Button></div>
           )}
         </div>
 
@@ -258,6 +255,7 @@ const DetailProposalCard = ({
 };
 
 export default DetailProposalCard;
+
 
 
 

@@ -41,3 +41,4 @@ export const DetailMetaItem = ({ label, value, className }) => (
 
 
 
+

@@ -33,9 +33,17 @@ const FeedbackPage = () => {
             <DataTable
               data={feedback}
               columns={[
-                { key: "userId.username", label: "Name" },
-                { key: "userId.email", label: "Email" },
-                { key: "message", label: "Feedback" },
+                { 
+                  key: "user", 
+                  label: "User",
+                  render: (f) => (
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{f.userId?.fullName || "N/A"}</p>
+                      <p className="text-xs text-muted-foreground">{f.userId?.email || ""}</p>
+                    </div>
+                  )
+                },
+                { key: "message", label: "Feedback", cellClassName: "text-sm text-foreground/80" },
                 { key: "createdAt", label: "Date", render: (f) => new Date(f.createdAt).toLocaleDateString() },
               ]}
             />

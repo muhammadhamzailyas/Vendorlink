@@ -150,24 +150,23 @@ const NotificationsPage = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <div className="grid-cols-2 grid gap-3 w-full sm:w-auto">
                                 <Button 
                                     variant="outline" 
                                     size="sm" 
                                     onClick={() => handleAction(n)}
-                                    className="flex-1 sm:flex-none rounded-xl font-black uppercase tracking-tighter text-[10px] h-10 gap-2 border-border/50 hover:bg-foreground hover:text-background"
+                                    className="w-full flex-1 sm:flex-none rounded-xl font-black uppercase tracking-tighter text-[10px] h-10 gap-2 border-border/50 hover:bg-foreground hover:text-background"
                                 >
-                                    Take Action <ArrowRight size={14} weight="bold" />
+                                    Take Action 
                                 </Button>
                                 <Button 
                                     variant="ghost" 
                                     size="sm" 
                                     onClick={() => deleteNotification(n._id)}
-                                    className="h-10 w-10 p-0 rounded-xl text-muted-foreground hover:text-error hover:bg-error/5"
+                                    className="w-full h-10 w-10 p-0 rounded-xl text-muted-foreground hover:text-error hover:bg-error/5"
                                 >
-                                    <Trash size={18} weight="bold" />
-                                </Button>
-                            </div>
+                                    
+                                </Button></div>
                         </div>
                     </Card.Content>
                 </Card>
@@ -181,3 +180,4 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
+

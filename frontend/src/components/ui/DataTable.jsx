@@ -82,7 +82,7 @@ export const DataTable = ({
                 {showRowActions && (
                   <TableCell className={actionsCellClassName}>
                     {actions.length > 0 ? (
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="grid-cols-1 grid grid-wrap gap-2">
                         {actions.map((action, actionIndex) => (
                           <Button
                             key={action.key || action.label || `action-${actionIndex}`}
@@ -102,8 +102,7 @@ export const DataTable = ({
                             {action.icon || null}
                             {action.label}
                           </Button>
-                        ))}
-                      </div>
+                        ))}</div>
                     ) : (
                       <span className="text-xs text-muted-foreground">No actions</span>
                     )}
@@ -148,6 +147,7 @@ export const DataTable = ({
     </div>
   );
 };
+
 
 
 

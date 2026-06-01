@@ -75,7 +75,7 @@ const UserArchiveDialog = ({
     (warnings.length === 0 || acknowledgeWarnings);
 
   const title = isDeactivate ? "Deactivate User" : "Delete User";
-  const displayName = user?.role === 'admin' ? "Admin" : (user?.companyName || user?.username || user?.email || "User");
+  const displayName = user?.role === 'admin' ? "Admin" : (user?.companyName || user?.fullName || user?.email || "User");
 
   return (
     <Dialog open={open} className="sm:max-w-2xl">
@@ -99,7 +99,7 @@ const UserArchiveDialog = ({
 
       <Dialog.Body className="px-10 pb-10 bg-card space-y-8">
         {loading ? (
-          <div className="rounded-2xl border border-border/60 bg-card p-12 flex flex-col items-center justify-center gap-4">
+          <div className="rounded-xl border border-border/60 bg-card p-12 flex flex-col items-center justify-center gap-4">
              <div className="w-8 h-8 border-4 border-muted border-t-foreground rounded-full animate-spin" />
              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Analysing account health...</p>
           </div>
@@ -109,7 +109,7 @@ const UserArchiveDialog = ({
             {(blockers.length > 0 || warnings.length > 0) && (
               <Alert
                 variant={blockers.length > 0 ? "destructive" : "warning"}
-                className="rounded-2xl border-2"
+                className="rounded-xl border-2"
               >
                 <div className="flex items-start gap-3 text-left">
                   {blockers.length > 0 ? (
@@ -134,7 +134,7 @@ const UserArchiveDialog = ({
             )}
 
             {blockers.length > 0 && (
-              <section className="space-y-4 rounded-2xl border border-danger/20 bg-danger-surface/40 p-5">
+              <section className="space-y-4 rounded-xl border border-danger/20 bg-danger-surface/40 p-5">
                 <div>
                   <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-danger">
                     Critical Blockers
@@ -154,7 +154,7 @@ const UserArchiveDialog = ({
             )}
 
             {warnings.length > 0 && (
-              <section className="space-y-4 rounded-2xl border border-warning/20 bg-warning/5 p-5">
+              <section className="space-y-4 rounded-xl border border-warning/20 bg-warning/5 p-5">
                 <div>
                   <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-warning">
                     Action Warnings
@@ -174,7 +174,7 @@ const UserArchiveDialog = ({
             )}
 
             <section className="grid gap-6 lg:grid-cols-2">
-              <div className="rounded-2xl border border-border/60 bg-card p-5">
+              <div className="rounded-xl border border-border/60 bg-card p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Wallet className="h-4 w-4 text-foreground opacity-50" />
                   <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground opacity-50">
@@ -193,7 +193,7 @@ const UserArchiveDialog = ({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-card p-5">
+              <div className="rounded-xl border border-border/60 bg-card p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Stack className="h-4 w-4 text-foreground opacity-50" />
                   <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-foreground opacity-50">
@@ -219,11 +219,11 @@ const UserArchiveDialog = ({
                 onChange={(event) => onReasonChange(event.target.value)}
                 placeholder={`Document why this account is being ${mode === 'delete' ? 'deleted' : 'deactivated'}...`}
                 disabled={submitting}
-                className="rounded-2xl border-border/60 min-h-[100px] text-sm"
+                className="rounded-xl border-border/60 min-h-[100px] text-sm"
               />
 
               {warnings.length > 0 && (
-                <label className="flex items-start gap-4 rounded-2xl border border-warning/20 bg-warning/5 p-4 cursor-pointer">
+                <label className="flex items-start gap-4 rounded-xl border border-warning/20 bg-warning/5 p-4 cursor-pointer">
                   <Checkbox
                     checked={acknowledgeWarnings}
                     onCheckedChange={(checked) =>
@@ -240,7 +240,7 @@ const UserArchiveDialog = ({
             </section>
           </>
         ) : (
-          <Alert variant="destructive" className="rounded-2xl">
+          <Alert variant="destructive" className="rounded-xl">
             <ShieldWarning className="h-5 w-5" />
             <AlertTitle className="text-sm font-black uppercase">Service Error</AlertTitle>
             <AlertDescription className="text-xs font-medium">
@@ -254,7 +254,7 @@ const UserArchiveDialog = ({
             variant="secondary" 
             onClick={onX} 
             disabled={submitting} 
-            className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl"
+            className="w-full font-semibold uppercase tracking-tight text-[11px] h-12 rounded-xl"
           >
             Cancel
           </Button>
@@ -264,7 +264,7 @@ const UserArchiveDialog = ({
             onClick={onConfirm}
             loading={submitting}
             disabled={!canConfirm || loading}
-            className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl"
+            className="w-full font-semibold uppercase tracking-tight text-[11px] h-12 rounded-xl"
           >
             {isDeactivate ? "Deactivate User" : "Delete User"}
           </Button>
@@ -275,4 +275,5 @@ const UserArchiveDialog = ({
 };
 
 export default UserArchiveDialog;
+
 

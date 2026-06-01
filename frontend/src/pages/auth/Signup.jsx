@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useLocation, useBlocker } from "react-router-dom";
 import toastUtil from "../../lib/toast";
 import { authService, onboardingService } from "../../services/api";
 import AuthLayout from "../../components/auth/AuthLayout";
 import { cn } from "../../lib/cn";
-import { loginWithGoogle } from "../../lib/auth";
+import { loginWithGoogle, setToken } from "../../lib/auth";
 import SignupStep1 from "../../components/auth/signup/SignupStep1";
 import SignupStep2 from "../../components/auth/signup/SignupStep2";
 import SignupStep3 from "../../components/auth/signup/SignupStep3";
@@ -20,7 +20,6 @@ const INITIAL_STEP1 = {
   role: "company",
   fullName: "",
   email: "",
-  username: "",
   password: "",
   confirmPassword: "",
   countryCode: "+92",
@@ -33,23 +32,45 @@ const INITIAL_STEP1 = {
 const Signup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [stepVisible, setStepVisible] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({});
+  const [showErrors, setShowErrors] = useState(false);
+
+  // Jump to Step 2 if coming from verification or already logged in with incomplete profile
+  useEffect(() => {
+    if (user && !user.profileCompleted) {
+      setStep(2);
+    }
+  }, [user]);
+
+  // Handle specifically the redirect from verification page
+  useEffect(() => {
+    if (location.state?.fromVerification) {
+      setStep(2);
+    }
+  }, [location.state]);
+
+  // Reset error visibility when step changes
+  useEffect(() => {
+    setShowErrors(false);
+    setTouchedFields({});
+  }, [step]);
 
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
-  const [isFormDirty, setIsFormDirty] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState(null);
+  const isFormDirty = useRef(false);
 
   // Robust Navigation Guard for SPA
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      isFormDirty && 
+      isFormDirty.current && 
       step < TOTAL_STEPS && 
-      currentLocation.pathname !== nextLocation.pathname
+      currentLocation.pathname !== nextLocation.pathname &&
+      !["/terms", "/privacy"].includes(nextLocation.pathname)
   );
 
   useEffect(() => {
@@ -59,21 +80,18 @@ const Signup = () => {
   }, [blocker.state]);
 
   const confirmLeave = useCallback(() => {
-    setIsFormDirty(false);
+    isFormDirty.current = false;
     setShowLeaveDialog(false);
     if (blocker.state === "blocked") {
       blocker.proceed();
-    } else if (pendingNavigation) {
-      navigate(pendingNavigation);
     }
-  }, [blocker, navigate, pendingNavigation]);
+  }, [blocker]);
 
   const cancelLeave = useCallback(() => {
     setShowLeaveDialog(false);
     if (blocker.state === "blocked") {
       blocker.reset();
     }
-    setPendingNavigation(null);
   }, [blocker]);
 
   const [formData, setFormData] = useState({
@@ -118,31 +136,22 @@ const Signup = () => {
     }
   });
 
-  const handleLinkClick = useCallback((e, to) => {
-    if (isFormDirty && step < TOTAL_STEPS) {
-      e.preventDefault();
-      setPendingNavigation(to);
-      setShowLeaveDialog(true);
-    }
-  }, [isFormDirty, step]);
-
   // Handle BeforeUnload (Tab close/Refresh)
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (isFormDirty && step < TOTAL_STEPS) {
+      if (isFormDirty.current && step < TOTAL_STEPS) {
         e.preventDefault();
         e.returnValue = "Are you sure you want to leave?"; 
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isFormDirty, step]);
+  }, [step]);
 
   const step1Errors = useMemo(() => {
     const errs = {};
     const { step1 } = formData;
     if (step1.fullName && step1.fullName.trim().length < 3) errs.fullName = "Name is too short (min 3 characters)";
-    if (step1.username && !/^[a-zA-Z0-9_]{3,30}$/.test(step1.username)) errs.username = "Invalid username (3-30 alphanumeric characters)";
     if (step1.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(step1.email)) errs.email = "Invalid email format";
     if (step1.phone) {
         const raw = step1.phone.replace(/\D/g, "");
@@ -188,8 +197,14 @@ const Signup = () => {
   }, [formData.step2, formData.step1.role]);
 
   const nextStep = () => {
-    if (step === 1 && Object.keys(step1Errors).length > 0) return;
-    if (step === 2 && Object.keys(step2Errors).length > 0) return;
+    if (step === 1 && Object.keys(step1Errors).length > 0) {
+        setShowErrors(true);
+        return;
+    }
+    if (step === 2 && Object.keys(step2Errors).length > 0) {
+        setShowErrors(true);
+        return;
+    }
     setStep(Math.min(TOTAL_STEPS, step + 1));
   };
 
@@ -197,10 +212,13 @@ const Signup = () => {
 
   const handleStep1Submit = async () => {
     const { step1 } = formData;
-    if (Object.keys(step1Errors).length > 0) return;
+    if (Object.keys(step1Errors).length > 0) {
+        setShowErrors(true);
+        return;
+    }
     
     // 1. Mandatory field validation
-    if (!step1.fullName || !step1.email || !step1.username || !step1.phone || !step1.agreeToTerms) {
+    if (!step1.fullName || !step1.email || !step1.phone || !step1.agreeToTerms) {
       toastUtil.validationError("Required fields missing");
       return;
     }
@@ -220,11 +238,26 @@ const Signup = () => {
     setLoading(true);
     try {
       // Register initial account on backend
-      await authService.register(step1.email, step1.password, step1.username);
+      const res = await authService.register(step1.email, step1.password, step1.fullName);
       
+      if (res.data.resume) {
+          if (!res.data.emailVerified) {
+              toastUtil.info("Account found. Please verify your email first.");
+              isFormDirty.current = false;
+              navigate("/auth/verify-email", { state: { email: step1.email } });
+          } else {
+              toastUtil.success("Verified account found! Resuming your signup.");
+              setToken(res.data.token);
+              setUser(res.data.user);
+              setStep(2);
+              isFormDirty.current = false;
+          }
+          return;
+      }
+
       toastUtil.success("Account created! Please check your email to verify your account.");
-      setIsFormDirty(false);
-      navigate("/login");
+      isFormDirty.current = false;
+      navigate("/auth/verify-email", { state: { email: step1.email } });
     } catch (error) {
       console.error("Signup Step 1 Error:", error);
       toastUtil.handleApiError(error, {
@@ -234,7 +267,11 @@ const Signup = () => {
   };
 
   const handleStep1Change = (fields) => {
-    setIsFormDirty(true);
+    isFormDirty.current = true;
+    setTouchedFields(prev => ({ 
+        ...prev, 
+        ...Object.keys(fields).reduce((acc, k) => ({ ...acc, [k]: true }), {}) 
+    }));
     setFormData(prev => ({ 
       ...prev, 
       step1: { ...prev.step1, ...fields } 
@@ -257,7 +294,7 @@ const Signup = () => {
       await onboardingService.submitFinal(payload);
       
       toastUtil.success("Onboarding complete! Your profile is now pending review.");
-      setIsFormDirty(false);
+      isFormDirty.current = false;
       navigate("/login");
     } catch (e) { 
       console.error("Final Submit Error:", e);
@@ -279,13 +316,23 @@ const Signup = () => {
 
   const renderStep = () => {
     const { step1, step2, step3, step4 } = formData;
-    const isS2Disabled = loading || Object.keys(step2Errors).length > 0;
+    
+    const filteredStep1Errors = Object.keys(step1Errors).reduce((acc, key) => {
+        if (showErrors || touchedFields[key]) acc[key] = step1Errors[key];
+        return acc;
+    }, {});
+
+    const filteredStep2Errors = Object.keys(step2Errors).reduce((acc, key) => {
+        if (showErrors || touchedFields[key]) acc[key] = step2Errors[key];
+        return acc;
+    }, {});
+
     const isS3Disabled = loading || (step1.role === "company" ? (!step3.registrationCertificate || !step3.ntnCertificate) : (!step3.cnicFront || !step3.cnicBack));
 
     switch (step) {
-      case 1: return <SignupStep1 data={step1} onChange={handleStep1Change} showPassword={showPassword} onTogglePassword={() => setShowPassword(!showPassword)} showConfirmPassword={showConfirmPassword} onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)} onSubmit={handleStep1Submit} loading={loading} />;
-      case 2: return <SignupStep2 data={step2} errors={step2Errors} onChange={(f) => { setIsFormDirty(true); setFormData(p => ({ ...p, step2: { ...p.step2, ...f } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={prevStep} loading={loading} isSubmitDisabled={isS2Disabled} />;
-      case 3: return <SignupStep3 data={step3} onFileChange={(k, f) => { setIsFormDirty(true); setFormData(p => ({ ...p, step3: { ...p.step3, [k]: f } })); }} onRemoveFile={(k) => { setIsFormDirty(true); setFormData(p => ({ ...p, step3: { ...p.step3, [k]: null } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={prevStep} loading={loading} isSubmitDisabled={isS3Disabled} />;
+      case 1: return <SignupStep1 data={step1} errors={filteredStep1Errors} onChange={handleStep1Change} showPassword={showPassword} onTogglePassword={() => setShowPassword(!showPassword)} showConfirmPassword={showConfirmPassword} onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)} onSubmit={handleStep1Submit} loading={loading} />;
+      case 2: return <SignupStep2 data={step2} errors={filteredStep2Errors} onChange={(f) => { isFormDirty.current = true; setTouchedFields(prev => ({ ...prev, ...Object.keys(f).reduce((acc, k) => ({ ...acc, [k]: true }), {}) })); setFormData(p => ({ ...p, step2: { ...p.step2, ...f } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={prevStep} loading={loading} isSubmitDisabled={false} />;
+      case 3: return <SignupStep3 data={step3} onFileChange={(k, f) => { isFormDirty.current = true; setFormData(p => ({ ...p, step3: { ...p.step3, [k]: f } })); }} onRemoveFile={(k) => { isFormDirty.current = true; setFormData(p => ({ ...p, step3: { ...p.step3, [k]: null } })); }} isCompany={step1.role === "company"} onSubmit={nextStep} onBack={prevStep} loading={loading} isSubmitDisabled={isS3Disabled} />;
       case 4: return <SignupStep4 stripePaymentId={step4.stripePaymentId} onSubmit={(pid) => { if (pid) setFormData(p => ({ ...p, step4: { ...p.step4, stripePaymentId: pid } })); nextStep(); }} onBack={prevStep} loading={loading} />;
       case 5: return <SignupStep5 data={formData} onSubmit={handleFinalSubmit} onBack={prevStep} loading={loading} />;
       default: return null;
@@ -293,7 +340,7 @@ const Signup = () => {
   };
 
   return (
-    <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading} hideGoogle={step > 1} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} onLinkClick={handleLinkClick} maxWidth="max-w-2xl" >
+    <AuthLayout title="Create Account" subtitle="Sign up in a few steps to begin your journey." onGoogleLogin={handleGoogleSignup} googleDisabled={loading} hideGoogle={step > 1} footerText="Already have an account?" footerLinkText="Login" footerLinkTo="/login" extraFooterLink={{ to: "/", text: "Learn more" }} maxWidth="max-w-2xl" >
       <div className="mb-8"> <SignupProgressBar step={step} /> </div>
       <div className={cn("transition-all duration-300", stepVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}> {renderStep()} </div>
       
@@ -305,8 +352,8 @@ const Signup = () => {
           </Dialog.Description>
         </Dialog.Header>
         <Dialog.Footer className="gap-4 sm:gap-4">
-          <Button variant="secondary" onClick={cancelLeave} className="flex-1 font-normal">Stay</Button>
-          <Button variant="primary" onClick={confirmLeave} className="flex-1 font-normal shadow-soft">Leave anyway</Button>
+          <Button variant="secondary" onClick={cancelLeave} className="flex-1 font-semibold">Stay</Button>
+          <Button variant="primary" onClick={confirmLeave} className="flex-1 font-semibold shadow-soft">Leave anyway</Button>
         </Dialog.Footer>
       </Dialog>
     </AuthLayout>

@@ -92,12 +92,12 @@ class EmailService {
     });
   }
 
-  async sendNewPasswordEmail(email, newPassword, username) {
+  async sendNewPasswordEmail(email, newPassword, fullName) {
       const loginUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/login`;
       const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
             <h1 style="font-size: 24px;">Password Reset</h1>
-            <p>Hello ${username}, your new password is:</p>
+            <p>Hello ${fullName}, your new password is:</p>
             <div style="background: #f4f4f5; padding: 15px; font-family: monospace; font-size: 18px; border-radius: 8px; margin: 10px 0;">
                 ${newPassword}
             </div>
@@ -117,7 +117,7 @@ class EmailService {
     const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
             <h1 style="font-size: 24px; color: #10b981;">Account Approved!</h1>
-            <p>Hello ${user.fullName || user.username || "User"},</p>
+            <p>Hello ${user.fullName || "User"},</p>
             <p>We are excited to inform you that your Vendorlink account has been successfully verified and approved.</p>
             <p>You now have full access to our platform to ${user.role === 'company' ? 'post tasks and hire expert vendors' : 'browse tasks and submit proposals'}.</p>
             <div style="margin: 30px 0;">
@@ -135,15 +135,15 @@ class EmailService {
     });
   }
 
-  async sendVerificationEmail(email, token) {
-    const verifyUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/verify-email?token=${token}`;
+  async sendVerificationEmail(email, code) {
     const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #18181b;">
             <h1 style="font-size: 24px;">Verify Your Email</h1>
-            <p>Thank you for registering with Vendorlink. Please click the button below to verify your email address:</p>
-            <div style="margin: 30px 0;">
-                <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background: #18181b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">Verify Email Address</a>
+            <p>Thank you for registering with Vendorlink. Please use the following 6-digit code to verify your email address:</p>
+            <div style="background: #f4f4f5; padding: 15px; font-family: monospace; font-size: 32px; font-bold; text-align: center; letter-spacing: 5px; border-radius: 8px; margin: 20px 0;">
+                ${code}
             </div>
+            <p>Enter this code in the verification window to complete your registration.</p>
             <p>If you did not create an account, please ignore this email.</p>
             <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 20px 0;" />
             <p style="font-size: 12px; color: #71717a;">This is an automated message from Vendorlink.</p>
@@ -151,7 +151,7 @@ class EmailService {
     `;
     return this.sendEmail({
         to: email,
-        subject: "Verify your Vendorlink email",
+        subject: `${code} is your Vendorlink verification code`,
         html
     });
   }

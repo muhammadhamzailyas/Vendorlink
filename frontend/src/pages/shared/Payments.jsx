@@ -58,6 +58,7 @@ import UserAvatar from "@/components/shared/UserAvatar";
 import PaymentActionMenu from "@/components/admin/PaymentActionMenu";
 import dayjs from "dayjs";
 import { cn } from "@/lib/cn";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 // --- SCHEMAS ---
 const companyPaymentSchema = z.object({
@@ -73,33 +74,24 @@ const vendorRequestSchema = z.object({
 
 // --- SUB-COMPONENTS ---
 const ChangeIndicator = ({ value }) => {
-  const val = parseFloat(value || 0);
-  const isPositive = val > 0;
-  const isNegative = val < 0;
+    const val = parseFloat(value || 0);
+    const isPositive = val > 0;
+    const isNegative = val < 0;
+    
+    const colorClass = isPositive 
+        ? "text-success" 
+        : isNegative 
+            ? "text-error" 
+            : "text-muted-foreground";
   
-  const colorClass = isPositive 
-      ? "bg-success/20 text-success border-success/30" 
-      : isNegative 
-          ? "bg-error/20 text-error border-error/30" 
-          : "bg-muted text-muted-foreground border-border";
-
-  return (
-      <div className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
-          colorClass
-      )}>
-          <div className="flex items-center gap-0.5">
-              {isPositive && <CaretUp size={10} weight="bold" />}
-              {isNegative && <CaretDown size={10} weight="bold" />}
-              <span className="text-[10px] font-black uppercase tracking-tight">
-                  {Math.abs(val)}%
-              </span>
-          </div>
-          <span className="text-[9px] font-bold uppercase tracking-tight opacity-90 ml-1">
-              vs last month
-          </span>
-      </div>
-  );
+    return (
+        <Badge variant="outline" className={cn("gap-1.5 font-bold tracking-widest border-border/40", colorClass)}>
+            {isPositive && <CaretUp size={10} weight="bold" />}
+            {isNegative && <CaretDown size={10} weight="bold" />}
+            <span>{Math.abs(val)}%</span>
+            <span className="opacity-70">vs last month</span>
+        </Badge>
+    );
 };
 
 const CaretUp = ({ size, weight }) => <TrendUp size={size} weight={weight} className="rotate-0" />;
@@ -107,6 +99,10 @@ const CaretDown = ({ size, weight }) => <TrendUp size={size} weight={weight} cla
 
 // --- MAIN COMPONENT ---
 const SharedPayments = ({ role }) => {
+  usePageMeta(
+    role === "admin" ? "Platform Payments" : (role === "company" ? "Make a Payment" : "My Earnings"),
+    role === "admin" ? "Monitor all financial transactions and platform revenue" : "Manage your tasks and wallet"
+  );
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { wallet, refreshWallet, formatCurrency } = useWallet();
@@ -249,13 +245,35 @@ const SharedPayments = ({ role }) => {
       const counts = data?.counts || {};
       const changes = adminStatsData?.data?.changes || {};
       const totalVolume = adminStatsData?.data?.growthData?.reduce((sum, d) => sum + (d.totalVolume || 0), 0) || 0;
-      const platformRev = adminStatsData?.data?.growthData?.[5]?.revenue || 0;
+      const platformRev = adminStatsData?.data?.growthData?.find(g => g.label === 'Revenue')?.revenue || 0;
 
       return (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 w-full rounded-2xl" />
-          ))}
+          <StatCard
+            title="Total Transaction Volume"
+            value={formatCurrency(totalVolume)}
+            icon={<CurrencyDollar />}
+            trend={<ChangeIndicator value={changes?.revenue} />}
+            noHover
+          />
+          <StatCard
+            title="Platform Revenue"
+            value={formatCurrency(platformRev)}
+            icon={<HandCoins />}
+            noHover
+          />
+          <StatCard
+            title="Pending Payments"
+            value={counts.pending || 0}
+            icon={<Clock />}
+            noHover
+          />
+          <StatCard
+            title="Completed Payments"
+            value={counts.completed || 0}
+            icon={<CheckCircle />}
+            noHover
+          />
         </div>
       );
     } else if (role === "company") {
@@ -290,26 +308,16 @@ const SharedPayments = ({ role }) => {
       render: (p) => <span className="font-bold text-[10px] uppercase text-muted-foreground tracking-widest">{p.invoiceNumber || p._id.slice(-8)}</span>,
     },
     {
-      key: "company",
-      label: "Company",
-      cellClassName: "px-6 py-4",
-      render: (p) => (
-        <div className="flex items-center gap-2">
-          <UserAvatar user={p.companyId} name={p.companyId?.companyName || p.companyId?.username} size="sm" />
-          <span className="text-sm font-bold text-foreground">{p.companyId?.companyName || p.companyId?.username || "—"}</span>
-        </div>
-      ),
+        key: "company",
+        label: "Company Email",
+        cellClassName: "px-6 py-4 text-sm font-medium text-muted-foreground",
+        render: (p) => p.companyId?.email || "N/A",
     },
     {
-      key: "vendor",
-      label: "Vendor",
-      cellClassName: "px-6 py-4",
-      render: (p) => (
-        <div className="flex items-center gap-2">
-          <UserAvatar user={p.vendorId} name={p.vendorId?.username} size="sm" />
-          <span className="text-sm font-medium text-foreground/80">{p.vendorId?.username || "—"}</span>
-        </div>
-      ),
+        key: "vendor",
+        label: "Vendor Email",
+        cellClassName: "px-6 py-4 text-sm font-medium text-muted-foreground",
+        render: (p) => p.vendorId?.email || "N/A",
     },
     {
       key: "amount",
@@ -398,7 +406,7 @@ const SharedPayments = ({ role }) => {
               {renderStats()}
               {isLoading ? (
                 <div className="space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-48 w-full rounded-2xl" />)}
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-48 w-full rounded-xl" />)}
                 </div>
               ) : (data?.activeTasks || []).length === 0 ? (
                 <EmptyState icon={Receipt} title="No active tasks" description="You'll see tasks here once contracts are active." />
@@ -406,7 +414,7 @@ const SharedPayments = ({ role }) => {
                 <div className={cn("grid grid-cols-1 gap-6", role === "company" ? "" : "")}>
                   {(data?.activeTasks || []).map((task) => (
                     role === "company" ? (
-                      <FormSection key={task.contractId} title={task.title} description={`Vendor: ${task.vendor?.companyName || task.vendor?.username || "—"}`} actions={<StatusChip status={task.paymentStatus} />}>
+                      <FormSection key={task.contractId} title={task.title} description={`Vendor: ${task.vendor?.companyName || task.vendor?.fullName || task.vendor?.email || "—"}`} actions={<StatusChip status={task.paymentStatus} />}>
                         <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3 sm:gap-4">
                           <div><p className="text-muted-foreground">Total Budget</p><p className="font-semibold text-foreground">{formatCurrency(task.totalBudget)}</p></div>
                           <div><p className="text-muted-foreground">Paid</p><p className="font-semibold text-success">{formatCurrency(task.totalPaid)}</p></div>
@@ -415,7 +423,7 @@ const SharedPayments = ({ role }) => {
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
                           <div className="h-full rounded-full bg-foreground transition-all" style={{ width: `${task.totalBudget > 0 ? (task.totalPaid / task.totalBudget) * 100 : 0}%` }} />
                         </div>
-                        {task.pendingAmount > 0 && <Button onClick={() => handleAction(task)} className="w-full sm:w-auto"><Send className="mr-2 h-4 w-4" /> Pay Now</Button>}
+                        {task.pendingAmount > 0 && <Button onClick={() => handleAction(task)} className="w-full sm:w-auto"> Pay Now</Button>}
                         {task.payments?.length > 0 && (
                           <div className="rounded-xl border border-border bg-muted/60 p-3 mt-4">
                             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Recent Payments</p>
@@ -435,11 +443,11 @@ const SharedPayments = ({ role }) => {
                               <div className="h-10 w-10 rounded-xl bg-card border border-border/50 flex items-center justify-center shadow-xs"><FileText className="h-5 w-5 text-foreground" /></div>
                               <div><Card.Title className="text-sm font-bold uppercase tracking-tight">{task.title}</Card.Title>
                                 <Card.Description className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
-                                  <Badge variant="outline" className="text-[9px] px-1.5 py-0">Partner</Badge>{task.company?.companyName || task.company?.username}
+                                  <Badge variant="outline" className="text-[9px] px-1.5 py-0">Partner</Badge>{task.company?.companyName || task.company?.fullName || task.company?.email}
                                 </Card.Description>
                               </div>
                             </div>
-                            {task.canRequestPayment ? <Button size="sm" icon={<Send className="h-3.5 w-3.5" />} onClick={() => handleAction(task)}>Request Payout</Button> : <StatusChip status="processing" />}
+                            {task.canRequestPayment ? <Button size="sm" onClick={() => handleAction(task)}>Request Payout</Button> : <StatusChip status="processing" />}
                           </div>
                         </Card.Header>
                         <Card.Content className="p-6">

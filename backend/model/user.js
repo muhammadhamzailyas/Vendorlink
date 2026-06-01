@@ -1,17 +1,11 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    username: {
+    uid: {
       type: String,
-      trim: true,
-      lowercase: true,
-      minlength: 3,
-      maxlength: 30,
-      unique: true,
-      sparse: true,
-      index: true,
     },
     email: {
       type: String,
@@ -27,10 +21,6 @@ const userSchema = new mongoose.Schema(
     },
     googleId: {
       type: String,
-      default: null,
-      unique: true,
-      sparse: true,
-      index: true,
     },
     authProvider: {
       type: String,
@@ -63,8 +53,13 @@ const userSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
-    emailVerificationToken: {
+    emailVerificationCode: {
       type: String,
+      default: null,
+      select: false,
+    },
+    emailVerificationExpires: {
+      type: Date,
       default: null,
       select: false,
     },
@@ -123,8 +118,25 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Pre-save hook to hash password
+// Robust Unique Partial Indexes
+// Only enforce uniqueness if the field is present and is a string (not null)
+userSchema.index(
+    { googleId: 1 }, 
+    { unique: true, partialFilterExpression: { googleId: { $type: "string" } } }
+);
+
+userSchema.index(
+    { uid: 1 }, 
+    { unique: true, partialFilterExpression: { uid: { $type: "string" } } }
+);
+
+// Pre-save hook to hash password and generate background UID
 userSchema.pre("save", async function (next) {
+  // Generate background UID if not exists
+  if (!this.uid) {
+    this.uid = `VL-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+  }
+
   if (!this.isModified("password") || !this.password) return next();
   try {
     this.password = await bcrypt.hash(this.password, 12);

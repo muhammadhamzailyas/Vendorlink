@@ -70,19 +70,18 @@ const SignupStep3 = ({ data, onFileChange, onRemoveFile, isCompany, onSubmit, on
         </div>
       )}
 
-      <div className="flex gap-4 pt-4 border-t border-border/50">
-        <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
+      <div className="grid-cols-2 grid gap-4 pt-4 border-t border-border/50">
+        <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="w-full flex-1 font-semibold">Back</Button>
         <Button 
             variant="primary" 
             onClick={onSubmit} 
             loading={loading} 
             disabled={!isFormValid || loading}
             size="lg"
-            className="flex-1 font-normal shadow-soft"
+            className="w-full flex-1 font-semibold shadow-soft"
         >
           {loading ? "Saving..." : "Continue"}
-        </Button>
-      </div>
+        </Button></div>
     </div>
   );
 };

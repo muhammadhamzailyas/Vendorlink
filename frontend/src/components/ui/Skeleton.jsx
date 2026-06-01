@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/cn";
 
 const Skeleton = ({ className, ...props }) => (
-  <div className={cn("animate-pulse rounded-md bg-muted", className)} {...props} />
+  <div className={cn("animate-pulse rounded-xl bg-muted", className)} {...props} />
 );
 
 Skeleton.Card = ({ className }) => (
@@ -56,6 +56,7 @@ Skeleton.StatGrid = ({ count = 4 }) => (
 );
 
 export default Skeleton;
+
 
 
 

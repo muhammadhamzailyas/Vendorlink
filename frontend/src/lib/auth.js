@@ -9,8 +9,8 @@ export const setToken = (token) => Cookies.set(TOKEN_KEY, token, { secure: true,
 export const getToken = () => Cookies.get(TOKEN_KEY);
 export const removeToken = () => Cookies.remove(TOKEN_KEY);
 
-export const registerUser = async (email, password, username) => {
-  const res = await axios.post(`${API_BASE}/auth/register`, { email, password, username });
+export const registerUser = async (email, password, fullName) => {
+  const res = await axios.post(`${API_BASE}/auth/register`, { email, password, fullName });
   return res.data;
 };
 

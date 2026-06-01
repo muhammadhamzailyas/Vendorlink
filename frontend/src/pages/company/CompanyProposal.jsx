@@ -47,7 +47,7 @@ import UserAvatar from "@/components/shared/UserAvatar";
 import { cn } from "@/lib/cn";
 import toastUtil from "@/lib/toast";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
-import CompanyProposalDetailsModal from "./CompanyProposalDetailsModal";
+import ProposalDetailsModal from "@/components/shared/ProposalDetailsModal";
 import RankProposalsButton from "./RankProposalsButton";
 import AIRankingExplanationModal from "./AIRankingExplanationModal";
 
@@ -142,7 +142,7 @@ const CompanyProposals = () => {
     let result = proposals.filter((proposal) => {
       const matchesFilter = activeFilter === "all" || proposal.status === activeFilter;
       const taskTitle = proposal.taskId?.title || proposal.task?.title || "";
-      const vendorName = proposal.vendorId?.username || proposal.vendorId?.companyName || "";
+      const vendorName = proposal.vendorId?.fullName || proposal.vendorId?.companyName || proposal.vendorId?.email || "";
       const query = searchTerm.toLowerCase();
       const matchesSearch =
         taskTitle.toLowerCase().includes(query) ||
@@ -193,7 +193,7 @@ const CompanyProposals = () => {
       label: "Expert Vendor",
       render: (proposal) => {
         const vendor = proposal.vendorId || {};
-        const vendorName = vendor.companyName || vendor.username || "Vendor";
+        const vendorName = vendor.companyName || vendor.fullName || vendor.email || "Vendor";
         return (
           <div className="flex items-center gap-3">
             <UserAvatar user={vendor} name={vendorName} size="xs" />
@@ -364,7 +364,7 @@ const CompanyProposals = () => {
           </>
         )}
 
-        <CompanyProposalDetailsModal
+        <ProposalDetailsModal
             open={detailsModalOpen}
             proposal={selectedProposal}
             isApproved={isApproved}
@@ -394,7 +394,7 @@ const CompanyProposals = () => {
             {selectedProposal && (
                 <div className="my-4 rounded-xl border border-border bg-muted/30 p-4 text-xs font-bold text-foreground/80 uppercase tracking-tight">
                     <p>Task: {selectedProposal?.taskId?.title || selectedProposal?.task?.title || "Untitled Task"}</p>
-                    <p className="mt-1">Vendor: {selectedProposal?.vendorId?.companyName || selectedProposal?.vendorId?.username}</p>
+                    <p className="mt-1">Vendor: {selectedProposal?.vendorId?.companyName || selectedProposal?.vendorId?.fullName || selectedProposal?.vendorId?.email}</p>
                     <p className="mt-1 text-primary font-black">Bid: ${selectedProposal?.bidAmount?.toLocaleString()}</p>
                 </div>
             )}
@@ -404,7 +404,7 @@ const CompanyProposals = () => {
                 onClick={handleConfirmAction}
                 loading={isProcessing}
                 variant={pendingAction === "accept" ? "default" : "destructive"}
-                className="font-bold uppercase tracking-tight text-[11px]"
+                className="font-semibold uppercase tracking-tight text-[11px]"
               >
                 {pendingAction === "accept" ? "Confirm Hire" : "Reject Bid"}
               </Button>
@@ -417,3 +417,4 @@ const CompanyProposals = () => {
 };
 
 export default CompanyProposals;
+

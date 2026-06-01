@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react";
-import { Popover, PopoverTrigger, PopoverContent, ScrollArea } from "../../ui";
+import { Popover, PopoverTrigger, PopoverContent, ScrollArea, Button } from "../../ui";
 import { cn } from "@/lib/cn";
 import { getCountries } from "react-phone-number-input";
 import { AsYouType, getCountryCallingCode } from "libphonenumber-js";
@@ -33,32 +33,32 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
     <div className="w-full">
       <div 
         className={cn(
-          "flex h-12 w-full items-stretch overflow-hidden rounded-xl bg-[#1a1a1a] transition-all",
-          "border border-neutral-800 focus-within:ring-2 focus-within:ring-neutral-500/15 focus-within:border-neutral-500 focus-within:shadow-soft"
+          "flex h-12 w-full items-stretch overflow-hidden rounded-xl bg-input-bg transition-all duration-200",
+          "border border-input-border focus-within:ring-2 focus-within:ring-input-focus/15 focus-within:border-input-focus focus-within:shadow-soft"
         )}
       >
           {/* Custom Popover Country Selector (Themed for high contrast) */}
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <button 
+              <Button 
                 type="button"
-                className="flex items-center gap-2 border-r border-neutral-800/50 bg-neutral-900/50 px-3 transition-colors hover:bg-neutral-800/50"
+                className="flex items-center gap-2 border-r border-input-border/50 bg-muted/50 px-3 transition-colors hover:bg-muted"
               >
-                <div className="flex h-3.5 w-5 overflow-hidden rounded-sm border border-white/5 bg-neutral-800 shrink-0">
+                <div className="flex h-3.5 w-5 overflow-hidden rounded-sm border border-white/5 bg-muted shrink-0">
                     {SelectedFlag ? <SelectedFlag /> : <span className="text-[8px]">{isoCode}</span>}
                 </div>
-                <span className="text-sm font-bold text-neutral-200 tabular-nums whitespace-nowrap">{countryCode}</span>
-                <CaretDown className={cn("h-3.5 w-3.5 text-neutral-500 transition-transform shrink-0", open && "rotate-180")} />
-              </button>
+                <span className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap">{countryCode}</span>
+                <CaretDown className="h-3 w-3 text-muted-foreground" />
+              </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[340px] p-2 bg-[#171717] border-neutral-800 shadow-2xl rounded-2xl overflow-hidden z-[100]" align="start">
+            <PopoverContent className="w-[340px] p-2 bg-popover border-input-border shadow-2xl rounded-xl overflow-hidden z-[100]" align="start">
               <div className="mb-2 p-1">
-                  <div className="relative bg-neutral-800/50 rounded-lg overflow-hidden border border-neutral-700/50">
-                      <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                  <div className="relative bg-muted/50 rounded-lg overflow-hidden border border-input-border/50">
+                      <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <input 
                         autoFocus
                         placeholder="Search country..."
-                        className="w-full bg-transparent pl-9 pr-3 py-2.5 text-xs focus:outline-none text-[#e5e5e5] font-semibold placeholder:text-neutral-500"
+                        className="w-full bg-transparent pl-9 pr-3 py-2.5 text-xs focus:outline-none text-foreground font-semibold placeholder:text-muted-foreground"
                         value={search}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -81,8 +81,8 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
                                 className={cn(
                                   "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all",
                                   isActive 
-                                    ? "bg-[#e5e5e5] text-[#0a0a0a] shadow-lg scale-[1.02]" 
-                                    : "text-[#e5e5e5] hover:bg-neutral-800"
+                                    ? "bg-foreground text-background shadow-lg scale-[1.02]" 
+                                    : "text-foreground hover:bg-muted"
                                 )}
                               >
                                 <span className="flex items-center gap-3 pointer-events-none overflow-hidden flex-1">
@@ -93,7 +93,7 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
                                 </span>
                                 <span className={cn(
                                   "pointer-events-none shrink-0 tabular-nums text-right min-w-[60px] text-[11px]", 
-                                  isActive ? "text-[#0a0a0a]/70" : "text-neutral-500"
+                                  isActive ? "text-background/70" : "text-muted-foreground"
                                 )}>
                                     {c.dial}
                                 </span>
@@ -107,7 +107,7 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
 
           {/* Numeric Input with libphonenumber-js Formatting */}
           <input
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-[#e5e5e5] placeholder:text-neutral-500 focus:outline-none font-medium"
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none font-medium"
             placeholder="Phone Number"
             type="text"
             value={phone}
@@ -133,3 +133,4 @@ const PhoneInputField = ({ countryCode, isoCode, phone, onChange }) => {
 };
 
 export default PhoneInputField;
+

@@ -59,14 +59,8 @@ passport.use(new GoogleStrategy(
           await user.save();
         } else {
           // New user via Google
-          // Generate a random username if not present
-          let username = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
-          const existingUsername = await User.findOne({ username });
-          if (existingUsername) username = `${username}_${Math.floor(Math.random() * 1000)}`;
-
           user = await User.create({
             email,
-            username,
             googleId: profile.id,
             authProvider: 'google',
             fullName: profile.displayName || '',

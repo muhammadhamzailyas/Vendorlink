@@ -138,7 +138,7 @@ const UserManagement = () => {
         import("@/components/admin/UserDetailsPDF"),
       ]);
 
-      const fileName = `${userToExport.companyName || userToExport.username || "user"}_profile.pdf`;
+      const fileName = `${userToExport.companyName || userToExport.fullName || userToExport.email || "user"}_profile.pdf`;
       const blob = await pdf(<UserDetailsPDF user={userToExport} />).toBlob();
 
       const url = URL.createObjectURL(blob);
@@ -269,7 +269,7 @@ const UserManagement = () => {
       const query = searchTerm.toLowerCase();
       const matchesSearch =
         user.companyName?.toLowerCase().includes(query) ||
-        user.username?.toLowerCase().includes(query) ||
+        user.fullName?.toLowerCase().includes(query) ||
         user.email?.toLowerCase().includes(query);
 
       const currentFilter = tabOptions[activeTab]?.value || "all";
@@ -288,7 +288,7 @@ const UserManagement = () => {
       label: "User",
       cellClassName: "px-6 py-4 whitespace-nowrap",
       render: (user) => {
-        const displayName = user.role === 'admin' ? "Admin" : (user.companyName || user.fullName || user.username || user.email || "User");
+        const displayName = user.role === 'admin' ? "Admin" : (user.companyName || user.fullName || user.email || "User");
         return (
           <div className="flex items-center gap-2">
             <UserAvatar user={user} name={displayName} size="md" />
@@ -471,6 +471,7 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+
 
 
 

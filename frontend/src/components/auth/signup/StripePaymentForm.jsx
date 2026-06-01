@@ -55,7 +55,7 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planPrice, clientSecret }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="bg-muted/50 border border-border/50 p-5 rounded-2xl">
+      <div className="bg-muted/50 border border-border/50 p-5 rounded-xl">
           <div className="flex justify-between items-center mb-4">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Order Summary</h3>
               <span className="px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded uppercase tracking-tighter">
@@ -107,14 +107,14 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planPrice, clientSecret }
         </div>
       </div>
 
-      <div className="flex gap-4 pt-4">
+      <div className="grid-cols-2 grid gap-4 pt-4">
         <Button 
           type="button" 
           variant="secondary" 
           onClick={onBack} 
           disabled={isProcessing} 
           size="lg"
-          className="flex-1 font-normal"
+          className="w-full flex-1 font-semibold"
         >
           Back
         </Button>
@@ -124,13 +124,13 @@ const StripePaymentForm = ({ onPaymentSuccess, onBack, planPrice, clientSecret }
           loading={isProcessing} 
           disabled={!stripe || isProcessing}
           size="lg"
-          className="flex-1 font-normal shadow-soft"
+          className="w-full flex-1 font-semibold shadow-soft"
         >
           {isProcessing ? "Processing..." : "Complete Payment"}
-        </Button>
-      </div>
+        </Button></div>
     </form>
   );
 };
 
 export default StripePaymentForm;
+

@@ -81,7 +81,7 @@ const HowItWorksSection = () => {
                   key={index}
                   className="flex items-start gap-6 group bg-card p-6 sm:p-8 rounded-3xl border border-border shadow-soft transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.01] hover:border-ring/30"
                 >
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-2xl bg-muted flex items-center justify-center shadow-inner border border-border group-hover:scale-110 group-hover:bg-accent transition-all duration-500">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl bg-muted flex items-center justify-center shadow-inner border border-border group-hover:scale-110 group-hover:bg-accent transition-all duration-500">
                     <div className="text-foreground">
                       {React.cloneElement(step.icon, { size: 28, strokeWidth: 2.5 })}
                     </div>
@@ -114,7 +114,7 @@ const HowItWorksSection = () => {
                   key={index}
                   className="flex items-start gap-6 group bg-card p-6 sm:p-8 rounded-3xl border border-border shadow-soft transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.01] hover:border-ring/30"
                 >
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-2xl bg-muted flex items-center justify-center shadow-inner border border-border group-hover:scale-110 group-hover:bg-accent transition-all duration-500">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl bg-muted flex items-center justify-center shadow-inner border border-border group-hover:scale-110 group-hover:bg-accent transition-all duration-500">
                     <div className="text-foreground">
                       {React.cloneElement(step.icon, { size: 28, strokeWidth: 2.5 })}
                     </div>
@@ -139,6 +139,7 @@ const HowItWorksSection = () => {
 };
 
 export default HowItWorksSection;
+
 
 
 

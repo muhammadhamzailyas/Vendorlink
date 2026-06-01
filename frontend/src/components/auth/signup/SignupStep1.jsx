@@ -1,9 +1,10 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Button, Checkbox, Input, Label, Tabs } from "../../ui";
+import { Button, Checkbox, Input, Label, Tabs, ErrorBanner } from "../../ui";
 import PhoneInputField from "./PhoneInputField";
-import PasswordInputField from "./PasswordInputField";
+import PasswordInputField from "../PasswordInputField";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { validatePassword } from "@/lib/utils";
 
 const SignupStep1 = ({ 
   data, 
@@ -43,16 +44,9 @@ const SignupStep1 = ({
 
     // Password validation
     if (!isOAuth && data.password) {
-        const pass = data.password;
-        const hasUpper = /[A-Z]/.test(pass);
-        const hasLower = /[a-z]/.test(pass);
-        const hasNumber = /[0-9]/.test(pass);
-        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-
-        if (pass.length < 8) {
-            errs.password = "Min 8 characters required";
-        } else if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
-            errs.password = "Must include uppercase, lowercase, number & special char";
+        const passResult = validatePassword(data.password);
+        if (passResult !== true) {
+            errs.password = passResult;
         }
     }
 
@@ -77,15 +71,6 @@ const SignupStep1 = ({
     { label: "Company", value: "company" },
     { label: "Vendor", value: "vendor" },
   ];
-
-  const ErrorMsg = ({ children }) => (
-    <div className="mt-2 flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-[11px] font-bold tracking-tight text-error animate-in fade-in slide-in-from-top-1 border border-error/20">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
-          <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,16,0v40A8,8,0,0,1,144,176ZM128,80a12,12,0,1,1-12,12A12,12,0,0,1,128,80Z"></path>
-      </svg>
-      <span className="leading-none">{children}</span>
-    </div>
-  );
 
   return (
   <form
@@ -116,8 +101,8 @@ const SignupStep1 = ({
               value={data.fullName}
               autoComplete="new-password"
               onChange={(e) => onChange({ fullName: e.target.value })}
+              error={errors.fullName}
             />
-            {errors.fullName && <ErrorMsg>{errors.fullName}</ErrorMsg>}
         </div>
         
         <div className="space-y-1">
@@ -127,7 +112,7 @@ const SignupStep1 = ({
               phone={data.phone}
               onChange={onChange}
             />
-            {errors.phone && <ErrorMsg>{errors.phone}</ErrorMsg>}
+            <ErrorBanner error={errors.phone} />
         </div>
     </div>
 
@@ -139,8 +124,8 @@ const SignupStep1 = ({
           autoComplete="new-password"
           onChange={(e) => onChange({ email: e.target.value })}
           disabled={isOAuth}
+          error={errors.email}
         />
-        {errors.email && <ErrorMsg>{errors.email}</ErrorMsg>}
     </div>
 
     {!isOAuth && (
@@ -179,11 +164,11 @@ const SignupStep1 = ({
       />
       <Label htmlFor="terms" className="leading-relaxed text-sm text-foreground cursor-pointer select-none">
         I agree to the{" "}
-        <Link to="/terms" className="text-foreground hover:opacity-80 underline underline-offset-4">
+        <Link to="/terms" target="_blank" className="text-foreground hover:opacity-80 underline underline-offset-4">
           Terms of Service
         </Link>
         {" "}and{" "}
-        <Link to="/privacy" className="text-foreground hover:opacity-80 underline underline-offset-4">
+        <Link to="/privacy" target="_blank" className="text-foreground hover:opacity-80 underline underline-offset-4">
           Privacy Policy
         </Link>
       </Label>
@@ -194,7 +179,7 @@ const SignupStep1 = ({
       variant="primary"
       disabled={isSubmitDisabled}
       loading={loading}
-      className="w-full h-12 rounded-xl shadow-soft font-normal text-base"
+      className="w-full h-12 rounded-xl shadow-soft font-semibold text-base"
     >
       {loading ? "Saving..." : "Save & Continue"}
     </Button>
@@ -203,3 +188,4 @@ const SignupStep1 = ({
 };
 
 export default SignupStep1;
+

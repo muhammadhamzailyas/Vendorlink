@@ -175,8 +175,8 @@ const CreateContract = () => {
       <PageTransition>
         <div className="mx-auto max-w-5xl space-y-8">
           <Skeleton className="h-12 w-64" />
-          <Skeleton className="h-96 w-full rounded-2xl" />
-          <Skeleton className="h-96 w-full rounded-2xl" />
+          <Skeleton className="h-96 w-full rounded-xl" />
+          <Skeleton className="h-96 w-full rounded-xl" />
         </div>
       </PageTransition>
     );
@@ -360,7 +360,7 @@ const CreateContract = () => {
                         onClick={() => remove(index)}
                         className="text-error hover:bg-error/10"
                       >
-                        <Trash className="h-3.5 w-3.5 mr-1.5" />
+                        
                         Remove
                       </Button>
                     )}
@@ -431,7 +431,7 @@ const CreateContract = () => {
                 onClick={() => append({ ...emptyMilestone })}
                 className="font-bold uppercase tracking-tight"
               >
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                
                 Add Milestone
               </Button>
             </FormSection>
@@ -646,7 +646,7 @@ const CreateContract = () => {
                   <Button type="button" variant="secondary" onClick={() => navigate(-1)} className="w-full sm:w-auto font-bold uppercase tracking-tight" disabled={isSubmitting}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isSubmitting} className="w-full sm:w-auto font-bold uppercase tracking-tight" disabled={isSubmitting || !isFormFilled}>
+                  <Button type="submit" loading={isSubmitting} className="w-full sm:w-auto font-semibold uppercase tracking-tight" disabled={isSubmitting || !isFormFilled}>
                     Create Contract
                   </Button>
                 </FormActionRow>
@@ -664,4 +664,5 @@ const CreateContract = () => {
 };
 
 export default CreateContract;
+
 

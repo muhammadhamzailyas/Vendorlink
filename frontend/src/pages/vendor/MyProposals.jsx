@@ -43,7 +43,7 @@ import {
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import toastUtil from "@/lib/toast";
-import ProposalDetailsModal from "./ProposalDetailsModal";
+import ProposalDetailsModal from "@/components/shared/ProposalDetailsModal";
 import ProposalUpdateModal from "./ProposalUpdateModal";
 
 dayjs.extend(relativeTime);
@@ -156,7 +156,7 @@ const MyProposals = () => {
     const colorClass = isPositive ? "bg-success/20 text-success border-success/30" : isNegative ? "bg-error/20 text-error border-error/30" : "bg-muted text-muted-foreground border-border";
 
     return (
-        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1", colorClass)}>
+        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1", colorClass)}>
             <div className="flex items-center gap-0.5">
                 {isPositive && <CaretUp size={10} weight="bold" />}
                 {isNegative && <CaretDown size={10} weight="bold" />}
@@ -183,7 +183,7 @@ const MyProposals = () => {
       label: "Company",
       render: (proposal) => {
         const company = proposal.companyId || {};
-        const name = company.companyName || company.username || "Verified Company";
+        const name = company.companyName || company.fullName || company.email || "Verified Company";
         return (
           <span className="text-sm font-bold text-foreground/90 uppercase tracking-tight">
             {name}
@@ -272,7 +272,7 @@ const MyProposals = () => {
         {loading ? (
           <div className="space-y-3">
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
              </div>
              {Array.from({ length: 6 }).map((_, i) => (
                <Skeleton key={i} className="h-12 w-full rounded-xl" />
@@ -379,7 +379,7 @@ const MyProposals = () => {
                       variant={deletabilityInfo?.level === 2 ? "destructive" : "default"}
                       onClick={confirmDelete}
                       loading={isDeleting}
-                      className="font-bold uppercase tracking-tight text-[11px]"
+                      className="font-semibold uppercase tracking-tight text-[11px]"
                     >
                       Yes, Withdraw
                     </Button>
@@ -395,3 +395,4 @@ const MyProposals = () => {
 };
 
 export default MyProposals;
+

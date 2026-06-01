@@ -108,7 +108,8 @@ const CompanyContracts = () => {
     return contracts.filter((contract) => {
       const matchesSearch =
         (contract.title || "").toLowerCase().includes(search.toLowerCase()) ||
-        (contract.vendorId?.username || "").toLowerCase().includes(search.toLowerCase());
+        (contract.vendorId?.fullName || "").toLowerCase().includes(search.toLowerCase()) ||
+        (contract.vendorId?.email || "").toLowerCase().includes(search.toLowerCase());
 
       return matchesSearch;
     });
@@ -133,7 +134,7 @@ const CompanyContracts = () => {
     const colorClass = isPositive ? "bg-success/20 text-success border-success/30" : isNegative ? "bg-error/20 text-error border-error/30" : "bg-muted text-muted-foreground border-border";
 
     return (
-        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1", colorClass)}>
+        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1", colorClass)}>
             <div className="flex items-center gap-0.5">
                 {isPositive && <CaretUp size={10} weight="bold" />}
                 {isNegative && <CaretDown size={10} weight="bold" />}
@@ -166,7 +167,7 @@ const CompanyContracts = () => {
       render: (contract) => (
           <div className="flex items-center gap-2">
               <span className="font-bold text-foreground/90 underline decoration-border decoration-dotted underline-offset-4 cursor-help">
-                {contract.vendorId?.username || "N/A"}
+                {contract.vendorId?.fullName || contract.vendorId?.email || "N/A"}
               </span>
           </div>
       ),
@@ -310,7 +311,7 @@ const CompanyContracts = () => {
                   variant={deletabilityInfo?.level === 2 ? "destructive" : "default"}
                   onClick={confirmDelete}
                   loading={isDeleting}
-                  className="font-bold uppercase tracking-tight text-[11px]"
+                  className="font-semibold uppercase tracking-tight text-[11px]"
                 >
                   Yes, Delete
                 </Button>
@@ -324,3 +325,4 @@ const CompanyContracts = () => {
 };
 
 export default CompanyContracts;
+

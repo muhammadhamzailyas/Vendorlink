@@ -71,7 +71,7 @@ const RankProposalsButton = ({ taskId, onRankingComplete, disabled }) => {
       onClick={handleRank}
       disabled={disabled}
       title={disabled ? "Need at least 2 proposals to rank them" : "Use AI to rank proposals based on task requirements"}
-      icon={<Sparkle className="h-4 w-4" />}
+     
     >
       AI Rank Proposals
     </Button>

@@ -1,255 +1,179 @@
-import React, { useState, useEffect } from "react";
-import { ArrowUp } from "@phosphor-icons/react";
-import { Card, PageTransition, Button } from "@/components/ui";
+import React from "react";
+import { PageTransition } from "@/components/ui";
 
 const TermsOfService = () => {
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
-      setShowScrollTop(isAtBottom);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background py-20 px-4 sm:px-6 relative">
-        <div className="mx-auto max-w-4xl space-y-12">
-          {/* Header Section */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-foreground uppercase leading-none">
-              Terms of <span className="text-muted-foreground">Service</span>
+      <div className="min-h-screen bg-background text-foreground py-16 px-6 sm:px-12 lg:px-24">
+        <div className="mx-auto max-w-[800px] border border-border bg-card p-10 sm:p-16 shadow-soft rounded-sm">
+          {/* Document Header */}
+          <div className="border-b-2 border-foreground pb-8 mb-12">
+            <h1 className="text-3xl font-serif font-bold uppercase tracking-tight text-foreground mb-2">
+              Terms of Service
             </h1>
-            <div className="flex items-center justify-center gap-4">
-                <div className="h-px w-12 bg-border" />
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
-                    Effective Date: April 20, 2025
-                </p>
-                <div className="h-px w-12 bg-border" />
-            </div>
+            <p className="text-sm font-medium text-muted-foreground italic">
+              Effective Date: April 20, 2025
+            </p>
           </div>
 
-          <Card className="overflow-hidden border-border bg-card shadow-2xl rounded-[2.5rem]">
-            <div className="p-8 md:p-16 space-y-16 text-foreground">
-              
-              {/* 01. Acceptance */}
-              <section className="space-y-6">
-                <div className="inline-block px-4 py-1 rounded-full bg-muted border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    01. Acceptance
-                </div>
-                <p className="text-base leading-relaxed font-medium opacity-90">
-                    By accessing or using Vendorlink, you agree to these Terms. If you do not agree, do not use the Platform. These Terms and the Privacy Policy form the complete agreement.
-                </p>
-              </section>
+          <div className="space-y-10 text-[15px] leading-[1.6] font-serif text-justify text-foreground/90">
+            
+            {/* 1. Acceptance of Terms */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                1. ACCEPTANCE OF TERMS
+              </h2>
+              <p>
+                By accessing or using the Vendorlink platform (the “Platform”), you agree to be bound by these Terms of Service (“Terms”). If you do not agree to these Terms, you must immediately cease all use of the Platform. These Terms, together with our Privacy Policy, constitute the entire agreement between you and Vendorlink.
+              </p>
+            </section>
 
-              {/* 02. Eligibility */}
-              <section className="space-y-6">
-                <div className="inline-block px-4 py-1 rounded-full bg-muted border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    02. Eligibility
-                </div>
-                <div className="space-y-4 text-base leading-relaxed font-medium opacity-90">
-                    <p>You must meet the following requirements to use our Platform:</p>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                            "Be at least 18 years old",
-                            "Have legal capacity to contract",
-                            "Provide accurate registration data",
-                            "Complete account verification"
-                        ].map((req, i) => (
-                            <li key={i} className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border/50">
-                                <div className="h-1.5 w-1.5 rounded-full bg-foreground" />
-                                <span className="text-sm font-bold uppercase tracking-tight">{req}</span>
-                            </li>
-                        ))}
-                    </ul>
-                    <p className="italic pt-2">We reserve the right to refuse access at our sole discretion.</p>
-                </div>
-              </section>
+            {/* 2. Eligibility */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                2. ELIGIBILITY
+              </h2>
+              <p>To use the Platform, you must meet the following criteria:</p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Be at least 18 years of age.</li>
+                <li>Have the legal capacity to enter into a binding contract.</li>
+                <li>Provide accurate, current, and complete registration information.</li>
+                <li>Successfully complete any required account verification processes.</li>
+              </ul>
+              <p className="italic">
+                Vendorlink reserves the right to refuse service or terminate accounts at its sole discretion.
+              </p>
+            </section>
 
-              {/* 03. Accounts */}
-              <section className="space-y-8">
-                <div className="inline-block px-4 py-1 rounded-full bg-muted border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    03. Accounts
+            {/* 3. Account Registration and Security */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                3. ACCOUNT REGISTRATION AND SECURITY
+              </h2>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="font-bold italic underline text-foreground/80">3.1 Account Responsibility</h3>
+                  <p>
+                    You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must notify us immediately of any unauthorized use.
+                  </p>
                 </div>
-                
-                <div className="space-y-10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-3">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground">3.1 Registration</h3>
-                            <p className="text-sm font-bold leading-relaxed">You are responsible for your account and all activity under it. Maintain strong credentials.</p>
-                        </div>
-                        <div className="space-y-3">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground">3.2 Verification</h3>
-                            <p className="text-sm font-bold leading-relaxed">False information may result in immediate suspension or termination of access.</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-black uppercase tracking-tight">3.3 Account Types</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {[
-                                { title: "Company", desc: "Post tasks, hire vendors, manage projects." },
-                                { title: "Vendor", desc: "Submit proposals, deliver work, get paid." },
-                                { title: "Admin", desc: "Global system and user management." },
-                            ].map((role, i) => (
-                                <div key={i} className="p-5 rounded-2xl bg-muted border border-border">
-                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">{role.title}</h4>
-                                    <p className="text-xs font-bold leading-relaxed">{role.desc}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                <div className="space-y-2">
+                  <h3 className="font-bold italic underline text-foreground/80">3.2 Account Verification</h3>
+                  <p>
+                    Users must provide valid documentation for verification. Providing false or misleading information is a violation of these Terms and may result in immediate account termination.
+                  </p>
                 </div>
-              </section>
-
-              {/* 04. Platform Services */}
-              <section className="space-y-8">
-                <div className="inline-block px-4 py-1 rounded-full bg-muted border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    04. Platform Services
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                    {[
-                        { title: "4.1 Tasks & Proposals", desc: "Companies post tasks; Vendors submit proposals. AI tools assist but do not make decisions." },
-                        { title: "4.2 Contracts", desc: "Generated contracts through the platform are legally binding between Companies and Vendors." },
-                        { title: "4.3 Deliverables", desc: "Vendors must meet milestones; Companies must review submissions and deliverables promptly." },
-                        { title: "4.4 Payments", desc: "Secure processing. Vendorlink facilitates but is not a party to the financial transaction." },
-                    ].map((item, i) => (
-                        <div key={i} className="space-y-2">
-                            <h4 className="text-sm font-black uppercase tracking-tight">{item.title}</h4>
-                            <p className="text-sm font-medium opacity-80 leading-relaxed">{item.desc}</p>
-                        </div>
-                    ))}
-                </div>
-                <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 flex items-center gap-3">
-                    <span className="text-sm font-black text-muted-foreground">4.5</span>
-                    <p className="text-xs font-bold uppercase tracking-tight">Communication: Messaging may be monitored for compliance and dispute resolution.</p>
-                </div>
-              </section>
-
-              {/* 05. User Obligations */}
-              <section className="space-y-6">
-                <div className="inline-block px-4 py-1 rounded-full bg-muted border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    05. User Obligations
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                        "Provide accurate information",
-                        "Use the Platform lawfully",
-                        "Respect intellectual property",
-                        "Avoid fraud or misuse",
-                        "Not bypass Platform payments",
-                        "No malicious content"
-                    ].map((text, i) => (
-                        <div key={i} className="flex gap-4 items-center p-3 rounded-xl border border-border/30">
-                            <span className="text-xl font-black text-muted">/</span>
-                            <span className="text-xs font-bold uppercase tracking-tight">{text}</span>
-                        </div>
-                    ))}
-                </div>
-              </section>
-
-              {/* 06. Fees & 07. IP */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <section className="space-y-4">
-                    <div className="inline-block px-3 py-1 rounded-lg bg-muted border border-border text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                        06. Fees
-                    </div>
-                    <p className="text-sm leading-relaxed font-bold opacity-80">
-                        Vendorlink may charge service fees. All fees are non-refundable unless explicitly stated otherwise in writing.
-                    </p>
-                </section>
-                <section className="space-y-4">
-                    <div className="inline-block px-3 py-1 rounded-lg bg-muted border border-border text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                        07. Intellectual Property
-                    </div>
-                    <p className="text-sm leading-relaxed font-bold opacity-80">
-                        We own the platform technology; you retain ownership of your content but grant us a license for Platform operations.
-                    </p>
-                </section>
-              </div>
-
-              {/* 10. Liability & 11. Disclaimer */}
-              <section className="space-y-6">
-                <div className="inline-block px-4 py-1 rounded-full bg-muted border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Liability & Disclaimer
-                </div>
-                <div className="p-8 rounded-[2rem] bg-foreground text-background space-y-6">
-                    <div className="space-y-2">
-                        <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-70">10. Liability</h4>
-                        <p className="text-sm font-bold leading-relaxed">
-                            Vendorlink is not liable for indirect damages, user disputes, or platform interruptions. Total liability is limited to fees paid in the past 3 months.
-                        </p>
-                    </div>
-                    <div className="h-px bg-background/20" />
-                    <div className="space-y-2">
-                        <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-70">11. Disclaimer</h4>
-                        <p className="text-sm font-bold leading-relaxed italic">
-                            The Platform is provided “as is” without warranties of any kind, express or implied.
-                        </p>
-                    </div>
-                </div>
-              </section>
-
-              {/* 12-14 Sections */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                    { num: "12", title: "Governing Law", desc: "Governed by the laws of Pakistan." },
-                    { num: "13", title: "Changes", desc: "We may update Terms with notice. Continued use means acceptance." },
-                    { num: "14", title: "Entire Agreement", desc: "These Terms and Privacy Policy form the complete agreement." },
-                ].map((item, i) => (
-                    <div key={i} className="space-y-3">
-                        <div className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Section {item.num}</div>
-                        <h5 className="font-black uppercase tracking-tight text-xs">{item.title}</h5>
-                        <p className="text-xs font-bold opacity-70 leading-relaxed">{item.desc}</p>
-                    </div>
-                ))}
-              </div>
-
-              {/* 15. Contact */}
-              <div className="pt-10 border-t border-border flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
-                <div className="space-y-6">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">15. Contact Information</p>
-                    <div className="flex flex-col gap-6">
-                        <div className="space-y-1">
-                            <span className="text-[9px] font-black uppercase text-muted-foreground">Legal Inquiries</span>
-                            <a href="mailto:legal@vendorlink.com" className="block text-xl font-black hover:opacity-70 transition-opacity uppercase tracking-tight leading-none">legal@vendorlink.com</a>
-                        </div>
-                        <div className="space-y-1">
-                            <span className="text-[9px] font-black uppercase text-muted-foreground">Customer Support</span>
-                            <a href="mailto:support.vendorlink@gmail.com" className="block text-xl font-black hover:opacity-70 transition-opacity uppercase tracking-tight leading-none">support.vendorlink@gmail.com</a>
-                        </div>
-                        <div className="space-y-1">
-                            <span className="text-[9px] font-black uppercase text-muted-foreground">Official Website</span>
-                            <a href="http://www.vendorlink.com" target="_blank" rel="noreferrer" className="block text-xl font-black hover:opacity-70 transition-opacity leading-none">www.vendorlink.com</a>
-                        </div>
-                    </div>
-                </div>
-                <div className="text-right shrink-0 pb-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Vendorlink Legal © 2026</p>
+                <div className="space-y-2">
+                  <h3 className="font-bold italic underline text-foreground/80">3.3 User Roles</h3>
+                  <p>
+                    The Platform supports different roles (Company, Vendor, Administrator), each with specific permissions and responsibilities as defined within the Platform's interface.
+                  </p>
                 </div>
               </div>
+            </section>
 
+            {/* 4. Platform Services */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                4. PLATFORM SERVICES
+              </h2>
+              <div className="space-y-4">
+                <p><strong className="text-foreground">4.1 Tasks and Proposals:</strong> Companies may post tasks, and Vendors may submit proposals. While our AI tools assist in ranking and matching, the final selection is the sole responsibility of the users.</p>
+                <p><strong className="text-foreground">4.2 Contracts:</strong> Agreements generated through the Platform are legally binding contracts between the Company and the Vendor. Vendorlink is not a party to these contracts.</p>
+                <p><strong className="text-foreground">4.3 Payments:</strong> All financial transactions are facilitated via secure third-party payment processors. Vendorlink is not liable for issues arising from payment processor failures.</p>
+              </div>
+            </section>
+
+            {/* 5. User Obligations and Prohibited Conduct */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                5. USER OBLIGATIONS
+              </h2>
+              <p>Users agree NOT to:</p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Use the Platform for any illegal or unauthorized purpose.</li>
+                <li>Bypass Platform payment systems to avoid service fees.</li>
+                <li>Post fraudulent, defamatory, or malicious content.</li>
+                <li>Infringe upon the intellectual property rights of others.</li>
+                <li>Interfere with the Platform's security or performance.</li>
+              </ul>
+            </section>
+
+            {/* 6. Fees and Payments */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                6. FEES AND PAYMENTS
+              </h2>
+              <p>
+                Vendorlink reserves the right to charge service fees for the use of certain Platform features. All fees are clearly disclosed and are non-refundable unless otherwise required by law.
+              </p>
+            </section>
+
+            {/* 7. Intellectual Property */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                7. INTELLECTUAL PROPERTY
+              </h2>
+              <p>
+                Vendorlink owns all rights, title, and interest in the Platform technology and branding. Users retain ownership of their uploaded content but grant Vendorlink a non-exclusive license to use such content for Platform operations.
+              </p>
+            </section>
+
+            {/* 8. Limitation of Liability */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                8. LIMITATION OF LIABILITY
+              </h2>
+              <p className="uppercase font-bold text-xs text-foreground">
+                To the maximum extent permitted by law, Vendorlink shall not be liable for any indirect, incidental, special, or consequential damages arising out of your use of the Platform.
+              </p>
+            </section>
+
+            {/* 9. Termination */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                9. TERMINATION
+              </h2>
+              <p>
+                We may suspend or terminate your access to the Platform at any time, without notice, for conduct that we believe violates these Terms or is harmful to other users or the Platform itself.
+              </p>
+            </section>
+
+            {/* 10. Governing Law */}
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold border-b border-border pb-1 text-foreground">
+                10. GOVERNING LAW
+              </h2>
+              <p>
+                These Terms shall be governed by and construed in accordance with the laws of Pakistan, without regard to its conflict of law provisions.
+              </p>
+            </section>
+
+            {/* 11. Contact Information */}
+            <section className="space-y-4 pt-8 border-t-2 border-foreground">
+              <h2 className="text-lg font-bold uppercase text-foreground">
+                11. Contact Information
+              </h2>
+              <div className="space-y-4 not-italic text-foreground/80">
+                <div className="space-y-1">
+                  <p className="font-bold text-xs uppercase text-muted-foreground">Legal Inquiries</p>
+                  <p><a href="mailto:legal@vendorlink.com" className="underline hover:text-foreground">legal@vendorlink.com</a></p>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-bold text-xs uppercase text-muted-foreground">Customer Support</p>
+                  <p><a href="mailto:support.vendorlink@gmail.com" className="underline hover:text-foreground">support.vendorlink@gmail.com</a></p>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-bold text-xs uppercase text-muted-foreground">Official Website</p>
+                  <p><a href="http://www.vendorlink.com" className="underline hover:text-foreground">www.vendorlink.com</a></p>
+                </div>
+              </div>
+            </section>
+
+            <div className="pt-12 text-center text-[10px] text-muted-foreground uppercase tracking-widest">
+              End of Terms of Service
             </div>
-          </Card>
-        </div>
-
-        {/* Action Button: Scroll to Top */}
-        <div className={`fixed bottom-8 right-8 transition-all duration-500 transform ${showScrollTop ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-            <Button 
-                onClick={scrollToTop}
-                variant="primary"
-                className="h-14 w-14 rounded-full shadow-2xl bg-foreground text-background flex items-center justify-center p-0 border-none hover:scale-110 active:scale-95"
-            >
-                <ArrowUp size={24} strokeWidth={3} />
-            </Button>
+          </div>
         </div>
       </div>
     </PageTransition>
@@ -257,6 +181,3 @@ const TermsOfService = () => {
 };
 
 export default TermsOfService;
-
-
-

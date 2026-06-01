@@ -42,7 +42,7 @@ import {
 import StatusChip from "@/components/shared/StatusChip";
 import FilterSearchBar from "@/components/shared/FilterSearchBar";
 import TaskActionMenu from "@/components/admin/TaskActionMenu";
-import TaskDetailsModal from "@/components/admin/TaskDetailsModal";
+import TaskDetailsModal from "@/components/shared/TaskDetailsModal";
 import { cn } from "@/lib/cn";
 
 dayjs.extend(relativeTime);
@@ -60,7 +60,7 @@ const ChangeIndicator = ({ value }) => {
 
   return (
       <div className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
           colorClass
       )}>
           <div className="flex items-center gap-0.5">
@@ -116,7 +116,8 @@ const TaskMonitoring = () => {
     const matchesSearch =
       task.title?.toLowerCase().includes(query) ||
       task.companyId?.companyName?.toLowerCase().includes(query) ||
-      task.companyId?.username?.toLowerCase().includes(query);
+      task.companyId?.fullName?.toLowerCase().includes(query) ||
+      task.companyId?.email?.toLowerCase().includes(query);
 
     const currentFilter = ["all", "open", "in-progress", "completed"][activeTab];
     const matchesTab = currentFilter === "all" || task.status === currentFilter;
@@ -140,7 +141,7 @@ const TaskMonitoring = () => {
       key: "company",
       label: "Company",
       cellClassName: "px-6 py-4 text-sm text-muted-foreground",
-      render: (task) => task.companyId?.companyName || task.companyId?.username || "N/A",
+      render: (task) => task.companyId?.companyName || task.companyId?.fullName || task.companyId?.email || "N/A",
     },
     {
       key: "status",
@@ -207,12 +208,12 @@ const TaskMonitoring = () => {
     return (
       <div className="space-y-8">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {[1, 2].map(i => <Skeleton key={i} className="h-80 w-full rounded-2xl" />)}
+          {[1, 2].map(i => <Skeleton key={i} className="h-80 w-full rounded-xl" />)}
         </div>
-        <Skeleton className="h-96 w-full rounded-2xl" />
+        <Skeleton className="h-96 w-full rounded-xl" />
       </div>
     );
   }

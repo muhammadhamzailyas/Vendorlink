@@ -31,16 +31,16 @@ function Calendar({
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
         weekday:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+          "text-muted-foreground rounded-xl w-9 font-normal text-[0.8rem]",
         week: "flex w-full mt-2",
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
         ),
-        day_button: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 flex items-center justify-center rounded-md transition-colors",
+        day_button: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 flex items-center justify-center rounded-xl transition-colors",
         selected:
-          "bg-foreground text-background hover:bg-foreground hover:text-background focus:bg-foreground focus:text-background rounded-md",
-        today: "bg-accent text-accent-foreground rounded-md",
+          "bg-foreground text-background hover:bg-foreground hover:text-background focus:bg-foreground focus:text-background rounded-xl",
+        today: "bg-accent text-accent-foreground rounded-xl",
         outside:
           "outside text-muted-foreground opacity-50 aria-selected:bg-muted/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         disabled: "text-muted-foreground opacity-50 cursor-not-allowed",

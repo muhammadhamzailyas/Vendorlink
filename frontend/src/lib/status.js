@@ -61,8 +61,16 @@ export const VENDOR_CATEGORIES = [
 
 export const formatCategory = (value) => {
   if (!value) return "";
+  
+  // First check if it matches a predefined vendor category value
   const cat = VENDOR_CATEGORIES.find(c => c.value === value);
-  return cat ? cat.label : value;
+  if (cat) return cat.label;
+
+  // Otherwise treat as a slug and format it
+  return value
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 };
 
 

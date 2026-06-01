@@ -32,13 +32,13 @@ const ReviewItem = ({ label, value }) => {
       <div className="flex justify-between items-center py-3 px-3 min-h-[44px]">
         <dt className="text-xs font-medium text-muted-foreground flex-shrink-0 pr-4">{label}</dt>
         <dd>
-            <button
+            <Button
               type="button"
               onClick={handleShowFile}
-              className="text-[10px] font-bold bg-muted hover:bg-border/50 text-foreground px-2 py-1 rounded-md transition-colors cursor-pointer"
+              className="text-[10px] font-semibold bg-muted hover:bg-border/50 text-foreground px-2 py-1 rounded-xl transition-colors cursor-pointer"
             >
               Show Document
-            </button>
+            </Button>
         </dd>
       </div>
     );
@@ -150,13 +150,13 @@ const SignupStep5 = ({ data, onSubmit, onBack, loading }) => {
             </p>
         </div>
 
-        <div className="flex w-full gap-4 pt-4 border-t border-border/50">
+        <div className="grid-cols-2 grid w-full gap-4 pt-4 border-t border-border/50">
           <Button 
             variant="secondary" 
             onClick={onBack} 
             disabled={loading}
             size="lg"
-            className="flex-1 font-normal"
+            className="w-full flex-1 font-semibold"
           >
             Back
           </Button>
@@ -166,14 +166,14 @@ const SignupStep5 = ({ data, onSubmit, onBack, loading }) => {
             loading={loading} 
             disabled={loading}
             size="lg"
-            className="flex-1 font-normal shadow-soft"
+            className="w-full flex-1 font-semibold shadow-soft"
           >
             {loading ? "Submitting..." : "Submit Application"}
-          </Button>
-        </div>
+          </Button></div>
       </div>
     </div>
   );
 };
 
 export default SignupStep5;
+

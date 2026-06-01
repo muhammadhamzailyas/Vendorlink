@@ -9,7 +9,7 @@ const { z } = require("zod");
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  username: z.string().trim().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/),
+  fullName: z.string().trim().min(3).max(50),
 });
 
 const loginSchema = z.object({
@@ -18,13 +18,6 @@ const loginSchema = z.object({
 });
 
 const updateProfileSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(3)
-    .max(30)
-    .regex(/^[a-zA-Z0-9_]+$/)
-    .optional(),
   fullName: z.string().trim().min(1).optional(),
   phone: z.string().trim().optional(),
   profileImage: z.string().optional(),
@@ -67,7 +60,8 @@ router.get(
 );
 
 // Email verification
-router.get("/verify-email", authController.verifyEmail);
+router.post("/verify-email", authController.verifyEmail);
+router.post("/resend-verification", authController.resendVerificationCode);
 
 // Forgot password
 router.post("/forgot-password", authController.forgotPassword);

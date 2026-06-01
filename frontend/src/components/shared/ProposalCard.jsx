@@ -43,7 +43,7 @@ const ProposalCard = ({
             </Card.Title>
             <div className="mt-1 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-muted-foreground">
               <Person className="h-3.5 w-3.5" />
-              <span>{proposal.vendorId?.username || proposal.vendorId?.companyName || "Vendor"}</span>
+              <span>{proposal.vendorId?.fullName || proposal.vendorId?.companyName || proposal.vendorId?.email || "Vendor"}</span>
             </div>
           </div>
           <StatusChip status={proposal.status} className="shrink-0" />
@@ -88,26 +88,26 @@ const ProposalCard = ({
                   type="button"
                   variant="ghost"
                   size="xs"
-                  className="font-bold uppercase tracking-tight text-muted-foreground hover:text-foreground"
+                  className="font-semibold uppercase tracking-tight text-muted-foreground hover:text-foreground"
                 >
-                  {expanded ? <CaretUp className="mr-1.5 h-4 w-4" /> : <CaretDown className="mr-1.5 h-4 w-4" />}
+                  
                   {expanded ? "Show Less" : "View Proposal"}
                 </Button>
               </CollapsibleTrigger>
             ) : <div />}
 
           {proposal.status === "submitted" && (
-            <div className="flex gap-2.5">
+            <div className="grid-cols-2 grid gap-2.5">
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
                 onClick={handleReject}
                 disabled={!isApproved}
-                className="font-bold uppercase tracking-tight text-[11px] h-9"
+                className="w-full font-semibold uppercase tracking-tight text-[11px] h-9"
                 title={!isApproved ? "Please wait for admin approval to reject proposals" : ""}
               >
-                <X className="mr-1.5 h-4 w-4" />
+                
                 Reject
               </Button>
               <Button
@@ -116,13 +116,12 @@ const ProposalCard = ({
                 size="sm"
                 onClick={handleAccept}
                 disabled={!isApproved}
-                className="font-bold uppercase tracking-tight text-[11px] h-9"
+                className="w-full font-semibold uppercase tracking-tight text-[11px] h-9"
                 title={!isApproved ? "Please wait for admin approval to accept proposals" : ""}
               >
-                <Check className="mr-1.5 h-4 w-4" />
+                
                 Accept
-              </Button>
-            </div>
+              </Button></div>
           )}
         </Card.Footer>
       )}
@@ -131,6 +130,7 @@ const ProposalCard = ({
   );
 };
 export default ProposalCard;
+
 
 
 

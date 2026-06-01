@@ -39,7 +39,7 @@ const Payment = () => {
   if (loading || userLoading) {
     return (
         <div className="min-h-screen bg-muted flex items-center justify-center py-16 px-4">
-            <Skeleton className="h-[400px] w-full max-w-sm rounded-2xl" />
+            <Skeleton className="h-[400px] w-full max-w-sm rounded-xl" />
         </div>
     );
   }
@@ -47,7 +47,7 @@ const Payment = () => {
   return (
     <div className="min-h-screen bg-muted flex items-center justify-center py-16 px-4">
       <div className="w-full max-w-sm">
-        <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm sm:p-12">
+        <div className="rounded-xl border border-border bg-card p-10 text-center shadow-sm sm:p-12">
           <div className="mb-6 flex justify-center">
             <div className="h-20 w-20 rounded-full border border-border bg-muted flex items-center justify-center">
               <CheckCircle size={50} className="text-foreground" />
@@ -65,7 +65,6 @@ const Payment = () => {
           <Button
             variant="secondary"
             onClick={handleGoToDashboard}
-            icon={<DashboardIcon size={20} />}
             className="w-full rounded-xl px-6 py-2"
           >
             Go to Dashboard
@@ -77,6 +76,7 @@ const Payment = () => {
 };
 
 export default Payment;
+
 
 
 

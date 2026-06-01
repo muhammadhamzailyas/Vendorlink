@@ -111,7 +111,7 @@ const CompanyDashboard = () => {
 
     return (
         <div className={cn(
-            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
             colorClass
         )}>
             <div className="flex items-center gap-0.5">
@@ -264,12 +264,12 @@ const CompanyDashboard = () => {
         <div className="space-y-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+                    <Skeleton key={i} className="h-28 w-full rounded-xl" />
                 ))}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <Skeleton className="lg:col-span-8 h-[400px] w-full rounded-2xl" />
-                <Skeleton className="lg:col-span-4 h-[400px] w-full rounded-2xl" />
+                <Skeleton className="lg:col-span-8 h-[400px] w-full rounded-xl" />
+                <Skeleton className="lg:col-span-4 h-[400px] w-full rounded-xl" />
             </div>
             <div className="space-y-3">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -281,10 +281,10 @@ const CompanyDashboard = () => {
         <>
           
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="grid-cols-2 grid grid-wrap gap-3">
               <Button
                 variant="secondary"
-                icon={<ArrowRight className="h-4 w-4" />}
+               
                 onClick={() => navigate("/company/add-task")}
                 className="w-full sm:w-auto"
               >
@@ -295,8 +295,7 @@ const CompanyDashboard = () => {
                 className="w-full sm:w-auto"
               >
                 Review Proposals
-              </Button>
-            </div>
+              </Button></div>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -304,28 +303,24 @@ const CompanyDashboard = () => {
               title="Total Tasks" 
               value={stats.totalTasks} 
               icon={<Assignment />} 
-              link="/company/my-tasks" 
               trend={<ChangeIndicator value={stats.changes.tasks} />}
             />
             <StatCard 
               title="Pending Bids" 
               value={stats.pendingProposals} 
               icon={<Pending />} 
-              link="/company/proposals" 
               trend={<ChangeIndicator value={stats.changes.proposals} />}
             />
             <StatCard 
               title="Active Work" 
               value={stats.activeTasks} 
               icon={<CheckCircle />} 
-              link="/company/my-tasks?status=in-progress" 
               trend={<ChangeIndicator value={stats.changes.active} />}
             />
             <StatCard 
               title="Wallet Balance" 
               value={formatCurrency(wallet?.balance)} 
               icon={<CurrencyDollar />} 
-              link="/company/payments" 
             />
           </div>
 
@@ -483,6 +478,7 @@ const CompanyDashboard = () => {
 };
 
 export default CompanyDashboard;
+
 
 
 

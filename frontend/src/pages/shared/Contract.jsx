@@ -44,7 +44,7 @@ const ChangeIndicator = ({ value }) => {
 
   return (
       <div className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
           colorClass
       )}>
           <div className="flex items-center gap-0.5">
@@ -147,8 +147,8 @@ const Contract = () => {
       cellClassName: "px-6 py-4",
       render: (row) => (
         <div className="flex items-center gap-2">
-          <UserAvatar user={row.companyId || {}} name={row.companyId?.companyName || row.companyId?.username} size="md" />
-          <span className="text-sm text-foreground/80 font-medium">{row.companyId?.companyName || row.companyId?.username}</span>
+          <UserAvatar user={row.companyId || {}} name={row.companyId?.companyName || row.companyId?.fullName || row.companyId?.email} size="md" />
+          <span className="text-sm text-foreground/80 font-medium">{row.companyId?.companyName || row.companyId?.fullName || row.companyId?.email}</span>
         </div>
       ),
     },
@@ -158,8 +158,8 @@ const Contract = () => {
         cellClassName: "px-6 py-4",
         render: (row) => (
           <div className="flex items-center gap-2">
-            <UserAvatar user={row.vendorId || {}} name={row.vendorId?.username} size="md" />
-            <span className="text-sm text-foreground/80 font-medium">{row.vendorId?.username}</span>
+            <UserAvatar user={row.vendorId || {}} name={row.vendorId?.fullName || row.vendorId?.email} size="md" />
+            <span className="text-sm text-foreground/80 font-medium">{row.vendorId?.fullName || row.vendorId?.email}</span>
           </div>
         ),
       },
@@ -248,7 +248,7 @@ const Contract = () => {
       />
 
       {loading ? (
-        <Skeleton className="h-96 w-full rounded-2xl bg-muted" />
+        <Skeleton className="h-96 w-full rounded-xl bg-muted" />
       ) : (
         <DataTable
           columns={contractColumns}
@@ -276,6 +276,7 @@ const Contract = () => {
 };
 
 export default Contract;
+
 
 
 

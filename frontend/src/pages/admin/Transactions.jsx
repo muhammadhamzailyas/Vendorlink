@@ -92,8 +92,8 @@ const AdminTransactions = () => {
     const q = search.toLowerCase();
     return transactions.filter((t) => {
       if (!q) return true;
-      const fromName = t.fromUserId?.companyName || t.fromUserId?.username || "";
-      const toName = t.toUserId?.companyName || t.toUserId?.username || "";
+      const fromName = t.fromUserId?.companyName || t.fromUserId?.fullName || t.fromUserId?.email || "";
+      const toName = t.toUserId?.companyName || t.toUserId?.fullName || t.toUserId?.email || "";
       return (
         t.invoiceNumber?.toLowerCase().includes(q) ||
         fromName.toLowerCase().includes(q) ||
@@ -125,15 +125,21 @@ const AdminTransactions = () => {
       label: "Initiator",
       cellClassName: "px-6 py-4",
       render: (t) => {
-          // Logic: fromUserId is usually the one starting the action (payer or withdrawer)
-          // For deposits, toUserId and fromUserId are often the same (the user)
           const target = t.fromUserId || t.toUserId;
-          const displayName = target?.companyName || target?.username || "System";
+          if (!target) {
+            return <span className="text-sm font-bold text-muted-foreground">System</span>;
+          }
           
+          const displayName = target.companyName || target.fullName || "N/A";
+          const displayEmail = target.email;
+
           return (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <UserAvatar user={target} name={displayName} size="sm" />
-              <span className="text-sm font-bold text-foreground">{displayName}</span>
+              <div>
+                <p className="text-sm font-bold text-foreground">{displayName}</p>
+                <p className="text-xs text-muted-foreground">{displayEmail || 'No Email'}</p>
+              </div>
             </div>
           );
       }
@@ -177,26 +183,25 @@ const AdminTransactions = () => {
             const isWithdrawalPending = t.type === "withdrawal" && t.status === "pending";
             if (!isWithdrawalPending) return null;
             return (
-                <div className="flex justify-end gap-2">
+                <div className="grid-cols-2 grid gap-2">
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => withdrawalMutation.mutate({ transactionId: t._id, status: "completed", adminNotes: "Approved by admin" })}
                         disabled={withdrawalMutation.isPending}
-                        className="h-8 w-8 p-0 rounded-full text-success hover:bg-success/10"
+                        className="w-full h-8 w-8 p-0 rounded-full text-success hover:bg-success/10"
                     >
-                        <CheckCircle className="h-4 w-4" />
+                        <CheckCircle weight="bold" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => withdrawalMutation.mutate({ transactionId: t._id, status: "failed", adminNotes: "Rejected by admin" })}
                         disabled={withdrawalMutation.isPending}
-                        className="h-8 w-8 p-0 rounded-full text-danger hover:bg-danger/10"
+                        className="w-full h-8 w-8 p-0 rounded-full text-danger hover:bg-danger/10"
                     >
-                        <XCircle className="h-4 w-4" />
-                    </Button>
-                </div>
+                        <XCircle weight="bold" />
+                    </Button></div>
             );
         },
     },

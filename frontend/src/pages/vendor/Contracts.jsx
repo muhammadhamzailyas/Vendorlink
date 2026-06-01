@@ -89,7 +89,7 @@ const VendorContracts = () => {
     const colorClass = isPositive ? "bg-success/20 text-success border-success/30" : "bg-muted text-muted-foreground border-border";
 
     return (
-        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1", colorClass)}>
+        <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1", colorClass)}>
             <div className="flex items-center gap-0.5">
                 {isPositive && <CaretUp size={10} weight="bold" />}
                 <span className="text-[10px] font-black uppercase tracking-tight">{Math.abs(val)}%</span>
@@ -122,7 +122,7 @@ const VendorContracts = () => {
         <div className="flex items-center gap-3">
           <UserAvatar user={contract.companyId || {}} name={contract.companyId?.companyName} size="xs" />
           <span className="text-sm font-bold text-foreground/90 uppercase tracking-tight">
-            {contract.companyId?.companyName || contract.companyId?.username || "N/A"}
+            {contract.companyId?.companyName || contract.companyId?.fullName || contract.companyId?.email || "N/A"}
           </span>
         </div>
       ),
@@ -194,7 +194,7 @@ const VendorContracts = () => {
         {loading ? (
           <div className="space-y-3">
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
              </div>
              {Array.from({ length: 6 }).map((_, i) => (
                <Skeleton key={i} className="h-12 w-full rounded-xl" />
@@ -231,6 +231,7 @@ const VendorContracts = () => {
 };
 
 export default VendorContracts;
+
 
 
 

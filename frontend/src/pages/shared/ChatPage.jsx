@@ -22,7 +22,8 @@ import {
   AvatarImage, 
   AvatarFallback,
   Badge,
-  ScrollArea
+  ScrollArea,
+  Skeleton
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -104,7 +105,7 @@ const ChatPage = () => {
       <div className="h-[calc(100vh-180px)] flex gap-4 overflow-hidden">
         {/* Partners List */}
         <div className={cn(
-          "w-full md:w-80 flex flex-col bg-card border border-border rounded-2xl overflow-hidden shrink-0",
+          "w-full md:w-80 flex flex-col bg-card border border-border rounded-xl overflow-hidden shrink-0",
           activePartner ? "hidden md:flex" : "flex"
         )}>
           <div className="p-4 border-b border-border bg-muted/20">
@@ -124,8 +125,16 @@ const ChatPage = () => {
           <ScrollArea className="flex-1">
             <div className="p-2 space-y-1">
               {loadingPartners ? (
-                <div className="flex justify-center py-8">
-                  <CircleNotch className="h-5 w-5 animate-spin text-muted-foreground/50" />
+                <div className="p-2 space-y-2">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="flex items-center gap-3 p-3">
+                      <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-2 w-full" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : filteredPartners.length === 0 ? (
                 <div className="text-center py-12 px-4">
@@ -181,7 +190,7 @@ const ChatPage = () => {
 
         {/* Chat Area */}
         <div className={cn(
-          "flex-1 flex flex-col bg-card border border-border rounded-2xl overflow-hidden",
+          "flex-1 flex flex-col bg-card border border-border rounded-xl overflow-hidden",
           !activePartner ? "hidden md:flex items-center justify-center bg-muted/5" : "flex"
         )}>
           {!activePartner ? (
@@ -205,7 +214,7 @@ const ChatPage = () => {
                     className="md:hidden h-8 w-8 mr-1"
                     onClick={() => setActivePartner(null)}
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-5 w-5" />
                   </Button>
                   <Avatar className="h-10 w-10 border-2 border-background">
                     <AvatarImage src={activePartner.partnerImage} />
@@ -230,8 +239,13 @@ const ChatPage = () => {
               <ScrollArea className="flex-1 bg-muted/5 p-4 sm:p-6">
                 <div className="space-y-6 max-w-4xl mx-auto">
                   {loadingMessages ? (
-                    <div className="flex justify-center py-12">
-                      <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground/50" />
+                    <div className="space-y-6">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className={cn("flex flex-col max-w-[70%]", i % 2 === 0 ? "ml-auto items-end" : "items-start")}>
+                          <Skeleton className={cn("h-12 w-full rounded-xl", i % 2 === 0 ? "rounded-br-none" : "rounded-bl-none")} />
+                          <Skeleton className="h-2 w-16 mt-2" />
+                        </div>
+                      ))}
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="text-center py-12">
@@ -249,7 +263,7 @@ const ChatPage = () => {
                           )}
                         >
                           <div className={cn(
-                            "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-xs",
+                            "px-4 py-3 rounded-xl text-[13px] leading-relaxed shadow-xs",
                             isMe 
                               ? "bg-primary text-primary-foreground rounded-br-none" 
                               : "bg-background border border-border rounded-bl-none"
@@ -293,15 +307,14 @@ const ChatPage = () => {
                     placeholder="Coordinate and discuss project milestones..."
                     className="flex-1 rounded-full px-6 py-6 text-sm bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20 transition-all placeholder:text-muted-foreground/40 placeholder:uppercase placeholder:text-[10px] placeholder:font-bold placeholder:tracking-widest"
                   />
-                  <Button 
-                    type="submit" 
-                    size="icon" 
-                    className="h-12 w-12 rounded-full shrink-0 shadow-soft"
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="h-12 px-6 rounded-xl shrink-0 shadow-soft"
                     disabled={!newMessage.trim() || !isConnected}
                   >
-                    <PaperPlaneTilt className="h-5 w-5" weight="fill" />
-                  </Button>
-                </form>
+                    SEND
+                  </Button>                </form>
               </div>
             </>
           )}
@@ -312,3 +325,4 @@ const ChatPage = () => {
 };
 
 export default ChatPage;
+

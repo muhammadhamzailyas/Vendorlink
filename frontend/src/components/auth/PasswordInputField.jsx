@@ -1,7 +1,6 @@
 import React from "react";
 import { Eye as Visibility, EyeSlash as VisibilityOff } from "@phosphor-icons/react";
-import { Input } from "../../ui";
-import { cn } from "@/lib/cn";
+import { Input, Button } from "../ui";
 
 const PasswordInputField = ({ placeholder, value, onChange, showPassword, onToggle, error, ...props }) => {
   return (
@@ -15,18 +14,17 @@ const PasswordInputField = ({ placeholder, value, onChange, showPassword, onTogg
         error={error}
         {...props}
       />
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={onToggle}
-        className={cn(
-          "absolute right-3 p-0 text-muted-foreground hover:text-foreground transition-colors",
-          error ? "top-[22px]" : "top-1/2 -translate-y-1/2"
-        )}
+        className="absolute right-1 top-0 h-12 w-10 p-0 text-muted-foreground hover:bg-transparent"
       >
         {showPassword ? <VisibilityOff size={20} /> : <Visibility size={20} />}
-      </button>
+      </Button>
     </div>
   );
 };
 
 export default PasswordInputField;
+

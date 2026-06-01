@@ -141,7 +141,7 @@ exports.createCompleteContract = async (req, res) => {
             senderId: userId,
             type: "contract_created_admin",
             title: "Contract Agreement Initiated",
-            message: `A new contract agreement has been initiated between ${proposal.companyId.companyName || 'Company'} and ${proposal.vendorId.username || 'Vendor'}.`,
+            message: `A new contract agreement has been initiated between ${proposal.companyId.companyName || 'Company'} and ${proposal.vendorId.fullName || 'Vendor'}.`,
             data: { contractId: contract._id, taskId: proposal.taskId._id },
             relatedId: contract._id,
             relatedModel: "Contract",
@@ -278,8 +278,8 @@ exports.approveContract = async (req, res) => {
     const { name } = req.body;
 
     const contract = await Contract.findById(id)
-      .populate("companyId", "username email")
-      .populate("vendorId", "username email");
+      .populate("companyId", "fullName email")
+      .populate("vendorId", "fullName email");
 
     if (!contract) return res.status(404).json({ error: "Contract not found" });
 
@@ -300,12 +300,12 @@ exports.approveContract = async (req, res) => {
       if (contract.companyApproved) return res.status(400).json({ error: "Already approved by company" });
       contract.companyApproved = true;
       contract.companyApprovedAt = new Date();
-      contract.companySignature = { name: name || contract.companyId?.username || "Company", date: new Date() };
+      contract.companySignature = { name: name || contract.companyId?.fullName || "Company", date: new Date() };
     } else {
       if (contract.vendorApproved) return res.status(400).json({ error: "Already approved by vendor" });
       contract.vendorApproved = true;
       contract.vendorApprovedAt = new Date();
-      contract.vendorSignature = { name: name || contract.vendorId?.username || "Vendor", date: new Date() };
+      contract.vendorSignature = { name: name || contract.vendorId?.fullName || "Vendor", date: new Date() };
     }
 
     if (contract.companyApproved && contract.vendorApproved) {
@@ -486,7 +486,7 @@ exports.getCompanyContracts = async (req, res) => {
 
     const contracts = await Contract.find(query)
       .populate("taskId", "title description category")
-      .populate("vendorId", "username email")
+      .populate("vendorId", "fullName email")
       .populate("proposalId")
       .sort({ createdAt: -1 });
 
@@ -506,7 +506,7 @@ exports.getVendorContracts = async (req, res) => {
 
     const contracts = await Contract.find(query)
       .populate("taskId", "title description category")
-      .populate("companyId", "username email")
+      .populate("companyId", "fullName email")
       .populate("proposalId")
       .sort({ createdAt: -1 });
 
@@ -525,8 +525,8 @@ exports.getAllContracts = async (req, res) => {
 
     const contracts = await Contract.find()
       .populate("taskId", "title description category")
-      .populate("companyId", "username email companyName")
-      .populate("vendorId", "username email")
+      .populate("companyId", "fullName email companyName")
+      .populate("vendorId", "fullName email")
       .populate("proposalId")
       .sort({ createdAt: -1 });
 
@@ -544,10 +544,10 @@ exports.getContractById = async (req, res) => {
 
     const contract = await Contract.findById(id)
       .populate("taskId", "title description category requirements createdAt")
-      .populate("companyId", "username email")
-      .populate("vendorId", "username email")
+      .populate("companyId", "fullName email")
+      .populate("vendorId", "fullName email")
       .populate("proposalId")
-      .populate("createdBy", "username");
+      .populate("createdBy", "fullName");
 
     if (!contract) return res.status(404).json({ error: "Contract not found" });
 
@@ -724,7 +724,7 @@ exports.getActiveContracts = async (req, res) => {
     const userId = req.user._id.toString();
     const contracts = await Contract.find({ vendorId: userId, status: "active" })
       .populate("taskId", "title description")
-      .populate("companyId", "username email")
+      .populate("companyId", "fullName email")
       .sort({ updatedAt: -1 });
 
     res.json({ success: true, data: contracts });
@@ -741,8 +741,8 @@ exports.downloadContract = async (req, res) => {
 
     const contract = await Contract.findById(id)
       .populate("taskId")
-      .populate("companyId", "username email")
-      .populate("vendorId", "username email")
+      .populate("companyId", "fullName email")
+      .populate("vendorId", "fullName email")
       .populate("proposalId");
 
     if (!contract) return res.status(404).json({ error: "Contract not found" });
@@ -764,8 +764,8 @@ exports.downloadContract = async (req, res) => {
 <p><strong>Date:</strong> ${formatDate(contract.contractDate)}</p>
 <p><strong>Status:</strong> ${esc(contract.status).toUpperCase()}</p>
 <h2>PARTIES</h2>
-<p><strong>Company:</strong> ${esc(contract.companyId?.username)} (${esc(contract.companyId?.email)})</p>
-<p><strong>Vendor:</strong> ${esc(contract.vendorId?.username)} (${esc(contract.vendorId?.email)})</p>
+<p><strong>Company:</strong> ${esc(contract.companyId?.fullName || contract.companyId?.email)} (${esc(contract.companyId?.email)})</p>
+<p><strong>Vendor:</strong> ${esc(contract.vendorId?.fullName || contract.vendorId?.email)} (${esc(contract.vendorId?.email)})</p>
 <h2>PROJECT DETAILS</h2>
 <p><strong>Title:</strong> ${esc(contract.title)}</p>
 <p><strong>Description:</strong> ${esc(contract.description)}</p>

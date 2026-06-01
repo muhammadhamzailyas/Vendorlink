@@ -15,7 +15,7 @@ class AIRankingController {
         return res.status(403).json({ error: "Only companies can rank proposals" });
       }
 
-      const task = await Task.findById(taskId).populate("companyId", "username companyName");
+      const task = await Task.findById(taskId).populate("companyId", "fullName companyName");
       if (!task) {
         return res.status(404).json({ error: "Task not found" });
       }
@@ -25,7 +25,7 @@ class AIRankingController {
       }
 
       const proposals = await Proposal.find({ taskId })
-        .populate("vendorId", "username companyName email vendorType description createdAt")
+        .populate("vendorId", "fullName companyName email vendorType description createdAt")
         .lean();
 
       if (proposals.length === 0) {

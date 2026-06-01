@@ -130,14 +130,13 @@ const WalletDashboard = () => {
         <StatCard title="Gross Outflow" value={formatCurrency(wallet?.totalWithdrawn)} icon={<ArrowCircleDown />} />
       </div>
 
-      <div className="flex gap-4">
-        <Button onClick={() => setShowDeposit(true)} className="h-12 px-6 font-bold uppercase tracking-tight">
-          <ArrowCircleUp className="h-5 w-5 mr-2" /> Load Wallet
+      <div className="grid-cols-2 grid gap-4">
+        <Button onClick={() => setShowDeposit(true)} className="w-full h-12 px-6 font-bold uppercase tracking-tight">
+           Load Wallet
         </Button>
-        <Button onClick={() => setShowWithdraw(true)} variant="secondary" className="h-12 px-6 font-bold uppercase tracking-tight">
-          <ArrowCircleDown className="h-5 w-5 mr-2" /> Request Payout
-        </Button>
-      </div>
+        <Button onClick={() => setShowWithdraw(true)} variant="secondary" className="w-full h-12 px-6 font-bold uppercase tracking-tight">
+           Request Payout
+        </Button></div>
 
       <Card className="shadow-soft border-border/50">
           <Card.Header className="pb-4 border-b border-border/50 bg-muted/20">
@@ -146,8 +145,8 @@ const WalletDashboard = () => {
                       <Card.Title className="text-sm font-bold uppercase tracking-tight">Ledger & Pulse</Card.Title>
                       <Card.Description className="text-xs">Latest wallet activity and transfer records.</Card.Description>
                   </div>
-                  <Button variant="outline" size="xs" onClick={refreshWallet} className="font-bold uppercase tracking-tight bg-card">
-                      <ArrowsClockwise className="h-3.5 w-3.5 mr-1.5" />
+                  <Button variant="outline" size="xs" onClick={refreshWallet} className="font-semibold uppercase tracking-tight bg-card">
+                      
                       Sync Wallet
                   </Button>
               </div>

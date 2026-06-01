@@ -35,9 +35,9 @@ const Settings = () => {
                 type="button"
                 onClick={logout}
                 variant="destructive"
-                className="w-full sm:w-auto font-black uppercase tracking-widest text-[10px] h-10 px-8 rounded-xl"
+                className="w-full sm:w-auto font-semibold uppercase tracking-widest text-[11.5px] h-10 px-8 rounded-xl"
               >
-                <SignOut className="h-4 w-4 mr-2" />
+                
                 Logout Session
               </Button>
             </FormActionRow>
@@ -99,9 +99,9 @@ const Settings = () => {
                         onClick={handlePasswordReset} 
                         loading={loading}
                         variant="outline" 
-                        className="rounded-xl font-bold uppercase tracking-tight text-[10px] h-10 px-6 border-border/60 hover:bg-muted"
+                        className="rounded-xl font-semibold uppercase tracking-tight text-[11.5px] h-10 px-6 border-border/60 hover:bg-muted"
                     >
-                        <ArrowsClockwise size={16} weight="bold" className="mr-2" />
+                        
                         Reset Now
                     </Button>
                 </Card.Content>
@@ -114,3 +114,4 @@ const Settings = () => {
 };
 
 export default Settings;
+

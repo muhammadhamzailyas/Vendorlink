@@ -7,7 +7,7 @@ const MilestoneEditor = ({ milestones, onChange, onAdd, onRemove, disabled, erro
     {milestones.map((ms, idx) => (
       <div
         key={idx}
-        className="group relative p-6 rounded-2xl bg-muted/20 border border-border/60 hover:border-foreground/20 transition-all duration-300"
+        className="group relative p-6 rounded-xl bg-muted/20 border border-border/60 hover:border-foreground/20 transition-all duration-300"
       >
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
@@ -25,7 +25,7 @@ const MilestoneEditor = ({ milestones, onChange, onAdd, onRemove, disabled, erro
               disabled={disabled}
               className="h-8 w-8 p-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5"
             >
-              <Trash size={16} />
+              
             </Button>
           )}
         </div>
@@ -81,10 +81,10 @@ const MilestoneEditor = ({ milestones, onChange, onAdd, onRemove, disabled, erro
       size="sm"
       onClick={onAdd}
       disabled={disabled}
-      className="w-full h-14 border-dashed border-2 border-border/60 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:border-foreground/30 hover:bg-muted/30 group"
+      className="w-full h-14 border-dashed border-2 border-border/60 rounded-xl font-semibold uppercase tracking-widest text-[10px] hover:border-foreground/30 hover:bg-muted/30 group"
     >
       <div className="flex items-center justify-center gap-2">
-        <Plus size={16} weight="bold" className="group-hover:scale-110 transition-transform" />
+        
         Add New Milestone
       </div>
     </Button>
@@ -92,3 +92,4 @@ const MilestoneEditor = ({ milestones, onChange, onAdd, onRemove, disabled, erro
 );
 
 export default MilestoneEditor;
+

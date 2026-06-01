@@ -86,7 +86,7 @@ const SignupStep2 = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SearchableSelect
                 value={data.category}
-                placeholder="Service Category"
+                placeholder="Service category"
                 searchPlaceholder="Search category..."
                 options={VENDOR_CATEGORY_OPTIONS}
                 error={errors.category}
@@ -137,12 +137,11 @@ const SignupStep2 = ({
 
     <AddressFields data={data} errors={errors} onChange={onChange} />
 
-    <div className="flex gap-4 pt-4 border-t border-border/50">
-      <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="flex-1 font-normal">Back</Button>
-      <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading || isSubmitDisabled} size="lg" className="flex-1 shadow-soft font-normal">
+    <div className="grid-cols-2 grid gap-4 pt-4 border-t border-border/50">
+      <Button variant="secondary" onClick={onBack} disabled={loading} size="lg" className="w-full flex-1 font-semibold">Back</Button>
+      <Button variant="primary" onClick={onSubmit} loading={loading} disabled={loading || isSubmitDisabled} size="lg" className="w-full flex-1 shadow-soft font-semibold">
         {loading ? "Saving..." : "Continue"}
-      </Button>
-    </div>
+      </Button></div>
   </div>
 );
 

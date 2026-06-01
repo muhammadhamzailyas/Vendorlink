@@ -32,7 +32,7 @@ class NotificationService {
       });
 
       if (senderId) {
-        await notification.populate("senderId", "username email role");
+        await notification.populate("senderId", "fullName email role");
       }
 
       let delivered = false;
@@ -91,7 +91,7 @@ class NotificationService {
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate("senderId", "username email role");
+        .populate("senderId", "fullName email role");
 
       const total = await Notification.countDocuments(query);
       const unreadCount = await Notification.getUnreadCount(userId);

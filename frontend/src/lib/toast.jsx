@@ -179,7 +179,7 @@ export const ToastViewport = () => (
       visibleToasts={CONFIG.limit}
       theme="dark"
       toastOptions={{
-        className: "rounded-2xl border border-border bg-card shadow-2xl !p-4 !pl-5",
+        className: "rounded-xl border border-border bg-card shadow-2xl !p-4 !pl-5",
         descriptionClassName: "text-muted-foreground text-[11px] font-medium mt-0.5",
       }}
     />
@@ -226,3 +226,4 @@ const toast = {
 
 export { toast };
 export default toast;
+

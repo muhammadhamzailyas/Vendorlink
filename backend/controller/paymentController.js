@@ -50,8 +50,8 @@ class PaymentController {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
-        .populate("fromUserId", "username companyName")
-        .populate("toUserId", "username companyName");
+        .populate("fromUserId", "fullName email")
+        .populate("toUserId", "fullName email");
 
       const totalTransactions = await Transaction.countDocuments({
         $or: [{ fromUserId: userId }, { toUserId: userId }],
@@ -457,7 +457,7 @@ class PaymentController {
         status: { $in: ["active", "in-progress", "pending-vendor"] },
       })
         .populate("taskId", "title description category budget")
-        .populate("vendorId", "username companyName email")
+        .populate("vendorId", "fullName companyName email")
         .lean();
 
       if (!contracts.length) {
@@ -516,7 +516,7 @@ class PaymentController {
         status: { $in: ["active", "in-progress", "pending-vendor"] },
       })
         .populate("taskId", "title description category budget")
-        .populate("companyId", "username companyName email")
+        .populate("companyId", "fullName companyName email")
         .lean();
 
       if (!contracts.length) {
@@ -687,8 +687,8 @@ class PaymentController {
 
       const payments = await Payment.find({ contractId })
         .populate("taskId", "title")
-        .populate("companyId", "username companyName")
-        .populate("vendorId", "username companyName")
+        .populate("companyId", "fullName companyName email")
+        .populate("vendorId", "fullName companyName email")
         .sort({ createdAt: -1 });
 
       res.json({ success: true, data: payments });
@@ -707,8 +707,8 @@ class PaymentController {
 
       const payment = await Payment.findById(id)
         .populate("taskId", "title description")
-        .populate("companyId", "username companyName email")
-        .populate("vendorId", "username companyName email")
+        .populate("companyId", "fullName companyName email")
+        .populate("vendorId", "fullName companyName email")
         .populate("contractId");
 
       if (!payment) return res.status(404).json({ error: "Payment not found" });
@@ -745,8 +745,8 @@ class PaymentController {
 
       const payments = await Payment.find(query)
         .populate("taskId", "title")
-        .populate("companyId", "username companyName")
-        .populate("vendorId", "username companyName")
+        .populate("companyId", "fullName companyName email")
+        .populate("vendorId", "fullName companyName email")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
@@ -787,8 +787,8 @@ class PaymentController {
       }
 
       const transactions = await Transaction.find(query)
-        .populate("fromUserId", "username companyName")
-        .populate("toUserId", "username companyName")
+        .populate("fromUserId", "fullName companyName email")
+        .populate("toUserId", "fullName companyName email")
         .populate("taskId", "title")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
@@ -866,8 +866,8 @@ class PaymentController {
 
       const payment = await Payment.findById(id)
         .populate("taskId", "title description")
-        .populate("companyId", "username companyName email")
-        .populate("vendorId", "username companyName email");
+        .populate("companyId", "fullName companyName email")
+        .populate("vendorId", "fullName companyName email");
 
       if (!payment) return res.status(404).json({ error: "Payment not found" });
 
@@ -917,11 +917,11 @@ class PaymentController {
         <h1>INVOICE</h1>
         <div class="header">
           <div>
-            <h3>From: ${payment.companyId?.companyName || payment.companyId?.username || "Company"}</h3>
+            <h3>From: ${payment.companyId?.companyName || payment.companyId?.fullName || "Company"}</h3>
             <p>${payment.companyId?.email || ""}</p>
           </div>
           <div>
-            <h3>To: ${payment.vendorId?.companyName || payment.vendorId?.username || "Vendor"}</h3>
+            <h3>To: ${payment.vendorId?.companyName || payment.vendorId?.fullName || "Vendor"}</h3>
             <p>${payment.vendorId?.email || ""}</p>
           </div>
         </div>

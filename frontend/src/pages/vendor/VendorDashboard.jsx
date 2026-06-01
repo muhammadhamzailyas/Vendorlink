@@ -121,7 +121,7 @@ const VendorDashboard = () => {
 
     return (
         <div className={cn(
-            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
             colorClass
         )}>
             <div className="flex items-center gap-0.5">
@@ -219,12 +219,12 @@ const VendorDashboard = () => {
         <div className="space-y-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+                    <Skeleton key={i} className="h-28 w-full rounded-xl" />
                 ))}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <Skeleton className="lg:col-span-8 h-[400px] w-full rounded-2xl" />
-                <Skeleton className="lg:col-span-4 h-[400px] w-full rounded-2xl" />
+                <Skeleton className="lg:col-span-8 h-[400px] w-full rounded-xl" />
+                <Skeleton className="lg:col-span-4 h-[400px] w-full rounded-xl" />
             </div>
             <div className="space-y-3">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -237,22 +237,21 @@ const VendorDashboard = () => {
           
           
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex flex-wrap items-center gap-3 sm:ml-auto">
+            <div className="grid-cols-2 grid grid-wrap gap-3 sm:ml-auto">
               <Button
                 variant="secondary"
                 onClick={() => navigate("/vendor/available-tasks")}
                 className="w-full sm:w-auto font-bold uppercase tracking-tight text-[11px]"
               >
                 Browse Tasks
-                <ArrowRight className="ml-2 h-4 w-4" weight="bold" />
+                
               </Button>
               <Button
                 onClick={() => navigate("/vendor/my-proposals")}
                 className="w-full sm:w-auto font-bold uppercase tracking-tight text-[11px]"
               >
                 My Proposals
-              </Button>
-            </div>
+              </Button></div>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -261,20 +260,17 @@ const VendorDashboard = () => {
               value={stats.assignedProjects} 
               icon={<Assignment />} 
               trend={<ChangeIndicator value={stats.changes.projects} />}
-              link="/vendor/contracts" 
             />
             <StatCard 
               title="Wallet Balance" 
               value={formatCurrency(wallet?.balance)} 
               icon={<AttachMoney />} 
-              link="/vendor/payments" 
             />
             <StatCard 
               title="Active Work" 
               value={stats.ongoingWork} 
               icon={<Receipt />} 
               trend={<ChangeIndicator value={stats.changes.work} />}
-              link="/vendor/contracts" 
             />
             <StatCard 
               title="Gross Earnings" 
@@ -394,3 +390,4 @@ const VendorDashboard = () => {
 };
 
 export default VendorDashboard;
+

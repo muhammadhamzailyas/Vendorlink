@@ -40,7 +40,7 @@ class SocketService {
           return;
         }
 
-        const userRecord = await User.findById(decoded.id).select("_id role username");
+        const userRecord = await User.findById(decoded.id).select("_id role fullName email");
         const userId = userRecord?._id;
         const userType = userRecord?.role;
 
@@ -52,7 +52,7 @@ class SocketService {
         }
 
         const userIdStr = userId.toString();
-        console.log(`[WS] User connected: ${userRecord.username} (${userIdStr}) [${userType}]`);
+        console.log(`[WS] User connected: ${userRecord.fullName || userRecord.email} (${userIdStr}) [${userType}]`);
         
         // Store client info
         this.clients.set(userIdStr, { socketId: socket.id, userId: userIdStr, userType });
@@ -111,7 +111,7 @@ class SocketService {
         recipientId: userId,
         delivered: false,
         read: false,
-      }).populate("senderId", "username email role");
+      }).populate("senderId", "fullName email role");
 
       for (const notification of undelivered) {
         const sent = this.sendToUser(userId, {
@@ -191,7 +191,7 @@ class SocketService {
 
       await newMessage.populate({
         path: "senderId",
-        select: "username email role",
+        select: "fullName email role",
         model: "User",
       });
 
@@ -258,7 +258,7 @@ class SocketService {
         .limit(limit)
         .populate({
           path: "senderId",
-          select: "username email role",
+          select: "fullName email role",
           model: "User",
         });
 

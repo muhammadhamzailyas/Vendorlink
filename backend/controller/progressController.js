@@ -29,9 +29,9 @@ exports.getVendorActiveTasks = async (req, res) => {
       .populate({
         path: "taskId",
         select: "title description category companyId",
-        populate: { path: "companyId", select: "username email" },
+        populate: { path: "companyId", select: "fullName email" },
       })
-      .populate("companyId", "username email")
+      .populate("companyId", "fullName email")
       .lean();
 
     const tasks = await Promise.all(
@@ -53,7 +53,7 @@ exports.getVendorActiveTasks = async (req, res) => {
             category: contract.taskId.category,
             budget: contract.totalBudget,
             deadline: contract.projectEndDate,
-            companyName: contract.companyId?.username,
+            companyName: contract.companyId?.fullName,
             companyId: contract.companyId?._id,
             progress: latestUpdate?.percentage || 0,
             currentStatus: latestUpdate?.status || "in-progress",
@@ -85,7 +85,7 @@ exports.getTaskProgress = async (req, res) => {
       return res.status(403).json({ success: false, error: "Access denied - No contract found" });
     }
 
-    const task = await Task.findById(taskId).populate("companyId", "username email");
+    const task = await Task.findById(taskId).populate("companyId", "fullName email");
     if (!task) {
       return res.status(404).json({ success: false, error: "Task not found" });
     }
@@ -129,7 +129,7 @@ exports.addProgressUpdate = async (req, res) => {
     }
 
     const contract = await Contract.findOne({ taskId, vendorId, status: "active" })
-      .populate("companyId", "username");
+      .populate("companyId", "fullName");
     if (!contract) {
       return res.status(403).json({ success: false, error: "Access denied or task not active" });
     }
@@ -176,7 +176,7 @@ exports.addProgressUpdate = async (req, res) => {
           senderId: vendorId,
           type: "progress_updated",
           title: "Progress Update",
-          message: `${req.user.username} updated progress to ${percentage}% on "${task?.title || "your task"}"`,
+          message: `${req.user.fullName} updated progress to ${percentage}% on "${task?.title || "your task"}"`,
           data: {
             taskId,
             taskTitle: task?.title,
@@ -217,7 +217,7 @@ exports.getCompanyActiveTasks = async (req, res) => {
       vendorApproved: true,
     })
       .populate({ path: "taskId", select: "title description category" })
-      .populate("vendorId", "username email")
+      .populate("vendorId", "fullName email")
       .lean();
 
     const tasks = await Promise.all(
@@ -244,7 +244,7 @@ exports.getCompanyActiveTasks = async (req, res) => {
             category: contract.taskId.category,
             budget: contract.totalBudget,
             deadline: contract.projectEndDate,
-            vendorName: contract.vendorId?.username || "Vendor",
+            vendorName: contract.vendorId?.fullName || "Vendor",
             vendorEmail: contract.vendorId?.email,
             vendorId: contract.vendorId?._id,
             progress: latestUpdate?.percentage || 0,
@@ -291,7 +291,7 @@ exports.getCompanyTaskProgress = async (req, res) => {
       companyId, 
       status: { $in: ["active", "pending-completion", "completed"] } 
     })
-      .populate("vendorId", "username email profileImage")
+      .populate("vendorId", "fullName email profileImage")
       .populate("taskId");
 
     if (!contract) {
@@ -366,7 +366,7 @@ exports.exportProgressReport = async (req, res) => {
     const companyId = req.user._id.toString();
 
     const contract = await Contract.findOne({ taskId, companyId })
-      .populate("vendorId", "username email")
+      .populate("vendorId", "fullName email")
       .populate("taskId");
 
     if (!contract) {
@@ -426,7 +426,7 @@ exports.requestProjectCompletion = async (req, res) => {
           senderId: vendorId,
           type: "completion_requested",
           title: "Project Completion Request",
-          message: `${req.user.username} has marked the project "${contract.title}" as completed. Please review and approve.`,
+          message: `${req.user.fullName} has marked the project "${contract.title}" as completed. Please review and approve.`,
           data: { taskId, contractId: contract._id, role: "company" },
           relatedId: taskId,
           relatedModel: "Task",

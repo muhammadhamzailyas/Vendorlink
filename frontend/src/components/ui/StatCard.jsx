@@ -1,7 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/cn";
-import { ArrowSquareOut } from "@phosphor-icons/react";
 import Card from "./Card";
 import Skeleton from "./Skeleton";
 
@@ -9,30 +7,15 @@ export const StatCard = ({
   title,
   value,
   icon,
-  link,
-  onClick,
   loading = false,
   className,
   trend,
+  noHover = false,
 }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    if (link) {
-      navigate(link);
-    } else if (onClick) {
-      onClick();
-    }
-  };
-
-  const isInteractive = link || onClick;
-
   return (
     <Card
-      onClick={isInteractive ? handleClick : undefined}
       className={cn(
-        "group relative transition-all duration-300 shadow-soft border-border bg-card",
-        isInteractive && "cursor-pointer hover:border-input-focus hover:shadow-md",
+        "relative transition-all duration-300 shadow-soft border-border bg-card overflow-hidden",
         className
       )}
     >
@@ -41,7 +24,10 @@ export const StatCard = ({
           {title}
         </p>
         {icon && !loading && (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground transition-all duration-300 group-hover:scale-110 shadow-sm border border-border">
+          <div className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground transition-all duration-300 shadow-sm border border-border",
+              !noHover && "group-hover:scale-110"
+          )}>
             {React.cloneElement(icon, {
               size: 18,
               strokeWidth: 2.5,
@@ -66,6 +52,3 @@ export const StatCard = ({
     </Card>
   );
 };
-
-
-

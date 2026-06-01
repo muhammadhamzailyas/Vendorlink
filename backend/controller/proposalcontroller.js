@@ -64,8 +64,8 @@ class ProposalController {
       });
 
       const data = await Proposal.findById(proposal._id)
-        .populate("vendorId", "username email vendorType")
-        .populate("companyId", "companyName username")
+        .populate("vendorId", "fullName email vendorType")
+        .populate("companyId", "companyName fullName")
         .populate("taskId", "title budget deadline category");
 
       res.status(201).json({
@@ -82,7 +82,7 @@ class ProposalController {
             senderId: req.user._id,
             type: "proposal_submitted",
             title: "New Proposal Received",
-            message: `${req.user.username} submitted a proposal for "${task.title}"`,
+            message: `${req.user.fullName} submitted a proposal for "${task.title}"`,
             data: { proposalId: proposal._id, taskId: task._id, taskTitle: task.title },
             relatedId: proposal._id,
             relatedModel: "Proposal",
@@ -103,7 +103,7 @@ class ProposalController {
     try {
       const data = await Proposal.find({ vendorId: req.user._id })
         .populate("taskId", "title budget deadline status category")
-        .populate("companyId", "companyName username email")
+        .populate("companyId", "companyName fullName email")
         .sort({ submittedAt: -1 });
 
       res.json(data);
@@ -120,7 +120,7 @@ class ProposalController {
 
       const data = await Proposal.find({ taskId: { $in: ids } })
         .populate("taskId", "title budget deadline status")
-        .populate("vendorId", "username email vendorType description")
+        .populate("vendorId", "fullName email vendorType description")
         .sort({ submittedAt: -1 });
 
       res.json(data);
@@ -133,8 +133,8 @@ class ProposalController {
   async getTaskProposals(req, res) {
     try {
       const data = await Proposal.find({ taskId: req.params.taskId })
-        .populate("vendorId", "username email vendorType description")
-        .populate("companyId", "companyName username")
+        .populate("vendorId", "fullName email vendorType description")
+        .populate("companyId", "companyName fullName")
         .populate("taskId", "title budget deadline status companyId")
         .sort({ submittedAt: -1 });
 
@@ -170,7 +170,7 @@ class ProposalController {
 
       const p = await Proposal.findById(req.params.id)
         .populate("taskId")
-        .populate("vendorId", "username email");
+        .populate("vendorId", "fullName email");
 
       if (!p) return res.status(404).json({ error: "Not found" });
 
@@ -188,7 +188,7 @@ class ProposalController {
           status: "in-progress",
         },
         { new: true }
-      ).populate("selectedVendor", "username email");
+      ).populate("selectedVendor", "fullName email");
 
       await Proposal.updateMany(
         { taskId: p.taskId._id, _id: { $ne: p._id }, status: "submitted" },
@@ -306,7 +306,7 @@ class ProposalController {
       await proposal.save();
 
       const data = await Proposal.findById(proposal._id)
-        .populate("vendorId", "username email")
+        .populate("vendorId", "fullName email")
         .populate("taskId", "title budget deadline category");
 
       res.json({ message: "Proposal updated", proposal: data });
@@ -418,7 +418,7 @@ class ProposalController {
             senderId: req.user._id,
             type: "proposal_withdrawn",
             title: "Proposal Withdrawn",
-            message: `${req.user.username} withdrew their proposal for "${proposal.taskId.title}"`,
+            message: `${req.user.fullName} withdrew their proposal for "${proposal.taskId.title}"`,
             data: { taskId: proposal.taskId?._id, taskTitle: proposal.taskId.title },
             relatedId: proposal.taskId?._id,
             relatedModel: "Task",

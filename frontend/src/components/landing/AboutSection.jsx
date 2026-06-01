@@ -64,7 +64,7 @@ const AboutSection = () => {
                   viewport={{ once: true }}
                   className="flex gap-6 items-start"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-foreground text-background shadow-lg flex items-center justify-center shrink-0 border border-border transition-transform hover:scale-110">
+                  <div className="w-14 h-14 rounded-xl bg-foreground text-background shadow-lg flex items-center justify-center shrink-0 border border-border transition-transform hover:scale-110">
                     {React.cloneElement(value.icon, { size: 24, strokeWidth: 2.5 })}
                   </div>
                   <div>
@@ -82,6 +82,7 @@ const AboutSection = () => {
 };
 
 export default AboutSection;
+
 
 
 

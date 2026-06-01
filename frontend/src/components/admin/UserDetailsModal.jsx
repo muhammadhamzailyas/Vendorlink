@@ -60,7 +60,7 @@ const UserDetailsModal = ({
   if (!open || !user) return null;
 
   const isAdmin = user.role === "admin";
-  const displayName = isAdmin ? "Admin" : (user.companyName || user.fullName || user.username || "User Profile");
+  const displayName = isAdmin ? "Admin" : (user.companyName || user.fullName || user.email || "User Profile");
   const isCompany = user.role === "company";
   const profile = isCompany ? user.companyProfile : user.vendorProfile;
   const isPending = user.status === "pending";
@@ -256,7 +256,7 @@ const UserDetailsModal = ({
               </>
             ) : (
               <>
-                <Button variant="secondary" onClick={onX} className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl">Close</Button>
+                <Button variant="secondary" onClick={onX} className="w-full font-semibold uppercase tracking-tight text-[11px] h-12 rounded-xl">Close</Button>
                 <Button onClick={() => onDownloadPDF(user)} className="w-full font-bold uppercase tracking-tight text-[11px] h-12 rounded-xl bg-foreground text-background hover:opacity-90 shadow-md">Export Profile</Button>
               </>
             )}
@@ -304,3 +304,4 @@ const UserDetailsModal = ({
 };
 
 export default UserDetailsModal;
+

@@ -60,19 +60,19 @@ class WebSocketClient {
       });
 
       this.socket.on("connect", () => {
-        console.log("[WS] Connected to server");
+        console.log("[Socket.io] Connected to server");
         this.connectionListeners.forEach((fn) => fn(true));
         this.isConnecting = false;
       });
 
       this.socket.on("disconnect", (reason) => {
-        console.log("[WS] Disconnected:", reason);
+        console.log("[Socket.io] Disconnected:", reason);
         this.connectionListeners.forEach((fn) => fn(false));
         this.isConnecting = false;
       });
 
       this.socket.on("connect_error", (error) => {
-        console.error("[WS] Connection error:", error);
+        console.error("[Socket.io] Connection error:", error);
         this.errorListeners.forEach((fn) => fn(error));
         this.isConnecting = false;
       });

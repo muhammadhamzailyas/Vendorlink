@@ -12,6 +12,7 @@ import {
   Badge, 
   Separator, 
   Loader,
+  Skeleton,
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
@@ -81,11 +82,11 @@ const VendorTaskDetail = () => {
                     <Skeleton className="h-10 w-32 rounded-xl" />
                 </div>
                 <div className="space-y-6">
-                    <Skeleton className="h-64 w-full rounded-2xl" />
+                    <Skeleton className="h-64 w-full rounded-xl" />
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Skeleton className="h-24 w-full rounded-2xl" />
-                        <Skeleton className="h-24 w-full rounded-2xl" />
-                        <Skeleton className="h-24 w-full rounded-2xl" />
+                        <Skeleton className="h-24 w-full rounded-xl" />
+                        <Skeleton className="h-24 w-full rounded-xl" />
+                        <Skeleton className="h-24 w-full rounded-xl" />
                     </div>
                 </div>
             </div>
@@ -130,13 +131,11 @@ const VendorTaskDetail = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex items-center justify-between gap-4">
-            <Button variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight">
-                <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+        <div className="grid-cols-1 grid gap-4">
+            <Button variant="secondary" size="xs" onClick={() => navigate(-1)} className="w-full font-bold uppercase tracking-tight">
+                
                 Back to Tasks
-            </Button>
-            
-        </div>
+            </Button></div>
         
         <Card className="overflow-hidden shadow-soft border-border/50">
           <div className="bg-muted/20 p-6 sm:p-8 border-b border-border/50">
@@ -181,7 +180,7 @@ const VendorTaskDetail = () => {
                 { label: "Deadline", value: formatDate(task.deadline), icon: <Clock className="text-warning" /> },
                 { label: "Posted On", value: formatDate(task.createdAt), icon: <Calendar className="text-sky-600" /> },
                 ].map((item, index) => (
-                <div key={index} className="flex flex-col gap-3 p-5 rounded-2xl bg-muted/20 border border-border/30 transition-all hover:bg-muted/30">
+                <div key={index} className="flex flex-col gap-3 p-5 rounded-xl bg-muted/20 border border-border/30 transition-all hover:bg-muted/30">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-card border border-border/50 shadow-xs">
                         {React.cloneElement(item.icon, { size: 16, strokeWidth: 2.5 })}
                     </div>
@@ -198,7 +197,7 @@ const VendorTaskDetail = () => {
                     <div className="h-1.5 w-8 rounded-full bg-foreground" />
                     <h2 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Detailed Requirements</h2>
                 </div>
-                <div className="p-6 rounded-2xl bg-muted/20 border border-border/30 text-[14px] font-medium leading-relaxed whitespace-pre-wrap text-foreground/80 shadow-inner">
+                <div className="p-6 rounded-xl bg-muted/20 border border-border/30 text-[14px] font-medium leading-relaxed whitespace-pre-wrap text-foreground/80 shadow-inner">
                 {task.requirements || "No specific requirements provided."}
                 </div>
             </div>
@@ -221,11 +220,11 @@ const VendorTaskDetail = () => {
             
             <Card.Content className="p-6 sm:p-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="p-5 rounded-2xl bg-muted/20 border border-border/20 shadow-xs">
+                <div className="p-5 rounded-xl bg-muted/20 border border-border/20 shadow-xs">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Your Bid Price</p>
                     <p className="text-2xl font-extrabold text-foreground uppercase tracking-tighter">${myProposal.bidAmount?.toLocaleString()}</p>
                 </div>
-                <div className="p-5 rounded-2xl bg-muted/20 border border-border/20 shadow-xs">
+                <div className="p-5 rounded-xl bg-muted/20 border border-border/20 shadow-xs">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Proposed Deadline</p>
                     <p className="text-2xl font-extrabold text-foreground uppercase tracking-tighter">{formatDate(myProposal.proposedDeadline)}</p>
                 </div>
@@ -254,7 +253,7 @@ const VendorTaskDetail = () => {
         )}
 
         {task.status !== "open" && !myProposal && (
-          <div className="p-5 rounded-2xl bg-warning/10 border border-warning/20 text-xs font-bold text-warning text-center uppercase tracking-widest shadow-sm">
+          <div className="p-5 rounded-xl bg-warning/10 border border-warning/20 text-xs font-bold text-warning text-center uppercase tracking-widest shadow-sm">
             This task is currently <span className="underline decoration-warning/30">{task.status}</span> and is not accepting new proposals.
           </div>
         )}
@@ -272,6 +271,7 @@ const VendorTaskDetail = () => {
 };
 
 export default VendorTaskDetail;
+
 
 
 

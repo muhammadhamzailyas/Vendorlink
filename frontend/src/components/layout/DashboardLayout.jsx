@@ -25,7 +25,7 @@ import {
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import ApprovalStatusBanner from "../ApprovalStatusBanner";
-import { Skeleton } from "../ui";
+import { Skeleton, Loader } from "../ui";
 import { cn } from "@/lib/cn";
 import { useUser } from "../../context/UserContext";
 import { usePageMetaContext } from "../../context/PageMetaContext";
@@ -100,14 +100,7 @@ const DashboardLayout = () => {
   const { main = [] } = MENU_CONFIG[role] || {};
 
   if (!user || !role) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-background">
-        <div className="text-center">
-          <Skeleton className="h-10 w-64 mb-4 bg-muted" />
-          <Skeleton className="h-4 w-48 mx-auto bg-muted" />
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
@@ -126,9 +119,10 @@ const DashboardLayout = () => {
         animate={{ 
           marginLeft: isSidebarCollapsed ? 96 : 272
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+        style={{ willChange: "margin-left" }}
         className={cn(
-          "flex-1 flex flex-col min-w-0 border border-border bg-card rounded-2xl overflow-hidden shadow-sm"
+          "flex-1 flex flex-col min-w-0 border border-border bg-card rounded-xl overflow-hidden shadow-sm"
         )}
       >
         <Header 
@@ -140,12 +134,11 @@ const DashboardLayout = () => {
         />
 
         <div className="flex-1 overflow-y-auto bg-background custom-scrollbar">
-          <div className={cn(
-            "mx-auto px-4 py-8 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out",
-            isSidebarCollapsed ? "max-w-[1600px]" : "max-w-7xl"
-          )}>
+          <div className="mx-auto px-4 py-8 sm:px-6 lg:px-10 max-w-[1600px]">
             <ApprovalStatusBanner />
-            <Outlet />
+            <React.Suspense fallback={<Loader />}>
+              <Outlet />
+            </React.Suspense>
           </div>
         </div>
       </motion.main>
@@ -156,3 +149,4 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
+

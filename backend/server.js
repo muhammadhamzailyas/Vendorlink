@@ -137,18 +137,65 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    // Ensure DB indexes are created for all schemas.
+    // 1. Migration & Cleanup: Generate uids and fix legacy data
+    const usersToClean = await User.find({ 
+      $or: [
+        { uid: { $exists: false } },
+        { googleId: null },
+        { authProvider: { $nin: ["local", "google"] } }
+      ] 
+    });
+
+    if (usersToClean.length > 0) {
+      console.log(`[Migration] Found ${usersToClean.length} users requiring cleanup. Fixing...`);
+      const crypto = require("crypto");
+      for (const user of usersToClean) {
+        const updates = {};
+        const unset = {};
+        
+        if (!user.uid) {
+          updates.uid = `VL-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+        }
+
+        // REMOVE googleId if it is explicit null or an empty string
+        if (user.googleId === null || user.googleId === "") {
+          unset.googleId = "";
+        }
+
+        const updateOp = {};
+        if (Object.keys(updates).length > 0) updateOp.$set = updates;
+        if (Object.keys(unset).length > 0) updateOp.$unset = unset;
+
+        if (Object.keys(updateOp).length > 0) {
+          console.log(`[Migration] Cleaning user ${user.email}...`);
+          await User.updateOne({ _id: user._id }, updateOp, { runValidators: false });
+        }
+      }
+      console.log("[Migration] Database cleanup complete.");
+    }
+
+    // 2. Sync indexes to handle unique/sparse changes
+    try {
+      console.log("[Index] Renewing indexes...");
+      // Drop the specific problematic indexes
+      await User.collection.dropIndex("googleId_1").catch(() => {});
+      await User.collection.dropIndex("uid_1").catch(() => {});
+      console.log("[Index] Legacy unique indexes dropped");
+    } catch (e) { 
+      console.log("[Index] Error dropping specific indexes:", e.message);
+    }
+
     await Promise.all([
-      User.createIndexes(),
-      Company.createIndexes(),
-      Vendor.createIndexes(),
-      Notification.createIndexes(),
-      Task.createIndexes(),
-      Proposal.createIndexes(),
-      Contract.createIndexes(),
-      Payment.createIndexes(),
-      Transaction.createIndexes(),
-      Wallet.createIndexes(),
+      User.syncIndexes(), // Use syncIndexes to reconcile schema and DB
+      Company.syncIndexes(),
+      Vendor.syncIndexes(),
+      Notification.syncIndexes(),
+      Task.syncIndexes(),
+      Proposal.syncIndexes(),
+      Contract.syncIndexes(),
+      Payment.syncIndexes(),
+      Transaction.syncIndexes(),
+      Wallet.syncIndexes(),
     ]);
     console.log("Database indexes synchronized");
 

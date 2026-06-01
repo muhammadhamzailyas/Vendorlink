@@ -54,7 +54,7 @@ const ContractDetailsModal = ({ open, contract, onX, onSuccess }) => {
   const handleAccept = async () => {
     setIsSubmitting(true);
     try {
-        await contractAPI.approveContract(contract._id, { name: user.fullName || user.username });
+        await contractAPI.approveContract(contract._id, { name: user.fullName || user.email });
         toastUtil.success("Contract accepted successfully!");
         if (onSuccess) onSuccess();
         onX();
@@ -121,10 +121,10 @@ const ContractDetailsModal = ({ open, contract, onX, onSuccess }) => {
           <SectionHeader icon={User} title="Parties & Financials" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <DetailField label="Company" valueClassName="text-sm font-bold text-foreground">
-              {contract.companyId?.companyName || contract.companyId?.username || "N/A"}
+              {contract.companyId?.companyName || contract.companyId?.fullName || "N/A"}
             </DetailField>
             <DetailField label="Vendor" valueClassName="text-sm font-bold text-foreground">
-              {contract.vendorId?.username || contract.vendorId?.email || "N/A"}
+              {contract.vendorId?.fullName || contract.vendorId?.email || "N/A"}
             </DetailField>
             <DetailField label="Total Budget" valueClassName="text-sm font-black text-foreground">
               ${contract.totalBudget?.toLocaleString()}
@@ -158,14 +158,14 @@ const ContractDetailsModal = ({ open, contract, onX, onSuccess }) => {
             <DetailField 
               label="Scope of Work" 
               labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2" 
-              valueClassName="text-xs font-medium leading-relaxed text-foreground bg-muted/30 p-5 rounded-2xl border border-border/50 whitespace-pre-wrap"
+              valueClassName="text-xs font-medium leading-relaxed text-foreground bg-muted/30 p-5 rounded-xl border border-border/50 whitespace-pre-wrap"
             >
               {contract.scope || "No scope defined."}
             </DetailField>
             <DetailField 
               label="Key Deliverables" 
               labelClassName="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2" 
-              valueClassName="text-xs font-medium leading-relaxed text-foreground bg-muted/30 p-5 rounded-2xl border border-border/50 whitespace-pre-wrap"
+              valueClassName="text-xs font-medium leading-relaxed text-foreground bg-muted/30 p-5 rounded-xl border border-border/50 whitespace-pre-wrap"
             >
               {contract.deliverables || "No deliverables listed."}
             </DetailField>
@@ -256,26 +256,24 @@ const ContractDetailsModal = ({ open, contract, onX, onSuccess }) => {
           <Button 
             variant="ghost" 
             onClick={onX} 
-            className="font-black uppercase tracking-widest text-[10px] h-12 px-8"
+            className="font-semibold uppercase tracking-widest text-[10px] h-12 px-8"
           >
             Close brief
           </Button>
 
           {showActionButtons && (
-              <div className="flex items-center gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Button 
                     variant="ghost"
                     onClick={() => setRejectOpen(true)}
-                    className="font-black uppercase tracking-widest text-[10px] h-12 px-6 text-error hover:bg-error/10"
+                    className="w-full font-semibold uppercase tracking-widest text-[10px] h-12 px-6 text-error hover:bg-error/10"
                 >
-                    <XCircle className="mr-2 h-4 w-4" weight="bold" />
                     Request Changes
                 </Button>
                 <Button 
                     onClick={() => setConfirmOpen(true)}
-                    className="font-black uppercase tracking-widest text-[10px] h-12 px-10 shadow-lg"
+                    className="w-full font-semibold uppercase tracking-widest text-[10px] h-12 px-10 shadow-lg"
                 >
-                    <Signature className="mr-2 h-4 w-4" weight="bold" />
                     Accept & Sign
                 </Button>
               </div>

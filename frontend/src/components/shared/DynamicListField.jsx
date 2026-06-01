@@ -44,7 +44,7 @@ const DynamicListField = ({
               size="xs"
               className="h-11 w-11 shrink-0 rounded-xl text-danger hover:bg-danger-surface hover:border-danger/30 active:scale-[0.95]"
             >
-              <Delete className="h-4 w-4" />
+              
             </Button>
           )}
         </div>
@@ -56,15 +56,16 @@ const DynamicListField = ({
       disabled={disabled}
       variant="secondary"
       size="sm"
-      className="mt-4 font-bold uppercase tracking-tight"
+      className="mt-4 font-semibold uppercase tracking-tight"
     >
-      <Add className="mr-1.5 h-4 w-4" /> {addLabel}
+       {addLabel}
     </Button>
     {error ? <p className="mt-1.5 text-xs font-bold text-danger">{error}</p> : null}
   </div>
 );
 
 export default DynamicListField;
+
 
 
 

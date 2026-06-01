@@ -47,10 +47,10 @@ const PaymentDetail = () => {
         <div className="space-y-8">
             <Skeleton className="h-12 w-1/3 rounded-lg" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Skeleton className="h-64 rounded-2xl" />
+                <Skeleton className="h-64 rounded-xl" />
                 <div className="space-y-6">
-                    <Skeleton className="h-32 rounded-2xl" />
-                    <Skeleton className="h-32 rounded-2xl" />
+                    <Skeleton className="h-32 rounded-xl" />
+                    <Skeleton className="h-32 rounded-xl" />
                 </div>
             </div>
         </div>
@@ -110,7 +110,7 @@ const PaymentDetail = () => {
             onClick={() => navigate("/admin/payments")}
             className="font-bold uppercase tracking-tight shrink-0"
           >
-            <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+            
             Back
           </Button>
           <div className="min-w-0">
@@ -124,8 +124,8 @@ const PaymentDetail = () => {
         <div className="flex items-center gap-3 shrink-0">
           <StatusChip status={payment.status} />
           {payment.invoiceNumber && (
-            <Button variant="outline" size="xs" onClick={handleDownloadInvoice} className="font-bold uppercase tracking-tight bg-card shadow-soft">
-              <Download className="h-3.5 w-3.5 mr-1.5" />
+            <Button variant="outline" size="xs" onClick={handleDownloadInvoice} className="font-semibold uppercase tracking-tight bg-card shadow-soft">
+              
               Download PDF
             </Button>
           )}
@@ -143,15 +143,15 @@ const PaymentDetail = () => {
           </Card.Header>
           <Card.Content className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-                <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
+                <div className="p-5 rounded-xl bg-muted/20 border border-border/30">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Gross Amount</p>
                     <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">${payment.amount?.toLocaleString()}</p>
                 </div>
-                <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
+                <div className="p-5 rounded-xl bg-muted/20 border border-border/30">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Platform Revenue</p>
                     <p className="text-2xl font-extrabold text-foreground tracking-tighter uppercase">${payment.platformFee?.toLocaleString()}</p>
                 </div>
-                <div className="p-5 rounded-2xl bg-jade-400/10 border border-jade-600/20">
+                <div className="p-5 rounded-xl bg-jade-400/10 border border-jade-600/20">
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-jade-600/60 mb-1.5">Net Payout</p>
                     <p className="text-2xl font-extrabold text-jade-600 tracking-tighter uppercase">${payment.vendorAmount?.toLocaleString()}</p>
                 </div>
@@ -217,7 +217,7 @@ const PaymentDetail = () => {
             <Card.Content className="p-5 space-y-4">
                 <div>
                     <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Name</p>
-                    <p className="text-sm font-bold text-foreground truncate">{payment.company?.companyName || payment.company?.username || "—"}</p>
+                    <p className="text-sm font-bold text-foreground truncate">{payment.company?.companyName || payment.company?.fullName || payment.company?.email || "—"}</p>
                 </div>
                 <div>
                     <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Identifier (Email)</p>
@@ -236,7 +236,7 @@ const PaymentDetail = () => {
             <Card.Content className="p-5 space-y-4">
                 <div>
                     <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Business Name</p>
-                    <p className="text-sm font-bold text-foreground truncate">{payment.vendor?.businessName || payment.vendor?.username || "—"}</p>
+                    <p className="text-sm font-bold text-foreground truncate">{payment.vendor?.businessName || payment.vendor?.fullName || payment.vendor?.email || "—"}</p>
                 </div>
                 <div>
                     <p className="text-[9px] font-extrabold uppercase tracking-tighter text-muted-foreground/60 mb-0.5">Identifier (Email)</p>
@@ -262,6 +262,8 @@ const PaymentDetail = () => {
 };
 
 export default PaymentDetail;
+
+
 
 
 

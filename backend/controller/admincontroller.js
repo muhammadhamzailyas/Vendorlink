@@ -645,7 +645,7 @@ class AdminController {
     try {
       const [users, tasks, contracts, payments] = await Promise.all([
         User.find().sort({ createdAt: -1 }).limit(20).lean(),
-        Task.find().sort({ updatedAt: -1 }).limit(20).populate("companyId", "username email").lean(),
+        Task.find().sort({ updatedAt: -1 }).limit(20).populate("companyId", "fullName email").lean(),
         Contract.find().sort({ updatedAt: -1 }).limit(20).lean(),
         Payment.find().sort({ updatedAt: -1 }).limit(20).lean()
       ]);
@@ -658,8 +658,8 @@ class AdminController {
       const activities = [
         ...(users || []).map(u => ({
           id: u._id,
-          action: u.status === 'approved' ? `User "${u.username || u.email}" verified` : `New user "${u.username || u.email}" registered`,
-          user: u.username || u.email,
+          action: u.status === 'approved' ? `User "${u.fullName || u.email}" verified` : `New user "${u.fullName || u.email}" registered`,
+          user: u.fullName || u.email,
           type: "USER",
           status: u.status,
           timestamp: u.createdAt
@@ -667,7 +667,7 @@ class AdminController {
         ...(tasks || []).map(t => ({
           id: t._id,
           action: `Task "${t.title}" ${t.status}`,
-          user: companyMap.get(String(t.companyId?._id)) || t.companyId?.username || "System",
+          user: companyMap.get(String(t.companyId?._id)) || t.companyId?.fullName || "System",
           type: "TASK",
           status: t.status,
           timestamp: t.updatedAt || t.createdAt
@@ -808,7 +808,7 @@ class AdminController {
   sanitizeUser(user) {
     return {
       id: user._id,
-      username: user.username,
+      fullName: user.fullName,
       email: user.email,
       role: user.role,
       status: user.status,
@@ -1165,7 +1165,7 @@ class AdminController {
 
   async getTaskReport(req, res) {
     try {
-      const tasks = await Task.find().populate("companyId", "username email").lean();
+      const tasks = await Task.find().populate("companyId", "fullName email").lean();
       res.json(tasks);
     } catch (error) {
       res.status(500).json({ message: "Error generating task report", error: error.message });
@@ -1214,7 +1214,7 @@ class AdminController {
 
       // Send Email
       try {
-        await emailService.sendRejectionEmail(user.email, user.fullName || user.username, reason);
+        await emailService.sendRejectionEmail(user.email, user.fullName || user.email, reason);
       } catch (emailError) {
         console.error("Failed to send rejection email:", emailError);
       }

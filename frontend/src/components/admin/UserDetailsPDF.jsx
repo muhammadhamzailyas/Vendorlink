@@ -99,7 +99,7 @@ const UserDetailsPDF = ({ user }) => {
   const isCompany = user.role === "company";
   const profile = isCompany ? user.companyProfile : user.vendorProfile;
   const isAdmin = user.role === "admin";
-  const displayName = isAdmin ? "Admin" : (user.companyName || user.fullName || user.username || "User Profile");
+  const displayName = isAdmin ? "Admin" : (user.companyName || user.fullName || user.email || "User Profile");
 
   return (
     <Document>
@@ -115,7 +115,6 @@ const UserDetailsPDF = ({ user }) => {
             <DataItem label="Full Name" value={user.fullName} />
             <DataItem label="Email Address" value={user.email} />
             <DataItem label="Phone Number" value={user.phone} />
-            <DataItem label="Username" value={user.username} />
             <DataItem label="Member Since" value={dayjs(user.createdAt).format("MMM DD, YYYY")} />
             <DataItem label="Status" value={user.status} />
           </View>

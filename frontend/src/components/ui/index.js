@@ -76,7 +76,9 @@ export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./Tool
 export { Progress } from "./Progress";
 export { Alert, AlertTitle, AlertDescription } from "./Alert";
 export { DataTable } from "./DataTable";
+export { ErrorBanner } from "./ErrorBanner";
 export { StatCard } from "./StatCard";
+export { DetailItem, DetailLabel } from "./DetailItem";
 export { Typography } from "./Typography";
 export { DetailField } from "./DetailField";
 export {

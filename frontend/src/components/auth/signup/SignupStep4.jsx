@@ -59,12 +59,11 @@ const SignupStep4 = ({ onSubmit, onBack, loading: parentLoading, stripePaymentId
           <h3 className="text-lg font-bold">Payment Already Completed</h3>
           <p className="text-sm text-muted-foreground max-w-xs">You have already submitted your payment information. You can proceed to the final step.</p>
         </div>
-        <div className="flex w-full gap-4 pt-4 border-t border-border/50">
-          <Button variant="secondary" onClick={onBack} disabled={parentLoading} size="lg" className="flex-1 font-normal">Back</Button>
-          <Button variant="primary" onClick={() => onSubmit()} loading={parentLoading} disabled={parentLoading} size="lg" className="flex-1 font-normal shadow-soft">
+        <div className="grid-cols-2 grid w-full gap-4 pt-4 border-t border-border/50">
+          <Button variant="secondary" onClick={onBack} disabled={parentLoading} size="lg" className="w-full flex-1 font-semibold">Back</Button>
+          <Button variant="primary" onClick={() => onSubmit()} loading={parentLoading} disabled={parentLoading} size="lg" className="w-full flex-1 font-semibold shadow-soft">
             {parentLoading ? "Continuing..." : "Continue"}
-          </Button>
-        </div>
+          </Button></div>
       </div>
     );
   }

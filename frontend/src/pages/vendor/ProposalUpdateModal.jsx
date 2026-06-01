@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import api from "@/services/api";
+import { cn } from "@/lib/cn";
 import { useApprovalStatus } from "@/lib/useApprovalStatus";
 import toastUtil from "@/lib/toast";
 import FormSection, { FormActionRow, FormFieldGrid } from "@/components/shared/FormSection";
@@ -287,13 +288,13 @@ const ProposalUpdateModal = ({
               </FormSection>
             </Dialog.Body>
 
-            <div className="flex items-center justify-end gap-3 px-8 py-8 border-t border-border/50 bg-muted/20 rounded-b-lg">
+            <div className="grid-cols-2 grid gap-3 px-8 py-8 border-t border-border/50 bg-muted/20 rounded-b-lg">
                 <Button 
                     variant="ghost" 
                     type="button" 
                     onClick={onX} 
                     disabled={isSubmitting}
-                    className="font-black uppercase tracking-widest text-[10px] h-12 px-8"
+                    className="w-full font-semibold uppercase tracking-widest text-[10px] h-12 px-8"
                 >
                     Cancel
                 </Button>
@@ -301,12 +302,11 @@ const ProposalUpdateModal = ({
                     type="submit"
                     loading={isSubmitting}
                     disabled={!isDirty || !isApproved}
-                    className="font-black uppercase tracking-widest text-[10px] h-12 px-12 shadow-lg"
+                    className="w-full font-semibold uppercase tracking-widest text-[10px] h-12 px-12 shadow-lg"
                 >
-                    <FloppyDisk className="mr-2 h-4 w-4" weight="bold" />
+                    
                     Save Changes
-                </Button>
-            </div>
+                </Button></div>
           </form>
         </Form>
       </Dialog>
@@ -330,3 +330,4 @@ const ProposalUpdateModal = ({
 };
 
 export default ProposalUpdateModal;
+

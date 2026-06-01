@@ -45,7 +45,7 @@ const ChangeIndicator = ({ value }) => {
 
   return (
       <div className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
           colorClass
       )}>
           <div className="flex items-center gap-0.5">
@@ -60,10 +60,10 @@ const ChangeIndicator = ({ value }) => {
 };
 
 const ReportActionCard = ({ title, description, onDownload, icon: Icon }) => (
-    <Card className="hover:border-foreground/20 transition-all duration-300 group">
+    <Card className="hover:border-border/80 transition-all duration-300">
         <Card.Content className="p-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-muted group-hover:bg-foreground group-hover:text-background transition-colors">
+                <div className="p-3 rounded-xl bg-muted text-muted-foreground">
                     <Icon size={24} weight="duotone" />
                 </div>
                 <div>
@@ -72,12 +72,13 @@ const ReportActionCard = ({ title, description, onDownload, icon: Icon }) => (
                 </div>
             </div>
             <Button 
-                variant="outline" 
+                variant="secondary" 
                 size="sm" 
                 onClick={onDownload}
-                className="rounded-lg font-black uppercase tracking-tighter text-[10px] h-9 gap-2"
+                className="rounded-lg font-semibold uppercase tracking-tighter text-[10px] h-9 gap-2 bg-muted/50 hover:bg-muted text-foreground border-none shadow-none"
             >
-                Export <DownloadSimple size={14} weight="bold" />
+                <DownloadSimple size={15} weight="bold" />
+                Export 
             </Button>
         </Card.Content>
     </Card>
@@ -221,9 +222,9 @@ const Reports = () => {
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
             </div>
-            <Skeleton className="h-96 w-full rounded-2xl" />
+            <Skeleton className="h-96 w-full rounded-xl" />
         </div>
     );
   }
@@ -238,23 +239,27 @@ const Reports = () => {
             value={stats?.marketplaceBalance?.reduce((sum, d) => sum + d.value, 0) || 0}
             icon={<People />}
             trend={<ChangeIndicator value={stats?.changes?.users} />}
+            noHover
           />
           <StatCard
             title="Platform Flow"
             value={`$${stats?.growthData?.reduce((sum, d) => sum + (d.totalVolume || 0), 0).toLocaleString() || 0}`}
             icon={<CurrencyDollar className="text-success" />}
             trend={<ChangeIndicator value={stats?.changes?.revenue} />}
+            noHover
           />
           <StatCard
             title="Active Tasks"
             value={stats?.taskFunnel?.find(f => f.name === 'Active Contracts')?.value || 0}
             icon={<TaskIcon />}
             trend={<ChangeIndicator value={stats?.changes?.tasks} />}
+            noHover
           />
           <StatCard
             title="Service Uptime"
             value="99.9%"
             icon={<ShieldCheck className="text-success" />}
+            noHover
           />
         </div>
 
@@ -308,6 +313,7 @@ const Reports = () => {
 };
 
 export default Reports;
+
 
 
 

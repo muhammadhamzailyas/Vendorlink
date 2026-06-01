@@ -24,7 +24,7 @@ exports.getChatPartners = async (req, res) => {
       vendorApproved: true,
     })
       .populate("taskId", "title category status")
-      .populate(role === "company" ? "vendorId" : "companyId", "username email profileImage");
+      .populate(role === "company" ? "vendorId" : "companyId", "fullName email profileImage");
 
     const partners = await Promise.all(contracts.map(async (contract) => {
       const partner = role === "company" ? contract.vendorId : contract.companyId;
@@ -48,7 +48,7 @@ exports.getChatPartners = async (req, res) => {
         taskId: contract.taskId._id,
         taskTitle: contract.taskId.title,
         partnerId: partner._id,
-        partnerName: partner.username,
+        partnerName: partner.fullName || partner.email,
         partnerImage: partner.profileImage,
         lastMessage: conversation.lastMessage,
         lastMessageAt: conversation.lastMessageAt,
@@ -77,12 +77,12 @@ exports.getConversations = async (req, res) => {
     let conversations;
     if (userType === "company") {
       conversations = await Conversation.find({ companyId: userId })
-        .populate({ path: "vendorId", select: "username email", model: "User" })
+        .populate({ path: "vendorId", select: "fullName email", model: "User" })
         .populate({ path: "taskId", select: "title budget status", model: "Task" })
         .sort({ lastMessageAt: -1 });
     } else {
       conversations = await Conversation.find({ vendorId: userId })
-        .populate({ path: "companyId", select: "username email", model: "User" })
+        .populate({ path: "companyId", select: "fullName email", model: "User" })
         .populate({ path: "taskId", select: "title budget status", model: "Task" })
         .sort({ lastMessageAt: -1 });
     }
@@ -116,7 +116,7 @@ exports.getTaskMessages = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * parseInt(limit))
       .limit(parseInt(limit))
-      .populate({ path: "senderId", select: "username email role", model: "User" });
+      .populate({ path: "senderId", select: "fullName email role", model: "User" });
 
     await Message.updateMany(
       { taskId, receiverId: userId, read: false },
@@ -277,7 +277,7 @@ exports.sendMessage = async (req, res) => {
 
     await newMessage.populate({
       path: "senderId",
-      select: "username email role",
+      select: "fullName email role",
       model: "User",
     });
 

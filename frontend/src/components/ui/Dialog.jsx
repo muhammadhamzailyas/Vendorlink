@@ -32,7 +32,7 @@ const DialogContent = React.forwardRef(({ className, children, onX, persistent, 
       onPointerDownOutside={(e) => { if (persistent) e.preventDefault(); }}
       onEscapeKeyDown={(e) => { if (persistent) e.preventDefault(); }}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/50 bg-card shadow-soft sm:max-w-lg animate-in fade-in zoom-in-95 duration-200",
+        "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-h-[90vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-border/50 bg-card shadow-soft sm:max-w-lg animate-in fade-in zoom-in-95 duration-200",
         className
       )}
       {...props}
@@ -68,16 +68,32 @@ DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({
   className,
+  children,
   ...props
-}) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 border-t border-border/50 px-6 py-4 bg-muted/30",
-      className
-    )}
-    {...props}
-  />
-);
+}) => {
+  const count = React.Children.count(children);
+  const gridCols = count === 1 ? "grid-cols-1" : count === 2 ? "grid-cols-2" : count === 3 ? "grid-cols-3" : "grid-cols-1";
+
+  return (
+    <div
+      className={cn(
+        "grid gap-4 w-full border-t border-border/50 px-6 py-4 bg-muted/30",
+        gridCols,
+        className
+      )}
+      {...props}
+    >
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, {
+            className: cn("w-full", child.props.className)
+          });
+        }
+        return child;
+      })}
+    </div>
+  );
+};
 DialogFooter.displayName = "DialogFooter";
 
 const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
@@ -139,6 +155,7 @@ export {
 };
 
 export default Dialog;
+
 
 
 

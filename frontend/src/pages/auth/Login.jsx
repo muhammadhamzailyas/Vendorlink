@@ -8,6 +8,7 @@ import toastUtil from "../../lib/toast";
 import { authService } from "../../services/api";
 import { useUser } from "../../context/UserContext";
 import AuthLayout from "../../components/auth/AuthLayout";
+import PasswordInputField from "../../components/auth/PasswordInputField";
 import { Button, Input } from "../../components/ui";
 import { setToken, loginWithGoogle } from "../../lib/auth";
 
@@ -105,27 +106,16 @@ const Login = () => {
           autoComplete="email"
         />
 
-        <div className="relative">
-          <Input
-            className="pr-11"
-            placeholder="Password"
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            disabled={loading}
-            autoComplete="current-password"
-          />
-          <Button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            variant="ghost"
-            size="sm"
-            className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 p-0 text-muted-foreground hover:bg-transparent"
-          >
-            {showPassword ? <VisibilityOff size={20} /> : <Visibility size={20} />}
-          </Button>
-        </div>
+        <PasswordInputField 
+          placeholder="Password"
+          name="password"
+          value={formData.password}
+          autoComplete="current-password"
+          onChange={(val) => setFormData({ ...formData, password: val })}
+          showPassword={showPassword}
+          onToggle={() => setShowPassword(!showPassword)}
+          disabled={loading}
+        />
 
         <div className="flex justify-end pt-2">
           <Link
@@ -141,7 +131,7 @@ const Login = () => {
           disabled={loading || !formData.email || !formData.password}
           loading={loading}
           size="lg"
-          className="w-full shadow-soft font-normal"
+          className="w-full shadow-soft font-semibold"
         >
           {loading ? "Signing In..." : "Sign In"}
         </Button>

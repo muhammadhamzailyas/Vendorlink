@@ -27,6 +27,7 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  Skeleton,
 } from "@/components/ui";
 import { DetailMetaGrid, DetailMetaItem, DetailSection } from "@/components/shared/DetailLayout";
 
@@ -57,7 +58,7 @@ const ContractDetail = () => {
   const handleApprove = async () => {
     setActionLoading(true);
     try {
-      const res = await contractAPI.approveContract(id, { name: user?.username });
+      const res = await contractAPI.approveContract(id, { name: user?.fullName || user?.email });
       setContract(res.data?.contract || res.data);
       showToast("Contract approved!", "success");
     } catch (err) {
@@ -137,9 +138,24 @@ const ContractDetail = () => {
   if (loading) {
     return (
       <PageTransition>
-      <div className="space-y-8">
-        <div className="flex justify-center py-12"><CircleNotch className="w-6 h-6 animate-spin text-muted-foreground/70" /></div>
-      </div>
+        <div className="space-y-8">
+            <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                    <Skeleton className="h-8 w-64" />
+                    <Skeleton className="h-4 w-48" />
+                </div>
+                <Skeleton className="h-10 w-24" />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <Skeleton className="h-48 w-full rounded-xl" />
+                    <Skeleton className="h-64 w-full rounded-xl" />
+                </div>
+                <div className="space-y-6">
+                    <Skeleton className="h-[400px] w-full rounded-xl" />
+                </div>
+            </div>
+        </div>
       </PageTransition>
     );
   }
@@ -195,13 +211,12 @@ const ContractDetail = () => {
               <span>Created {formatDate(contract.createdAt)}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button type="button" variant="secondary" size="xs" onClick={() => navigate(-1)} className="font-bold uppercase tracking-tight">
-            <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+        <div className="grid-cols-1 grid gap-2 shrink-0">
+          <Button type="button" variant="secondary" size="xs" onClick={() => navigate(-1)} className="w-full font-bold uppercase tracking-tight">
+            
             Back
           </Button>
-          <StatusChip status={contract.status} />
-        </div>
+          <StatusChip status={contract.status} /></div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -299,7 +314,7 @@ const ContractDetail = () => {
                                 placeholder="Add a clarification note..."
                                 className="flex-1 h-11 bg-card rounded-xl border-border/50"
                             />
-                            <Button onClick={handleAddNote} className="h-11 px-6 font-bold uppercase tracking-tight shadow-soft">
+                            <Button onClick={handleAddNote} className="h-11 px-6 font-semibold uppercase tracking-tight shadow-soft">
                                 Add Note
                             </Button>
                         </div>
@@ -362,30 +377,30 @@ const ContractDetail = () => {
                 </Card.Content>
                 <Card.Footer className="bg-muted/30 p-4 border-t border-border/50 flex flex-col gap-2">
                     {canApprove && (
-                        <Button onClick={handleApprove} disabled={actionLoading} variant="primary" className="w-full font-bold uppercase tracking-tight shadow-soft">
-                            <Check className="w-4 h-4 mr-1.5" />
+                        <Button onClick={handleApprove} disabled={actionLoading} variant="primary" className="w-full font-semibold uppercase tracking-tight shadow-soft">
+                            
                             Approve Agreement
                         </Button>
                     )}
                     {canReject && (
-                        <Button onClick={handleReject} disabled={actionLoading} variant="secondary" className="w-full font-bold uppercase tracking-tight text-danger hover:bg-danger-surface">
-                            <X className="w-4 h-4 mr-1.5" />
+                        <Button onClick={handleReject} disabled={actionLoading} variant="secondary" className="w-full font-semibold uppercase tracking-tight text-danger hover:bg-danger-surface">
+                            
                             Reject
                         </Button>
                     )}
                     {canCancel && (
-                        <Button onClick={handleCancel} disabled={actionLoading} variant="secondary" className="w-full font-bold uppercase tracking-tight">
-                            <Prohibit className="w-4 h-4 mr-1.5" />
+                        <Button onClick={handleCancel} disabled={actionLoading} variant="secondary" className="w-full font-semibold uppercase tracking-tight">
+                            
                             Cancel Contract
                         </Button>
                     )}
-                    <Button onClick={handleDownload} variant="outline" className="w-full font-bold uppercase tracking-tight border-border/50 bg-card">
-                        <Download className="w-4 h-4 mr-1.5" />
+                    <Button onClick={handleDownload} variant="outline" className="w-full font-semibold uppercase tracking-tight border-border/50 bg-card">
+                        
                         Download HTML
                     </Button>
                     {canDelete && (
-                        <Button onClick={handleDelete} variant="ghost" className="w-full font-bold uppercase tracking-tight text-danger/60 hover:text-danger hover:bg-danger-surface/50">
-                            <Trash className="w-4 h-4 mr-1.5" />
+                        <Button onClick={handleDelete} variant="ghost" className="w-full font-semibold uppercase tracking-tight text-danger/60 hover:text-danger hover:bg-danger-surface/50">
+                            
                             Delete Draft
                         </Button>
                     )}
@@ -444,6 +459,7 @@ const ContractDetail = () => {
 };
 
 export default ContractDetail;
+
 
 
 

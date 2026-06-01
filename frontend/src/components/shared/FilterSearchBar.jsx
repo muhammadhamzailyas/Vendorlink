@@ -37,7 +37,7 @@ const FilterSearchBar = ({
               className="shrink-0 rounded-xl font-bold uppercase tracking-tight"
               size="sm"
             >
-              <Funnel size={18} />
+              
               <span className="whitespace-nowrap">Filters</span>
             </Button>
           ) : null}
@@ -96,6 +96,7 @@ const FilterSearchBar = ({
 };
 
 export default FilterSearchBar;
+
 
 
 

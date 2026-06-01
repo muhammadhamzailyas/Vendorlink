@@ -29,11 +29,8 @@ const seedDemoAdmin = async () => {
 
     console.log(`[Seed] Creating new admin account: ${adminEmail}`);
     
-    // Generate a default username for admin if none provided
-    const username = adminEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "") || "admin";
-
     admin = await User.create({
-      username,
+      fullName: "System Administrator",
       email: adminEmail.toLowerCase(),
       password: adminPassword,
       authProvider: "local",

@@ -24,7 +24,6 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
     if (item.path.includes("chat") || item.text.toLowerCase().includes("message")) {
       return unreadChatCount;
     }
-    // Can add other counts here later
     return 0;
   }
 
@@ -33,76 +32,54 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
     return text.includes("message") || text.includes("notification") || text.includes("feedback");
   };
 
+  const transition = { duration: 0.25, ease: [0.4, 0, 0.2, 1] };
+
   return (
     <motion.aside 
       initial={false}
       animate={{ width: collapsed ? 80 : 256 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={transition}
+      style={{ willChange: "width" }}
       className={cn(
-        "fixed left-4 top-4 bottom-4 z-40 hidden flex-col border border-border bg-card lg:flex rounded-2xl shadow-sm overflow-hidden"
+        "fixed left-4 top-4 bottom-4 z-40 hidden flex-col border border-border bg-card lg:flex rounded-xl shadow-sm overflow-hidden"
       )}
     >
       <div className={cn(
-        "flex h-20 items-center justify-between px-4 shrink-0",
-        collapsed && "justify-center"
+        "flex h-20 items-center shrink-0 px-4 transition-all duration-200",
+        collapsed ? "justify-center" : "justify-between"
       )}>
-        <Link to="/" className="flex items-center gap-2 overflow-hidden">
-          <AnimatePresence mode="wait">
-            {collapsed ? (
-              <motion.img 
-                key="collapsed-logo"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-                src={logo} 
-                alt="Logo" 
-                className="h-9 w-9 shrink-0 object-contain" 
-              />
-            ) : (
-              <motion.img 
-                key="expanded-logo"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                src={secondaryLogo} 
-                alt="Vendorlink" 
-                className="h-6 w-auto shrink-0 object-contain" 
-              />
-            )}
-          </AnimatePresence>
-        </Link>
         {!collapsed && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onToggleCollapse}
-            className="h-9 w-9 text-muted-foreground hover:bg-muted/50 transition-colors"
-          >
-            <SidebarSimple className="h-5 w-5" />
-          </Button>
+          <Link to="/" className="flex items-center gap-2 overflow-hidden">
+            <motion.img 
+              key="expanded-logo"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              src={secondaryLogo} 
+              alt="Vendorlink" 
+              className="h-6 w-auto shrink-0 object-contain" 
+            />
+          </Link>
         )}
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onToggleCollapse}
+          className={cn(
+            "h-9 w-9 text-muted-foreground hover:bg-muted/50 transition-colors shrink-0",
+            collapsed && "mx-auto"
+          )}
+        >
+          <SidebarSimple size={18} />
+        </Button>
       </div>
-
-      {collapsed && (
-        <div className="flex justify-center pb-4 shrink-0">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onToggleCollapse}
-            className="h-9 w-9 text-muted-foreground hover:bg-muted/50 transition-colors"
-          >
-            <SidebarSimple className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
       
       <div className="h-px bg-border mx-4 shrink-0" />
 
       <ScrollArea className="flex-1 px-3">
         <div className="flex flex-col gap-6 py-6">
-          {/* Navigation Section */}
           <div className="flex flex-col gap-1">
             <AnimatePresence>
               {!collapsed && (
@@ -110,7 +87,8 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 0.5, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground overflow-hidden whitespace-nowrap"
+                  transition={transition}
+                  className="px-3 mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground overflow-hidden whitespace-nowrap"
                 >
                   Navigation
                 </motion.p>
@@ -127,21 +105,24 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start gap-3 h-10 transition-colors duration-200",
+                        "w-full justify-start h-10 transition-colors duration-200",
                         collapsed ? "px-0 justify-center" : "px-3",
                         active 
                           ? "bg-muted text-foreground shadow-xs" 
                           : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                       )}
                     >
-                      <Icon className={cn("h-5 w-5 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
-                      <AnimatePresence mode="popLayout">
+                      <div className="flex w-8 items-center justify-center shrink-0">
+                        <Icon size={20} weight={active ? "bold" : "regular"} />
+                      </div>
+                      <AnimatePresence>
                         {!collapsed && (
                           <motion.span 
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -10 }}
-                            className="truncate font-bold uppercase tracking-tight text-[10px] whitespace-nowrap"
+                            transition={transition}
+                            className="truncate font-bold uppercase tracking-tight text-[11.5px] whitespace-nowrap ml-1"
                           >
                             {item.text}
                           </motion.span>
@@ -153,7 +134,6 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
               })}
           </div>
 
-          {/* Other Section */}
           {(menuItems.some(item => isOtherItem(item))) && (
             <div className="flex flex-col gap-1">
               <AnimatePresence>
@@ -162,7 +142,8 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 0.5, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground overflow-hidden whitespace-nowrap"
+                    transition={transition}
+                    className="px-3 mb-2 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground overflow-hidden whitespace-nowrap"
                   >
                     Others
                   </motion.p>
@@ -179,7 +160,7 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                       <Button
                         variant="ghost"
                         className={cn(
-                          "w-full justify-start gap-3 h-10 transition-colors duration-200 relative",
+                          "w-full justify-start h-10 transition-colors duration-200 relative",
                           collapsed ? "px-0 justify-center" : "px-3",
                           active 
                             ? "bg-muted text-foreground shadow-xs" 
@@ -188,18 +169,21 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
                       >
                         {getUnreadCountForItem(item) > 0 && (
                             <div className={cn(
-                                "absolute h-2 w-2 rounded-full bg-red-500",
-                                collapsed ? "top-2 right-2" : "top-2.5 left-2.5"
+                                "absolute h-2 w-2 rounded-full bg-red-500 transition-all duration-300",
+                                collapsed ? "top-2 right-4 scale-110" : "top-2.5 left-2.5"
                             )} />
                         )}
-                        <Icon className={cn("h-5 w-5 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
-                        <AnimatePresence mode="popLayout">
+                        <div className="flex w-8 items-center justify-center shrink-0">
+                          <Icon size={20} weight={active ? "bold" : "regular"} />
+                        </div>
+                        <AnimatePresence>
                           {!collapsed && (
                             <motion.span 
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               exit={{ opacity: 0, x: -10 }}
-                              className="truncate font-bold uppercase tracking-tight text-[10px] whitespace-nowrap"
+                              transition={transition}
+                              className="truncate font-bold uppercase tracking-tight text-[11.5px] whitespace-nowrap ml-1"
                             >
                               {item.text}
                             </motion.span>
@@ -218,6 +202,3 @@ const Sidebar = ({ menuItems, collapsed, onToggleCollapse, role }) => {
 };
 
 export default Sidebar;
-
-
-

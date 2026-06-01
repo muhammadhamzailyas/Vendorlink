@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { paymentAPI } from "../services/paymentAPI";
 import { useUser } from "./UserContext";
+import { formatCurrency as formatUSD } from "@/lib/utils";
 
 const WalletContext = createContext();
 
@@ -119,8 +120,7 @@ const WalletProvider = ({ children }) => {
   }, [checkAuth, loadWallet]);
 
   const formatCurrency = useCallback((amount) => {
-    if (amount === undefined || amount === null) return "$0";
-    return `$${amount.toLocaleString()}`;
+    return formatUSD(amount);
   }, []);
 
   const value = {

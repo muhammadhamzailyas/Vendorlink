@@ -44,7 +44,7 @@ import {
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import toastUtil from "@/lib/toast";
-import TaskDetailsModal from "./TaskDetailsModal";
+import TaskDetailsModal from "@/components/shared/TaskDetailsModal";
 import TaskEditModal from "./TaskEditModal";
 
 const MyTaskPage = () => {
@@ -136,7 +136,7 @@ const MyTaskPage = () => {
 
     return (
         <div className={cn(
-            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
             colorClass
         )}>
             <div className="flex items-center gap-0.5">
@@ -254,7 +254,7 @@ const MyTaskPage = () => {
         {loading ? (
           <div className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-               {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
+               {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
             </div>
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full rounded-xl" />
@@ -268,7 +268,6 @@ const MyTaskPage = () => {
                 value={stats.total} 
                 icon={<Assignment />} 
                 trend={<ChangeIndicator value={8.4} />}
-                link="/company/my-tasks" 
               />
               <StatCard 
                 title="Open Tasks" 
@@ -302,7 +301,7 @@ const MyTaskPage = () => {
                   variant="secondary"
                   onClick={() => navigate("/company/add-task")}
                 >
-                  <Plus className="mr-2 h-4 w-4" weight="bold" />
+                  
                   Create Task
                 </Button>
               )}
@@ -356,7 +355,7 @@ const MyTaskPage = () => {
                       variant={deletabilityInfo?.level === 2 ? "destructive" : "default"}
                       onClick={confirmDelete}
                       loading={isDeleting}
-                      className="font-bold uppercase tracking-tight text-[11px]"
+                      className="font-semibold uppercase tracking-tight text-[11px]"
                     >
                       Yes, Delete
                     </Button>
@@ -372,3 +371,4 @@ const MyTaskPage = () => {
 };
 
 export default MyTaskPage;
+

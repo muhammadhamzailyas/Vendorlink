@@ -63,7 +63,7 @@ const ForgotPassword = () => {
               disabled={loading || !email}
               loading={loading}
               size="lg"
-              className="w-full shadow-soft font-normal"
+              className="w-full shadow-soft font-semibold"
               aria-label="Send password reset link"
           >
               {loading ? "Sending..." : "Send Reset Link"}

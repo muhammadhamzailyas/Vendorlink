@@ -20,7 +20,7 @@ const VendorBusinessFields = ({ data, errors = {}, onChange }) => (
       />
     </div>
     <Input
-      placeholder="National ID / Passport / CNIC Number"
+      placeholder="National ID / Passport / CNIC number"
       type="text"
       value={data.cnicNumber}
       error={errors.cnicNumber}
@@ -37,14 +37,14 @@ const VendorBusinessFields = ({ data, errors = {}, onChange }) => (
     {data.vendorType === "Registered Business" && (
         <>
             <Input
-              placeholder="Business Name"
+              placeholder="Business name"
               value={data.businessName}
               error={errors.businessName}
               onChange={(e) => onChange({ businessName: e.target.value })}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  placeholder="Reg Number (optional)"
+                  placeholder="Reg number (optional)"
                   type="text"
                   value={data.registrationNumber}
                   onChange={(e) => {

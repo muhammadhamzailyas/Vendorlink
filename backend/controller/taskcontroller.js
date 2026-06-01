@@ -90,7 +90,7 @@ class TaskController {
               senderId: req.user._id,
               type: "task_created_admin",
               title: "Task Posted",
-              message: `A new task "${title}" has been posted by ${req.user.username || 'a company'}.`,
+              message: `A new task "${title}" has been posted by ${req.user.fullName || 'a company'}.`,
               data: { taskId: task._id, taskTitle: title },
               relatedId: task._id,
               relatedModel: "Task",
@@ -146,8 +146,8 @@ class TaskController {
   async getTaskById(req, res) {
     try {
       const task = await Task.findById(req.params.id)
-        .populate("companyId", "companyName username email")
-        .populate("selectedVendor", "username email");
+        .populate("companyId", "companyName fullName email")
+        .populate("selectedVendor", "fullName email");
 
       if (!task) return res.status(404).json({ error: "Task not found" });
 
@@ -348,7 +348,7 @@ class TaskController {
       }
 
       const tasks = await Task.find()
-        .populate("companyId", "companyName username email")
+        .populate("companyId", "companyName fullName email")
         .sort({ createdAt: -1 });
 
       res.json(tasks);

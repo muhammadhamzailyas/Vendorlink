@@ -116,7 +116,7 @@ const PRIORITY_OPTIONS = [
 
 const TaskWidthCard = ({ task, onOpenDetails }) => {
   return (
-    <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
+    <Card className="group relative overflow-hidden rounded-xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/40 hover:shadow-lg">
       <Card.Content className="relative flex flex-col gap-5 p-6">
         {/* Top Right: Posted Time */}
         <div className="absolute top-6 right-6">
@@ -205,7 +205,7 @@ const TaskDetailsDialog = ({ open, task, onX, onApply }) => {
     <Dialog open={open} onX={onX} className="sm:max-w-4xl">
         <Dialog.Header className="border-b-0 px-8 pt-10 pb-6">
             <div className="flex flex-col items-center gap-4 text-center">
-                <div className="p-4 rounded-2xl bg-muted/50 text-foreground">
+                <div className="p-4 rounded-xl bg-muted/50 text-foreground">
                     <Briefcase size={40} weight="bold" />
                 </div>
                 <div className="space-y-2">
@@ -226,19 +226,19 @@ const TaskDetailsDialog = ({ open, task, onX, onApply }) => {
 
         <Dialog.Body className="px-8 pb-10 max-h-[60vh] overflow-y-auto space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
+                <div className="p-5 rounded-xl bg-muted/20 border border-border/30">
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Client</p>
                     <p className="text-sm font-bold text-foreground flex items-center gap-2">
                         <User size={16} /> {task.companyId?.companyName || "Verified Client"}
                     </p>
                 </div>
-                <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
+                <div className="p-5 rounded-xl bg-muted/20 border border-border/30">
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Deadline</p>
                     <p className="text-sm font-bold text-foreground flex items-center gap-2">
                         <DateRange size={16} /> {dayjs(task.deadline).format("MMM DD, YYYY")}
                     </p>
                 </div>
-                <div className="p-5 rounded-2xl bg-muted/20 border border-border/30">
+                <div className="p-5 rounded-xl bg-muted/20 border border-border/30">
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Priority</p>
                     <p className="text-sm font-bold text-foreground flex items-center gap-2 uppercase">
                         <Tag size={16} /> {task.priority || "Medium"}
@@ -251,7 +251,7 @@ const TaskDetailsDialog = ({ open, task, onX, onApply }) => {
                     <div className="h-1.5 w-6 rounded-full bg-primary" />
                     Description
                 </h4>
-                <div className="text-sm font-medium leading-relaxed text-foreground/80 bg-card p-6 rounded-2xl border border-border/50 whitespace-pre-wrap">
+                <div className="text-sm font-medium leading-relaxed text-foreground/80 bg-card p-6 rounded-xl border border-border/50 whitespace-pre-wrap">
                     {task.description}
                 </div>
             </div>
@@ -261,7 +261,7 @@ const TaskDetailsDialog = ({ open, task, onX, onApply }) => {
                     <div className="h-1.5 w-6 rounded-full bg-primary" />
                     Requirements
                 </h4>
-                <div className="text-sm font-medium leading-relaxed text-foreground/80 bg-card p-6 rounded-2xl border border-border/50 whitespace-pre-wrap">
+                <div className="text-sm font-medium leading-relaxed text-foreground/80 bg-card p-6 rounded-xl border border-border/50 whitespace-pre-wrap">
                     {task.requirements || "No specific requirements provided."}
                 </div>
             </div>
@@ -285,22 +285,21 @@ const TaskDetailsDialog = ({ open, task, onX, onApply }) => {
             </div>
         </Dialog.Body>
 
-        <div className="flex items-center justify-center gap-4 px-8 py-8 border-t border-border/50 bg-muted/20">
+        <div className="grid-cols-2 grid gap-4 px-8 py-8 border-t border-border/50 bg-muted/20">
             <Button
                 variant="ghost"
                 onClick={onX}
-                className="font-black uppercase tracking-widest text-[10px] h-12 px-8"
+                className="w-full font-semibold uppercase tracking-widest text-[10px] h-12 px-8"
             >
                 Close
             </Button>
             <Button
                 onClick={() => onApply(task)}
                 disabled={!isApproved}
-                className="font-black uppercase tracking-widest text-[10px] h-12 px-12 shadow-lg"
+                className="w-full font-black uppercase tracking-widest text-[10px] h-12 px-12 shadow-lg"
             >
                 Submit Proposal Now
-            </Button>
-        </div>
+            </Button></div>
     </Dialog>
   );
 };
@@ -477,3 +476,4 @@ const AvailableTasks = () => {
 };
 
 export default AvailableTasks;
+

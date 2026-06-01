@@ -147,10 +147,10 @@ const ContractEditModal = ({ open, contract, onX, onSuccess }) => {
 
         {!isEditable ? (
           <Dialog.Body className="px-8 pb-10">
-            <div className="rounded-2xl bg-warning/10 border border-warning/20 p-6 text-center space-y-2">
+            <div className="rounded-xl bg-warning/10 border border-warning/20 p-6 text-center space-y-2">
                 <p className="text-sm font-black text-warning uppercase">Modification Restricted</p>
                 <p className="text-xs font-medium text-muted-foreground">This contract has been accepted and is now active or completed. Terms can no longer be modified.</p>
-                <Button variant="outline" onClick={onX} className="mt-4 uppercase text-[10px] font-black tracking-widest">Close</Button>
+                <Button variant="outline" onClick={onX} className="mt-4 uppercase text-[10px] font-semibold tracking-widest">Close</Button>
             </div>
           </Dialog.Body>
         ) : (
@@ -235,7 +235,7 @@ const ContractEditModal = ({ open, contract, onX, onSuccess }) => {
                                 className="absolute top-2 right-2 text-error h-8 w-8"
                                 onClick={() => remove(index)}
                             >
-                                <Trash size={16} />
+                                
                             </Button>
                             <FormFieldGrid>
                                 <FormField
@@ -281,18 +281,17 @@ const ContractEditModal = ({ open, contract, onX, onSuccess }) => {
                         className="w-full"
                         onClick={() => append({ title: "", amount: 0, deadline: "", description: "" })}
                     >
-                        <Plus className="mr-2 h-4 w-4" /> Add Milestone
+                         Add Milestone
                     </Button>
                    </div>
                 </FormSection>
               </Dialog.Body>
 
-              <div className="flex items-center justify-end gap-3 px-8 py-6 border-t border-border/50 bg-muted/20">
-                <Button type="button" variant="ghost" onClick={onX} className="uppercase text-[10px] font-black tracking-widest h-11 px-6">Cancel</Button>
-                <Button type="submit" loading={isSubmitting} disabled={!isDirty} className="uppercase text-[10px] font-black tracking-widest h-11 px-8">
-                  <FloppyDisk className="mr-2 h-4 w-4" /> Save Agreement
-                </Button>
-              </div>
+              <div className="grid-cols-2 grid gap-3 px-8 py-6 border-t border-border/50 bg-muted/20">
+                <Button type="button" variant="ghost" onClick={onX} className="w-full uppercase text-[10px] font-semibold tracking-widest h-11 px-6">Cancel</Button>
+                <Button type="submit" loading={isSubmitting} disabled={!isDirty} className="w-full uppercase text-[10px] font-semibold tracking-widest h-11 px-8">
+                   Save Agreement
+                </Button></div>
             </form>
           </Form>
         )}
@@ -315,3 +314,4 @@ const ContractEditModal = ({ open, contract, onX, onSuccess }) => {
 };
 
 export default ContractEditModal;
+

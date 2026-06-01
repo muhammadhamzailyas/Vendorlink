@@ -26,7 +26,7 @@ TASK DETAILS:
   proposals.forEach((p, i) => {
     const vendor = p.vendorId || {};
     const vendorId = vendor._id ? vendor._id.toString() : String(vendor);
-    const vendorName = vendor.companyName || vendor.username || "Unknown";
+    const vendorName = vendor.companyName || vendor.fullName || "Unknown";
     const vendorInfo = vendorsData[vendorId] || {};
 
     const skills = p.skills || [];

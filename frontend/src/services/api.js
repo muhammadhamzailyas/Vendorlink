@@ -30,7 +30,8 @@ api.interceptors.request.use((config) => {
     "/auth/register", 
     "/auth/forgot-password",
     "/auth/reset-password",
-    "/auth/verify-email"
+    "/auth/verify-email",
+    "/auth/resend-verification"
   ];
   const isPublic = publicRoutes.some(route => config.url.includes(route));
 
@@ -69,7 +70,7 @@ export const authService = {
   /**
    * Register a new user
    */
-  register: (email, password, username) => api.post("/auth/register", { email, password, username }),
+  register: (email, password, fullName) => api.post("/auth/register", { email, password, fullName }),
 
   /**
    * Forgot password request
@@ -81,6 +82,16 @@ export const authService = {
    */
   resetPassword: (token, newPassword) => api.put("/auth/reset-password", { token, newPassword }),
   
+  /**
+   * Verify email with code
+   */
+  verifyEmail: (email, code) => api.post("/auth/verify-email", { email, code }),
+
+  /**
+   * Resend verification code
+   */
+  resendVerificationCode: (email) => api.post("/auth/resend-verification", { email }),
+
   /**
    * Fetches the current user profile using JWT.
    */

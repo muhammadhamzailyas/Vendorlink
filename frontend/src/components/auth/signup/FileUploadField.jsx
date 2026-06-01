@@ -1,5 +1,6 @@
 import React from "react";
 import { Upload, CheckCircle, X } from "@phosphor-icons/react";
+import { Button } from "../../ui";
 
 const FileUploadField = ({ label, file, onFileChange, onRemove, id }) => {
   const fileName = typeof file === "string" ? file.split("/").pop() : file?.name;
@@ -13,9 +14,9 @@ const FileUploadField = ({ label, file, onFileChange, onRemove, id }) => {
             <CheckCircle className="h-5 w-5 text-foreground shrink-0" />
             <span className="text-sm font-medium truncate">{fileName}</span>
           </div>
-          <button onClick={onRemove} className="text-muted-foreground hover:text-destructive">
-            <X size={18} />
-          </button>
+          <Button variant="ghost" size="sm" onClick={onRemove} className="text-muted-foreground hover:text-destructive text-[10px]">
+            REMOVE
+          </Button>
         </div>
       ) : (
         <div 
@@ -38,6 +39,7 @@ const FileUploadField = ({ label, file, onFileChange, onRemove, id }) => {
 };
 
 export default FileUploadField;
+
 
 
 

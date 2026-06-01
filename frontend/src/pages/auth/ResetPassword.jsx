@@ -3,8 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import toastUtil from "../../lib/toast";
 import { Button, Input } from "../../components/ui";
 import AuthLayout from "../../components/auth/AuthLayout";
+import PasswordInputField from "../../components/auth/PasswordInputField";
 import { authService } from "../../services/api";
-import { Key, Eye, EyeSlash } from "@phosphor-icons/react";
+import { Key } from "@phosphor-icons/react";
+
+import { validatePassword } from "@/lib/utils";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -23,8 +26,9 @@ const ResetPassword = () => {
       return;
     }
 
-    if (password.length < 8) {
-      toastUtil.validationError("Password must be at least 8 characters");
+    const passResult = validatePassword(password);
+    if (passResult !== true) {
+      toastUtil.validationError(passResult);
       return;
     }
 
@@ -62,32 +66,24 @@ const ResetPassword = () => {
       footerLinkTo="/login"
     >
       <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="relative">
-            <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                autoComplete="new-password"
-                placeholder="New Password"
-                className="pr-10"
-            />
-            <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-                {showPassword ? <EyeSlash size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
+          <PasswordInputField 
+            placeholder="New Password"
+            value={password}
+            autoComplete="new-password"
+            onChange={(val) => setPassword(val)}
+            showPassword={showPassword}
+            onToggle={() => setShowPassword(!showPassword)}
+            disabled={loading}
+          />
 
-          <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={loading}
-              autoComplete="new-password"
-              placeholder="Confirm New Password"
+          <PasswordInputField 
+            placeholder="Confirm New Password"
+            value={confirmPassword}
+            autoComplete="new-password"
+            onChange={(val) => setConfirmPassword(val)}
+            showPassword={showPassword}
+            onToggle={() => setShowPassword(!showPassword)}
+            disabled={loading}
           />
 
           <Button
@@ -95,7 +91,7 @@ const ResetPassword = () => {
               disabled={loading || !password || !confirmPassword}
               loading={loading}
               size="lg"
-              className="w-full shadow-soft font-normal"
+              className="w-full shadow-soft font-semibold"
           >
               {loading ? "Resetting..." : "Reset Password"}
           </Button>

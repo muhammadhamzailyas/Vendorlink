@@ -58,6 +58,7 @@ const ProposalForm = ({
   
   const form = useForm({
     resolver: zodResolver(proposalSchema),
+    mode: "onChange",
     defaultValues: {
       bidAmount: "",
       proposalText: "",
@@ -76,7 +77,7 @@ const ProposalForm = ({
     reset,
     watch,
     setValue,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isValid },
   } = form;
 
   const availabilityOptions = [
@@ -333,25 +334,24 @@ const ProposalForm = ({
             </FormSection>
           </Dialog.Body>
 
-          <div className="flex items-center justify-end gap-3 px-8 py-8 border-t border-border/50 bg-muted/20 rounded-b-lg">
+          <div className="grid-cols-2 grid gap-3 px-8 py-8 border-t border-border/50 bg-muted/20 rounded-b-lg">
               <Button 
                 variant="ghost" 
                 type="button" 
                 onClick={onX} 
                 disabled={isSubmitting}
-                className="font-black uppercase tracking-widest text-[10px] h-12 px-8"
+                className="w-full font-semibold uppercase tracking-widest text-[10px] h-12 px-8"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 loading={isSubmitting}
-                disabled={isSubmitting || !isApproved}
-                className="font-black uppercase tracking-widest text-[10px] h-12 px-12 shadow-lg"
+                disabled={isSubmitting || !isApproved || !isValid}
+                className="w-full font-semibold uppercase tracking-widest text-[10px] h-12 px-12 shadow-lg"
               >
                 Submit Proposal
-              </Button>
-          </div>
+              </Button></div>
         </form>
       </Form>
     </Dialog>
@@ -359,6 +359,7 @@ const ProposalForm = ({
 };
 
 export default ProposalForm;
+
 
 
 

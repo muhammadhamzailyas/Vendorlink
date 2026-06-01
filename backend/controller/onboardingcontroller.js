@@ -211,7 +211,7 @@ class OnboardingController {
             senderId: user._id,
             type: "new_user",
             title: "New Registration Pending",
-            message: `New ${user.role} "${user.fullName || user.username}" has registered and needs approval.`,
+            message: `New ${user.role} "${user.fullName || user.email}" has registered and needs approval.`,
             data: { userId: user._id, role: user.role },
             priority: "medium",
           });

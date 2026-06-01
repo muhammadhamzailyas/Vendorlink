@@ -127,7 +127,7 @@ const AdminDashboard = () => {
 
     return (
         <div className={cn(
-            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border mt-1",
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl border mt-1",
             colorClass
         )}>
             <div className="flex items-center gap-0.5">
@@ -164,10 +164,10 @@ const AdminDashboard = () => {
       cellClassName: "px-6 py-4",
       render: (user) => (
         <div className="flex items-center gap-3">
-          <UserAvatar user={user} name={user.companyName || user.username || user.email} size="md" />
+          <UserAvatar user={user} name={user.companyName || user.fullName || user.email} size="md" />
           <div>
             <p className="text-sm font-semibold text-foreground">
-              {user.companyName || user.username || "N/A"}
+              {user.companyName || user.fullName || user.email || "N/A"}
             </p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
@@ -210,12 +210,12 @@ const AdminDashboard = () => {
             <div className="space-y-8">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+                        <Skeleton key={i} className="h-28 w-full rounded-xl" />
                     ))}
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <Skeleton className="lg:col-span-8 h-[400px] w-full rounded-2xl" />
-                    <Skeleton className="lg:col-span-4 h-[400px] w-full rounded-2xl" />
+                    <Skeleton className="lg:col-span-8 h-[400px] w-full rounded-xl" />
+                    <Skeleton className="lg:col-span-4 h-[400px] w-full rounded-xl" />
                 </div>
                 <div className="space-y-3">
                     {Array.from({ length: 6 }).map((_, i) => (
@@ -230,7 +230,6 @@ const AdminDashboard = () => {
                 title="Total Users"
                 value={stats.totalUsers}
                 icon={<People />}
-                link="/admin/users"
                 loading={loading}
                 trend={<ChangeIndicator value={stats.changes.users} />}
             />
@@ -238,7 +237,6 @@ const AdminDashboard = () => {
                 title="Companies"
                 value={stats.totalCompanies}
                 icon={<Business />}
-                link="/admin/users?role=company"
                 loading={loading}
                 trend={<ChangeIndicator value={stats.changes.companies} />}
             />
@@ -246,7 +244,6 @@ const AdminDashboard = () => {
                 title="Vendors"
                 value={stats.totalVendors}
                 icon={<Storefront />}
-                link="/admin/users?role=vendor"
                 loading={loading}
                 trend={<ChangeIndicator value={stats.changes.vendors} />}
             />
@@ -254,7 +251,6 @@ const AdminDashboard = () => {
                 title="Pending Approvals"
                 value={stats.pendingApprovals}
                 icon={<Pending />}
-                link="/admin/pending"
                 loading={loading}
                 trend={<ChangeIndicator value={stats.changes.pending} />}
             />
@@ -455,7 +451,7 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="w-2/3 grid grid-cols-3 gap-4 px-12">
                                     {stats.withdrawalHealth.map((entry, index) => (
-                                        <div key={entry.name} className="p-4 rounded-2xl bg-muted/50 border border-border">
+                                        <div key={entry.name} className="p-4 rounded-xl bg-muted/50 border border-border">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{entry.name}</p>
                                             <p className="text-2xl font-bold text-foreground">{entry.value}</p>
                                         </div>
@@ -495,6 +491,7 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
 
 
 

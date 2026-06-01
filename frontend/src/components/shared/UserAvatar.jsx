@@ -47,7 +47,7 @@ const sizeClassMap = {
 
 const UserAvatar = ({ user, name, size = "md", className = "" }) => {
   const avatarSrc = useMemo(() => getAvatarSource(user), [user]);
-  const fallbackName = name || user?.companyName || user?.username || user?.email || "U";
+  const fallbackName = name || user?.companyName || user?.fullName || user?.email || "U";
   const initials = fallbackName.charAt(0).toUpperCase();
   const sizeClass = sizeClassMap[size] || sizeClassMap.md;
 
@@ -68,6 +68,7 @@ const UserAvatar = ({ user, name, size = "md", className = "" }) => {
 };
 
 export default UserAvatar;
+
 
 
 

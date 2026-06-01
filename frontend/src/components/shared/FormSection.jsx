@@ -30,9 +30,23 @@ const FormSection = ({
   );
 };
 
-export const FormActionRow = ({ className, children }) => (
-  <div className={cn("flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end", className)}>{children}</div>
-);
+export const FormActionRow = ({ className, children }) => {
+  const count = React.Children.count(children);
+  const gridCols = count === 1 ? "grid-cols-1" : count === 2 ? "grid-cols-2" : count === 3 ? "grid-cols-3" : "grid-cols-4"; // Handle more just in case
+
+  return (
+    <div className={cn("grid gap-4 w-full items-center justify-stretch", gridCols, className)}>
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, {
+            className: cn("w-full", child.props.className)
+          });
+        }
+        return child;
+      })}
+    </div>
+  );
+};
 
 export const FormFieldGrid = ({ className, children }) => (
   <div className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-5", className)}>{children}</div>

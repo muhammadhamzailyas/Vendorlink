@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { Calendar as CalendarIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/cn";
 import { Calendar } from "./Calendar";
+import { Button } from "./Button";
 import {
   Popover,
   PopoverContent,
@@ -24,7 +25,7 @@ export function DatePicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
           disabled={disabled}
           className={cn(
@@ -34,9 +35,9 @@ export function DatePicker({
             className
           )}
         >
-          <CalendarIcon className="mr-3 h-4 w-4 text-muted-foreground/60 shrink-0" />
+          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" weight="bold" />
           <span className="truncate">{value ? dayjs(value).format("MMMM D, YYYY") : placeholder}</span>
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-popover border-border shadow-xl rounded-xl overflow-hidden" align="start">
         <Calendar
@@ -53,3 +54,4 @@ export function DatePicker({
     </Popover>
   );
 }
+

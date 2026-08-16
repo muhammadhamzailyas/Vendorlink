@@ -1,4 +1,4 @@
-# VendorLink
+# Vendorlink
 
 VendorLink is a web-based outsourcing platform designed to connect **companies with vendors** and provide a centralized system for managing the complete outsourcing lifecycle.
 
